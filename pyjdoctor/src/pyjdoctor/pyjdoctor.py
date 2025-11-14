@@ -58,6 +58,17 @@ class PyJDoctor:
         return data
 
     def extract_java_doc(self, fq_class_name):
-        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --javadoc-extractor-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-javadoc_extractor.json')} --condition-translator-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-condition_translator.json')} --randoop-specs {os.path.join(self.OUTPUTDIR_R, 'toradocu-randoop_specs.json')}"
+        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --javadoc-extractor-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-javadoc_extractor.json')}"
         self.execute_cmd(JDOC_CMD)
 
+    def translate_conditions(self, fq_class_name):
+        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --condition-translator-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-condition_translator.json')}"
+        self.execute_cmd(JDOC_CMD)
+
+    def generate_randoop_specs(self, fq_class_name):
+        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --randoop-specs {os.path.join(self.OUTPUTDIR_R, 'toradocu-randoop_specs.json')}"
+        self.execute_cmd(JDOC_CMD)
+
+    def generate_all(self, fq_class_name):
+        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --javadoc-extractor-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-javadoc_extractor.json')} --condition-translator-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-condition_translator.json')} --randoop-specs {os.path.join(self.OUTPUTDIR_R, 'toradocu-randoop_specs.json')}"
+        self.execute_cmd(JDOC_CMD)

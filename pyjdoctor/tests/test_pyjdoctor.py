@@ -13,16 +13,21 @@ def test_extract_java_doc():
     image_name = "pjkroker/toradocu-x86-extractor"
     pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", image_name)
     pyjdoctor.start_container()
-    pyjdoctor.extract_java_doc(fq_class_name)
 
-    file_path_condition_translator = pathlib.Path(pyjdoctor.OUT_DIR + "/toradocu-condition_translator.json")
+    pyjdoctor.extract_java_doc(fq_class_name)
     file_path_javadoc_extractor = pathlib.Path(pyjdoctor.OUT_DIR + "/toradocu-javadoc_extractor.json")
+    assert file_path_javadoc_extractor.exists(), f"File not found: {file_path_javadoc_extractor.absolute()}"
+
+    pyjdoctor.translate_conditions(fq_class_name)
+    file_path_condition_translator = pathlib.Path(pyjdoctor.OUT_DIR + "/toradocu-condition_translator.json")
+    assert file_path_condition_translator.exists(), f"File not found: {file_path_condition_translator.absolute()}"
+
+    pyjdoctor.generate_randoop_specs(fq_class_name)
     file_path_randoop_specs = pathlib.Path(pyjdoctor.OUT_DIR + "/toradocu-randoop_specs.json")
+    assert file_path_randoop_specs.exists(), f"File not found: {file_path_randoop_specs.absolute()}"
 
     pyjdoctor.stop_container()
-    assert file_path_condition_translator.exists(), f"File not found: {file_path_condition_translator.absolute()}"
-    assert file_path_javadoc_extractor.exists(), f"File not found: {file_path_javadoc_extractor.absolute()}"
-    assert file_path_randoop_specs.exists(), f"File not found: {file_path_randoop_specs.absolute()}"
+
 
 def test_load_data():
     path = __file__
