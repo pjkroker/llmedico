@@ -2,6 +2,7 @@ import os
 import logging
 import sys
 import json
+from pathlib import Path
 
 from se_helpers.docker_helper import DockerHelper
 
@@ -49,6 +50,16 @@ class PyJDoctor:
 
     def stop_container(self):
         self.container.stop_container()
+
+    def set_output_dir(self, output_dir: Path) -> None:
+        self.OUT_DIR = output_dir
+
+    def set_input_dir(self, input_dir: Path) -> None:
+        self.IN_DIR = input_dir
+
+    def set_data_dir(self, data_dir: Path) -> None:
+        self.DATA_DIR = data_dir
+
 
     @staticmethod
     def _load_data(file_path):

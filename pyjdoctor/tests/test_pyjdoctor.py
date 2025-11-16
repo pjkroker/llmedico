@@ -30,7 +30,7 @@ def test_extract_java_doc():
 
 
 def test_load_data():
-    path = __file__
+    path = "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/tests/data/test.json"
     data = PyJDoctor._load_data(path)
     assert data is not None
     assert data["name"] == "Paul"
