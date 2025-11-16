@@ -29,6 +29,7 @@ def test_java_parser_is_valid_assertion():
     assert java_parser.is_valid_java_assert("assert 0====0") == False
     assert java_parser.is_valid_java_assert("assert (x==y) == false") == False
     assert java_parser.is_valid_java_assert("assert (x==y) == false;") == True
+    assert java_parser.is_valid_java_assert("assert code != null;//this is a comment") == True
 
 def test_java_parser_extractor():
     jp = JavaParser()
