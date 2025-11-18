@@ -9,7 +9,7 @@ def test_pyjdoctor():
     assert pyjdoctor.__repr__().startswith("PyJDoctor Container mit: image_tag='" + image_name)
 
 def test_extract_java_doc():
-    fq_class_name = "org.apache.commons.math3.complex.Complex"
+    fq_class_name = "org.apache.commons.lang3.StringUtils"
     image_name = "pjkroker/toradocu-x86-extractor"
     pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", image_name)
     pyjdoctor.start_container()
