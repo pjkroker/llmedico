@@ -5,7 +5,7 @@ from llmedico.java_utils.javapy import JavaPy, JavaParser
 from se_helpers.files.files import save_json_to_file
 
 """
-    As only one JVM per thread is allowed, tests have to be executed separately. Else the will fail.
+    As only one JVM per thread is allowed, tests have to be executed separately. Else they will fail.
 """
 
 def test_javapy():
