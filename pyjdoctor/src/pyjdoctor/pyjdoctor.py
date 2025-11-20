@@ -13,7 +13,7 @@ class PyJDoctor:
         self.ROOT_DIR = root_dir #TODO
         self.DATA_DIR = os.path.join(self.ROOT_DIR, "data")
         self.OUT_DIR = os.path.join(self.DATA_DIR, "output")
-        self.IN_DIR = os.path.join(self.DATA_DIR, "input")
+        # self.IN_DIR = os.path.join(self.DATA_DIR, "input")
         self.SETUP_PATH = os.path.join(self.ROOT_DIR, "scripts", "setup.sh")
 
         self.SOURCEDIR_R = "/data/input/repository/src/main/java"
@@ -54,8 +54,8 @@ class PyJDoctor:
     def set_output_dir(self, output_dir: Path) -> None:
         self.OUT_DIR = output_dir
 
-    def set_input_dir(self, input_dir: Path) -> None:
-        self.IN_DIR = input_dir
+    # def set_input_dir(self, input_dir: Path) -> None:
+    #     self.IN_DIR = input_dir
 
     def set_data_dir(self, data_dir: Path) -> None:
         self.DATA_DIR = data_dir
