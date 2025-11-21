@@ -77,7 +77,32 @@ class DockerHelper:
         )
         self.container = container
         return container
-    
+
+    def run_container_two_mounts(self, image, command: str, input_host:str, input_guest:str, output_host:str, output_guest:str):
+
+        container = self.client.containers.run(
+            image=image,
+            command=command, # This is inside the container
+            volumes={
+                input_host: { # This is on the host
+                    "bind": input_guest, # This will appear inside the container
+                    "mode": "rw",
+                },
+                output_host: {  # This is on the host
+                    "bind": output_guest, # This will appear inside the container
+                    "mode": "rw",
+                }
+            },
+            tty=True,
+            stdin_open=True,
+            detach=True,
+            stdout=True,
+            stderr=True,
+        )
+
+        self.container = container
+        return container
+
     #TODO testing
     def exec(self, cmd):
         if self.container is None:

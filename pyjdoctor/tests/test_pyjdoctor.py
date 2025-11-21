@@ -4,14 +4,14 @@ import pathlib
 
 def test_pyjdoctor():
     image_name = "pjkroker/toradocu-x86-extractor"
-    pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", image_name)
+    pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", image_name, "", "")
 
     assert pyjdoctor.__repr__().startswith("PyJDoctor Container mit: image_tag='" + image_name)
 
 def test_extract_java_doc():
     fq_class_name = "org.apache.commons.lang3.StringUtils"
     image_name = "pjkroker/toradocu-x86-extractor"
-    pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", image_name)
+    pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", image_name, "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/project", "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/output")
     pyjdoctor.start_container()
 
     pyjdoctor.extract_java_doc(fq_class_name)

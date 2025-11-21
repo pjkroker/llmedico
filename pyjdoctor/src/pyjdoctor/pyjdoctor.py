@@ -9,16 +9,20 @@ from se_helpers.docker_helper import DockerHelper
 
 class PyJDoctor:
 
-    def __init__(self, root_dir:str, image_name:str):
+    def __init__(self, root_dir:str, image_name:str, path_input_dir, path_output_dir):
         self.ROOT_DIR = root_dir #TODO
         self.DATA_DIR = os.path.join(self.ROOT_DIR, "data")
-        self.OUT_DIR = os.path.join(self.DATA_DIR, "output")
-        # self.IN_DIR = os.path.join(self.DATA_DIR, "input")
+        self.OUT_DIR = path_output_dir
+        self.IN_DIR = path_input_dir
         self.SETUP_PATH = os.path.join(self.ROOT_DIR, "scripts", "setup.sh")
 
-        self.SOURCEDIR_R = "/data/input/repository/src/main/java"
-        self.CLASSDIR_R = "/data/input/repository/target/classes"
-        self.OUTPUTDIR_R = "/data/output"
+        #inside the container
+        self.INPUT_DIR_R = "/input"
+        self.OUTPUTDIR_R = "/output"
+
+        self.SOURCEDIR_R = "/input/src/main/java" #set manually if not at this location
+        self.CLASSDIR_R = "/input/target/classes" #set manually if not at this location
+
 
         self.container = DockerHelper()
         self.IMAGE_TAG = image_name
@@ -40,9 +44,14 @@ class PyJDoctor:
     def start_container(self):
         logging.info("---Starting PyJDoctor container---")
         COMMAND = "sleep infinity"
-        HOST_VOLUME_PATH = self.DATA_DIR
-        GUEST_VOLUME_PATH = "/data"
-        self.container.run_container(self.IMAGE_TAG, COMMAND, HOST_VOLUME_PATH, GUEST_VOLUME_PATH)
+
+        path_host_input = self.IN_DIR
+        path_guest_input = self.INPUT_DIR_R
+
+        path_host_output = self.OUT_DIR
+        path_guest_output = self.OUTPUTDIR_R
+
+        self.container.run_container_two_mounts(self.IMAGE_TAG, COMMAND, path_host_input, path_guest_input, path_host_output, path_guest_output)
 
     def execute_cmd(self, cmd:str):
         logging.info("---Executing PyJDoctor command---")
@@ -59,6 +68,11 @@ class PyJDoctor:
 
     def set_data_dir(self, data_dir: Path) -> None:
         self.DATA_DIR = data_dir
+
+    def set_source_dir(self, source_dir: Path) -> None:
+        self.SOURCEDIR_R = source_dir
+    def set_class_dir(self, class_dir: Path) -> None:
+        self.CLASSDIR_R = class_dir
 
 
     @staticmethod
