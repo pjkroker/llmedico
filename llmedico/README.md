@@ -3,6 +3,8 @@
 **Options marked with an asterisk (*) are mandatory.**
 
 ### General Options
+#TODO
+### Analyze
 
 llmedico analyze --target-class=org.apache.commons.lang3.StringUtils --target-method=isNotEmpty --data-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project --out-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output
 oder

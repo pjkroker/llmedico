@@ -10,14 +10,16 @@ from pyrandoop.pyrandoop import PyRandoop
 from se_helpers.files.files import save_json_to_file, load_json, save_realy_json_to_file
 
 
-
-# PATH_CLASS_DIR = "" #--class-dir #TODO ignore for now
 IMAGE = "pjkroker/toradocu-x86-extractor"
 LIMIT_METHODS = 40 # defines the number of methods of the class to be analyzed #TODO change
-def start_jdoctor(path_data_dir: Path, path_output_dir: Path, fq_class_name: str) -> None:
-    pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", IMAGE)
+def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path_class_dir, path_output_dir: Path) -> None:
+    pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", IMAGE, path_data_dir, path_output_dir)
     pyjdoctor.set_data_dir(path_data_dir)
-    pyjdoctor.set_output_dir(path_output_dir)
+    if path_data_dir is None:
+        pyjdoctor.set_source_dir_r(path_source_dir)
+        pyjdoctor.set_class_dir_r(path_class_dir)
+    else:
+        pass
 
     pyjdoctor.start_container()
     pyjdoctor.generate_all(fq_class_name)
@@ -49,7 +51,7 @@ def start_translator_with_specified_method(result_json, target_method:str):
     results = {}
     print(target_method)
 
-    for i in range(0, LIMIT_METHODS):
+    for i in range(0, len(result_json[0]["methods"])):
         method_name = result_json[0]["methods"][i]["name"]
         if method_name == target_method:
             javadoc = result_json[0]["methods"][i]["javadoc"]
@@ -96,19 +98,28 @@ def start_building_randoop_file(valid, path_output_dir: Path):
     logging.debug(specs)
     save_realy_json_to_file(specs, path_output_dir / "llmedico-specs.json")
 
-def start_randoop(path_output_dir: Path, fq_class_name: str) -> None:
+def start_randoop(path_data_dir: Path, path_class_dir: Path, path_output_dir: Path, fq_class_name: str) -> None:
+    if path_data_dir:
+        path_class_dir = path_data_dir / "target" / "classes"
+    else:
+        pass
+
     rd = PyRandoop(path_output_dir=path_output_dir,
-                   class_dir="/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/repository/target/classes",
+                   class_dir=path_class_dir,
                    time_limit=60, deterministic=False)
     result = rd.generate_dependencies(
-        path_class_file="/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/repository/target/classes/org/apache/commons/lang3/StringUtils.class")
+        path_class_file=path_class_dir / fq_class_name.replace(".", "/") / ".class")
 
     result = rd.generate_error_revealing_tests(fq_class_name=fq_class_name, path_oracles=(path_output_dir / "llmedico-specs.json"))
     logging.debug(result["stdout"])
 
-def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_output_dir: Path):
+def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path,  path_output_dir: Path):
     relative_path = fq_class_name.replace(".", "/") + ".java"
-    path_java_class = path_data_dir / "input" / "repository" / "src" / "main" / "java" / relative_path
+
+    if path_data_dir is None:
+        pass
+    else:
+        path_java_class = path_data_dir / "src" / "main" / "java" / relative_path
     # Set up basic configuration for logging
     logging.basicConfig(
         filename=path_output_dir / 'log.txt',
@@ -118,7 +129,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_outpu
     )
     logging.debug("---Starting LLMedico---")
     logging.debug("---Starting JDoctor - Extracting JavaDoc---")
-    start_jdoctor(path_data_dir, path_output_dir, fq_class_name)
+    start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
 
     logging.debug("---Starting JavaParser - Extracting JavaDoc---")
     result_json = start_java_parser(path_output_dir, path_java_class)
@@ -133,19 +144,25 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_outpu
     start_building_randoop_file(valid, path_output_dir)
 
     logging.debug("---Generating Tests with Randoop File---")
-    start_randoop(path_output_dir, fq_class_name)
+    start_randoop(path_data_dir, path_class_dir, path_output_dir, fq_class_name)
     logging.debug("---Ending LLMedico---")
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.apache.commons.lang3.StringUtils"  # --target-class java class to be analyzed
-    TARGET_METHOD = "isNotEmpty"  # --target-method#
+    FQ_CLASS_NAME = "org.apache.commons.math3.primes.Primes"  # --target-class java class to be analyzed
+    TARGET_METHOD = "nextPrime"  # --target-method#
     PATH_DATA_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data")  # --data-dir #TODO change it so that is just project/src/..
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/repository_math")  # --data-dir
+
+    PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
+    PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
+
     PATH_OUTPUT_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output")  # --out-dir #TODO copy if different
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output")  # --out-dir
 
     main(fq_class_name=FQ_CLASS_NAME,
          target_method=TARGET_METHOD,
-         path_data_dir=PATH_DATA_DIR,
+         path_data_dir=PATH_DATA_DIR if PATH_DATA_DIR else None,
+         path_source_dir=PATH_SOURCE_DIR,
+         path_class_dir=PATH_CLASS_DIR,
          path_output_dir=PATH_OUTPUT_DIR,)

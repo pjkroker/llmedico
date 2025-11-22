@@ -9,11 +9,11 @@ from se_helpers.docker_helper import DockerHelper
 
 class PyJDoctor:
 
-    def __init__(self, root_dir:str, image_name:str, path_input_dir, path_output_dir):
+    def __init__(self, root_dir:str, image_name:str, path_data_dir, path_output_dir):
         self.ROOT_DIR = root_dir #TODO
-        self.DATA_DIR = os.path.join(self.ROOT_DIR, "data")
+        self.DATA_DIR = os.path.join(self.ROOT_DIR, "data") #TODO remove
         self.OUT_DIR = path_output_dir
-        self.IN_DIR = path_input_dir
+        self.IN_DIR = path_data_dir
         self.SETUP_PATH = os.path.join(self.ROOT_DIR, "scripts", "setup.sh")
 
         #inside the container
@@ -69,9 +69,9 @@ class PyJDoctor:
     def set_data_dir(self, data_dir: Path) -> None:
         self.DATA_DIR = data_dir
 
-    def set_source_dir(self, source_dir: Path) -> None:
+    def set_source_dir_r(self, source_dir: Path) -> None:
         self.SOURCEDIR_R = source_dir
-    def set_class_dir(self, class_dir: Path) -> None:
+    def set_class_dir_r(self, class_dir: Path) -> None:
         self.CLASSDIR_R = class_dir
 
 
