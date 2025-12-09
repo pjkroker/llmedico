@@ -5,6 +5,7 @@ but exposes the computation as reusable Python functions.
 """
 
 import csv
+import logging
 from pprint import pprint
 
 COLUMNS = [
@@ -45,7 +46,8 @@ def compute_metrics(csv_path, additional_missing=0):
             results['UNEXPECTED RETURN CONDITIONS'] += int(row[13])
             results['MISSING RETURN CONDITIONS'] += int(row[14])
 
-    pprint(results)
+    logging.debug(f"Loaded the following raw statistics from the following file: {csv_path}")
+    logging.debug(results)
 
     # Extract counts
     correct_param = results['CORRECT PARAM CONDITIONS']
@@ -109,7 +111,8 @@ def compute_metrics(csv_path, additional_missing=0):
         "overall_recall": overall_recall,
         "overall_f1": f1,
     })
-
+    logging.debug("Computed the following metrics:")
+    logging.debug(metrics)
     return metrics
 
 

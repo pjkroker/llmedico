@@ -4,14 +4,15 @@ import sys
 import json
 from pathlib import Path
 
+from jdoctor_metrics import compute_metrics
 from se_helpers.docker_helper import DockerHelper
 
 
 class PyJDoctor:
 
     def __init__(self, root_dir:str, image_name:str, path_data_dir, path_output_dir):
-        self.ROOT_DIR = root_dir #TODO
-        self.DATA_DIR = os.path.join(self.ROOT_DIR, "data") #TODO remove
+        self.ROOT_DIR = root_dir #TODO remove?
+        self.DATA_DIR = os.path.join(self.ROOT_DIR, "data") #TODO remove?
         self.OUT_DIR = path_output_dir
         self.IN_DIR = path_data_dir
         self.SETUP_PATH = os.path.join(self.ROOT_DIR, "scripts", "setup.sh")
@@ -27,15 +28,15 @@ class PyJDoctor:
         self.container = DockerHelper()
         self.IMAGE_TAG = image_name
 
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(os.path.join(self.OUT_DIR, "log.txt"), mode='w'),
-                logging.StreamHandler(sys.stdout)
-            ],
-            force=True
-        )
+        # logging.basicConfig(
+        #     level=logging.DEBUG,
+        #     format='%(asctime)s - %(levelname)s - %(message)s',
+        #     handlers=[
+        #         logging.FileHandler(os.path.join(self.OUT_DIR, "log.txt"), mode='w'),
+        #         logging.StreamHandler(sys.stdout)
+        #     ],
+        #     force=True
+        # )
         logging.debug("---PyJDoctor Object initialized---")
 
     def __repr__(self):
@@ -51,6 +52,11 @@ class PyJDoctor:
         path_host_output = self.OUT_DIR
         path_guest_output = self.OUTPUTDIR_R
 
+        logging.debug(path_host_output)
+        logging.debug(path_guest_output)
+        logging.debug(path_guest_input)
+        logging.debug(path_host_input)
+
         self.container.run_container_two_mounts(self.IMAGE_TAG, COMMAND, path_host_input, path_guest_input, path_host_output, path_guest_output)
 
     def execute_cmd(self, cmd:str):
@@ -63,8 +69,8 @@ class PyJDoctor:
     def set_output_dir(self, output_dir: Path) -> None:
         self.OUT_DIR = output_dir
 
-    # def set_input_dir(self, input_dir: Path) -> None:
-    #     self.IN_DIR = input_dir
+    def set_input_dir(self, input_dir: Path) -> None:
+        self.IN_DIR = input_dir
 
     def set_data_dir(self, data_dir: Path) -> None:
         self.DATA_DIR = data_dir
@@ -95,5 +101,16 @@ class PyJDoctor:
         self.execute_cmd(JDOC_CMD)
 
     def generate_all(self, fq_class_name):
-        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --javadoc-extractor-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-javadoc_extractor.json')} --condition-translator-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-condition_translator.json')} --randoop-specs {os.path.join(self.OUTPUTDIR_R, 'toradocu-randoop_specs.json')}"
+        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --javadoc-extractor-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-javadoc_extractor.json')} --condition-translator-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-condition_translator.json')} --randoop-specs {os.path.join(self.OUTPUTDIR_R, 'toradocu-randoop_specs.json')} --stats-file {os.path.join(self.OUTPUTDIR_R, 'stats.csv')}"
+        logging.debug(JDOC_CMD)
         self.execute_cmd(JDOC_CMD)
+
+    def generate_statistics(self, fq_class_name, expected_conditions_path: Path):
+        JDOC_CMD = f"java -jar /toradocu/build/libs/toradocu-1.0-all.jar --target-class {fq_class_name} --source-dir {self.SOURCEDIR_R} --class-dir {self.CLASSDIR_R} --expected-output {expected_conditions_path} --stats-file {os.path.join(self.OUTPUTDIR_R, 'stats.csv')}"
+        #--stats-file {os.path.join(self.OUTPUTDIR_R, 'stats.csv')} --condition-translator-output {os.path.join(self.OUTPUTDIR_R, 'toradocu-condition_translator.json')} --condition-translator-input {os.path.join(self.OUTPUTDIR_R, 'toradocu-condition_translator.json')}
+        logging.debug(JDOC_CMD)
+        self.execute_cmd(JDOC_CMD)
+
+    @staticmethod
+    def compute_metrics(csv_path: Path, additional_missing: int=0):
+        return compute_metrics(csv_path, additional_missing=additional_missing)
