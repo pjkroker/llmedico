@@ -8,7 +8,7 @@
 
 llmedico analyze --target-class=org.apache.commons.lang3.StringUtils --target-method=isNotEmpty --data-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project --out-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output
 oder
-llmedico analyze --target-class=org.apache.commons.lang3.StringUtils --target-method=isNotEmpty --source-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project/src/main/java --class-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/prokect/target/classes --out-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output
+llmedico analyze --target-class=org.apache.commons.lang3.StringUtils --target-method=isNotEmpty --source-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project/src/main/java --class-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project/target/classes --out-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output
 
 #/data/input is mandatory --> change later
 

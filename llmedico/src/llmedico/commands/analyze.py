@@ -20,7 +20,7 @@ from llmedico.main import main as run_pipeline
     "--data-dir",
     "path_data_dir",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
-    required=True,
+    required=False,
     help="Directory containing input data. Implies standard layout.",
 )
 @click.option("--source-dir", "path_source_dir", type=click.Path(), help="Directory with Java source files.")

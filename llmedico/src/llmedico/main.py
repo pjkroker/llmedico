@@ -23,6 +23,7 @@ def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path
 
     pyjdoctor.start_container()
     pyjdoctor.generate_all(fq_class_name)
+    pyjdoctor.compute_precision_recall(fq_class_name, "/input/toradocu-condition_translator.json")
     pyjdoctor.stop_container()
 
 def start_java_parser(path_output_dir: Path, path_java_class: Path):
@@ -131,26 +132,26 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     logging.debug("---Starting JDoctor - Extracting JavaDoc---")
     start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
 
-    logging.debug("---Starting JavaParser - Extracting JavaDoc---")
-    result_json = start_java_parser(path_output_dir, path_java_class)
+    # logging.debug("---Starting JavaParser - Extracting JavaDoc---")
+    # result_json = start_java_parser(path_output_dir, path_java_class)
+    #
+    # logging.debug("---Starting Translator - Translating JavaDoc to Assertions---")
+    # results = start_translator_with_specified_method(result_json, target_method)
+    #
+    # logging.debug("---Validating Syntax of generated Assertions---")
+    # valid = start_validating(results)
+    #
+    # logging.debug("---Adding valid Assertions to Randoop File???---")
+    # start_building_randoop_file(valid, path_output_dir)
 
-    logging.debug("---Starting Translator - Translating JavaDoc to Assertions---")
-    results = start_translator_with_specified_method(result_json, target_method)
-
-    logging.debug("---Validating Syntax of generated Assertions---")
-    valid = start_validating(results)
-
-    logging.debug("---Adding valid Assertions to Randoop File???---")
-    start_building_randoop_file(valid, path_output_dir)
-
-    logging.debug("---Generating Tests with Randoop File---")
-    start_randoop(path_data_dir, path_class_dir, path_output_dir, fq_class_name)
+    # logging.debug("---Generating Tests with Randoop File---")
+    # start_randoop(path_data_dir, path_class_dir, path_output_dir, fq_class_name)
     logging.debug("---Ending LLMedico---")
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.apache.commons.math3.primes.Primes"  # --target-class java class to be analyzed
-    TARGET_METHOD = "nextPrime"  # --target-method#
+    FQ_CLASS_NAME = "org.apache.commons.math3.complex.Complex"  # --target-class java class to be analyzed
+    TARGET_METHOD = "isBlank"  # --target-method#
     PATH_DATA_DIR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/repository_math")  # --data-dir
 
