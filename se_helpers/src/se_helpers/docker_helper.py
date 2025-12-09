@@ -7,10 +7,10 @@ import tarfile
 import io
 from pathlib import Path
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# )
 
 class DockerHelper:
 
@@ -22,10 +22,12 @@ class DockerHelper:
     
 
     #TODO test it 
-    def build_container(self, context_path=".", dockerfile="dockerfile", tag="my_docker_file", platform="linux/amd64", log_path="docker_build_log.jsonl"):
+    def build_container(self, context_path=".", dockerfile="dockerfile", tag="my_docker_file", platform="linux/amd64", log_path="docker_build.log"):
         """
         Build a Docker image.
 
+        :param context_path:
+        :param log_path:
         :param dockerfile: Path to Dockerfile
         :param tag: Image tag
         :param platform: Target platform (e.g., "linux/amd64")
@@ -35,8 +37,6 @@ class DockerHelper:
         #os.environ.setdefault("DOCKER_BUILDKIT", "1")
         #os.environ["DOCKER_DEFAULT_PLATFORM"] = "linux/amd64"
         api = docker.APIClient(base_url="unix:///var/run/docker.sock")
-        
-        
 
         with open(log_path, "w") as f:
             build_output = api.build(
@@ -57,6 +57,7 @@ class DockerHelper:
                     self.logger.info(chunk["stream"].rstrip())
                 if "error" in chunk:
                     self.logger.error(chunk["error"].rstrip())
+
     #TODO testing
     def run_container(self, image, command, host_volume_path, guest_volume_path):
 
