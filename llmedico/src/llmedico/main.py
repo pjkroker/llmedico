@@ -23,7 +23,7 @@ def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path
 
     pyjdoctor.start_container()
     pyjdoctor.generate_all(fq_class_name)
-    pyjdoctor.compute_precision_recall(fq_class_name, "/input/toradocu-condition_translator.json")
+    pyjdoctor.generate_statistics(fq_class_name, "/input/toradocu-condition_translator.json")
     pyjdoctor.stop_container()
 
 def start_java_parser(path_output_dir: Path, path_java_class: Path):
@@ -33,6 +33,7 @@ def start_java_parser(path_output_dir: Path, path_java_class: Path):
     result_json = json.loads(result_json)
     return result_json
 
+#TODO check if generated assertion contain { or }, gets mistaken as python dict seperator?
 def start_translator(result_json):
     trans = Translator()
     results = {}
@@ -41,7 +42,7 @@ def start_translator(result_json):
         method_name = result_json[0]["methods"][i]["name"]
         javadoc = result_json[0]["methods"][i]["javadoc"]
         javacode = result_json[0]["methods"][i]["code"]
-        java_assertions = trans.translate_javadoc(javacode)
+        java_assertions = trans.translate_javadoc(javacode, "return")
         logging.debug(java_assertions)
         results[method_name] = java_assertions
     logging.debug(results)
@@ -50,14 +51,14 @@ def start_translator(result_json):
 def start_translator_with_specified_method(result_json, target_method:str):
     trans = Translator()
     results = {}
-    print(target_method)
+    logging.debug(f"target method is: {target_method}")
 
     for i in range(0, len(result_json[0]["methods"])):
         method_name = result_json[0]["methods"][i]["name"]
         if method_name == target_method:
             javadoc = result_json[0]["methods"][i]["javadoc"]
             javacode = result_json[0]["methods"][i]["code"]
-            java_assertions = trans.translate_javadoc(javacode)
+            java_assertions = trans.translate_javadoc(javadoc, "pre")
             logging.debug(java_assertions)
             results[method_name] = java_assertions
     logging.debug(results)
@@ -123,23 +124,23 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         path_java_class = path_data_dir / "src" / "main" / "java" / relative_path
     # Set up basic configuration for logging
     logging.basicConfig(
-        filename=path_output_dir / 'log.txt',
+        filename=path_output_dir / 'llmedico.log',
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(message)s',
         force=True
     )
     logging.debug("---Starting LLMedico---")
-    logging.debug("---Starting JDoctor - Extracting JavaDoc---")
-    start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
+    # logging.debug("---Starting JDoctor - Extracting JavaDoc---")
+    # start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
+    #
+    logging.debug("---Starting JavaParser - Extracting JavaDoc---")
+    result_json = start_java_parser(path_output_dir, path_java_class)
 
-    # logging.debug("---Starting JavaParser - Extracting JavaDoc---")
-    # result_json = start_java_parser(path_output_dir, path_java_class)
-    #
-    # logging.debug("---Starting Translator - Translating JavaDoc to Assertions---")
-    # results = start_translator_with_specified_method(result_json, target_method)
-    #
-    # logging.debug("---Validating Syntax of generated Assertions---")
-    # valid = start_validating(results)
+    logging.debug("---Starting Translator - Translating JavaDoc to Assertions---")
+    results = start_translator_with_specified_method(result_json, target_method)
+
+    logging.debug("---Validating Syntax of generated Assertions---")
+    valid = start_validating(results)
     #
     # logging.debug("---Adding valid Assertions to Randoop File???---")
     # start_building_randoop_file(valid, path_output_dir)
@@ -150,10 +151,10 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.apache.commons.math3.complex.Complex"  # --target-class java class to be analyzed
-    TARGET_METHOD = "isBlank"  # --target-method#
+    FQ_CLASS_NAME = "org.apache.commons.math3.primes.Primes"  # --target-class java class to be analyzed
+    TARGET_METHOD = "isPrime"  # --target-method#
     PATH_DATA_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/repository_math")  # --data-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src")  # --data-dir
 
     PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
