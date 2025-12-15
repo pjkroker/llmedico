@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import List, Optional
 
@@ -17,6 +18,34 @@ def extract_code_by_language(llm_response: str, language: str) -> List[str]:
 
     # re.DOTALL allows newlines inside the match
     code_blocks = re.findall(pattern, llm_response, re.DOTALL)
-
+    if not code_blocks:
+        raise RuntimeError(f"No code snippets found for language {language}")
     # Strip extra whitespace from each block
     return [block.strip() for block in code_blocks]
+
+def extract_java_assertions(llm_response: str) -> List[str]:
+    """
+        Extracts individual Java assertion statements from Java code blocks
+        in the LLM response.
+
+        Returns:
+            List[str]: A list where each entry is a single Java assertion line.
+        """
+    code_blocks = extract_code_by_language(llm_response, "java")
+    assertions: List[str] = []
+
+    for block in code_blocks:
+        # Split the block by lines
+        for line in block.splitlines():
+            line = line.strip()
+
+            # Skip empty lines
+            if not line:
+                continue
+
+            # Only keep actual Java assert statements
+            # Example line: assert args[0] != null; //description: a must not be null
+            if line.startswith("assert "):
+                assertions.append(line)
+
+    return assertions
