@@ -7,10 +7,24 @@ from llmedico.java_utils.translator.translator import Translator
 
 def test_translator():
     translator = Translator()
-    java_assertions = translator.translate_javadoc("Checks whether a string is a valid Java assert statement.\n\n@param code the string to test\n@return true if valid, false otherwise\n")
+    javadoc = """/**
+     * Computes the average of two integers.
+     *
+     * <p>This method takes two integer values, adds them, and divides the result by two to compute
+     * their arithmetic mean. The result is returned as a double to preserve fractional precision.
+     *
+     * @param a the first integer value
+     * @param b the second integer value
+     * @return the average of {@code a} and {@code b} as a double
+     */
+    """
+    java_assertions = translator.translate_javadoc(javadoc,modes={"pre","return"})
     jp = JavaParser()
-    for assertion in java_assertions:
-        assert jp.is_valid_java_assert(assertion)
+    for mode in java_assertions:
+        print("mode: ", mode)
+        for assertion in java_assertions[mode]:
+            print("assertion: ", assertion)
+            assert jp.is_valid_java_assert(assertion)
 
 def test_translator_pre_assertion_to_json():
     #translator = Translator()

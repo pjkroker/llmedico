@@ -1,45 +1,56 @@
 from pathlib import Path
 import re
 import copy
+from typing import Iterable, Dict, List
 
 from se_helpers.files import*
 from se_helpers.files.files import load_json
 from llm_caller.models.ollama import Ollama
 from llm_caller.prompts import GEN_JAVA_ASSERTION_PROMPT, GEN_JAVA_ASSERTION_PROMPT_WITH_CODE, \
     GEN_RANDOOP_PRE_CONDITION_PROMPT, PRE_CONDITION_PROMPT, RETURN_CONDITION_PROMPT
-from llm_caller.utils.processing import extract_code_by_language
+from llm_caller.utils.processing import extract_code_by_language, extract_java_assertions
 from llmedico.java_utils.javapy import JavaParser
 
+
+ConditionOutput = Dict[str, List[str]]
 class Translator():
     PATH_JSON = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/result.json")
-
+    MODE_TO_PROMPT = {
+        "pre": PRE_CONDITION_PROMPT,
+        "return": RETURN_CONDITION_PROMPT,
+        #"throws": THROWS_CONDITION_PROMPT,
+    }
     def __init__(self):
         self.data = load_json(self.PATH_JSON)
 
-    def translate_javadoc(self, javadoc:str,mode) -> list:
+    def translate_javadoc(self, javadoc:str,modes:Iterable[str]) -> ConditionOutput:
         """
         Generates for a given Java Docstring meaningful Java assertions.
         :param javadoc:
         :return:
         """
         #java_doc = self.data[0]["methods"][0]["javadoc"]
-        llm = Ollama("llama3.2")
+        llm = Ollama("llama3.1")
         #prompt = GEN_JAVA_ASSERTION_PROMPT.format(javadoc=javadoc)
         #prompt = GEN_JAVA_ASSERTION_PROMPT_WITH_CODE.format(javacode=javadoc)
         #prompt = GEN_RANDOOP_PRE_CONDITION_PROMPT.format(javadoc=javadoc)
-        if mode == "pre":
-            prompt = PRE_CONDITION_PROMPT.format(javadoc=javadoc)
-        elif mode == "return":
-            prompt = RETURN_CONDITION_PROMPT.format(javadoc=javadoc)
-        elif mode == "throws":
-            raise NotImplementedError
-        else:
-            raise ValueError(mode)
-        result = llm.generate(prompt)
-        extraceted_assertions = extract_code_by_language(result, "java")
-        # Split each string at \n and flatten
-        separated_lines = [line for code in extraceted_assertions for line in code.split('\n')]
-        return separated_lines
+        results = []
+        output: ConditionOutput = {mode: [] for mode in modes}
+
+        for mode in modes:
+            if mode not in self.MODE_TO_PROMPT:
+                raise ValueError(f"Unsupported mode: {mode}")
+
+            print("current mode:", mode)
+            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc)
+            result = llm.generate(prompt)
+            print("result:", result)
+            extracted_assertion = extract_java_assertions(result)
+            print("extracted_assertion:", extracted_assertion)
+            output[mode].append(extracted_assertion[0])
+            print(output)
+
+        return output
 
     @staticmethod
     def assertion_to_json(assertion: str) -> dict:
