@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from pydantic.v1.parse import load_file
+
 from llmedico.java_utils.javapy import JavaParser
 from llmedico.java_utils.translator.translator import Translator
 from pyjdoctor.pyjdoctor import PyJDoctor
@@ -58,11 +60,44 @@ def start_translator_with_specified_method(result_json, target_method:str):
         if method_name == target_method:
             javadoc = result_json[0]["methods"][i]["javadoc"]
             javacode = result_json[0]["methods"][i]["code"]
-            java_assertions = trans.translate_javadoc(javadoc, "pre")
+            java_assertions = trans.translate_javadoc(javadoc, modes={"pre", "return"})
             logging.debug(java_assertions)
             results[method_name] = java_assertions
     logging.debug(results)
     return results
+
+def start_translator_everything(result_json):
+    trans = Translator()
+    results = {}
+    logging.debug("start translator")
+    for i in range(0, len(result_json[0]["methods"])):
+        method_name = result_json[0]["methods"][i]["name"]
+        logging.debug(f"current method name: {method_name}")
+        javadoc = result_json[0]["methods"][i]["javadoc"]
+        java_assertions = trans.translate_javadoc(javadoc, modes={"pre", "return"})
+        logging.debug(f"the following java assertion have been generated: {java_assertions}")
+        results[method_name] = java_assertions
+    logging.debug(results)
+    return results
+
+def insert_conditions(result_json, results, path_output_dir):
+    for i in range(0, len(result_json[0]["methods"])):
+        method_name = result_json[0]["methods"][i]["name"]
+        for j in range(0, len(result_json[0]["methods"][i]["tags"])):
+            if result_json[0]["methods"][i]["tags"][j]["tag"] == "param":
+                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["pre"][0]
+            elif result_json[0]["methods"][i]["tags"][j]["tag"] == "return":
+                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["return"][0]
+
+    # Convert to pretty JSON string for logging
+    json_preview = json.dumps(result_json, indent=2, ensure_ascii=False)
+    logging.info("Data before dumping:\n%s", json_preview)
+    with open(path_output_dir / "llmedico-condition_translator.json", "w", encoding="utf-8") as f:
+        json.dump(result_json, f, indent=2, ensure_ascii=False)
+
+
+
+
 
 
 def start_validating(results):
@@ -137,10 +172,11 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     result_json = start_java_parser(path_output_dir, path_java_class)
 
     logging.debug("---Starting Translator - Translating JavaDoc to Assertions---")
-    results = start_translator_with_specified_method(result_json, target_method)
-
-    logging.debug("---Validating Syntax of generated Assertions---")
-    valid = start_validating(results)
+    #results = start_translator_with_specified_method(result_json, target_method)
+    result = start_translator_everything(result_json)
+    insert_conditions(result_json, result, path_output_dir)
+    # logging.debug("---Validating Syntax of generated Assertions---")
+    # valid = start_validating(results)
     #
     # logging.debug("---Adding valid Assertions to Randoop File???---")
     # start_building_randoop_file(valid, path_output_dir)
