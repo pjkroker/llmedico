@@ -31,6 +31,8 @@ def test_java_parser_is_valid_assertion():
     assert java_parser.is_valid_java_assert("assert (x==y) == false;") == True
     assert java_parser.is_valid_java_assert("assert code != null;//this is a comment") == True
 
+    assert java_parser.is_valid_java_assert("assert methodResultID == (args[0] + args[1]) / 2.0; //description: result must equal the average of a and b.") == True
+
 def test_java_parser_extractor():
     jp = JavaParser()
     result_json = jp.extract_to_json("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/tests/data/input/TestJavaAssertion.java")
