@@ -9,8 +9,8 @@ def main(fq_class_name: str, path_data_dir: Path, path_source_dir, path_class_di
     jdoc = PyJDoctor("", "pjkroker/toradocu-3.0-x86", path_data_dir, path_output_dir)
 
     jdoc.start_container()
-    #jdoc.translate_conditions(fq_class_name)
-    #jdoc.generate_statistics(fq_class_name, "/input/org.apache.commons.math3.primes.Primes_goal.json")
+    jdoc.translate_conditions(fq_class_name)
+    jdoc.generate_statistics(fq_class_name, "/input/org.apache.commons.math3.primes.Primes_goal.json")
     jdoc.stop_container()
     metrics = jdoc.compute_metrics(path_output_dir / "stats.csv")
 
