@@ -18,7 +18,7 @@ def test_translator():
      * @return the average of {@code a} and {@code b} as a double
      */
     """
-    java_assertions = translator.translate_javadoc(javadoc,modes={"pre","return"})
+    java_assertions = translator.translate_javadoc(javadoc,modes={"param","return"})
     jp = JavaParser()
     for mode in java_assertions:
         print("mode: ", mode)

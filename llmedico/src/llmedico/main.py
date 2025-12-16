@@ -31,7 +31,7 @@ def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path
 def start_java_parser(path_output_dir: Path, path_java_class: Path):
     jp = JavaParser()
     result_json = jp.extract_to_json(path_java_class)
-    save_json_to_file(result_json, path_output_dir / "result.json")
+    save_json_to_file(result_json, path_output_dir / "llmedico-javadoc_extractor.json")
     result_json = json.loads(result_json)
     return result_json
 
@@ -70,11 +70,20 @@ def start_translator_everything(result_json):
     trans = Translator()
     results = {}
     logging.debug("start translator")
+    logging.debug("translating every method of the class")
     for i in range(0, len(result_json[0]["methods"])):
         method_name = result_json[0]["methods"][i]["name"]
         logging.debug(f"current method name: {method_name}")
         javadoc = result_json[0]["methods"][i]["javadoc"]
-        java_assertions = trans.translate_javadoc(javadoc, modes={"pre", "return"})
+        logging.debug(f"has the following javadoc: {javadoc}")
+
+        #get modes
+        modes = []
+        for tag in result_json[0]["methods"][i]["tags"]:
+            modes.append(tag["tag"])
+        if not modes: logging.warning(f"{method_name} contains not tags?")
+        logging.debug(f"found modes: {modes}")
+        java_assertions = trans.translate_javadoc(javadoc, modes=modes)
         logging.debug(f"the following java assertion have been generated: {java_assertions}")
         results[method_name] = java_assertions
     logging.debug(results)
@@ -85,9 +94,11 @@ def insert_conditions(result_json, results, path_output_dir):
         method_name = result_json[0]["methods"][i]["name"]
         for j in range(0, len(result_json[0]["methods"][i]["tags"])):
             if result_json[0]["methods"][i]["tags"][j]["tag"] == "param":
-                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["pre"][0]
+                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["param"][0]
             elif result_json[0]["methods"][i]["tags"][j]["tag"] == "return":
                 result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["return"][0]
+            elif result_json[0]["methods"][i]["tags"][j]["tag"] == "throws":
+                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["throws"][0]
 
     # Convert to pretty JSON string for logging
     json_preview = json.dumps(result_json, indent=2, ensure_ascii=False)
