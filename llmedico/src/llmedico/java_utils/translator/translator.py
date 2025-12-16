@@ -1,4 +1,5 @@
 import logging
+logger = logging.getLogger(__name__)
 from pathlib import Path
 import re
 import copy
@@ -34,14 +35,14 @@ class Translator():
             if mode not in self.MODE_TO_PROMPT:
                 raise ValueError(f"Unsupported mode: {mode}")
 
-            logging.debug(f"translating for current mode: {mode}")
+            logger.debug(f"translating for current mode: {mode}")
             prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc)
             result = llm.generate(prompt)
-            logging.debug(f"llm generated the following response: {result}")
+            logger.debug(f"llm generated the following response: {result}")
             extracted_assertion = extract_java_assertions(result)
-            logging.debug(f"extracted the following assertions: {extracted_assertion}")
+            logger.debug(f"extracted the following assertions: {extracted_assertion}")
             output[mode].append(extracted_assertion[0])
-        logging.debug(f"final Conditions: {output}")
+        logger.debug(f"final Conditions: {output}")
         return output
 
     @staticmethod

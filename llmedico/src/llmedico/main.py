@@ -7,7 +7,7 @@ from llmedico.java_utils.javapy import JavaParser
 from llmedico.java_utils.translator.translator import Translator
 from pyjdoctor.pyjdoctor import PyJDoctor
 import logging
-
+logger = logging.getLogger(__name__)
 from pyrandoop.pyrandoop import PyRandoop
 from se_helpers.files.files import save_json_to_file, load_json, save_realy_json_to_file
 
@@ -45,15 +45,15 @@ def start_translator(result_json):
         javadoc = result_json[0]["methods"][i]["javadoc"]
         javacode = result_json[0]["methods"][i]["code"]
         java_assertions = trans.translate_javadoc(javacode, "return")
-        logging.debug(java_assertions)
+        logger.debug(java_assertions)
         results[method_name] = java_assertions
-    logging.debug(results)
+    logger.debug(results)
     return results
 
 def start_translator_with_specified_method(result_json, target_method:str):
     trans = Translator()
     results = {}
-    logging.debug(f"target method is: {target_method}")
+    logger.debug(f"target method is: {target_method}")
 
     for i in range(0, len(result_json[0]["methods"])):
         method_name = result_json[0]["methods"][i]["name"]
@@ -61,32 +61,32 @@ def start_translator_with_specified_method(result_json, target_method:str):
             javadoc = result_json[0]["methods"][i]["javadoc"]
             javacode = result_json[0]["methods"][i]["code"]
             java_assertions = trans.translate_javadoc(javadoc, modes={"pre", "return"})
-            logging.debug(java_assertions)
+            logger.debug(java_assertions)
             results[method_name] = java_assertions
-    logging.debug(results)
+    logger.debug(results)
     return results
 
 def start_translator_everything(result_json):
     trans = Translator()
     results = {}
-    logging.debug("start translator")
-    logging.debug("translating every method of the class")
+    logger.debug("start translator")
+    logger.debug("translating every method of the class")
     for i in range(0, len(result_json[0]["methods"])):
         method_name = result_json[0]["methods"][i]["name"]
-        logging.debug(f"current method name: {method_name}")
+        logger.debug(f"current method name: {method_name}")
         javadoc = result_json[0]["methods"][i]["javadoc"]
-        logging.debug(f"has the following javadoc: {javadoc}")
+        logger.debug(f"has the following javadoc: {javadoc}")
 
         #get modes
         modes = []
         for tag in result_json[0]["methods"][i]["tags"]:
             modes.append(tag["tag"])
-        if not modes: logging.warning(f"{method_name} contains not tags?")
-        logging.debug(f"found modes: {modes}")
+        if not modes: logger.warning(f"{method_name} contains not tags?")
+        logger.debug(f"found modes: {modes}")
         java_assertions = trans.translate_javadoc(javadoc, modes=modes)
-        logging.debug(f"the following java assertion have been generated: {java_assertions}")
+        logger.debug(f"the following java assertion have been generated: {java_assertions}")
         results[method_name] = java_assertions
-    logging.debug(results)
+    logger.debug(results)
     return results
 
 def insert_conditions(result_json, results, path_output_dir):
@@ -102,7 +102,7 @@ def insert_conditions(result_json, results, path_output_dir):
 
     # Convert to pretty JSON string for logging
     json_preview = json.dumps(result_json, indent=2, ensure_ascii=False)
-    logging.info("Data before dumping:\n%s", json_preview)
+    logger.info("Data before dumping:\n%s", json_preview)
     with open(path_output_dir / "llmedico-condition_translator.json", "w", encoding="utf-8") as f:
         json.dump(result_json, f, indent=2, ensure_ascii=False)
 
@@ -120,9 +120,9 @@ def start_validating(results):
             if jp.is_valid_java_assert(assertion):
                 valid[method_name].append(assertion)
             else:
-                logging.debug(f"{assertion} is not a valid java assertion")
+                logger.debug(f"{assertion} is not a valid java assertion")
 
-    logging.debug(valid)
+    logger.debug(valid)
     return valid
 
 def start_building_randoop_file(valid, path_output_dir: Path):
@@ -136,14 +136,14 @@ def start_building_randoop_file(valid, path_output_dir: Path):
             pre_conditions = []
             for assertion in valid[method_name]:
                 pre_condition = Translator.assertion_to_json(assertion)
-                logging.debug(pre_condition)
+                logger.debug(pre_condition)
                 pre_conditions.append(pre_condition)
             one_method["pre"] = pre_conditions
             specs.append(one_method)
         except ValueError:
-            logging.warning(f"No entry found for method name '{method_name}'")
+            logger.warning(f"No entry found for method name '{method_name}'")
 
-    logging.debug(specs)
+    logger.debug(specs)
     save_realy_json_to_file(specs, path_output_dir / "llmedico-specs.json")
 
 def start_randoop(path_data_dir: Path, path_class_dir: Path, path_output_dir: Path, fq_class_name: str) -> None:
@@ -159,7 +159,7 @@ def start_randoop(path_data_dir: Path, path_class_dir: Path, path_output_dir: Pa
         path_class_file=path_class_dir / fq_class_name.replace(".", "/") / ".class")
 
     result = rd.generate_error_revealing_tests(fq_class_name=fq_class_name, path_oracles=(path_output_dir / "llmedico-specs.json"))
-    logging.debug(result["stdout"])
+    logger.debug(result["stdout"])
 
 def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path,  path_output_dir: Path):
     relative_path = fq_class_name.replace(".", "/") + ".java"
@@ -171,30 +171,33 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     # Set up basic configuration for logging
     logging.basicConfig(
         filename=path_output_dir / 'llmedico.log',
+        filemode='w',  # overwrite on each run
         level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s',
+        format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
         force=True
     )
-    logging.debug("---Starting LLMedico---")
-    # logging.debug("---Starting JDoctor - Extracting JavaDoc---")
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logger.debug("---Starting LLMedico---")
+    # logger.debug("---Starting JDoctor - Extracting JavaDoc---")
     # start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
     #
-    logging.debug("---Starting JavaParser - Extracting JavaDoc---")
+    logger.debug("---Starting JavaParser - Extracting JavaDoc---")
     result_json = start_java_parser(path_output_dir, path_java_class)
 
-    logging.debug("---Starting Translator - Translating JavaDoc to Assertions---")
+    logger.debug("---Starting Translator - Translating JavaDoc to Assertions---")
     #results = start_translator_with_specified_method(result_json, target_method)
     result = start_translator_everything(result_json)
     insert_conditions(result_json, result, path_output_dir)
-    # logging.debug("---Validating Syntax of generated Assertions---")
+    # logger.debug("---Validating Syntax of generated Assertions---")
     # valid = start_validating(results)
     #
-    # logging.debug("---Adding valid Assertions to Randoop File???---")
+    # logger.debug("---Adding valid Assertions to Randoop File???---")
     # start_building_randoop_file(valid, path_output_dir)
 
-    # logging.debug("---Generating Tests with Randoop File---")
+    # logger.debug("---Generating Tests with Randoop File---")
     # start_randoop(path_data_dir, path_class_dir, path_output_dir, fq_class_name)
-    logging.debug("---Ending LLMedico---")
+    logger.debug("---Ending LLMedico---")
 
 
 if __name__ == '__main__':

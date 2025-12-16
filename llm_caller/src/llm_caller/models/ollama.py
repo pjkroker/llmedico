@@ -1,4 +1,5 @@
 import logging
+logger = logging.getLogger(__name__)
 from .model import Model
 import ollama
 
@@ -18,5 +19,5 @@ class Ollama(Model):
             options={"temperature": temperature, **kwargs}
         )
         striped_response = response["message"]["content"].strip()
-        logging.debug(f"Ollama response: {str(striped_response)}")
+        logger.debug(f"raw response from {self.model_name}: {str(striped_response)}")
         return striped_response
