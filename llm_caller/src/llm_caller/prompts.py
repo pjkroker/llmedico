@@ -178,6 +178,49 @@ RETURN_CONDITION_PROMPT = PromptBuilder(
     "{javadoc}"
     """)
 
+THROWS_CONDITION_PROMPT = PromptBuilder(
+    """You are a Java expert.
+    I will provide a full Javadoc comment describing a method.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each on its own line.
+    10. Each assertion must include a short description comment in the following format:// description: <brief explanation>
+    11. Output only Java code, with no additional explanations or commentary.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Output Java assertions:
+    ```java
+    assert args[0] < 0 || args[1] < 0; // description: x or y is negative
+    ´´´
+    Input Javadoc:
+    /**
+    * Retrieves the element at the given index.
+    *
+    * @throws IndexOutOfBoundsException if index is less than zero or greater than or equal to size
+    */
+    Output Java assertions:
+    ```java
+    assert args[0] < 0 || args[0] >= size; // description: index is outside valid bounds
+    ´´´
+    Now generate Java assertion statements from the following Javadoc:
+    "{javadoc}"
+    """
+)
+
 
 GEN_JAVA_ASSERTION_PROMPT_WITH_CODE = PromptBuilder(
     """You are a Java expert. I will provide a full Javadoc comment describing a method, with multiple tags (e.g., @param, @return) and the full Java Code.
