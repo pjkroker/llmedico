@@ -4,7 +4,7 @@ import sys
 import json
 from pathlib import Path
 
-from .jdoctor_metrics import compute_metrics
+from pyjdoctor.jdoctor_metrics import compute_metrics
 from se_helpers.docker_helper import DockerHelper
 
 
