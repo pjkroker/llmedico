@@ -11,6 +11,73 @@ from llm_caller.utils.processing import extract_java_assertions
 
 
 ConditionOutput = Dict[str, List[str]]
+
+class ToradocuCondition:
+    def __init__(self, java_assertion: str, kind: str = "PRE"):
+        self.java_assertion = java_assertion.strip()
+        self.kind = kind
+        self.comment = self._extract_comment()
+        self.condition = self._extract_condition()
+
+    def _extract_condition(self) -> str:
+        """
+        Extracts the logical condition from:
+        assert <condition>; // comment
+        """
+        # Remove leading 'assert'
+        assertion = self.java_assertion
+        if not assertion.startswith("assert"):
+            raise ValueError(f"Not a valid Java assert: {assertion}")
+
+        # Remove 'assert' and everything after ';'
+        without_assert = assertion[len("assert"):].strip()
+        condition_part = without_assert.split(";", 1)[0].strip()
+
+        if not condition_part:
+            raise ValueError("Empty assertion condition")
+
+        return condition_part
+
+    def _extract_comment(self) -> str:
+        """
+        Extracts the human-readable comment from:
+        //description: ...
+        """
+        if "//" not in self.java_assertion:
+            return ""
+
+        comment_part = self.java_assertion.split("//", 1)[1].strip()
+
+        # Remove optional prefixes like 'description:'
+        comment_part = re.sub(
+            r"^(description|desc|comment)\s*:\s*",
+            "",
+            comment_part,
+            flags=re.IGNORECASE,
+        )
+
+        return comment_part
+
+    def to_dict(self) -> dict:
+        """
+        Converts to Toradocu-style JSON representation.
+        """
+        return {
+            "comment": self.comment,
+            "kind": self.kind,
+            "condition": self.condition,
+        }
+
+    def get_comment(self):
+        return self.comment
+    def get_kind(self):
+        return self.kind
+    def get_condition(self):
+        return self.condition
+
+
+
+
 class Translator():
     PATH_JSON = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/result.json")
     MODE_TO_PROMPT = {
@@ -45,14 +112,11 @@ class Translator():
         logger.debug(f"final Conditions: {output}")
         return output
 
-    @staticmethod
-    def _get_modes():
-        pass
 
     @staticmethod
     def assertion_to_json(assertion: str) -> dict:
         """
-        Convert a Java assertion statement into the JDoctor JSON structure.
+        Convert a Java assertion statement into the Randoop JSON structure.
 
         Expected input format:
             assert <condition>; // <description>

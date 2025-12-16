@@ -2,7 +2,7 @@ from platform import java_ver
 from pprint import pprint
 
 from llmedico.java_utils.javapy import JavaParser
-from llmedico.java_utils.translator.translator import Translator
+from llmedico.java_utils.translator.translator import Translator, ToradocuCondition
 
 
 def test_translator():
@@ -50,3 +50,10 @@ def test_translator_pre_assertion_to_json():
     assert jsons[0] == {'description': 'the CharSequence must not be null', 'guard': {'condition': 'cs != null', 'description': 'the CharSequence must not be null'}}
     assert jsons[1] == {'description': 'the CharSequence must not be empty', 'guard': {'condition': '!cs.isEmpty()', 'description': 'the CharSequence must not be empty'}}
     assert jsons[2] == {'description': 'the CharSequence must not be null and not empty', 'guard': {'condition': 'cs != null && !cs.isEmpty()', 'description': 'the CharSequence must not be null and not empty'}}
+
+def test_translator_toradocu_condition():
+    assertion = 'assert args[0] > 1; //description: n must be greater than 1'
+    condition = ToradocuCondition(assertion, "PARAM")
+    assert condition.to_dict() == {"comment": "n must be greater than 1",
+                                  "kind": "PARAM",
+                                  "condition": "args[0] > 1"}

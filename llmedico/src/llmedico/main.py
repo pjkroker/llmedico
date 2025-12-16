@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
+from pprint import pprint
 
 from pydantic.v1.parse import load_file
 
 from llmedico.java_utils.javapy import JavaParser
-from llmedico.java_utils.translator.translator import Translator
+from llmedico.java_utils.translator.translator import Translator, ToradocuCondition
 from pyjdoctor.pyjdoctor import PyJDoctor
 import logging
 logger = logging.getLogger(__name__)
@@ -80,7 +81,7 @@ def start_translator_everything(result_json):
         #get modes
         modes = []
         for tag in result_json[0]["methods"][i]["tags"]:
-            modes.append(tag["tag"])
+            modes.append(tag["tag"].upper())
         if not modes: logger.warning(f"{method_name} contains not tags?")
         logger.debug(f"found modes: {modes}")
         java_assertions = trans.translate_javadoc(javadoc, modes=modes)
@@ -88,6 +89,30 @@ def start_translator_everything(result_json):
         results[method_name] = java_assertions
     logger.debug(results)
     return results
+
+#TODO
+def build_toradocu_llmedico_file(path_toradocu_condition_translator_json, llmedico_conditions):
+    '''
+    Takes the corresponding "toradocu-condition_translator.json" and replaces the conditions with the one from llmedico.
+    :return:
+    '''
+    toradocu_condition_translator_json = load_json(path_toradocu_condition_translator_json)
+    for method in toradocu_condition_translator_json:
+        conditions = llmedico_conditions[method["name"]]
+        for mode in conditions:
+            toradocu_condition = ToradocuCondition(conditions[mode][0],kind=mode)
+            if mode == "param":
+                method["paramTags"][0]["comment"] = toradocu_condition.get_comment()
+                method["paramTags"][0]["condition"] = toradocu_condition.get_condition()
+            elif mode == "return":
+                method["returnTag"] = toradocu_condition.to_dict()
+            elif mode == "throwsTags":
+                method["throwsTags"][0]["comment"] = toradocu_condition.get_comment()
+                method["throwsTags"][0]["condition"] = toradocu_condition.get_condition()
+
+    pprint(toradocu_condition_translator_json)
+    with open(Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output") / "llmedico-toradocu-condition_translator.json", "w", encoding="utf-8") as f:
+        json.dump(toradocu_condition_translator_json, f, indent=2, ensure_ascii=False)
 
 def insert_conditions(result_json, results, path_output_dir):
     for i in range(0, len(result_json[0]["methods"])):
@@ -105,11 +130,6 @@ def insert_conditions(result_json, results, path_output_dir):
     logger.info("Data before dumping:\n%s", json_preview)
     with open(path_output_dir / "llmedico-condition_translator.json", "w", encoding="utf-8") as f:
         json.dump(result_json, f, indent=2, ensure_ascii=False)
-
-
-
-
-
 
 def start_validating(results):
     jp = JavaParser()
@@ -171,7 +191,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     # Set up basic configuration for logging
     logging.basicConfig(
         filename=path_output_dir / 'llmedico.log',
-        filemode='w',  # overwrite on each run
+        filemode='w',  # over^^
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
         force=True
@@ -185,10 +205,14 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     logger.debug("---Starting JavaParser - Extracting JavaDoc---")
     result_json = start_java_parser(path_output_dir, path_java_class)
 
-    logger.debug("---Starting Translator - Translating JavaDoc to Assertions---")
+    #logger.debug("---Starting Translator - Translating JavaDoc to Assertions---")
     #results = start_translator_with_specified_method(result_json, target_method)
-    result = start_translator_everything(result_json)
-    insert_conditions(result_json, result, path_output_dir)
+    # conditions = start_translator_everything(result_json)
+    # with open(path_output_dir / "llmedico-conditions.json", "w", encoding="utf-8") as f:
+    #     json.dump(conditions, f, indent=2, ensure_ascii=False)
+    conditions = load_json(path_output_dir / "llmedico-conditions.json")
+    insert_conditions(result_json, conditions, path_output_dir)
+    build_toradocu_llmedico_file("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/toradocu-condition_translator.json",conditions)
     # logger.debug("---Validating Syntax of generated Assertions---")
     # valid = start_validating(results)
     #
