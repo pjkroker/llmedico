@@ -81,9 +81,9 @@ class ToradocuCondition:
 class Translator():
     PATH_JSON = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/result.json")
     MODE_TO_PROMPT = {
-        "param": PRE_CONDITION_PROMPT,
-        "return": RETURN_CONDITION_PROMPT,
-        "throws": THROWS_CONDITION_PROMPT,
+        "PARAM": PRE_CONDITION_PROMPT,
+        "RETURN": RETURN_CONDITION_PROMPT,
+        "THROWS": THROWS_CONDITION_PROMPT,
     }
     def __init__(self):
         pass
@@ -105,7 +105,6 @@ class Translator():
             logger.debug(f"translating for current mode: {mode}")
             prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc)
             result = llm.generate(prompt)
-            logger.debug(f"llm generated the following response: {result}")
             extracted_assertion = extract_java_assertions(result)
             logger.debug(f"extracted the following assertions: {extracted_assertion}")
             output[mode].append(extracted_assertion[0])
