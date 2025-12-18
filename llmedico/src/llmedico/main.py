@@ -2,6 +2,9 @@ import json
 from pathlib import Path
 from pprint import pprint
 import logging
+
+from llm_caller.models.ollama import Ollama
+
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +70,7 @@ def start_translator_with_specified_method(result_json, target_method:str):
     return results
 
 def start_translator_everything(result_json):
-    trans = Translator()
+    trans = Translator(Ollama("llama3.1"))
     results = {}
     logger.debug("start translator")
     logger.debug("translating every method of the class")
