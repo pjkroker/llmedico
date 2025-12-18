@@ -128,6 +128,63 @@ PRE_CONDITION_PROMPT = PromptBuilder(
     "{javadoc}"
     """)
 
+PRE_CONDITION_PROMPT_JSON = PromptBuilder(
+    """You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the paremter's name related to the assertion as shown in the example.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    "int x"
+    Output Java assertions:
+    ```json
+    [{{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",}}]
+    ´´´
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+    "int x",
+    "int y"
+    Output Java assertions:
+    ```json
+    [{{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x"}},
+    {{description="y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y"}}]
+    ´´´
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "{javadoc}"
+    With the following Parameters:
+    "{parameters}"
+    """)
+
 
 RETURN_CONDITION_PROMPT = PromptBuilder(
     """You are a Java expert.
@@ -178,6 +235,67 @@ RETURN_CONDITION_PROMPT = PromptBuilder(
     "{javadoc}"
     """)
 
+RETURN_CONDITION_PROMPT_JSON = PromptBuilder(
+    """You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate a valid, compilable Java return-condition assertion statement that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    3. Ignore @param and @throws tags — output only a return-condition check.
+    4. Use standard Java syntax (e.g., assert x > 0;).
+    5. Only output Java code, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement, as an JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on, as shown in the example.
+    10. Refer to the return value as methodResultID, as shown in the example.
+    12. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value. 
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Parameters:
+     "int n"
+    Output Java assertions:
+     ```json
+    [{{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert args[0]<2 ? methodResultID == true : methodResultID == false;",
+    "name": null}}]
+    ´´´
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     "int x",
+     "int y"
+     Output Java assertions:
+      ```json
+    [{{"description": "result must equal the sum of x and y",
+    "assertion": "assert methodResultID == args[0] + args[1];",
+    "name": null}}]
+    ´´´
+
+    Now generate Java return-condition assertion for the following Javadoc:
+    "{javadoc}"
+    With the following Parameters:
+    "{parameters}"
+    """)
+
 THROWS_CONDITION_PROMPT = PromptBuilder(
     """You are a Java expert.
     I will provide a full Javadoc comment describing a method.
@@ -218,6 +336,76 @@ THROWS_CONDITION_PROMPT = PromptBuilder(
     ´´´
     Now generate Java assertion statements from the following Javadoc:
     "{javadoc}"
+    """
+)
+
+THROWS_CONDITION_PROMPT_JSON = PromptBuilder(
+    """You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each inside its own JSON element.
+    10. Each assertion must include a short description comment following the format as shown in the example.
+    11. Output only the JSON, with no additional explanations or commentary.
+    12. Include the exception's name related to the assertion as shown in the example.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Parameters:
+    "int x",
+    "int y"
+    Output Java assertions:
+    ```json
+    [{{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException"}}]
+    ´´´
+    
+    Input Javadoc:
+    /**
+     * Creates paths obtained by concatenating the specified edge to the
+     * specified paths.
+     *
+     * @param maxSize maximum number of paths the list is able to store.
+     * @param elementList paths, list of <code>AbstractPathElement</code>.
+     * @param edge edge reaching the end vertex of the created paths.
+     *
+     * @throws NullPointerException if the specified prevPathElementList or edge
+     * is <code>null</code>.
+     * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+     * 0.
+     */
+     Input Parameters:
+     "Graph<V, E> graph",
+     "int maxSize",
+     "AbstractPathElementList<V, E, T> elementList",
+     "E edge"
+     Output Java assertions:
+    ```json
+    [{{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException"}},
+    {{description="if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException"}}]
+    ´´´
+    Now generate Java assertion statements from the following Javadoc:
+    "{javadoc}"
+    With the following Parameters:
+    "{parameters}"
     """
 )
 
