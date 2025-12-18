@@ -13,6 +13,7 @@ class Ollama(Model):
         super().__init__(model_name)
 
     def generate(self, prompt: str, temperature: float = 0.7, **kwargs) -> str:
+        logger.debug("Ollama: generating prompt: %s", prompt)
         response = ollama.chat(
             model=self.model_name,
             messages=[{"role": "user", "content": prompt}],
