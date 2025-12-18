@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 from llmedico.java_utils.javapy import JavaParser
-from llmedico.java_utils.translator.translator import Translator, ToradocuCondition
+from llmedico.translator.translator import Translator, ToradocuCondition
 from pyjdoctor.pyjdoctor import PyJDoctor
 from pyrandoop.pyrandoop import PyRandoop
 from se_helpers.files.files import save_json_to_file, load_json, save_realy_json_to_file

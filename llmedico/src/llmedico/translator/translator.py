@@ -1,6 +1,6 @@
 import logging
 
-from llmedico.java_utils.translator.conditionvalidator import ConditionValidator
+from llmedico.translator.conditionvalidator import ConditionValidator
 
 logger = logging.getLogger(__name__)
 from pathlib import Path
