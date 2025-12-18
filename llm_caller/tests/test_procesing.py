@@ -31,6 +31,11 @@ def test_extract_code():
     with pytest.raises(RuntimeError):
         extract_code_by_language(code, "java")
 
+    code = """```json 
+            []```"""
+    code = "```json\n```"
+    assert extract_code_by_language(code, "json")[0] == ''
+
 def test_extract_java_assertions():
     llm_response = """
     ```java
