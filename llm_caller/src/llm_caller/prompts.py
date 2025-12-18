@@ -108,7 +108,7 @@ PRE_CONDITION_PROMPT = PromptBuilder(
     Output Java assertions:
     ```java
     assert args[0] > 0; //description: the code must be positive
-    ´´´
+    ```
     Input Javadoc:
     /**
      * Adds two positive integers and returns the result.
@@ -122,14 +122,28 @@ PRE_CONDITION_PROMPT = PromptBuilder(
     ```java
     assert args[0] > 0; //description: x must be positive
     assert args[1] > 0; //description: y must be positive
-    ´´´
+    ```
 
     Now generate Java pre-condition assertions for the following Javadoc:
     "{javadoc}"
     """)
 
-PRE_CONDITION_PROMPT_JSON = PromptBuilder(
-    """You are a Java expert.
+FEEDBACK_BASE_STRING = """PREVIOUS OUTPUT:
+    "{previous_output}"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "{errors}"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    """
+
+PRE_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
     Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
     Requirements:
@@ -156,7 +170,7 @@ PRE_CONDITION_PROMPT_JSON = PromptBuilder(
     [{{"description": "the code must be positive",
     "assertion": "assert args[0] > 0;",
     "name": "x",}}]
-    ´´´
+    ```
     Input Javadoc:
     /**
      * Adds two positive integers and returns the result.
@@ -177,14 +191,15 @@ PRE_CONDITION_PROMPT_JSON = PromptBuilder(
     {{"description": "y must be positive",
     "assertion": "assert args[1] > 0;",
     "name": "y"}}]
-    ´´´
+    ```
 
     Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
     "{javadoc}"
     With the following Parameters:
     "{parameters}"
-    """)
-
+    """
+PRE_CONDITION_PROMPT_JSON = PromptBuilder(PRE_CONDITION_PROMPT_JSON_STRING)
+PRE_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(PRE_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
 
 RETURN_CONDITION_PROMPT = PromptBuilder(
     """You are a Java expert.
@@ -216,7 +231,7 @@ RETURN_CONDITION_PROMPT = PromptBuilder(
     Output Java assertions:
     ```java
     assert args[0]<2 ? methodResultID == true : methodResultID == false; //description: true if n is prime. (All numbers < 2 return false).
-    ´´´
+    ```
     Input Javadoc:
     /**
      * Adds two positive integers and returns the result.
@@ -229,14 +244,13 @@ RETURN_CONDITION_PROMPT = PromptBuilder(
      Output Java assertions:
     ```java
     assert methodResultID == args[0] + args[1]; //description: result must equal the sum of x and y.
-    ´´´
+    ```
 
     Now generate Java return-condition assertion for the following Javadoc:
     "{javadoc}"
     """)
 
-RETURN_CONDITION_PROMPT_JSON = PromptBuilder(
-    """You are a Java expert.
+RETURN_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
     Your task is to generate a valid, compilable Java return-condition assertion statement that represent the requirements described in the Javadoc.
     Requirements:
@@ -270,7 +284,7 @@ RETURN_CONDITION_PROMPT_JSON = PromptBuilder(
     [{{"description": "true if n is prime. (All numbers < 2 return false).",
     "assertion": "assert args[0]<2 ? methodResultID == true : methodResultID == false;",
     "name": null}}]
-    ´´´
+    ```
     Input Javadoc:
     /**
      * Adds two positive integers and returns the result.
@@ -288,14 +302,15 @@ RETURN_CONDITION_PROMPT_JSON = PromptBuilder(
     [{{"description": "result must equal the sum of x and y",
     "assertion": "assert methodResultID == args[0] + args[1];",
     "name": null}}]
-    ´´´
+    ```
 
     Now generate Java return-condition assertion for the following Javadoc:
     "{javadoc}"
     With the following Parameters:
     "{parameters}"
-    """)
-
+    """
+RETURN_CONDITION_PROMPT_JSON = PromptBuilder(RETURN_CONDITION_PROMPT_JSON_STRING)
+RETURN_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(RETURN_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
 THROWS_CONDITION_PROMPT = PromptBuilder(
     """You are a Java expert.
     I will provide a full Javadoc comment describing a method.
@@ -323,7 +338,7 @@ THROWS_CONDITION_PROMPT = PromptBuilder(
     Output Java assertions:
     ```java
     assert args[0] < 0 || args[1] < 0; // description: x or y is negative
-    ´´´
+    ```
     Input Javadoc:
     /**
     * Retrieves the element at the given index.
@@ -333,14 +348,13 @@ THROWS_CONDITION_PROMPT = PromptBuilder(
     Output Java assertions:
     ```java
     assert args[0] < 0 || args[0] >= size; // description: index is outside valid bounds
-    ´´´
+    ```
     Now generate Java assertion statements from the following Javadoc:
     "{javadoc}"
     """
 )
 
-THROWS_CONDITION_PROMPT_JSON = PromptBuilder(
-    """You are a Java expert.
+THROWS_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
     The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
     Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
@@ -372,7 +386,7 @@ THROWS_CONDITION_PROMPT_JSON = PromptBuilder(
     [{{"description": "x or y is negative",
     "assertion": "assert args[0] < 0 || args[1] < 0;",
     "name": "IllegalArgumentException"}}]
-    ´´´
+    ```
     
     Input Javadoc:
     /**
@@ -401,13 +415,14 @@ THROWS_CONDITION_PROMPT_JSON = PromptBuilder(
     {{"description": "if maxSize is negative or 0.",
     "assertion": "assert args[1]<0 || args[1]==0;",
     "name": "IllegalArgumentException"}}]
-    ´´´
+    ```
     Now generate Java assertion statements from the following Javadoc:
     "{javadoc}"
     With the following Parameters:
     "{parameters}"
     """
-)
+THROWS_CONDITION_PROMPT_JSON = PromptBuilder(THROWS_CONDITION_PROMPT_JSON_STRING)
+THROWS_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(THROWS_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
 
 
 GEN_JAVA_ASSERTION_PROMPT_WITH_CODE = PromptBuilder(
