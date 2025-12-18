@@ -1,14 +1,13 @@
 import json
 from pathlib import Path
 from pprint import pprint
+import logging
+logger = logging.getLogger(__name__)
 
-from pydantic.v1.parse import load_file
 
 from llmedico.java_utils.javapy import JavaParser
 from llmedico.java_utils.translator.translator import Translator, ToradocuCondition
 from pyjdoctor.pyjdoctor import PyJDoctor
-import logging
-logger = logging.getLogger(__name__)
 from pyrandoop.pyrandoop import PyRandoop
 from se_helpers.files.files import save_json_to_file, load_json, save_realy_json_to_file
 
@@ -72,19 +71,21 @@ def start_translator_everything(result_json):
     results = {}
     logger.debug("start translator")
     logger.debug("translating every method of the class")
-    for i in range(0, len(result_json[0]["methods"])):
-        method_name = result_json[0]["methods"][i]["name"]
+    for i in range(0, len(result_json[0]["members"])):
+        method_name = result_json[0]["members"][i]["name"]
         logger.debug(f"current method name: {method_name}")
-        javadoc = result_json[0]["methods"][i]["javadoc"]
+        javadoc = result_json[0]["members"][i]["javadoc"]
         logger.debug(f"has the following javadoc: {javadoc}")
+        parameters = result_json[0]["members"][i]["parameters"]
 
-        #get modes
-        modes = []
-        for tag in result_json[0]["methods"][i]["tags"]:
-            modes.append(tag["tag"].upper())
-        if not modes: logger.warning(f"{method_name} contains not tags?")
-        logger.debug(f"found modes: {modes}")
-        java_assertions = trans.translate_javadoc(javadoc, modes=modes)
+        #get modes, and they #tags for each mode/tag
+        modes = {}
+        for tag in result_json[0]["members"][i]["tags"]:
+            key = tag["tag"].upper()
+            modes[key] = modes.get(key, 0) + 1
+        if not modes: logger.warning(f"{method_name} contains not tags?") #TODO check
+        logger.debug(f"found modes and their frequencies: {modes}")
+        java_assertions = trans.translate_javadoc(javadoc,parameters, modes=modes)
         logger.debug(f"the following java assertion have been generated: {java_assertions}")
         results[method_name] = java_assertions
     logger.debug(results)
@@ -115,15 +116,17 @@ def build_toradocu_llmedico_file(path_toradocu_condition_translator_json, llmedi
         json.dump(toradocu_condition_translator_json, f, indent=2, ensure_ascii=False)
 
 def insert_conditions(result_json, results, path_output_dir):
-    for i in range(0, len(result_json[0]["methods"])):
-        method_name = result_json[0]["methods"][i]["name"]
-        for j in range(0, len(result_json[0]["methods"][i]["tags"])):
-            if result_json[0]["methods"][i]["tags"][j]["tag"] == "param":
-                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["param"][0]
-            elif result_json[0]["methods"][i]["tags"][j]["tag"] == "return":
-                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["return"][0]
-            elif result_json[0]["methods"][i]["tags"][j]["tag"] == "throws":
-                result_json[0]["methods"][i]["tags"][j]["condition"] = results[method_name]["throws"][0]
+    for i in range(0, len(result_json[0]["members"])):
+        method_name = result_json[0]["members"][i]["name"]
+        for j in range(0, len(result_json[0]["members"][i]["tags"])):
+            if result_json[0]["members"][i]["tags"][j]["tag"] == "param":
+                #TODO several params
+                result_json[0]["members"][i]["tags"][j]["condition"] = results[method_name]["PARAM"][0]
+            elif result_json[0]["members"][i]["tags"][j]["tag"] == "return":
+                result_json[0]["members"][i]["tags"][j]["condition"] = results[method_name]["RETURN"][0]
+            elif result_json[0]["members"][i]["tags"][j]["tag"] == "throws":
+                #TODO several throws
+                result_json[0]["members"][i]["tags"][j]["condition"] = results[method_name]["THROWS"][0]
 
     # Convert to pretty JSON string for logging
     json_preview = json.dumps(result_json, indent=2, ensure_ascii=False)
@@ -198,21 +201,23 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     )
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
+
+
     logger.debug("---Starting LLMedico---")
-    # logger.debug("---Starting JDoctor - Extracting JavaDoc---")
-    # start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
-    #
+    #logger.debug("---Starting JDoctor - Extracting JavaDoc---")
+    #start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
+
     logger.debug("---Starting JavaParser - Extracting JavaDoc---")
     result_json = start_java_parser(path_output_dir, path_java_class)
 
-    #logger.debug("---Starting Translator - Translating JavaDoc to Assertions---")
+    logger.debug("---Starting Translator - Translating JavaDoc to Assertions---")
     #results = start_translator_with_specified_method(result_json, target_method)
-    # conditions = start_translator_everything(result_json)
-    # with open(path_output_dir / "llmedico-conditions.json", "w", encoding="utf-8") as f:
-    #     json.dump(conditions, f, indent=2, ensure_ascii=False)
-    conditions = load_json(path_output_dir / "llmedico-conditions.json")
+    conditions = start_translator_everything(result_json)
+    with open(path_output_dir / "llmedico-conditions.json", "w", encoding="utf-8") as f:
+        json.dump(conditions, f, indent=2, ensure_ascii=False)
+    #conditions = load_json(path_output_dir / "llmedico-conditions.json")
     insert_conditions(result_json, conditions, path_output_dir)
-    build_toradocu_llmedico_file("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/toradocu-condition_translator.json",conditions)
+    #build_toradocu_llmedico_file("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/toradocu-condition_translator.json",conditions)
     # logger.debug("---Validating Syntax of generated Assertions---")
     # valid = start_validating(results)
     #
@@ -225,16 +230,16 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.apache.commons.math3.primes.Primes"  # --target-class java class to be analyzed
-    TARGET_METHOD = "isPrime"  # --target-method#
+    FQ_CLASS_NAME = "org.jgrapht.alg.AbstractPathElementList"  # --target-class java class to be analyzed
+    TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src")  # --data-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
 
     PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
 
     PATH_OUTPUT_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output")  # --out-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/jgraph")  # --out-dir
 
     main(fq_class_name=FQ_CLASS_NAME,
          target_method=TARGET_METHOD,

@@ -1,6 +1,8 @@
 from platform import java_ver
 from pprint import pprint
+from typing import List
 
+from llm_caller.utils.processing import extract_conditions
 from llmedico.java_utils.javapy import JavaParser
 from llmedico.java_utils.translator.translator import Translator, ToradocuCondition
 
@@ -8,17 +10,24 @@ from llmedico.java_utils.translator.translator import Translator, ToradocuCondit
 def test_translator():
     translator = Translator()
     javadoc = """/**
-     * Computes the average of two integers.
+     * Returns a {@code Complex} whose value is
+     * {@code (this + addend)}.
+     * Uses the definitional formula
+     * <p>
+     *   {@code (a + bi) + (c + di) = (a+c) + (b+d)i}
+     * </p>
+     * If either {@code this} or {@code addend} has a {@code NaN} value in
+     * either part, {@link #NaN} is returned; otherwise {@code Infinite}
+     * and {@code NaN} values are returned in the parts of the result
+     * according to the rules for {@link java.lang.Double} arithmetic.
      *
-     * <p>This method takes two integer values, adds them, and divides the result by two to compute
-     * their arithmetic mean. The result is returned as a double to preserve fractional precision.
-     *
-     * @param a the first integer value
-     * @param b the second integer value
-     * @return the average of {@code a} and {@code b} as a double
+     * @param  addend Value to be added to this {@code Complex}.
+     * @return {@code this + addend}.
+     * @throws NullArgumentException if {@code addend} is {@code null}.
      */
     """
-    java_assertions = translator.translate_javadoc(javadoc,modes={"param","return"})
+    parameters = """Complex addend"""
+    java_assertions = translator.translate_javadoc(javadoc,parameters, modes={"PARAM","RETURN", "THROWS"})
     jp = JavaParser()
     for mode in java_assertions:
         print("mode: ", mode)
@@ -57,3 +66,27 @@ def test_translator_toradocu_condition():
     assert condition.to_dict() == {"comment": "n must be greater than 1",
                                   "kind": "PARAM",
                                   "condition": "args[0] > 1"}
+
+def test_extract_conditions():
+    raw_response = """```json
+    [
+        {"description": "maxSize must be positive",
+        "assertion": "assert args[0] > 0;",
+        "name": "maxSize"},
+        {"description": "elementList cannot be null",
+        "assertion": "assert args[1] != null;",
+        "name": "elementList"},
+        {"description": "edge cannot be null",
+        "assertion": "assert args[2] != null;",
+        "name": "edge"}
+    ]
+    ```"""
+    condition = extract_conditions(raw_response)
+
+    assert condition == [{"description": "maxSize must be positive","assertion": "assert args[0] > 0;","name": "maxSize"},
+                        {"description": "elementList cannot be null","assertion": "assert args[1] != null;", "name": "elementList"},
+                        {"description": "edge cannot be null", "assertion": "assert args[2] != null;","name": "edge"}]
+
+    assert type(condition) == list
+    assert condition[0]["assertion"] == "assert args[0] > 0;"
+    assert condition[2]["assertion"] == "assert args[2] != null;"

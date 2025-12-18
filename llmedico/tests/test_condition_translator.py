@@ -1,0 +1,76 @@
+from llmedico.java_utils.translator.conditionvalidator import ConditionValidator
+
+
+def test_condition_translator():
+    raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
+    ```jso
+    [{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException"},
+    {description="if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException"}]
+    ```
+    """
+    validator = ConditionValidator("json")
+    assert validator.validate(raw_response)[0].startswith("No code snippets found for language json.")
+    raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
+        ```json
+        {"description": "if the specified prevPathElementList or edge is null.",
+        "assertion": "assert args[2]==null || args[3]==null;",
+        "name": "NullPointerException"},
+        {"description": "if maxSize is negative or 0.",
+        "assertion": "assert args[1]<0 || args[1]==0;",
+        "name": "IllegalArgumentException"}]
+        ```
+        """
+    assert validator.validate(raw_response)[0].startswith("Extra data:")
+    raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
+            ```json
+            [{"description": "if the specified prevPathElementList or edge is null.",
+            "assertion": "assert args[2]==null || args[3]==null;",
+            "name": "NullPointerException"},
+            {description": "if maxSize is negative or 0.",
+            "assertion": "assert args[1]<0 || args[1]==0;",
+            "name": "IllegalArgumentException"}]
+            ```
+            """
+    assert validator.validate(raw_response)[0].startswith("Expecting property name enclosed in double quotes")
+    raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
+                ```json
+                [{"assertion": "assert args[2]==null || args[3]==null;",
+                "name": "NullPointerException"},
+                {"description": "if maxSize is negative or 0.",
+                "assertion": "assert args[1]<0 || args[1]==0;",
+                "name": "IllegalArgumentException"}]
+                ```
+                """
+    assert validator.validate(raw_response)[0].endswith("missing keys: {'description'}")
+    raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
+                ```json
+                [{"description": "if the specified prevPathElementList or edge is null.",
+                "assertion": "assert args[2]==null || args[3]==null;",
+                "name": "NullPointerException"},
+                {"description": "if maxSize is negative or 0.",
+                "assertion": "assertt args[1]<0 || args[1]==0;",
+                "name": "IllegalArgumentException"}]
+                ```
+                """
+    assert validator.validate(raw_response)[0].endswith("is not a valid java assertion")
+    raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
+                    ```json
+                    [{"description": "if the specified prevPathElementList or edge is null.",
+                    "assertion": "assert args[2]==null || args[3]==null;",
+                    "name": "NullPointerException"},
+                    {"description": "if maxSize is negative or 0.",
+                    "assertion": "assert args[1]<0 || args[1]==0;",
+                    "name": "IllegalArgumentException"}]
+                    ```
+                    """
+    assert validator.validate(raw_response) == []
+
+
+
+
+
+

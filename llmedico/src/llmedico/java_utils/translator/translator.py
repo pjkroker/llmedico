@@ -1,4 +1,7 @@
 import logging
+
+from llmedico.java_utils.translator.conditionvalidator import ConditionValidator
+
 logger = logging.getLogger(__name__)
 from pathlib import Path
 import re
@@ -6,9 +9,9 @@ import copy
 from typing import Iterable, Dict, List
 
 from llm_caller.models.ollama import Ollama
-from llm_caller.prompts import PRE_CONDITION_PROMPT, RETURN_CONDITION_PROMPT, THROWS_CONDITION_PROMPT
-from llm_caller.utils.processing import extract_java_assertions
-
+from llm_caller.prompts import PRE_CONDITION_PROMPT, RETURN_CONDITION_PROMPT, THROWS_CONDITION_PROMPT, \
+    PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON
+from llm_caller.utils.processing import extract_java_assertions, extract_conditions
 
 ConditionOutput = Dict[str, List[str]]
 
@@ -81,15 +84,15 @@ class ToradocuCondition:
 class Translator():
     PATH_JSON = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/result.json")
     MODE_TO_PROMPT = {
-        "PARAM": PRE_CONDITION_PROMPT,
+        "PARAM": PRE_CONDITION_PROMPT_JSON,
         "RETURN": RETURN_CONDITION_PROMPT,
-        "THROWS": THROWS_CONDITION_PROMPT,
+        "THROWS": THROWS_CONDITION_PROMPT_JSON,
     }
     def __init__(self):
         pass
         #self.data = load_json(self.PATH_JSON)
 
-    def translate_javadoc(self, javadoc:str,modes:Iterable[str]) -> ConditionOutput:
+    def translate_javadoc(self, javadoc:str, parameters: list[str], modes) -> ConditionOutput:
         """
         Generates for a given Java Docstring meaningful Java assertions.
         :param javadoc:
@@ -103,11 +106,18 @@ class Translator():
                 raise ValueError(f"Unsupported mode: {mode}")
 
             logger.debug(f"translating for current mode: {mode}")
-            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc)
+            expected_len = modes[mode]
+            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc, parameters=parameters)
             result = llm.generate(prompt)
-            extracted_assertion = extract_java_assertions(result)
-            logger.debug(f"extracted the following assertions: {extracted_assertion}")
-            output[mode].append(extracted_assertion[0])
+            validator = ConditionValidator("json")
+            errors = validator.validate(result, expected_len)
+            if errors:
+                logger.warning(f"Found the following erros while validating the response: {errors}")
+                logger.debug("start feedback repair loop")
+                raise NotImplementedError
+            extracted_conditions = extract_conditions(result) #TODO
+            logger.debug(f"extracted the following assertions: {extracted_conditions}")
+            output[mode] = extracted_conditions #TODO support several assertions
         logger.debug(f"final Conditions: {output}")
         return output
 
