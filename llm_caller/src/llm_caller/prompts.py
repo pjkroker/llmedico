@@ -174,7 +174,7 @@ PRE_CONDITION_PROMPT_JSON = PromptBuilder(
     [{{"description": "x must be positive",
     "assertion": "assert args[0] > 0;",
     "name": "x"}},
-    {{description="y must be positive",
+    {{"description": "y must be positive",
     "assertion": "assert args[1] > 0;",
     "name": "y"}}]
     ´´´
@@ -398,7 +398,7 @@ THROWS_CONDITION_PROMPT_JSON = PromptBuilder(
     [{{"description": "if the specified prevPathElementList or edge is null.",
     "assertion": "assert args[2]==null || args[3]==null;",
     "name": "NullPointerException"}},
-    {{description="if maxSize is negative or 0.",
+    {{"description": "if maxSize is negative or 0.",
     "assertion": "assert args[1]<0 || args[1]==0;",
     "name": "IllegalArgumentException"}}]
     ´´´
