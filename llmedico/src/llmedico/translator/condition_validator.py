@@ -32,7 +32,7 @@ class ConditionValidator:
             errors = self._validate_condition_schema(json_list, expected_len)
         if errors: #has at least one error, len(errors) > 1
             return errors
-        #4. Check if the assertions are valid Java assertions
+        #4. Check if the assertions are valid Java assertions TODO get compiler errors
         jp = JavaParser()
         for code_block in code_blocks:
             json_list = json.loads(code_block)

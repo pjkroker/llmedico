@@ -1,6 +1,8 @@
 import logging
 
+from llm_caller.models.model import Model
 from llmedico.translator.condition_validator import ConditionValidator
+from llmedico.translator.translation_repair_loop import TranslationRepairLoop
 
 logger = logging.getLogger(__name__)
 from pathlib import Path
@@ -10,7 +12,8 @@ from typing import Iterable, Dict, List
 
 from llm_caller.models.ollama import Ollama
 from llm_caller.prompts import PRE_CONDITION_PROMPT, RETURN_CONDITION_PROMPT, THROWS_CONDITION_PROMPT, \
-    PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON
+    PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON, PRE_CONDITION_PROMPT_JSON_FEEDBACK, \
+    RETURN_CONDITION_PROMPT_JSON_FEEDBACK, THROWS_CONDITION_PROMPT_JSON_FEEDBACK
 from llm_caller.utils.processing import extract_java_assertions, extract_conditions
 
 ConditionOutput = Dict[str, List[str]]
@@ -88,8 +91,13 @@ class Translator():
         "RETURN": RETURN_CONDITION_PROMPT,
         "THROWS": THROWS_CONDITION_PROMPT_JSON,
     }
-    def __init__(self):
-        pass
+    MODE_TO_PROMPT_REPAIR = {
+        "PARAM": PRE_CONDITION_PROMPT_JSON_FEEDBACK,
+        "RETURN": RETURN_CONDITION_PROMPT_JSON_FEEDBACK,
+        "THROWS": THROWS_CONDITION_PROMPT_JSON_FEEDBACK,
+    }
+    def __init__(self, llm: Model):
+        self.llm = llm
         #self.data = load_json(self.PATH_JSON)
 
     def translate_javadoc(self, javadoc:str, parameters: list[str], modes) -> ConditionOutput:
@@ -98,7 +106,6 @@ class Translator():
         :param javadoc:
         :return:
         """
-        llm = Ollama("llama3.1")
         output: ConditionOutput = {mode: [] for mode in modes}
 
         for mode in modes:
@@ -107,20 +114,28 @@ class Translator():
 
             logger.debug(f"translating for current mode: {mode}")
             expected_len = modes[mode]
-            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc, parameters=parameters)
-            result = llm.generate(prompt)
+            result = self._translate_once(javadoc, parameters,mode, [], "")
             validator = ConditionValidator("json")
             errors = validator.validate(result, expected_len)
             if errors:
-                logger.warning(f"Found the following erros while validating the response: {errors}")
+                logger.warning(f"Found the following errors while validating the response: {errors}")
                 logger.debug("start feedback repair loop")
-                raise NotImplementedError
+                #raise NotImplementedError
+                repair = TranslationRepairLoop(self, validator)
+                repair.translate_with_repair(javadoc, parameters, mode, errors, expected_len, result)
             extracted_conditions = extract_conditions(result) #TODO
             logger.debug(f"extracted the following assertions: {extracted_conditions}")
             output[mode] = extracted_conditions #TODO support several assertions
         logger.debug(f"final Conditions: {output}")
         return output
 
+    def _translate_once(self,javadoc: str, parameters: list[str],mode, feedback: [],previous_output: str="") -> str:
+        if feedback == [] and previous_output=="":#TODO make better
+            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc, parameters=parameters)
+        else:
+            prompt = self.MODE_TO_PROMPT_REPAIR[mode].format(javadoc=javadoc, parameters=parameters, errors=feedback, previous_output=previous_output)
+        result = self.llm.generate(prompt)
+        return result
 
     @staticmethod
     def assertion_to_json(assertion: str) -> dict:
