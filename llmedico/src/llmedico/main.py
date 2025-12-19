@@ -71,7 +71,7 @@ def start_translator_with_specified_method(result_json, target_method:str):
 
 def start_translator_everything(result_json):
     trans = Translator(Ollama("llama3.1"))
-    results = {}
+    results = []
     logger.debug("start translator")
     logger.debug("translating every method of the class")
     for i in range(0, len(result_json[0]["members"])):
@@ -80,6 +80,7 @@ def start_translator_everything(result_json):
         javadoc = result_json[0]["members"][i]["javadoc"]
         logger.debug(f"has the following javadoc: {javadoc}")
         parameters = result_json[0]["members"][i]["parameters"]
+        type = result_json[0]["members"][i]["type"]
 
         #get modes, and they #tags for each mode/tag
         modes = {}
@@ -89,9 +90,11 @@ def start_translator_everything(result_json):
         if not modes: logger.warning(f"{method_name} contains not tags?") #TODO check
         logger.debug(f"found modes and their frequencies: {modes}")
         java_assertions = trans.translate_javadoc(javadoc,parameters, modes=modes)
-        logger.debug(f"the following java assertion have been generated: {java_assertions}")
-        results[method_name] = java_assertions
-    logger.debug(results)
+        logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
+        #conditions = {"conditions": java_assertions}
+        member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
+        results.append(member)
+    #logger.debug(f"the following java assertions have been generated \n {results}")
     return results
 
 #TODO
@@ -118,24 +121,42 @@ def build_toradocu_llmedico_file(path_toradocu_condition_translator_json, llmedi
     with open(Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output") / "llmedico-toradocu-condition_translator.json", "w", encoding="utf-8") as f:
         json.dump(toradocu_condition_translator_json, f, indent=2, ensure_ascii=False)
 
-def insert_conditions(result_json, results, path_output_dir):
-    for i in range(0, len(result_json[0]["members"])):
-        method_name = result_json[0]["members"][i]["name"]
-        for j in range(0, len(result_json[0]["members"][i]["tags"])):
-            if result_json[0]["members"][i]["tags"][j]["tag"] == "param":
-                #TODO several params
-                result_json[0]["members"][i]["tags"][j]["condition"] = results[method_name]["PARAM"][0]
-            elif result_json[0]["members"][i]["tags"][j]["tag"] == "return":
-                result_json[0]["members"][i]["tags"][j]["condition"] = results[method_name]["RETURN"][0]
-            elif result_json[0]["members"][i]["tags"][j]["tag"] == "throws":
-                #TODO several throws
-                result_json[0]["members"][i]["tags"][j]["condition"] = results[method_name]["THROWS"][0]
+def insert_conditions(java_extractions, generated_conditions, path_output_dir):
+    #sort result_json/extractions and results/conditions to insert condtions more easily
+    sorted_extractions_members = sorted(
+        java_extractions[0]["members"],
+        key=lambda member: (
+            member["name"],
+            len(member["parameters"]),
+            member["parameters"]
+        )
+    )
+
+    sorted_conditions = sorted(
+        generated_conditions,
+        key=lambda member: (
+            member["method"],
+            len(member["parameters"]),
+            member["parameters"]
+        )
+    )
+
+    for i, member in enumerate(sorted_extractions_members):
+        for j, tag in enumerate(member["tags"]):
+            for condition in sorted_conditions[i]["conditions"][tag["tag"].upper()]:
+                if (tag["name"] == condition["name"]
+                        and tag["content"].replace("\n", " ").replace(" ", "") == condition["comment"].replace("\n", " ").replace(" ", "")): #TODO make better
+                    tag["assertion"] = condition["assertion"]
+                    tag["description"] = condition["description"]
+                    tag["comment"] = condition["comment"]
+
+    java_extractions[0]["members"] = sorted_extractions_members
 
     # Convert to pretty JSON string for logging
-    json_preview = json.dumps(result_json, indent=2, ensure_ascii=False)
+    json_preview = json.dumps(java_extractions, indent=2, ensure_ascii=False)
     logger.info("Data before dumping:\n%s", json_preview)
     with open(path_output_dir / "llmedico-condition_translator.json", "w", encoding="utf-8") as f:
-        json.dump(result_json, f, indent=2, ensure_ascii=False)
+        json.dump(java_extractions, f, indent=2, ensure_ascii=False)
 
 def start_validating(results):
     jp = JavaParser()
@@ -218,6 +239,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     conditions = start_translator_everything(result_json)
     with open(path_output_dir / "llmedico-conditions.json", "w", encoding="utf-8") as f:
         json.dump(conditions, f, indent=2, ensure_ascii=False)
+    logger.debug(f"the following java assertions have been generated for {fq_class_name}: \n {conditions}")
     #conditions = load_json(path_output_dir / "llmedico-conditions.json")
     insert_conditions(result_json, conditions, path_output_dir)
     #build_toradocu_llmedico_file("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/toradocu-condition_translator.json",conditions)

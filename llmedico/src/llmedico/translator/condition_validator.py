@@ -5,7 +5,7 @@ from llmedico.java_utils.javapy import JavaParser
 
 
 class ConditionValidator:
-    EXPECTED_KEYS = {"description", "assertion", "name"} #python set
+    EXPECTED_KEYS = {"description", "assertion", "name", "comment"} #python set TODO get from prompt template?
     def __init__(self, language: str):
         self.language = language
 
@@ -26,7 +26,7 @@ class ConditionValidator:
             except json.JSONDecodeError as e:
                 errors.append(str(e))
                 return errors #the json string does not have the right format
-        #3. Check if json actually has the right format
+        #3. Check if json actually has the right format TODO check static values like name and comment
         for code_block in code_blocks:
             json_list = json.loads(code_block)
             errors = self._validate_condition_schema(json_list, expected_len)

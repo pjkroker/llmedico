@@ -8,13 +8,15 @@ class TranslationRepairLoop:
         self.max_iters = max_iters
 
     def translate_with_repair(self, javadoc: str,parameters: list[str], mode: str, errors, expected_len: int, previous_output: str) -> str:
-        i = 1
+        logger.debug('Trying to fix initial solution with repair loop.')
+        i = 0
         result = ""
         while errors and i < self.max_iters:
+            i += 1
             logger.info("Repair loop iteration %d", i)
             result = self.translator._translate_once(javadoc, parameters, mode, errors, previous_output)
             errors = self.validator.validate(result, expected_len)
-            i += 1
+
 
         if not errors:
             logger.info(f"Repair successful, after {i} out of a maximum of {self.max_iters} iterations.")

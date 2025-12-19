@@ -122,11 +122,11 @@ class Translator():
                 logger.debug("start feedback repair loop")
                 #raise NotImplementedError
                 repair = TranslationRepairLoop(self, validator)
-                repair.translate_with_repair(javadoc, parameters, mode, errors, expected_len, result)
-            extracted_conditions = extract_conditions(result) #TODO
+                result = repair.translate_with_repair(javadoc, parameters, mode, errors, expected_len, result)
+            extracted_conditions = extract_conditions(result)
             logger.debug(f"extracted the following assertions: {extracted_conditions}")
-            output[mode] = extracted_conditions #TODO support several assertions
-        logger.debug(f"final Conditions: {output}")
+            output[mode] = extracted_conditions
+        #logger.debug(f"final Conditions: {output}") # for this one method
         return output
 
     def _translate_once(self,javadoc: str, parameters: list[str],mode, feedback: [],previous_output: str="") -> str:
