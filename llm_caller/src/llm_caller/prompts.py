@@ -157,7 +157,7 @@ PRE_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     8. Provide a short description for the generated assertion as shown in the example.
     9. Refer to the parameters as args[0], and args[1] and so on.
     10. Include the parameter's name related to the assertion as shown in the example.
-    11. Include the parameter's comment related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \\n character accordingly.
     Example:
     Input Javadoc:
     /**
@@ -171,7 +171,7 @@ PRE_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     [{{"description": "the code must be positive",
     "assertion": "assert args[0] > 0;",
     "name": "x",
-    "comment": "x must be positive"}}]
+    "content": "x must be positive"}}]
     ```
     Input Javadoc:
     /**
@@ -190,11 +190,11 @@ PRE_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     [{{"description": "x must be positive",
     "assertion": "assert args[0] > 0;",
     "name": "x",
-    "comment": "the first number; must be positive"}},
+    "content": "the first number; must be positive"}},
     {{"description": "y must be positive",
     "assertion": "assert args[1] > 0;",
     "name": "y",
-    "comment": "the second number; must be positive"}}]
+    "content": "the second number; must be positive"}}]
     ```
 
     Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
@@ -269,7 +269,7 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     9. Refer to the parameters as args[0], and args[1] and so on, as shown in the example.
     10. Refer to the return value as methodResultID, as shown in the example.
     12. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
-    13. Include the return value's comment related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \\n character accordingly.
     Example:
     Input Javadoc:
     /**
@@ -289,7 +289,7 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     [{{"description": "true if n is prime. (All numbers < 2 return false).",
     "assertion": "assert args[0]<2 ? methodResultID == true : methodResultID == false;",
     "name": null,
-    "comment": "true if n is prime. (All numbers &lt; 2 return false)"}}]
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}}]
     ```
     Input Javadoc:
     /**
@@ -308,7 +308,7 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     [{{"description": "result must equal the sum of x and y",
     "assertion": "assert methodResultID == args[0] + args[1];",
     "name": null
-    "comment": "the sum of x and y"}}]
+    "content": "the sum of x and y"}}]
     ```
 
     Now generate Java return-condition assertion for the following Javadoc:
@@ -378,7 +378,7 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     10. Each assertion must include a short description comment following the format as shown in the example.
     11. Output only the JSON, with no additional explanations or commentary.
     12. Include the exception's name related to the assertion as shown in the example.
-    13. Include the exception's comment related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \\n character accordingly.
     Example:
     Input Javadoc:
     /**
@@ -394,7 +394,7 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     [{{"description": "x or y is negative",
     "assertion": "assert args[0] < 0 || args[1] < 0;",
     "name": "IllegalArgumentException",
-    "comment": "if x or y is negative"}}]
+    "content": "if x or y is negative"}}]
     ```
     
     Input Javadoc:
@@ -421,11 +421,11 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     [{{"description": "if the specified prevPathElementList or edge is null.",
     "assertion": "assert args[2]==null || args[3]==null;",
     "name": "NullPointerException",
-    "comment": "if the specified prevPathElementList or edge is <code>null</code>."}},
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."}},
     {{"description": "if maxSize is negative or 0.",
     "assertion": "assert args[1]<0 || args[1]==0;",
     "name": "IllegalArgumentException",
-    "comment": "if <code>maxSize</code> is negative or 0."}}]
+    "content": "if <code>maxSize</code> is negative or\\n0."}}]
     ```
     Now generate Java assertion statements from the following Javadoc:
     "{javadoc}"

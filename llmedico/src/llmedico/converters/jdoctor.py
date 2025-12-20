@@ -1,0 +1,3 @@
+class JDoctorConverter(ConditionConverter):
+    def convert(self, conditions):
+        ...
