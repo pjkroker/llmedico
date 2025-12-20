@@ -20,7 +20,7 @@ def extract_code_by_language(llm_response: str, language: str) -> List[str]:
     # re.DOTALL allows newlines inside the match
     code_blocks = re.findall(pattern, llm_response, re.DOTALL)
     if not code_blocks:
-        raise RuntimeError(f"No code snippets found for language {language}. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```{language} and  ´´´")
+        raise RuntimeError(f"No code snippets found for language {language}. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```{language} and ```")
     # Strip extra whitespace from each block
     return [block.strip() for block in code_blocks]
 
