@@ -16,13 +16,11 @@ class TranslationRepairLoop:
             logger.info("Repair loop iteration %d", i)
             result = self.translator._translate_once(javadoc, parameters, mode, errors, previous_output)
             errors = self.validator.validate(result, expected_len)
-
+            previous_output = result
 
         if not errors:
             logger.info(f"Repair successful, after {i} out of a maximum of {self.max_iters} iterations.")
             return result
         else:
             logger.warning(f"Repair failed, after {i} out of a maximum of {self.max_iters} iterations.")
-            return """```json 
-                    [] 
-                    ```"""
+            return "```json\n[]\n```"
