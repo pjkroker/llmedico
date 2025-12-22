@@ -5,7 +5,7 @@ from llmedico.java_utils.javapy import JavaParser
 
 
 class ConditionValidator:
-    EXPECTED_KEYS = {"description", "assertion", "name", "comment"} #python set TODO get from prompt template?
+    EXPECTED_KEYS = {"description", "assertion", "name", "content"} #python set TODO get from prompt template?
     def __init__(self, language: str):
         self.language = language
 

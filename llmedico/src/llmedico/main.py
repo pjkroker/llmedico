@@ -145,12 +145,17 @@ def insert_conditions(java_extractions, generated_conditions, path_output_dir):
         for j, tag in enumerate(member["tags"]):
             for condition in sorted_conditions[i]["conditions"][tag["tag"].upper()]:
                 if (tag["name"] == condition["name"]
-                        and tag["content"].replace("\n", " ").replace(" ", "") == condition["comment"].replace("\n", " ").replace(" ", "")): #TODO make better
+                        and tag["content"].replace("\n", " ").replace("."," ").replace(" ", "").lower() == condition["content"].replace("\n", " ").replace("."," ").replace(" ", "").lower()): #TODO make better
                     tag["assertion"] = condition["assertion"]
                     tag["description"] = condition["description"]
-                    tag["comment"] = condition["comment"]
+                    #tag["comment"] = condition["comment"]
 
     java_extractions[0]["members"] = sorted_extractions_members
+    #TODO check layout after insertion
+    for member in sorted_extractions_members:
+        for tag in member["tags"]:
+            if len(tag) !=5:
+                logger.critical(f"insertion failed for {tag}")
 
     # Convert to pretty JSON string for logging
     json_preview = json.dumps(java_extractions, indent=2, ensure_ascii=False)
