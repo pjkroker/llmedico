@@ -1,13 +1,11 @@
-from collections import defaultdict
-import re
-from llmedico.conditions.model import ConditionKind
 import re
 import html
 
-#class JDoctorConverter(ConditionConverter):
-class JDoctorConverter():
-    def convert(self, conditions):
-        ...
+from llmedico.conditions.model import ConditionKind, ClassModel, MethodModel, Condition, ParameterModel, TypeModel
+from llmedico.converters.base import ConditionConverter
+
+
+class JDoctorConditionConverter(ConditionConverter):
 
     @staticmethod
     def normalize_javadoc_text(text: str) -> str:
@@ -27,43 +25,28 @@ class JDoctorConverter():
         return text.strip()
 
     @staticmethod
-    def type_to_jdoctor(type_model):
+    def type_to_jdoctor(type: TypeModel) -> dict:
         return {
-            "qualifiedName": type_model.qualified_name,
-            "name": type_model.simple_name,
-            "isArray": type_model.is_array
+            "qualifiedName": type.qualified_name,
+            "name": type.simple_name,
+            "isArray": type.is_array
         }
 
-    def parameter_to_jdoctor(self, parameter_model):
+    def parameter_to_jdoctor(self, parameter: ParameterModel) -> dict:
         return {
-            "type": self.type_to_jdoctor(parameter_model.type),
-            "name": parameter_model.name
+            "type": self.type_to_jdoctor(parameter.type),
+            "name": parameter.name
         }
 
-    # TODO returnType
-
-    def method_signature_to_string(self, method_model):
+    @staticmethod
+    def method_signature_to_string(method: MethodModel) -> str:
         params = ",".join(
             f"{p.type.qualified_name} {p.name}"
-            for p in method_model.signature.parameters
+            for p in method.signature.parameters
         )
-        return f"{method_model.signature.name}({params})"
+        return f"{method.signature.name}({params})"
 
-    def condition_to_jdoctor_condition(self, c):
-        data = {
-            "content": c.content, # TODO remove html stuff
-            "kind": c.kind,
-            "condition": c.expression, # TODO remove "assert" and ";"
-        }
-        return data
-
-    def group_conditions(self, conditions):
-        grouped = defaultdict(list)
-        for c in conditions:
-            grouped[c.kind].append(self.condition_to_jdoctor(c))
-        return grouped
-
-    def param_condition_to_jdoctor(self, cond, method):
+    def param_condition_to_jdoctor(self, cond: Condition, method: MethodModel) -> dict:
         # find the matching parameter by name
         param = next(
             p for p in method.signature.parameters
@@ -77,15 +60,16 @@ class JDoctorConverter():
             "condition": cond.expression.replace("assert ", "").replace(";", "")
         }
 
-    #TODO verstehen
-    def exception_type_to_jdoctor(self, exception_name):
+    @staticmethod
+    def exception_type_to_jdoctor(exception_name: str) -> dict:
         return {
             "qualifiedName": f"java.lang.{exception_name}",
             "name": exception_name,
             "isArray": False
         }
 
-    def extract_code_tags(self, cond, method):
+    @staticmethod
+    def extract_code_tags(cond: Condition, method: MethodModel) -> list:
         """
         codeTags are identifiers mentioned in the Javadoc @throws comment that point to code-level entities
         (parameters, literals, fields, etc.) involved in the exceptional behavior.
@@ -106,25 +90,23 @@ class JDoctorConverter():
 
         return list(set(tags))
 
-    def throws_condition_to_jdoctor(self, cond, method):
+    def throws_condition_to_jdoctor(self, cond: Condition, method: MethodModel) -> dict:
         return {
             "exceptionType": self.exception_type_to_jdoctor(cond.name),
-            "codeTags": self.extract_code_tags(cond, method), #TODO html tags
+            "codeTags": self.extract_code_tags(cond, method),
             "comment": self.normalize_javadoc_text(cond.description),
             "kind": ConditionKind.THROWS.value,
             "condition": cond.expression.replace("assert ", "").replace(";", "")
         }
 
-    def return_condition_to_jdoctor(self, cond):
+    def return_condition_to_jdoctor(self, cond: Condition) -> dict:
         return {
             "comment": self.normalize_javadoc_text(cond.description),
             "kind": ConditionKind.RETURN.value,
             "condition": cond.expression.replace("assert ", "").replace(";", "")
         }
 
-
-
-    def method_to_jdoctor(self, method):
+    def convert_method(self, method: MethodModel) -> dict:
         param_tags = []
         throws_tags = []
         return_tag = None
@@ -165,13 +147,18 @@ class JDoctorConverter():
                 method.signature.return_type
             )
 
-        if param_tags:
-            result["paramTags"] = param_tags
+
+        result["paramTags"] = param_tags
 
         if return_tag:
             result["returnTag"] = return_tag
 
-        # if throws_tags:
         result["throwsTags"] = throws_tags
 
         return result
+
+    def convert_class(self, cls: ClassModel) -> list[dict]:
+        return [
+                self.convert_method(m)
+                for m in cls.methods
+            ]

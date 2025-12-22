@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import List
-from conditions.model import Condition
+
+from llmedico.conditions.model import ClassModel, MethodModel
+
 
 class ConditionConverter(ABC):
 
     @abstractmethod
-    def convert(self, conditions: List[Condition]):
+    def convert_class(self, cls: ClassModel):
         pass
+
+    @abstractmethod
+    def convert_method(self, method: MethodModel):
+        pass
+

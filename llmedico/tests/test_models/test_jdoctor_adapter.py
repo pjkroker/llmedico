@@ -3,7 +3,7 @@ from pathlib import Path
 from pprint import pprint
 
 from llmedico.conditions.model import Condition, ConditionKind, TypeModel, ParameterModel, MethodSignature, MethodModel, ClassModel
-from llmedico.converters.jdoctor import JDoctorConverter
+from llmedico.converters.jdoctor import JDoctorConditionConverter
 
 
 def test_jdoctor_adapter_constructor():
@@ -105,8 +105,8 @@ def test_jdoctor_adapter_constructor():
     cls.methods.append(method)
 
     # --- run adapter ---
-    jdoctor_converter = JDoctorConverter()
-    output = jdoctor_converter.method_to_jdoctor(method)
+    jdoctor_converter = JDoctorConditionConverter()
+    output = jdoctor_converter.convert_method(method)
 
     path_output_dir = Path(__file__).parent.parent / "data" / "output"
     with open(path_output_dir / "test_constructor.json", "w", encoding="utf-8") as f:
@@ -173,8 +173,8 @@ def test_jdoctor_adapter_method_with_return_type():
     cls.methods.append(method)
 
     # --- run adapter ---
-    jdoctor_converter = JDoctorConverter()
-    output = jdoctor_converter.method_to_jdoctor(method)
+    jdoctor_converter = JDoctorConditionConverter()
+    output = jdoctor_converter.convert_method(method)
 
     path_output_dir = Path(__file__).parent.parent / "data" / "output"
     with open(path_output_dir / "test_method_with_return_type.json", "w", encoding="utf-8") as f:
