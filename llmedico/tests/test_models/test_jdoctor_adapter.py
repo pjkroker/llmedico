@@ -149,7 +149,7 @@ def test_jdoctor_adapter_method_with_return_type():
         Condition(
             kind=ConditionKind.PARAM,
             name="n",
-            expression="assert 0==0",
+            expression="assert 0==0;",
             content="number to test.",
             description="number to test."
         ),
@@ -185,3 +185,5 @@ def test_jdoctor_adapter_method_with_return_type():
     assert "paramTags" in output
     assert "returnTag" in output
     assert output["isVarArgs"] is False
+
+
