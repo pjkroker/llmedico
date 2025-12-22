@@ -1,7 +1,7 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, List
-
 
 class ConditionKind(Enum):
     PARAM = "PARAM"
@@ -37,14 +37,28 @@ class MethodSignature:
 @dataclass
 class MethodModel:
     signature: MethodSignature
-    declaring_class: "ClassModel" #his is a type hint referring to a class that will exist later.
+    declaring_class: ClassModel #his is a type hint referring to a class that will exist later.
     conditions: list[Condition]
-    is_constructor: bool = False
+    is_constructor: bool = False #type
+
+    @property
+    def param_conditions(self):
+        return [c for c in self.conditions if c.kind == ConditionKind.PARAM]
+
+    @property
+    def return_conditions(self):
+        return [c for c in self.conditions if c.kind == ConditionKind.RETURN]
+
+    @property
+    def throws_conditions(self):
+        return [c for c in self.conditions if c.kind == ConditionKind.THROWS]
 
 @dataclass
 class ClassModel:
     package: str
     name: str
+    qualified_name: str
+    is_array: bool = False
     methods: list[MethodModel] = field(default_factory=list)
 
 
