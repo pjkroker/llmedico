@@ -165,7 +165,12 @@ PRE_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
      * @param x must be positive
      */
      Input Parameters:
-    "int x"
+    [{{"type": {{
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    }},
+    "name": "x"}}]
     Output Java assertions:
     ```json
     [{{"description": "the code must be positive",
@@ -183,8 +188,18 @@ PRE_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
      * @throws IllegalArgumentException if either x or y is zero or negative
      */
      Input Parameters:
-    "int x",
-    "int y"
+     [{{"type": {{
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    }},
+    "name": "x"}},
+    {{"type": {{
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    }},
+    "name": "y"}}]
     Output Java assertions:
     ```json
     [{{"description": "x must be positive",
@@ -283,7 +298,11 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
      * @return true if n is prime. (All numbers &lt; 2 return false).
      */
      Input Parameters:
-     "int n"
+     [{{"type": {{
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false}},
+    "name": "n"}}]
     Output Java assertions:
      ```json
     [{{"description": "true if n is prime. (All numbers < 2 return false).",
@@ -301,8 +320,18 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
      * @throws IllegalArgumentException if either x or y is zero or negative
      */
      Input Parameters:
-     "int x",
-     "int y"
+     [{{"type": {{
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    }},
+    "name": "x"}},
+    {{"type": {{
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    }},
+    "name": "y"}}]
      Output Java assertions:
       ```json
     [{{"description": "result must equal the sum of x and y",
@@ -387,8 +416,18 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     * @throws IllegalArgumentException if x or y is negative
     */
     Input Parameters:
-    "int x",
-    "int y"
+    [{{"type": {{
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    }},
+    "name": "x"}},
+    {{"type": {{
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    }},
+    "name": "y"}}]
     Output Java assertions:
     ```json
     [{{"description": "x or y is negative",
@@ -412,10 +451,27 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
      * 0.
      */
      Input Parameters:
-     "Graph<V, E> graph",
-     "int maxSize",
-     "AbstractPathElementList<V, E, T> elementList",
-     "E edge"
+     [{{"type": {{
+            "qualified_name": "org.jgrapht.Graph",
+            "name": "Graph",
+            "is_array": false
+        }},
+        "name": "graph"}},
+        {{"type": {{
+            "qualified_name": "int",
+            "name": "int",
+            "is_array": false}},
+        "name": "maxSize"}},
+        {{"type": {{
+            "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+            "name": "AbstractPathElementList",
+            "is_array": false}},
+            "name": "elementList"}},
+        {{"type": {{
+            "qualifiedName": "java.lang.Object",
+            "name": "Object",
+            "isArray": false}},
+        "name": "edge"}}]
      Output Java assertions:
     ```json
     [{{"description": "if the specified prevPathElementList or edge is null.",
