@@ -27,9 +27,7 @@ class JavaPy:
 
 
 class JavaParser(JavaPy):
-    DEFAULT_CLASSPATH = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/jars/javaparser-core-3.27.1.jar"
-    )
+    DEFAULT_CLASSPATH = Path(__file__).parent.parent.parent.parent / "data" / "jars" / "*"
 
     def __init__(self):
         super().__init__(self.DEFAULT_CLASSPATH)
@@ -61,6 +59,73 @@ class JavaParser(JavaPy):
             return str(node.getJavadocComment().get().toString())
         return None
 
+    def _py_str(self, value):
+        """Force Java strings → Python strings."""
+        return str(value) if value is not None else None
+
+    def _extract_type(self, t):
+        """
+        Returns a structured type model dict:
+        {
+          type: { simple_name, qualified_name }
+        }
+        """
+        #t = p.getType() #TODO remove?
+
+        # --- array detection ---
+        is_array = t.isArrayType()
+        if is_array:
+            t = t.asArrayType().getComponentType()
+
+        # --- Primitive types ---
+        if t.isPrimitiveType():
+            prim = str(t.asPrimitiveType().toString())
+            return {
+                    "qualified_name": prim,
+                    "simple_name": prim,
+                    "is_array": is_array
+                }
+
+        # --- Reference types (classes, generics, etc.) ---
+        try:
+            resolved = t.resolve()
+
+            # --- type variable (E, T, V, etc.) ---
+            if resolved.isTypeVariable():
+                return  {
+                        "qualified_name": "java.lang.Object",
+                        "simple_name": "Object",
+                        "is_array": is_array,
+                    }
+
+            # --- reference type ---
+            if resolved.isReferenceType():
+                ref = resolved.asReferenceType()
+                qualified = str(ref.getQualifiedName())  # e.g. org.jgrapht.alg.AbstractPathElementList
+                simple = qualified.split(".")[-1]
+
+                return  {
+                        "qualified_name": qualified,
+                        "simple_name": simple,
+                        "is_array": is_array,
+                    }
+
+        except Exception:
+            # Fallback: unresolved (still useful)
+            raw = str(t.toString())
+            simple = raw.split("<")[0]
+            return {
+                    "qualified_name": None,
+                    "simple_name": simple,
+                    "isArray": is_array
+                }
+
+    def _extract_parameter(self, p):
+        return {
+            "type": self._extract_type(p.getType()),
+            "name": str(p.getNameAsString())
+        }
+
     def extract_to_json(self, java_file: str) -> str:
         """
         Extract classes, constructors, methods, full raw Javadoc,
@@ -69,7 +134,18 @@ class JavaParser(JavaPy):
         from com.github.javaparser import JavaParser as JP
         from com.github.javaparser.ast.body import ClassOrInterfaceDeclaration
 
+        from com.github.javaparser.symbolsolver import JavaSymbolSolver
+        from com.github.javaparser.symbolsolver.resolution.typesolvers import CombinedTypeSolver, ReflectionTypeSolver, JarTypeSolver
+
+        type_solver = CombinedTypeSolver()
+        type_solver.add(ReflectionTypeSolver())
+        type_solver.add(JarTypeSolver("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar"))
+
+        symbol_solver = JavaSymbolSolver(type_solver)
+
+
         parser = JP()
+        parser.getParserConfiguration().setSymbolResolver(symbol_solver)
         file_text = Path(java_file).read_text()
 
         parse_result = parser.parse(file_text)
@@ -77,11 +153,25 @@ class JavaParser(JavaPy):
             raise ValueError(f"Could not parse Java file: {java_file}")
 
         cu = parse_result.getResult().get()
+
+        package_name = None
+        if cu.getPackageDeclaration().isPresent():
+            package_name = str(cu.getPackageDeclaration().get().getNameAsString())
+
         classes = []
 
         for clazz in cu.findAll(ClassOrInterfaceDeclaration):
+
+            class_name = clazz.getNameAsString()
+            if package_name:
+                qualified_name = f"{package_name}.{class_name}"
+            else:
+                qualified_name = class_name
+
             class_info = {
                 "name": str(clazz.getName()),
+                "package": package_name,
+                "qualified_name": qualified_name,
                 "javadoc": self._get_raw_javadoc(clazz),
                 "code": str(clazz.toString()),
                 "members": [],
@@ -95,7 +185,7 @@ class JavaParser(JavaPy):
                     "type": "constructor",
                     "name": str(clazz.getName()),
                     "parameters": [
-                        f"{p.getType().toString()} {p.getNameAsString()}"
+                        self._extract_parameter(p)
                         for p in ctor.getParameters()
                     ],
                     "javadoc": self._get_raw_javadoc(ctor),
@@ -125,9 +215,9 @@ class JavaParser(JavaPy):
                 method_info = {
                     "type": "method",
                     "name": str(method.getName()),
-                    "returnType": str(method.getType().toString()),
+                    "return_type": self._extract_type(method.getType()),
                     "parameters": [
-                        f"{p.getType().toString()} {p.getNameAsString()}"
+                        self._extract_parameter(p)
                         for p in method.getParameters()
                     ],
                     "javadoc": self._get_raw_javadoc(method),

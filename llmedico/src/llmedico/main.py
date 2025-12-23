@@ -1,9 +1,14 @@
+import html
 import json
 from pathlib import Path
 from pprint import pprint
 import logging
+import re
 
 from llm_caller.models.ollama import Ollama
+from llm_caller.utils.processing import extract_conditions
+from llmedico.builder.class_model_builder import ClassModelBuilder
+from llmedico.converters.jdoctor import JDoctorConditionConverter
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +22,27 @@ from se_helpers.files.files import save_json_to_file, load_json, save_realy_json
 
 IMAGE = "pjkroker/toradocu-x86-extractor"
 LIMIT_METHODS = 40 # defines the number of methods of the class to be analyzed #TODO change
+
+def _normalize_text(text: str) -> str:
+    if not text:
+        return ""
+
+    # 1. Convert HTML entities (&lt; → <, &gt; → >, etc.)
+    text = html.unescape(text)
+
+    # 2. Remove HTML tags (<code>, <p>, etc.) re.sub = regular expressions and substitute
+    text = re.sub(r"<[^>]+>", "", text)
+
+    # 3. Normalize whitespace (newlines, multiple spaces)
+    text = text.replace("\n", " ")
+    text = re.sub(r"\s+", " ", text)
+    text = text.replace(".", " ")
+    text = text.replace(",", "")
+
+    text = text.strip()
+    text = text.lower()
+    return text
+
 def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path_class_dir, path_output_dir: Path) -> None:
     pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", IMAGE, path_data_dir, path_output_dir)
     pyjdoctor.set_data_dir(path_data_dir)
@@ -123,29 +149,31 @@ def build_toradocu_llmedico_file(path_toradocu_condition_translator_json, llmedi
 
 def insert_conditions(java_extractions, generated_conditions, path_output_dir):
     #sort result_json/extractions and results/conditions to insert condtions more easily
-    sorted_extractions_members = sorted(
-        java_extractions[0]["members"],
-        key=lambda member: (
-            member["name"],
-            len(member["parameters"]),
-            member["parameters"]
-        )
-    )
-
-    sorted_conditions = sorted(
-        generated_conditions,
-        key=lambda member: (
-            member["method"],
-            len(member["parameters"]),
-            member["parameters"]
-        )
-    )
+    # sorted_extractions_members = sorted(
+    #     java_extractions[0]["members"],
+    #     key=lambda member: (
+    #         member["name"],
+    #         len(member["parameters"]),
+    #         tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"]),
+    #     )
+    # )
+    #
+    # sorted_conditions = sorted(
+    #     generated_conditions,
+    #     key=lambda member: (
+    #         member["method"],
+    #         len(member["parameters"]),
+    #         tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"])
+    #     )
+    # )
+    sorted_extractions_members = java_extractions[0]["members"]
+    sorted_conditions = generated_conditions
 
     for i, member in enumerate(sorted_extractions_members):
         for j, tag in enumerate(member["tags"]):
             for condition in sorted_conditions[i]["conditions"][tag["tag"].upper()]:
                 if (tag["name"] == condition["name"]
-                        and tag["content"].replace("\n", " ").replace("."," ").replace(" ", "").lower() == condition["content"].replace("\n", " ").replace("."," ").replace(" ", "").lower()): #TODO make better
+                        and _normalize_text(tag["content"]) == _normalize_text(condition["content"])):
                     tag["assertion"] = condition["assertion"]
                     tag["description"] = condition["description"]
                     #tag["comment"] = condition["comment"]
@@ -162,6 +190,7 @@ def insert_conditions(java_extractions, generated_conditions, path_output_dir):
     logger.info("Data before dumping:\n%s", json_preview)
     with open(path_output_dir / "llmedico-condition_translator.json", "w", encoding="utf-8") as f:
         json.dump(java_extractions, f, indent=2, ensure_ascii=False)
+    return java_extractions
 
 def start_validating(results):
     jp = JavaParser()
@@ -246,7 +275,17 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         json.dump(conditions, f, indent=2, ensure_ascii=False)
     logger.debug(f"the following java assertions have been generated for {fq_class_name}: \n {conditions}")
     #conditions = load_json(path_output_dir / "llmedico-conditions.json")
-    insert_conditions(result_json, conditions, path_output_dir)
+    llmedico_trans_conditions = insert_conditions(result_json, conditions, path_output_dir)
+
+    logger.debug("---Building Model---")
+    builder = ClassModelBuilder()
+    cls = builder.build_class(llmedico_trans_conditions[0])
+    jdoc_converter = JDoctorConditionConverter()
+    jdoc_trans_conditions = jdoc_converter.convert_class(cls)
+    with open(path_output_dir / "test_llmedico_conditions_jdoc_format.json", "w", encoding="utf-8") as f:
+        json.dump(jdoc_trans_conditions, f, indent=2, ensure_ascii=False)
+
+
     #build_toradocu_llmedico_file("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/toradocu-condition_translator.json",conditions)
     # logger.debug("---Validating Syntax of generated Assertions---")
     # valid = start_validating(results)
