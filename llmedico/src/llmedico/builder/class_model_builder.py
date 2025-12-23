@@ -14,20 +14,24 @@ class ClassModelBuilder:
             conditions.append(condition)
         return conditions
 
+    def _build_type(self, parameter_data: dict) -> TypeModel:
+        type_model = TypeModel(qualified_name=parameter_data["type"]["qualified_name"],
+                               simple_name=parameter_data["type"]["simple_name"],
+                               is_array=parameter_data["type"]["is_array"])
+        return type_model
+
     def _build_return_type(self, method_data: dict) -> TypeModel | None:
         if 'return_type' in method_data:
-            return TypeModel(qualified_name=...,
-                             simple_name=...) #TODO change Java Parser
+            t = {"type": method_data["return_type"]}
+            return self._build_type(t)
         else:
             return None
 
     def _build_parameters(self, method_data: dict, cls: ClassModel) -> list[ParameterModel]:
         parameters = []
-        for p in method_data['parameters']:
-            name = ...
-            qualified_name = ... #TODO change Java Parser
-            type = TypeModel(qualified_name=...,
-                             simple_name=...) #TODO change Java Parser
+        for p in method_data["parameters"]:
+            name = p["name"]
+            type = self._build_type(p)
             parameter = ParameterModel(name=name,type=type)
             parameters.append(parameter)
 
@@ -56,7 +60,7 @@ class ClassModelBuilder:
         cls = ClassModel(
             package=data["package"], #TODO change JavaParser
             name=data["name"],
-            qualified_name=data["qualifiedName"] #TODO change JavaParser
+            qualified_name=data["qualified_name"] #TODO change JavaParser
         )
 
         for m in data["members"]:

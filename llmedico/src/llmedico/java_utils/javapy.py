@@ -63,16 +63,14 @@ class JavaParser(JavaPy):
         """Force Java strings → Python strings."""
         return str(value) if value is not None else None
 
-    def _extract_parameter(self, p):
+    def _extract_type(self, t):
         """
-        Returns a structured parameter model dict:
+        Returns a structured type model dict:
         {
-          name,
           type: { simple_name, qualified_name }
         }
         """
-        name = str(p.getNameAsString())
-        t = p.getType()
+        #t = p.getType() #TODO remove?
 
         # --- array detection ---
         is_array = t.isArrayType()
@@ -83,13 +81,10 @@ class JavaParser(JavaPy):
         if t.isPrimitiveType():
             prim = str(t.asPrimitiveType().toString())
             return {
-                "type": {
                     "qualified_name": prim,
                     "simple_name": prim,
                     "is_array": is_array
-                },
-                "name": name
-            }
+                }
 
         # --- Reference types (classes, generics, etc.) ---
         try:
@@ -97,41 +92,39 @@ class JavaParser(JavaPy):
 
             # --- type variable (E, T, V, etc.) ---
             if resolved.isTypeVariable():
-                return {
-                    "type": {
+                return  {
                         "qualified_name": "java.lang.Object",
                         "simple_name": "Object",
                         "is_array": is_array,
-                    },
-                    "name": name
-                }
+                    }
+
             # --- reference type ---
             if resolved.isReferenceType():
                 ref = resolved.asReferenceType()
                 qualified = str(ref.getQualifiedName())  # e.g. org.jgrapht.alg.AbstractPathElementList
                 simple = qualified.split(".")[-1]
 
-                return {
-                    "type": {
+                return  {
                         "qualified_name": qualified,
                         "simple_name": simple,
                         "is_array": is_array,
-                    },
-                    "name": name,
-                }
+                    }
 
         except Exception:
             # Fallback: unresolved (still useful)
             raw = str(t.toString())
             simple = raw.split("<")[0]
             return {
-                "type": {
                     "qualified_name": None,
                     "simple_name": simple,
                     "isArray": is_array
-                },
-                "name": name
-            }
+                }
+
+    def _extract_parameter(self, p):
+        return {
+            "type": self._extract_type(p.getType()),
+            "name": str(p.getNameAsString())
+        }
 
     def extract_to_json(self, java_file: str) -> str:
         """
@@ -160,11 +153,25 @@ class JavaParser(JavaPy):
             raise ValueError(f"Could not parse Java file: {java_file}")
 
         cu = parse_result.getResult().get()
+
+        package_name = None
+        if cu.getPackageDeclaration().isPresent():
+            package_name = str(cu.getPackageDeclaration().get().getNameAsString())
+
         classes = []
 
         for clazz in cu.findAll(ClassOrInterfaceDeclaration):
+
+            class_name = clazz.getNameAsString()
+            if package_name:
+                qualified_name = f"{package_name}.{class_name}"
+            else:
+                qualified_name = class_name
+
             class_info = {
                 "name": str(clazz.getName()),
+                "package": package_name,
+                "qualified_name": qualified_name,
                 "javadoc": self._get_raw_javadoc(clazz),
                 "code": str(clazz.toString()),
                 "members": [],
@@ -208,7 +215,7 @@ class JavaParser(JavaPy):
                 method_info = {
                     "type": "method",
                     "name": str(method.getName()),
-                    "return_type": str(method.getType().toString()),
+                    "return_type": self._extract_type(method.getType()),
                     "parameters": [
                         self._extract_parameter(p)
                         for p in method.getParameters()

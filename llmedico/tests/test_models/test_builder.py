@@ -1,5 +1,7 @@
+import json
+
 from llmedico.builder.class_model_builder import ClassModelBuilder
-from llmedico.conditions.model import Condition, ConditionKind
+from llmedico.conditions.model import Condition, ConditionKind, TypeModel
 
 
 def test_condition_kind():
@@ -47,4 +49,46 @@ def test_build_condition():
     assert conditions[1] == return_condition
     assert conditions[1].name == None
 
+def test_build_type():
+    parameter_data_str = """{
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "graph"
+          }"""
+    parameter_data = json.loads(parameter_data_str)
+    builder = ClassModelBuilder()
+    assert builder._build_type(parameter_data) == TypeModel(qualified_name="org.jgrapht.Graph", simple_name="Graph", is_array=False)
 
+    parameter_data_str = """{
+                "type": {
+                  "qualified_name": "org.jgrapht.Graph",
+                  "simple_name": "Graph",
+                  "is_array": true
+                },
+                "name": "graph"
+              }"""
+    parameter_data = json.loads(parameter_data_str)
+    assert builder._build_type(parameter_data) == TypeModel(qualified_name="org.jgrapht.Graph", simple_name="Graph",
+                                                            is_array=True)
+
+def test_build_return_type():
+    builder = ClassModelBuilder()
+    method_data_str = """{
+        "type": "method",
+        "name": "getVertex",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/** * Returns target vertex. */",
+        "tags": [],
+        "code": "/** * Returns target vertex. */public V getVertex() {  return this.vertex;}"
+      }"""
+
+    method_data = json.loads(method_data_str)
+    assert builder._build_return_type(method_data) == TypeModel(qualified_name="java.lang.Object", simple_name="Object", is_array=False)
