@@ -128,7 +128,7 @@ def insert_conditions(java_extractions, generated_conditions, path_output_dir):
         key=lambda member: (
             member["name"],
             len(member["parameters"]),
-            member["parameters"]
+            tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"]),
         )
     )
 
@@ -137,7 +137,7 @@ def insert_conditions(java_extractions, generated_conditions, path_output_dir):
         key=lambda member: (
             member["method"],
             len(member["parameters"]),
-            member["parameters"]
+            tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"])
         )
     )
 
