@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from pprint import pprint
 
+from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.conditions.model import Condition, ConditionKind, TypeModel, ParameterModel, MethodSignature, MethodModel, ClassModel
 from llmedico.converters.jdoctor import JDoctorConditionConverter
 
@@ -186,4 +187,15 @@ def test_jdoctor_adapter_method_with_return_type():
     assert "returnTag" in output
     assert output["isVarArgs"] is False
 
+def test_full_pipeline():
+    builder = ClassModelBuilder()
+    input_path = Path(__file__).parent.parent / "data" / "input" / "llmedico-condition_translator.json"
+    with open(input_path, "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    cls = builder.build_class(extracted_conditions[0])
 
+    jdoctor_converter = JDoctorConditionConverter()
+    jdoc_trans_conditions = jdoctor_converter.convert_class(cls)
+    path_output_dir = Path(__file__).parent.parent / "data" / "output"
+    with open(path_output_dir / "test_llmedico_conditions_jdoc_format.json", "w", encoding="utf-8") as f:
+        json.dump(jdoc_trans_conditions, f, indent=2, ensure_ascii=False)

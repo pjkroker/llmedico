@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.conditions.model import Condition, ConditionKind, TypeModel
@@ -92,3 +93,12 @@ def test_build_return_type():
 
     method_data = json.loads(method_data_str)
     assert builder._build_return_type(method_data) == TypeModel(qualified_name="java.lang.Object", simple_name="Object", is_array=False)
+
+def test_build_class():
+    builder = ClassModelBuilder()
+    input_path = Path(__file__).parent.parent / "data" / "input" / "llmedico-condition_translator.json"
+    with open(input_path, "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    cls = builder.build_class(extracted_conditions[0])
+    assert len(cls.methods) == len(extracted_conditions[0]["members"])
+

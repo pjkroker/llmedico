@@ -56,7 +56,7 @@ class ClassModelBuilder:
         )
         return method_model
 
-    def build(self, data: dict) -> ClassModel:
+    def build_class(self, data: dict) -> ClassModel:
         cls = ClassModel(
             package=data["package"], #TODO change JavaParser
             name=data["name"],
