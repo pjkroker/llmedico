@@ -30,6 +30,17 @@ export PATH="$JAVA_HOME/bin:$PATH"
 ```
 Linux:
 
+### Compiling Project and Building Jar
+```
+mvn package
+```
+If you only want the JAR (skip tests)
+Old projects often have failing tests.
+```
+mvn package -DskipTests
+mvn package -Dmaven.test.skip=true
+```
+
 
 
 
