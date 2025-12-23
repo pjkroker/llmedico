@@ -149,23 +149,25 @@ def build_toradocu_llmedico_file(path_toradocu_condition_translator_json, llmedi
 
 def insert_conditions(java_extractions, generated_conditions, path_output_dir):
     #sort result_json/extractions and results/conditions to insert condtions more easily
-    sorted_extractions_members = sorted(
-        java_extractions[0]["members"],
-        key=lambda member: (
-            member["name"],
-            len(member["parameters"]),
-            tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"]),
-        )
-    )
-
-    sorted_conditions = sorted(
-        generated_conditions,
-        key=lambda member: (
-            member["method"],
-            len(member["parameters"]),
-            tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"])
-        )
-    )
+    # sorted_extractions_members = sorted(
+    #     java_extractions[0]["members"],
+    #     key=lambda member: (
+    #         member["name"],
+    #         len(member["parameters"]),
+    #         tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"]),
+    #     )
+    # )
+    #
+    # sorted_conditions = sorted(
+    #     generated_conditions,
+    #     key=lambda member: (
+    #         member["method"],
+    #         len(member["parameters"]),
+    #         tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"])
+    #     )
+    # )
+    sorted_extractions_members = java_extractions[0]["members"]
+    sorted_conditions = generated_conditions
 
     for i, member in enumerate(sorted_extractions_members):
         for j, tag in enumerate(member["tags"]):
