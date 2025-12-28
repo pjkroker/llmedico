@@ -42,7 +42,7 @@ def _normalize_text(text: str) -> str:
     text = text.lower()
     return text
 
-def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path, path_output_dir: Path):
+def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path, path_output_dir: Path, path_jar: Path):
     relative_path = fq_class_name.replace(".", "/") + ".java"
 
     if path_data_dir is None:
@@ -66,8 +66,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     logger.debug("---Starting JavaParser - Extracting JavaDoc---")
     #result_json = start_java_parser(path_output_dir, path_java_class)
     jp = JavaParser()
-    jar_path = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar") #TODO make parameter
-    java_extractions = jp.extract_to_json(path_java_class, jar_path)
+    java_extractions = jp.extract_to_json(path_java_class, path_jar)
     save_json_to_file(java_extractions, path_output_dir / "llmedico-javadoc_extractor.json")
     java_extractions = json.loads(java_extractions) #TODO load var directly and not file
 
@@ -144,6 +143,8 @@ if __name__ == '__main__':
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
+    path_jar = Path(
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar")
 
     PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
@@ -156,4 +157,5 @@ if __name__ == '__main__':
          path_data_dir=PATH_DATA_DIR if PATH_DATA_DIR else None,
          path_source_dir=PATH_SOURCE_DIR,
          path_class_dir=PATH_CLASS_DIR,
-         path_output_dir=PATH_OUTPUT_DIR,)
+         path_output_dir=PATH_OUTPUT_DIR,
+         path_jar=path_jar,)
