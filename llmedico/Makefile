@@ -8,6 +8,7 @@ test:
 
 clean:
 	rm -rf .pytest_cache __pycache__
+	rm -rf ./data/output/*
 
 lint:
 	$(PYTHON) -m ruff .
