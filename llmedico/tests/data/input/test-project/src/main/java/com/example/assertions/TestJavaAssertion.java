@@ -1,6 +1,10 @@
+package com.example.assertions;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.stmt.AssertStmt;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ast.stmt.Statement;
+
 
 public class TestJavaAssertion {
 
@@ -15,7 +19,7 @@ public class TestJavaAssertion {
     public static boolean isValidAssertion(String code) {
         try {
             // Use the parser instance
-            var parseResult = parser.parseStatement(code);
+            ParseResult<Statement> parseResult = parser.parseStatement(code);
             // parseResult is a ParseResult<Statement>
             if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
                 return parseResult.getResult().get() instanceof AssertStmt;

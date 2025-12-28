@@ -59,7 +59,8 @@ def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path
 
 def start_java_parser(path_output_dir: Path, path_java_class: Path):
     jp = JavaParser()
-    result_json = jp.extract_to_json(path_java_class)
+    jar_path = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar")
+    result_json = jp.extract_to_json(path_java_class, jar_path)
     save_json_to_file(result_json, path_output_dir / "llmedico-javadoc_extractor.json")
     result_json = json.loads(result_json)
     return result_json
@@ -252,7 +253,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     # Set up basic configuration for logging
     logging.basicConfig(
         filename=path_output_dir / 'llmedico.log',
-        filemode='w',  # over^^
+        filemode='w',  # overwrite
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
         force=True
@@ -308,7 +309,7 @@ if __name__ == '__main__':
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
 
     PATH_OUTPUT_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/jgraph")  # --out-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output")  # --out-dir
 
     main(fq_class_name=FQ_CLASS_NAME,
          target_method=TARGET_METHOD,
