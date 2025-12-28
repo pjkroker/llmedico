@@ -1,12 +1,10 @@
 import html
 import json
 from pathlib import Path
-from pprint import pprint
 import logging
 import re
 
 from llm_caller.models.ollama import Ollama
-from llm_caller.utils.processing import extract_conditions
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.converters.jdoctor import JDoctorConditionConverter
 
@@ -14,14 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 from llmedico.java_utils.javapy import JavaParser
-from llmedico.translator.translator import Translator, ToradocuCondition
-from pyjdoctor.pyjdoctor import PyJDoctor
-from pyrandoop.pyrandoop import PyRandoop
-from se_helpers.files.files import save_json_to_file, load_json, save_realy_json_to_file
+from llmedico.translator.translator import Translator
+from se_helpers.files.files import save_json_to_file, save_realy_json_to_file
 
-
-IMAGE = "pjkroker/toradocu-x86-extractor"
-LIMIT_METHODS = 40 # defines the number of methods of the class to be analyzed #TODO change
 
 def _normalize_text(text: str) -> str:
     if not text:
@@ -33,217 +26,18 @@ def _normalize_text(text: str) -> str:
     # 2. Remove HTML tags (<code>, <p>, etc.) re.sub = regular expressions and substitute
     text = re.sub(r"<[^>]+>", "", text)
 
-    # 3. Normalize whitespace (newlines, multiple spaces)
+    # 3. Normalize whitespace (newlines, multiple spaces, dots, hyphen)
     text = text.replace("\n", " ")
     text = re.sub(r"\s+", " ", text)
     text = text.replace(".", " ")
     text = text.replace(",", "")
+    text = text.replace("-", "")
 
     text = text.strip()
     text = text.lower()
     return text
 
-def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path_class_dir, path_output_dir: Path) -> None:
-    pyjdoctor = PyJDoctor("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor", IMAGE, path_data_dir, path_output_dir)
-    pyjdoctor.set_data_dir(path_data_dir)
-    if path_data_dir is None:
-        pyjdoctor.set_source_dir_r(path_source_dir)
-        pyjdoctor.set_class_dir_r(path_class_dir)
-    else:
-        pass
-
-    pyjdoctor.start_container()
-    pyjdoctor.generate_all(fq_class_name)
-    pyjdoctor.generate_statistics(fq_class_name, "/input/toradocu-condition_translator.json")
-    pyjdoctor.stop_container()
-
-def start_java_parser(path_output_dir: Path, path_java_class: Path):
-    jp = JavaParser()
-    jar_path = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar")
-    result_json = jp.extract_to_json(path_java_class, jar_path)
-    save_json_to_file(result_json, path_output_dir / "llmedico-javadoc_extractor.json")
-    result_json = json.loads(result_json)
-    return result_json
-
-#TODO check if generated assertion contain { or }, gets mistaken as python dict seperator?
-def start_translator(result_json):
-    trans = Translator()
-    results = {}
-
-    for i in range(0, LIMIT_METHODS):
-        method_name = result_json[0]["methods"][i]["name"]
-        javadoc = result_json[0]["methods"][i]["javadoc"]
-        javacode = result_json[0]["methods"][i]["code"]
-        java_assertions = trans.translate_javadoc(javacode, "return")
-        logger.debug(java_assertions)
-        results[method_name] = java_assertions
-    logger.debug(results)
-    return results
-
-def start_translator_with_specified_method(result_json, target_method:str):
-    trans = Translator()
-    results = {}
-    logger.debug(f"target method is: {target_method}")
-
-    for i in range(0, len(result_json[0]["methods"])):
-        method_name = result_json[0]["methods"][i]["name"]
-        if method_name == target_method:
-            javadoc = result_json[0]["methods"][i]["javadoc"]
-            javacode = result_json[0]["methods"][i]["code"]
-            java_assertions = trans.translate_javadoc(javadoc, modes={"pre", "return"})
-            logger.debug(java_assertions)
-            results[method_name] = java_assertions
-    logger.debug(results)
-    return results
-
-def start_translator_everything(result_json):
-    trans = Translator(Ollama("llama3.1"))
-    results = []
-    logger.debug("start translator")
-    logger.debug("translating every method of the class")
-    for i in range(0, len(result_json[0]["members"])):
-        method_name = result_json[0]["members"][i]["name"]
-        logger.debug(f"current method name: {method_name}")
-        javadoc = result_json[0]["members"][i]["javadoc"]
-        logger.debug(f"has the following javadoc: {javadoc}")
-        parameters = result_json[0]["members"][i]["parameters"]
-        type = result_json[0]["members"][i]["type"]
-
-        #get modes, and they #tags for each mode/tag
-        modes = {}
-        for tag in result_json[0]["members"][i]["tags"]:
-            key = tag["tag"].upper()
-            modes[key] = modes.get(key, 0) + 1
-        if not modes: logger.warning(f"{method_name} contains not tags?") #TODO check
-        logger.debug(f"found modes and their frequencies: {modes}")
-        java_assertions = trans.translate_javadoc(javadoc,parameters, modes=modes)
-        logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
-        #conditions = {"conditions": java_assertions}
-        member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
-        results.append(member)
-    #logger.debug(f"the following java assertions have been generated \n {results}")
-    return results
-
-#TODO
-def build_toradocu_llmedico_file(path_toradocu_condition_translator_json, llmedico_conditions):
-    '''
-    Takes the corresponding "toradocu-condition_translator.json" and replaces the conditions with the one from llmedico.
-    :return:
-    '''
-    toradocu_condition_translator_json = load_json(path_toradocu_condition_translator_json)
-    for method in toradocu_condition_translator_json:
-        conditions = llmedico_conditions[method["name"]]
-        for mode in conditions:
-            toradocu_condition = ToradocuCondition(conditions[mode][0],kind=mode)
-            if mode == "param":
-                method["paramTags"][0]["comment"] = toradocu_condition.get_comment()
-                method["paramTags"][0]["condition"] = toradocu_condition.get_condition()
-            elif mode == "return":
-                method["returnTag"] = toradocu_condition.to_dict()
-            elif mode == "throwsTags":
-                method["throwsTags"][0]["comment"] = toradocu_condition.get_comment()
-                method["throwsTags"][0]["condition"] = toradocu_condition.get_condition()
-
-    pprint(toradocu_condition_translator_json)
-    with open(Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output") / "llmedico-toradocu-condition_translator.json", "w", encoding="utf-8") as f:
-        json.dump(toradocu_condition_translator_json, f, indent=2, ensure_ascii=False)
-
-def insert_conditions(java_extractions, generated_conditions, path_output_dir):
-    #sort result_json/extractions and results/conditions to insert condtions more easily
-    # sorted_extractions_members = sorted(
-    #     java_extractions[0]["members"],
-    #     key=lambda member: (
-    #         member["name"],
-    #         len(member["parameters"]),
-    #         tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"]),
-    #     )
-    # )
-    #
-    # sorted_conditions = sorted(
-    #     generated_conditions,
-    #     key=lambda member: (
-    #         member["method"],
-    #         len(member["parameters"]),
-    #         tuple((p["name"], p["type"]["qualified_name"]) for p in member["parameters"])
-    #     )
-    # )
-    sorted_extractions_members = java_extractions[0]["members"]
-    sorted_conditions = generated_conditions
-
-    for i, member in enumerate(sorted_extractions_members):
-        for j, tag in enumerate(member["tags"]):
-            for condition in sorted_conditions[i]["conditions"][tag["tag"].upper()]:
-                if (tag["name"] == condition["name"]
-                        and _normalize_text(tag["content"]) == _normalize_text(condition["content"])):
-                    tag["assertion"] = condition["assertion"]
-                    tag["description"] = condition["description"]
-                    #tag["comment"] = condition["comment"]
-
-    java_extractions[0]["members"] = sorted_extractions_members
-    #TODO check layout after insertion
-    for member in sorted_extractions_members:
-        for tag in member["tags"]:
-            if len(tag) !=5:
-                logger.critical(f"insertion failed for {tag}")
-
-    # Convert to pretty JSON string for logging
-    json_preview = json.dumps(java_extractions, indent=2, ensure_ascii=False)
-    logger.info("Data before dumping:\n%s", json_preview)
-    with open(path_output_dir / "llmedico-condition_translator.json", "w", encoding="utf-8") as f:
-        json.dump(java_extractions, f, indent=2, ensure_ascii=False)
-    return java_extractions
-
-def start_validating(results):
-    jp = JavaParser()
-    valid = {}
-    for method_name in results:
-        valid[method_name] = []
-        for assertion in results[method_name]:
-            if jp.is_valid_java_assert(assertion):
-                valid[method_name].append(assertion)
-            else:
-                logger.debug(f"{assertion} is not a valid java assertion")
-
-    logger.debug(valid)
-    return valid
-
-def start_building_randoop_file(valid, path_output_dir: Path):
-    # load jdoctor file, remove everything except the one method
-    # overwrite pre, post and throws with generated assertions
-    jdoctor = load_json( path_output_dir / "toradocu-randoop_specs.json")
-    specs = []
-    for method_name in valid:
-        try:
-            one_method = Translator.copy_entry_by_method(jdoctor, method_name)
-            pre_conditions = []
-            for assertion in valid[method_name]:
-                pre_condition = Translator.assertion_to_json(assertion)
-                logger.debug(pre_condition)
-                pre_conditions.append(pre_condition)
-            one_method["pre"] = pre_conditions
-            specs.append(one_method)
-        except ValueError:
-            logger.warning(f"No entry found for method name '{method_name}'")
-
-    logger.debug(specs)
-    save_realy_json_to_file(specs, path_output_dir / "llmedico-specs.json")
-
-def start_randoop(path_data_dir: Path, path_class_dir: Path, path_output_dir: Path, fq_class_name: str) -> None:
-    if path_data_dir:
-        path_class_dir = path_data_dir / "target" / "classes"
-    else:
-        pass
-
-    rd = PyRandoop(path_output_dir=path_output_dir,
-                   class_dir=path_class_dir,
-                   time_limit=60, deterministic=False)
-    result = rd.generate_dependencies(
-        path_class_file=path_class_dir / fq_class_name.replace(".", "/") / ".class")
-
-    result = rd.generate_error_revealing_tests(fq_class_name=fq_class_name, path_oracles=(path_output_dir / "llmedico-specs.json"))
-    logger.debug(result["stdout"])
-
-def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path,  path_output_dir: Path):
+def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path, path_output_dir: Path, path_jar: Path):
     relative_path = fq_class_name.replace(".", "/") + ".java"
 
     if path_data_dir is None:
@@ -263,39 +57,79 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
     logger.debug("---Starting LLMedico---")
-    #logger.debug("---Starting JDoctor - Extracting JavaDoc---")
-    #start_jdoctor(fq_class_name, path_data_dir, path_source_dir, path_class_dir, path_output_dir)
 
     logger.debug("---Starting JavaParser - Extracting JavaDoc---")
-    result_json = start_java_parser(path_output_dir, path_java_class)
+    #result_json = start_java_parser(path_output_dir, path_java_class)
+    jp = JavaParser()
+    java_extractions = jp.extract_to_json(path_java_class, path_jar)
+    save_json_to_file(java_extractions, path_output_dir / "llmedico-javadoc_extractor.json")
+    java_extractions = json.loads(java_extractions) #TODO load var directly and not file
 
-    logger.debug("---Starting Translator - Translating JavaDoc to Assertions---")
-    #results = start_translator_with_specified_method(result_json, target_method)
-    conditions = start_translator_everything(result_json)
-    with open(path_output_dir / "llmedico-conditions.json", "w", encoding="utf-8") as f:
-        json.dump(conditions, f, indent=2, ensure_ascii=False)
+
+    logger.debug("---Starting Translator - Translating JavaDoc to Conditions---")
+    #conditions = start_translator_everything(result_json)
+    trans = Translator(Ollama("llama3.1"))
+    conditions = []
+    logger.debug("translating every method of the class")
+    for i in range(0, len(java_extractions[0]["members"])):
+        method_name = java_extractions[0]["members"][i]["name"]
+        logger.debug(f"current method name: {method_name}")
+        javadoc = java_extractions[0]["members"][i]["javadoc"]
+        logger.debug(f"has the following javadoc: {javadoc}")
+        parameters = java_extractions[0]["members"][i]["parameters"]
+        type = java_extractions[0]["members"][i]["type"]
+
+        # get modes {PARAM, RETURN, THROWS} and their #tags in the doctring
+        modes = {}
+        for tag in java_extractions[0]["members"][i]["tags"]:
+            key = tag["tag"].upper()
+            modes[key] = modes.get(key, 0) + 1
+        if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
+        logger.debug(f"found modes and their frequencies: {modes}")
+
+        java_assertions = trans.translate_javadoc(javadoc, parameters, modes=modes)
+        logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
+        member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
+        conditions.append(member)
+
+    save_realy_json_to_file(conditions, path_output_dir / "llmedico-conditions.json")
     logger.debug(f"the following java assertions have been generated for {fq_class_name}: \n {conditions}")
-    #conditions = load_json(path_output_dir / "llmedico-conditions.json")
-    llmedico_trans_conditions = insert_conditions(result_json, conditions, path_output_dir)
 
-    logger.debug("---Building Model---")
+
+    logger.debug("---Inserting Generated Conditions into LLMedico File---")
+    #conditions = load_json(path_output_dir / "llmedico-conditions.json")
+
+    for i, member in enumerate(java_extractions[0]["members"]):
+        for j, tag in enumerate(member["tags"]):
+            for condition in conditions[i]["conditions"][tag["tag"].upper()]:
+                if (tag["name"] == condition["name"]
+                        and (not tag["name"] == "throws" or _normalize_text(tag["content"]) == _normalize_text(condition["content"]))): #two @throws can have same name (exception)
+                    tag["assertion"] = condition["assertion"]
+                    tag["description"] = condition["description"]
+
+    # check if there is now an assertion for every tag, if not llm has most likely extracted content poorly
+    for member in java_extractions[0]["members"]:
+        for tag in member["tags"]:
+            if len(tag) != 5:
+                logger.critical(f"insertion failed for {tag}") #TODO what to do in this case?
+
+    # Convert to pretty JSON string for logging
+    json_preview = json.dumps(java_extractions, indent=2, ensure_ascii=False)
+    logger.info("Data before dumping:\n%s", json_preview)
+    save_realy_json_to_file(java_extractions, path_output_dir / "llmedico-condition_translator.json")
+
+    llmedico_trans_conditions = java_extractions
+
+
+    logger.debug("---Loading Data from LLMedico File into internal Canonical State---")
     builder = ClassModelBuilder()
     cls = builder.build_class(llmedico_trans_conditions[0])
+
+    logger.debug("---Converting Data from Canonical State into JDoctor Format---")
     jdoc_converter = JDoctorConditionConverter()
     jdoc_trans_conditions = jdoc_converter.convert_class(cls)
-    with open(path_output_dir / "test_llmedico_conditions_jdoc_format.json", "w", encoding="utf-8") as f:
-        json.dump(jdoc_trans_conditions, f, indent=2, ensure_ascii=False)
+    save_realy_json_to_file(jdoc_trans_conditions, path_output_dir / "test_llmedico_conditions_jdoc_format.json")
 
-
-    #build_toradocu_llmedico_file("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/toradocu-condition_translator.json",conditions)
-    # logger.debug("---Validating Syntax of generated Assertions---")
-    # valid = start_validating(results)
-    #
-    # logger.debug("---Adding valid Assertions to Randoop File???---")
-    # start_building_randoop_file(valid, path_output_dir)
-
-    # logger.debug("---Generating Tests with Randoop File---")
-    # start_randoop(path_data_dir, path_class_dir, path_output_dir, fq_class_name)
     logger.debug("---Ending LLMedico---")
 
 
@@ -304,6 +138,8 @@ if __name__ == '__main__':
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
+    path_jar = Path(
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar")
 
     PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
@@ -316,4 +152,5 @@ if __name__ == '__main__':
          path_data_dir=PATH_DATA_DIR if PATH_DATA_DIR else None,
          path_source_dir=PATH_SOURCE_DIR,
          path_class_dir=PATH_CLASS_DIR,
-         path_output_dir=PATH_OUTPUT_DIR,)
+         path_output_dir=PATH_OUTPUT_DIR,
+         path_jar=path_jar,)

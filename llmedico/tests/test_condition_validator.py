@@ -24,7 +24,7 @@ def test_condition_translator():
         "name": "IllegalArgumentException"}]
         ```
         """
-    assert validator.validate(raw_response, 2)[0].startswith("Extra data:")
+    assert validator.validate(raw_response, 2)[0].endswith("Extra data: line 3 column 40 (char 175)")
     raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
             ```json
             [{"description": "if the specified prevPathElementList or edge is null.",
@@ -35,7 +35,7 @@ def test_condition_translator():
             "name": "IllegalArgumentException"}]
             ```
             """
-    assert validator.validate(raw_response, 2)[0].startswith("Expecting property name enclosed in double quotes")
+    assert validator.validate(raw_response, 2)[0].endswith("Expecting property name enclosed in double quotes: line 4 column 14 (char 199)")
     raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
                 ```json
                 [{"assertion": "assert args[2]==null || args[3]==null;",

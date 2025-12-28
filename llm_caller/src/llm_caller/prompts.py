@@ -158,6 +158,7 @@ PRE_CONDITION_PROMPT_JSON_STRING = """You are a Java expert.
     9. Refer to the parameters as args[0], and args[1] and so on.
     10. Include the parameter's name related to the assertion as shown in the example.
     11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \\n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
     Example:
     Input Javadoc:
     /**

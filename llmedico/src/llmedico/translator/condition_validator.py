@@ -24,7 +24,7 @@ class ConditionValidator:
             try:
                 json.loads(code_block)
             except json.JSONDecodeError as e:
-                errors.append(str(e))
+                errors.append("An Error occurred while trying to load the JSON element. Make sure the output is a valid List of JSON elements with no additional commas after '{'.\n Take into account this error message: " + str(e))
                 return errors #the json string does not have the right format
         #3. Check if json actually has the right format TODO check static values like name and comment
         for code_block in code_blocks:
