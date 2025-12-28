@@ -1,13 +1,10 @@
 import html
 import json
 from pathlib import Path
-from platform import java_ver
-from pprint import pprint
 import logging
 import re
 
 from llm_caller.models.ollama import Ollama
-from llm_caller.utils.processing import extract_conditions
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.converters.jdoctor import JDoctorConditionConverter
 
@@ -15,10 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 from llmedico.java_utils.javapy import JavaParser
-from llmedico.translator.translator import Translator, ToradocuCondition
-from pyjdoctor.pyjdoctor import PyJDoctor
-from pyrandoop.pyrandoop import PyRandoop
-from se_helpers.files.files import save_json_to_file, load_json, save_realy_json_to_file
+from llmedico.translator.translator import Translator
+from se_helpers.files.files import save_json_to_file, save_realy_json_to_file
 
 
 def _normalize_text(text: str) -> str:
