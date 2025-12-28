@@ -59,7 +59,8 @@ def start_jdoctor(fq_class_name: str, path_data_dir: Path, path_source_dir, path
 
 def start_java_parser(path_output_dir: Path, path_java_class: Path):
     jp = JavaParser()
-    result_json = jp.extract_to_json(path_java_class)
+    jar_path = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar")
+    result_json = jp.extract_to_json(path_java_class, jar_path)
     save_json_to_file(result_json, path_output_dir / "llmedico-javadoc_extractor.json")
     result_json = json.loads(result_json)
     return result_json

@@ -126,7 +126,7 @@ class JavaParser(JavaPy):
             "name": str(p.getNameAsString())
         }
 
-    def extract_to_json(self, java_file: str) -> str:
+    def extract_to_json(self, java_file: str, jar_path: Path) -> str:
         """
         Extract classes, constructors, methods, full raw Javadoc,
         tags, and source code to JSON.
@@ -139,7 +139,7 @@ class JavaParser(JavaPy):
 
         type_solver = CombinedTypeSolver()
         type_solver.add(ReflectionTypeSolver())
-        type_solver.add(JarTypeSolver("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar"))
+        type_solver.add(JarTypeSolver(jar_path.as_posix()))
 
         symbol_solver = JavaSymbolSolver(type_solver)
 
