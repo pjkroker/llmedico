@@ -253,7 +253,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     # Set up basic configuration for logging
     logging.basicConfig(
         filename=path_output_dir / 'llmedico.log',
-        filemode='w',  # over^^
+        filemode='w',  # overwrite
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
         force=True
@@ -309,7 +309,7 @@ if __name__ == '__main__':
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
 
     PATH_OUTPUT_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/jgraph")  # --out-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output")  # --out-dir
 
     main(fq_class_name=FQ_CLASS_NAME,
          target_method=TARGET_METHOD,

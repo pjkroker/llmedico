@@ -28,7 +28,7 @@ def test_translator():
      * @throws NullArgumentException if {@code addend} is {@code null}.
      */
     """
-    parameters = ["Complex addend"] #todo
+    parameters = ["Complex addend"] #todo make same layout as in real prompt
     java_assertions = translator.translate_javadoc(javadoc,parameters, modes={"PARAM": 1,"RETURN": 1, "THROWS": 1})
     jp = JavaParser()
     for mode in java_assertions:
