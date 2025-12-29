@@ -6,6 +6,7 @@ import re
 
 from llm_caller.models.ollama import Ollama
 from llmedico.builder.class_model_builder import ClassModelBuilder
+from llmedico.config.config import Config
 from llmedico.converters.jdoctor import JDoctorConditionConverter
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,9 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
     logger.debug("---Starting LLMedico---")
+    cnfg = Config(Path(__file__).parent.parent.parent / "config.toml")
+    llm_config = cnfg.section("config")
+    trans_config = cnfg.section("translation")
 
     logger.debug("---Starting JavaParser - Extracting JavaDoc---")
     #result_json = start_java_parser(path_output_dir, path_java_class)
@@ -68,7 +72,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
     logger.debug("---Starting Translator - Translating JavaDoc to Conditions---")
     #conditions = start_translator_everything(result_json)
-    trans = Translator(Ollama("llama3.1"))
+    trans = Translator(Ollama("llama3.1"),trans_config["iteration_repairloop"])
     conditions = []
     logger.debug("translating every method of the class")
     for i in range(0, len(java_extractions[0]["members"])):

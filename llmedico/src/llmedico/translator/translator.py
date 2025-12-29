@@ -96,8 +96,9 @@ class Translator():
         "RETURN": RETURN_CONDITION_PROMPT_JSON_FEEDBACK,
         "THROWS": THROWS_CONDITION_PROMPT_JSON_FEEDBACK,
     }
-    def __init__(self, llm: Model):
+    def __init__(self, llm: Model, max_iters_repair: int = 5):
         self.llm = llm
+        self.max_iters_repair = max_iters_repair
         #self.data = load_json(self.PATH_JSON)
 
     def translate_javadoc(self, javadoc:str, parameters: list[str], modes) -> ConditionOutput:
@@ -121,7 +122,7 @@ class Translator():
                 logger.warning(f"Found the following errors while validating the response: {errors}")
                 logger.debug("start feedback repair loop")
                 #raise NotImplementedError
-                repair = TranslationRepairLoop(self, validator)
+                repair = TranslationRepairLoop(self, validator, self.max_iters_repair)
                 result = repair.translate_with_repair(javadoc, parameters, mode, errors, expected_len, result)
             extracted_conditions = extract_conditions(result)
             logger.debug(f"extracted the following assertions: {extracted_conditions}")
