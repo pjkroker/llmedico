@@ -4,6 +4,7 @@ from pathlib import Path
 import logging
 import re
 
+from llm_caller.models.litellm import LiteLLMModel
 from llm_caller.models.ollama import Ollama
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.config.config import Config
@@ -72,7 +73,9 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
     logger.debug("---Starting Translator - Translating JavaDoc to Conditions---")
     #conditions = start_translator_everything(result_json)
-    trans = Translator(Ollama("llama3.1"),trans_config["iteration_repairloop"])
+    llm = Ollama("llama3.1")
+    #llm = LiteLLMModel(model_name="openai/deepseek-ai/deepseek-coder-33b-instruct", api_base="http://127.0.0.1:8010/v1", api_key="dummy")
+    trans = Translator(llm, trans_config["iteration_repairloop"])
     conditions = []
     logger.debug("translating every method of the class")
     for i in range(0, len(java_extractions[0]["members"])):
