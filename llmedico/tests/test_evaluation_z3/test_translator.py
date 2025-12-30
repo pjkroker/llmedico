@@ -15,6 +15,11 @@ def test_tokenizer():
     tokens = tokenize(expr)
     assert tokens == ["x", ">=", "0", "&&" ,"x", "<=", "10"]
 
+def test_tokenizer_arithmetic():
+    expr = normalize_expression("assert x >= -1;")
+    tokens = tokenize(expr)
+    assert tokens == ["x", ">=", "-", "1"]
+
 def test_parser():
     expr = normalize_expression("assert x >= 0 && x <= 10;")
     tokens = tokenize(expr)
@@ -22,7 +27,6 @@ def test_parser():
     ast = parser.parse()
     assert ast == And(left=Compare(left=Var(name='x'), op='>=', right=IntConst(value=0)),
                       right=Compare(left=Var(name='x'), op='<=', right=IntConst(value=10)))
-
 
 def test_translator_mini():
     parser = StringParser(tokenize("x >= 0"))

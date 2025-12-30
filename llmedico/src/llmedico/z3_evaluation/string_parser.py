@@ -69,6 +69,11 @@ class StringParser:
         if tok is None:
             raise ParseError("Unexpected end")
 
+        if tok == '-': #TODO check if this is correct
+            self.consume("-")
+            expr = self.parse_expr()
+            return UnaryMinus(expr)
+
         if tok.isdigit():
             self.consume()
             return IntConst(int(tok))

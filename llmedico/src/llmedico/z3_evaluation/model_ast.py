@@ -36,6 +36,10 @@ class Var(Expr):
 class IntConst(Expr):
     value: int
 
+@dataclass(frozen=True)
+class UnaryMinus(Expr):
+    expr: Expr
+
 # Comparisons
 @dataclass(frozen=True)
 class Compare(Expr):

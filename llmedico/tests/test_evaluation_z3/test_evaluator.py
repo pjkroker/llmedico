@@ -1,4 +1,5 @@
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
+from llmedico.z3_evaluation.result import AssertionRelation
 from llmedico.z3_evaluation.string_parser import StringParser
 from llmedico.z3_evaluation.z3_evaluator import AssertionEvaluator
 
@@ -16,7 +17,7 @@ def test_evaluator_equal():
 
     evaluator = AssertionEvaluator()
     result = evaluator.evaluate(expected_ast, generated_ast)
-    print(result)
+    assert result.relation == AssertionRelation.EQUIVALENT
 
 def test_evaluator_equivalent():
     expr = normalize_expression("assert x >= 0;")
@@ -26,13 +27,13 @@ def test_evaluator_equivalent():
 
     expr = normalize_expression("assert x > -1;") #TODO they should be equal?
     tokens = tokenize(expr)
-    print(tokens) #TODO edit tokenizer
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
+
     evaluator = AssertionEvaluator()
     result = evaluator.evaluate(expected_ast, generated_ast)
-    print(result)
+    assert result.relation == AssertionRelation.EQUIVALENT
 
 def test_evaluator_weaker():
     expr = normalize_expression("assert x >= 0 || x <= 10;")
