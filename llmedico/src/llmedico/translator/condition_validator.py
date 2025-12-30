@@ -68,6 +68,7 @@ class ConditionValidator:
                 errors.append(f"Entry {i} has unexpected keys: {extra}")
 
             for key in self.EXPECTED_KEYS & keys:
-                if not isinstance(entry[key], str):
-                    errors.append(f"Entry {i} key '{key}' must be a string")
+                if not isinstance(entry[key], str):#TODO return must be null
+                    if not key == "name" and not expected_len == 1:
+                     errors.append(f"Entry {i} key '{key}' must be a string")
         return errors
