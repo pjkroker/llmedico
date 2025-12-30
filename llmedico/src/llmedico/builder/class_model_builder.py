@@ -5,13 +5,14 @@ class ClassModelBuilder:
     def _build_conditions(self, method_data: dict) -> list[Condition]:
         conditions = []
         for tag in method_data["tags"]:
-            condition = Condition(kind=ConditionKind(tag["tag"].upper()),
-                                  expression=tag["assertion"],
-                                  content=tag["content"],
-                                  description=tag["description"])
-            if type(tag["name"]) == str: condition.name = tag["name"]
-            else: condition.name = None #return type has no name
-            conditions.append(condition)
+            if ConditionKind.is_condition_kind(tag["tag"]):
+                condition = Condition(kind=ConditionKind(tag["tag"].upper()),
+                                      expression=tag["assertion"],
+                                      content=tag["content"],
+                                      description=tag["description"])
+                if type(tag["name"]) == str: condition.name = tag["name"]
+                else: condition.name = None #return type has no name
+                conditions.append(condition)
         return conditions
 
     def _build_type(self, parameter_data: dict) -> TypeModel:
@@ -21,7 +22,7 @@ class ClassModelBuilder:
         return type_model
 
     def _build_return_type(self, method_data: dict) -> TypeModel | None:
-        if 'return_type' in method_data:
+        if 'return_type' in method_data and method_data['return_type']: #void has return_type = null
             t = {"type": method_data["return_type"]}
             return self._build_type(t)
         else:
