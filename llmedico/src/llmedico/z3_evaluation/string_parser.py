@@ -11,8 +11,10 @@ class StringParser:
     1.||
     2.&&
     3.comparisons
-    4.unary !
-    5.atoms
+    4.Addition / Subtraction
+    5.Multiplication
+    6.unary ! -
+    7.atoms
     """
     def __init__(self, tokens: list[str]):
         self.tokens = tokens
@@ -48,18 +50,43 @@ class StringParser:
 
     # Comparison
     def _parse_cmp(self) -> Expr:
-        left = self._parse_unary()
+        left = self._parse_add()
         if self.peek() in {">", ">=", "<", "<=", "==", "!="}:
             op = self.consume()
-            right = self._parse_unary()
+            right = self._parse_add()
             return Compare(left, op, right)
         return left
+
+    # Addition and Subtraction
+    def _parse_add(self) -> Expr:
+        expr = self._parse_mul()
+        while self.peek() in {"+", "-"}:
+            op = self.consume()
+            right = self._parse_mul()
+            if op == "+":
+                expr = Add(expr, right)
+            else:
+                expr = Sub(expr, right)
+        return expr
+
+    # Multiplication
+    def _parse_mul(self) -> Expr:
+        expr = self._parse_unary()
+        while self.peek() == "*":
+            self.consume("*")
+            expr = Mul(expr, self._parse_unary())
+        return expr
 
     # Unary
     def _parse_unary(self) -> Expr:
         if self.peek() == "!":
             self.consume("!")
             return Not(self._parse_unary())
+
+        if self.peek() == "-":
+            self.consume("-")
+            return UnaryMinus(self._parse_unary())
+
         return self._parse_atom()
 
     # Atom
@@ -68,11 +95,6 @@ class StringParser:
 
         if tok is None:
             raise ParseError("Unexpected end")
-
-        if tok == '-': #TODO check if this is correct
-            self.consume("-")
-            expr = self.parse_expr()
-            return UnaryMinus(expr)
 
         if tok.isdigit():
             self.consume()

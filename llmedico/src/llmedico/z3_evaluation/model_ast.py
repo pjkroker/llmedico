@@ -40,6 +40,21 @@ class IntConst(Expr):
 class UnaryMinus(Expr):
     expr: Expr
 
+@dataclass(frozen=True)
+class Add(Expr): #Addition
+    left: Expr
+    right: Expr
+
+@dataclass(frozen=True)
+class Sub(Expr): #Subtraction
+    left: Expr
+    right: Expr
+
+@dataclass(frozen=True)
+class Mul(Expr): #Multiplication
+    left: Expr
+    right: Expr
+
 # Comparisons
 @dataclass(frozen=True)
 class Compare(Expr):

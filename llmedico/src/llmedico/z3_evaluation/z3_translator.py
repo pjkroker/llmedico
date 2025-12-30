@@ -1,7 +1,7 @@
 from z3 import *
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
-    Var, IntConst, Compare, UnaryMinus
+    Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
@@ -29,6 +29,15 @@ class Z3Translator:
 
         if isinstance(expr, UnaryMinus):
             return -self.translate(expr.expr) #*-1
+
+        if isinstance(expr, Add):
+            return self.translate(expr.left) + self.translate(expr.right)
+
+        if isinstance(expr, Sub):
+            return self.translate(expr.left) - self.translate(expr.right)
+
+        if isinstance(expr, Mul):
+            return self.translate(expr.left) * self.translate(expr.right)
 
         if isinstance(expr, Compare):
             # Decide types BEFORE creating Z3 objects
