@@ -3,7 +3,7 @@ from llmedico.z3_evaluation.string_parser import StringParser
 from llmedico.z3_evaluation.z3_evaluator import AssertionEvaluator
 
 
-def test_evaluator_equality():
+def test_evaluator_equal():
     expr = normalize_expression("assert x >= 0 && x <= 10;")
     tokens = tokenize(expr)
     parser = StringParser(tokens)
@@ -18,14 +18,47 @@ def test_evaluator_equality():
     result = evaluator.evaluate(expected_ast, generated_ast)
     print(result)
 
-def test_evaluator():
+def test_evaluator_equivalent():
     expr = normalize_expression("assert x >= 0;")
     tokens = tokenize(expr)
     parser = StringParser(tokens)
     expected_ast = parser.parse()
 
-    expr = normalize_expression("assert x > -1;")
+    expr = normalize_expression("assert x > -1;") #TODO they should be equal?
     tokens = tokenize(expr)
+    print(tokens) #TODO edit tokenizer
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    print(result)
+
+def test_evaluator_weaker():
+    expr = normalize_expression("assert x >= 0 || x <= 10;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert x >=0;")
+    tokens = tokenize(expr)
+    print(tokens)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    print(result)
+
+def test_evaluator_stronger():
+    expr = normalize_expression("assert x >= 0 && x <= 10;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert x >=0;")
+    tokens = tokenize(expr)
+    print(tokens)
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
