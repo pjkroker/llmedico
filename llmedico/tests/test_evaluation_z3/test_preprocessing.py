@@ -19,3 +19,10 @@ def test_tokenizer_arithmetic():
     expr = normalize_expression("assert x >= -(5+1);")
     tokens = tokenize(expr)
     assert tokens == ["x", ">=", "-", "(", "5", "+", "1", ")"]
+
+def test_tokenizer_bool():
+    tokens = tokenize("true")
+    assert tokens == ["true"]
+
+    tokens = tokenize("false")
+    assert tokens == ["false"]

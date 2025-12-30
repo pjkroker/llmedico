@@ -37,6 +37,10 @@ class IntConst(Expr):
     value: int
 
 @dataclass(frozen=True)
+class BoolConst(Expr):
+    value: bool
+
+@dataclass(frozen=True)
 class UnaryMinus(Expr):
     expr: Expr
 

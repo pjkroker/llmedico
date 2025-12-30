@@ -100,9 +100,12 @@ class StringParser:
             self.consume()
             return IntConst(int(tok))
 
-        if tok.isidentifier():
+        if tok.isidentifier():# default assumption: boolean variable TODO?
             self.consume()
-            # default assumption: boolean variable TODO
+            if tok == "true":
+                return BoolConst(True)
+            if tok == "false":
+                return BoolConst(False)
             return Var(tok)
 
         if tok == "(":

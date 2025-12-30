@@ -1,6 +1,6 @@
 import z3
 
-from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, Add, UnaryMinus
+from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, Add, UnaryMinus, BoolConst, Not
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser
 from llmedico.z3_evaluation.z3_context import Z3Context
@@ -38,3 +38,17 @@ def test_translator_arithmetic():
     trans = Z3Translator()
     z3_expr = trans.translate(ast)
     assert type(z3_expr) == z3.z3.BoolRef
+
+def test_translator_bool():
+    ast = BoolConst(value=True)
+    trans = Z3Translator()
+    z3_expr = trans.translate(ast)
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    parser = StringParser(tokenize("true"))
+    z3_expr = trans.translate(parser.parse())
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = trans.translate(Not(BoolConst(value=False)))
+    assert type(z3_expr) == z3.z3.BoolRef
+    assert z3_expr == z3.Not(False)

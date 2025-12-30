@@ -1,4 +1,4 @@
-from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul
+from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser
 
@@ -17,6 +17,26 @@ def test_parser_complex_arithmetic():
     parser = StringParser(tokens)
     ast = parser.parse()
     assert ast == Compare(left=Var(name='x'), op='>=', right=UnaryMinus(expr=Sub(left=IntConst(value=5), right=IntConst(value=10))))
+
+def test_parser_boolean():
+    expr = normalize_expression("assert true;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    ast = parser.parse()
+    assert ast == BoolConst(value=True)
+
+    expr = normalize_expression("assert x;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    ast = parser.parse()
+    assert ast == Var(name="x")
+
+    expr = normalize_expression("assert x == true;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    ast = parser.parse()
+    assert ast == Compare(left=Var(name='x'), op='==', right=BoolConst(value=True))
+
 
 def test_precedence():
     parser = StringParser(tokenize("-1 + 2"))
