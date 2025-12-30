@@ -1,4 +1,5 @@
-from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst
+from llmedico.z3_evaluation import model_ast
+from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst, Type
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser
 
@@ -37,7 +38,6 @@ def test_parser_boolean():
     ast = parser.parse()
     assert ast == Compare(left=Var(name='x'), op='==', right=BoolConst(value=True))
 
-
 def test_precedence():
     parser = StringParser(tokenize("-1 + 2"))
     ast = parser.parse()
@@ -58,3 +58,24 @@ def test_precedence():
     parser = StringParser(tokenize("x > y + 1"))
     ast = parser.parse()
     assert ast == Compare(left=Var(name="x"), op=">", right=Add(left=Var(name='y'), right=IntConst(value=1)))
+
+def test_typeof():
+    parser = StringParser(tokenize("1"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast) == Type.INT
+
+    parser = StringParser(tokenize("X"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast) == None #has to be derived in the context
+
+    parser = StringParser(tokenize("true"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast) == Type.BOOL
+
+    parser = StringParser(tokenize("x >= 0"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast) == Type.BOOL
+
+    parser = StringParser(tokenize("x == y;"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast) == Type.BOOL #BOOL is default, but could also be INT!!!

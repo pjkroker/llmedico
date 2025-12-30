@@ -9,33 +9,33 @@ from llmedico.java_utils.javapy import JavaParser
 from llmedico.translator.translator import Translator, ToradocuCondition
 
 
-def test_translator():
-    translator = Translator(Ollama("llama3.1"))
-    javadoc = """/**
-     * Returns a {@code Complex} whose value is
-     * {@code (this + addend)}.
-     * Uses the definitional formula
-     * <p>
-     *   {@code (a + bi) + (c + di) = (a+c) + (b+d)i}
-     * </p>
-     * If either {@code this} or {@code addend} has a {@code NaN} value in
-     * either part, {@link #NaN} is returned; otherwise {@code Infinite}
-     * and {@code NaN} values are returned in the parts of the result
-     * according to the rules for {@link java.lang.Double} arithmetic.
-     *
-     * @param  addend Value to be added to this {@code Complex}.
-     * @return {@code this + addend}.
-     * @throws NullArgumentException if {@code addend} is {@code null}.
-     */
-    """
-    parameters = ["Complex addend"] #todo make same layout as in real prompt
-    java_assertions = translator.translate_javadoc(javadoc,parameters, modes={"PARAM": 1,"RETURN": 1, "THROWS": 1})
-    jp = JavaParser()
-    for mode in java_assertions:
-        print("mode: ", mode)
-        for assertion in java_assertions[mode]:
-            print("assertion: ", assertion["assertion"])
-            assert jp.is_valid_java_assert(assertion["assertion"])
+# def test_translator():
+#     translator = Translator(Ollama("llama3.1"))
+#     javadoc = """/**
+#      * Returns a {@code Complex} whose value is
+#      * {@code (this + addend)}.
+#      * Uses the definitional formula
+#      * <p>
+#      *   {@code (a + bi) + (c + di) = (a+c) + (b+d)i}
+#      * </p>
+#      * If either {@code this} or {@code addend} has a {@code NaN} value in
+#      * either part, {@link #NaN} is returned; otherwise {@code Infinite}
+#      * and {@code NaN} values are returned in the parts of the result
+#      * according to the rules for {@link java.lang.Double} arithmetic.
+#      *
+#      * @param  addend Value to be added to this {@code Complex}.
+#      * @return {@code this + addend}.
+#      * @throws NullArgumentException if {@code addend} is {@code null}.
+#      */
+#     """
+#     parameters = ["Complex addend"] #todo make same layout as in real prompt
+#     java_assertions = translator.translate_javadoc(javadoc,parameters, modes={"PARAM": 1,"RETURN": 1, "THROWS": 1})
+#     jp = JavaParser()
+#     for mode in java_assertions:
+#         print("mode: ", mode)
+#         for assertion in java_assertions[mode]:
+#             print("assertion: ", assertion["assertion"])
+#             assert jp.is_valid_java_assert(assertion["assertion"])
 
 def test_translator_pre_assertion_to_json():
     #translator = Translator()

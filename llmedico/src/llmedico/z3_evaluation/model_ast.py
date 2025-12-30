@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 
 class Expr:
@@ -65,3 +66,40 @@ class Compare(Expr):
     left: Expr
     op: str   # ">", ">=", "<", "<=", "==", "!="
     right: Expr
+
+class Type(Enum):
+    INT = "int"
+    BOOL = "bool"
+
+def typeof(expr: Expr) -> Type:
+    if isinstance(expr, IntConst):
+        return Type.INT
+
+    if isinstance(expr, BoolConst):
+        return Type.BOOL
+
+    if isinstance(expr, UnaryMinus):
+        return Type.INT
+
+    if isinstance(expr, (Add, Sub, Mul)):
+        return Type.INT
+
+    if isinstance(expr, (And, Or, Not)):
+        return Type.BOOL
+
+    if isinstance(expr, Compare):
+        # comparisons always return bool
+        return Type.BOOL
+
+    if isinstance(expr, Var):
+        # minimal assumption:
+        # - numeric vars appear in arithmetic
+        # - boolean vars appear in logical contexts
+        return None  # context-dependent (handled in translator)
+
+    raise TypeError(expr)
+
+def expect(expr, expected):
+    t = typeof(expr)
+    if t is not None and t != expected:
+        raise TypeError(f"Expected {expected}, got {t}")
