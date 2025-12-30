@@ -13,7 +13,7 @@ from typing import Iterable, Dict, List
 from llm_caller.models.ollama import Ollama
 from llm_caller.prompts import PRE_CONDITION_PROMPT, RETURN_CONDITION_PROMPT, THROWS_CONDITION_PROMPT, \
     PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON, PRE_CONDITION_PROMPT_JSON_FEEDBACK, \
-    RETURN_CONDITION_PROMPT_JSON_FEEDBACK, THROWS_CONDITION_PROMPT_JSON_FEEDBACK
+    RETURN_CONDITION_PROMPT_JSON_FEEDBACK, THROWS_CONDITION_PROMPT_JSON_FEEDBACK, RETURN_CONDITION_PROMPT_JSON
 from llm_caller.utils.processing import extract_java_assertions, extract_conditions
 
 ConditionOutput = Dict[str, List[str]]
@@ -88,7 +88,7 @@ class Translator():
     PATH_JSON = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/result.json")
     MODE_TO_PROMPT = {
         "PARAM": PRE_CONDITION_PROMPT_JSON,
-        "RETURN": RETURN_CONDITION_PROMPT,
+        "RETURN": RETURN_CONDITION_PROMPT_JSON,
         "THROWS": THROWS_CONDITION_PROMPT_JSON,
     }
     MODE_TO_PROMPT_REPAIR = {
