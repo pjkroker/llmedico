@@ -24,6 +24,14 @@ def test_tokenizer_modulo():
    tokens = tokenize("x % 2 == 0")
    assert tokens == ["x", "%", "2", "==", "0"]
 
+def test_tokenizer_null():
+    tokens = tokenize("x != null")
+    assert tokens == ["x", "!=", "null"]
+
+def test_tokenizer_obj():
+    tokens = tokenize("x != obj")
+    assert tokens == ["x", "!=", "obj"]
+
 def test_tokenizer_bool():
     tokens = tokenize("true")
     assert tokens == ["true"]

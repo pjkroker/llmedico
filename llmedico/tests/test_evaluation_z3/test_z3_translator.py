@@ -125,3 +125,21 @@ def test_translator_bool():
     z3_expr = trans.translate(Not(BoolConst(value=False)))
     assert type(z3_expr) == z3.z3.BoolRef
     assert z3_expr == z3.Not(False)
+
+def test_ref_not_null():
+    types = infer("x != null")
+    assert types["x"] == Type.REF
+
+def test_obj_not_null():
+    types = infer("obj != null")
+    assert types["obj"] == Type.REF
+
+# def test_null_int_comparison_rejected():
+#     with pytest.raises(TypeError):
+#         infer("x > null")
+#
+# def test_null_boolean_rejected():
+#     with pytest.raises(TypeError):
+#         infer("true == null")
+
+

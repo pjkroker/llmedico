@@ -112,7 +112,10 @@ class StringParser:
                 return BoolConst(True)
             if tok == "false":
                 return BoolConst(False)
+            if tok == "null":
+                return NullConst()
             return Var(tok)
+           # return Var(tok) TODO check
 
         if tok == "(":
             self.consume("(")

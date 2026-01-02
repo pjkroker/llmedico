@@ -66,3 +66,18 @@ def test_evaluator_stronger():
     evaluator = AssertionEvaluator()
     result = evaluator.evaluate(expected_ast, generated_ast)
     print(result)
+
+def test_null():
+    expr = normalize_expression("assert null == null;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert null == null;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    assert result.relation == AssertionRelation.EQUIVALENT

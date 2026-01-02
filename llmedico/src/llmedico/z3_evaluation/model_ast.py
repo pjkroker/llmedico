@@ -30,6 +30,12 @@ class IntVar(Expr):
     name: str
 
 @dataclass(frozen=True)
+class NullConst(Expr): #TODO check does this work?
+    def __repr__(self):
+        return "NullConst()"
+
+
+@dataclass(frozen=True)
 class Var(Expr):
     name: str
 
@@ -80,6 +86,7 @@ class Compare(Expr):
 class Type(Enum):
     INT = "int"
     BOOL = "bool"
+    REF = "ref" #objects, null
 
 def typeof(expr: Expr) -> Type:
     if isinstance(expr, IntConst):
@@ -106,6 +113,9 @@ def typeof(expr: Expr) -> Type:
         # - numeric vars appear in arithmetic
         # - boolean vars appear in logical contexts
         return None  # context-dependent (handled in translator)
+
+    if isinstance(expr, NullConst):
+        return Type.REF
 
     raise TypeError(expr)
 
