@@ -48,3 +48,8 @@ def test_tokenize_functions():
 
     tokens = tokenize("x.equals(y)")
     assert tokens == ['x', '.', 'equals', '(', 'y', ')']
+
+def test_ternary():
+    tokens = tokenize("x > 5 ? true : false")
+    print(tokens)
+    assert tokens == ['x', '>', '5', '?', 'true', ":" ,'false']

@@ -8,12 +8,13 @@ class ParseError(Exception):
 class StringParser:
     """
     We implement operator precedence:
-    1.||
-    2.&&
-    3.comparisons
-    4.Addition / Subtraction
-    5.Multiplication
-    6.unary ! -
+    1.?
+    2.||
+    3.&&
+    4.comparisons
+    5.Addition / Subtraction
+    6.Multiplication
+    7.unary ! -
     7.atoms
     """
     def __init__(self, tokens: list[str]):
@@ -32,8 +33,19 @@ class StringParser:
         self.pos += 1
         return tok
 
-    # OR
+    #?
     def parse_expr(self) -> Expr:
+        expr = self._parse_or()
+        if self.peek() == "?":
+            self.consume("?")
+            then = self.parse_expr()
+            self.consume(":")
+            otherwise = self.parse_expr()
+            return Conditional(expr, then, otherwise)
+        return expr
+
+    # OR
+    def _parse_or(self) -> Expr:
         expr = self._parse_and()
         while self.peek() == "||":
             self.consume("||")

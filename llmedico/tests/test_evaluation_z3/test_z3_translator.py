@@ -177,3 +177,8 @@ def test_methods():
     z3_expr = translate_expression("0 > size(x)")
     assert type(z3_expr) == z3.z3.BoolRef
 
+def test_terniary():
+    z3_expr = translate_expression("x > y ? true : false")
+    assert type(z3_expr) == z3.z3.BoolRef
+    types = infer("x < y ? true : false")
+    assert types == {'x': Type.INT, 'y': Type.INT}

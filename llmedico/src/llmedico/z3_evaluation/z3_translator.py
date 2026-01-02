@@ -5,7 +5,7 @@ from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
     Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect, NullConst, Method,
-    INT_RETURN_METHODS,
+    INT_RETURN_METHODS, Conditional,
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
@@ -207,3 +207,20 @@ class Z3Translator:
                     ">": l > r,
                     ">=": l >= r,
                 }[expr.op]
+
+        if isinstance(expr, Conditional):
+            expect(expr.cond, Type.BOOL, self)
+
+            t_then = model_ast.typeof(expr.then)
+            t_else = model_ast.typeof(expr.otherwise)
+
+            if t_then is not None:
+                expect(expr.otherwise, t_then, self)
+            if t_else is not None:
+                expect(expr.then, t_else, self)
+
+            c = self.translate(expr.cond)
+            t = self.translate(expr.then)
+            e = self.translate(expr.otherwise)
+
+            return If(c, t, e)

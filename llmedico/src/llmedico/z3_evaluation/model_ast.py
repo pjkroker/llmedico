@@ -83,6 +83,12 @@ class Method(Expr):
     name: str
     parameters: List[Expr]
 
+@dataclass(frozen=True)
+class Conditional(Expr):
+    cond: Expr
+    then: Expr
+    otherwise: Expr
+
 # Comparisons
 @dataclass(frozen=True)
 class Compare(Expr):
@@ -144,6 +150,19 @@ def typeof(expr: Expr) -> Type:
 
         # otherwise: object-valued method
         return Type.REF
+
+    if isinstance(expr, Conditional):
+        t_cond = typeof(expr.cond)
+        if t_cond != Type.BOOL:
+            raise TypeError("Condition of ?: must be boolean")
+
+        t_then = typeof(expr.then)
+        t_else = typeof(expr.otherwise)
+
+        if t_then is not None and t_else is not None and t_then != t_else:
+            raise TypeError("Both branches of ?: must have same type")
+
+        return t_then or t_else
 
     raise TypeError(expr)
 

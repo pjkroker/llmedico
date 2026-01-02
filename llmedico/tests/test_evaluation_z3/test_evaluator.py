@@ -138,3 +138,18 @@ def test_methods():
     evaluator = AssertionEvaluator()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
+
+def test_terniary():
+    expr = normalize_expression("assert x > y  ? true : false;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert y < x ? true : false;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    assert result.relation == AssertionRelation.EQUIVALENT

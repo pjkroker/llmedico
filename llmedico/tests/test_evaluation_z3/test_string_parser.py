@@ -124,6 +124,11 @@ def test_method():
     ast = parser.parse()
     assert ast == Method(receiver=Var(name='x'), name='equals', parameters=[Var(name='y')])
 
+def test_ternary():
+    parser = StringParser(tokenize("x>0 ? true : false"))
+    ast = parser.parse()
+    print(ast)
+
 
 
 
