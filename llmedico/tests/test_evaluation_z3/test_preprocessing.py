@@ -20,6 +20,10 @@ def test_tokenizer_arithmetic():
     tokens = tokenize(expr)
     assert tokens == ["x", ">=", "-", "(", "5", "+", "1", ")"]
 
+def test_tokenizer_modulo():
+   tokens = tokenize("x % 2 == 0")
+   assert tokens == ["x", "%", "2", "==", "0"]
+
 def test_tokenizer_bool():
     tokens = tokenize("true")
     assert tokens == ["true"]

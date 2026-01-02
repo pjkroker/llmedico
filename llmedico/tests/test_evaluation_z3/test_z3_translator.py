@@ -33,6 +33,39 @@ def test_x_equals_zero_infers_int():
     types = infer("x == 0")
     assert types["x"] == Type.INT
 
+def test_division():
+    types = infer("x / 2 > 0")
+    assert types["x"] == Type.INT
+
+def test_modulo():
+    types = infer("x % 2 == 0")
+    assert types["x"] == Type.INT
+
+def test_bool_division_rejected():
+    with pytest.raises(TypeError):
+        infer("true / x == 1")
+
+def test_bool_division_rejected_2():
+    with pytest.raises(TypeError):
+        infer("true / x")
+
+def test_bool_multiplication_rejected_2():
+    with pytest.raises(TypeError):
+        infer("true * x")
+
+def test_modulo_bool_rejected():
+    with pytest.raises(TypeError):
+        infer("true % 2 == 0")
+
+def test_minus_bool_rejected():
+    with pytest.raises(TypeError):
+        infer("-true  == 0")
+
+def test_not_integer_rejected():
+    with pytest.raises(TypeError):
+        infer("!1 == 0")
+
+
 def test_translator_equality():
     parser = StringParser(tokenize("x == 0"))
     logic_ast = parser.parse()

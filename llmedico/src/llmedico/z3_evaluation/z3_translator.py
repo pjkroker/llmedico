@@ -1,9 +1,10 @@
 from z3 import *
 
+
 from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
-    Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type
+    Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect,
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
@@ -63,22 +64,36 @@ class Z3Translator:
             return -self.translate(expr.expr) #*-1
 
         if isinstance(expr, Add):
-            for op in (expr.left, expr.right):
-                if isinstance(op, Var):
-                    self._expect_var_type(op, Type.INT)
+            expect(expr.left, Type.INT, self)
+            expect(expr.right, Type.INT, self)
             return self.translate(expr.left) + self.translate(expr.right)
 
         if isinstance(expr, Sub):
-            for op in (expr.left, expr.right):
-                if isinstance(op, Var):
-                    self._expect_var_type(op, Type.INT)
+            expect(expr.left, Type.INT, self)
+            expect(expr.right, Type.INT, self)
             return self.translate(expr.left) - self.translate(expr.right)
 
         if isinstance(expr, Mul):
-            for op in (expr.left, expr.right):
-                if isinstance(op, Var):
-                    self._expect_var_type(op, Type.INT)
+            expect(expr.left, Type.INT, self)
+            expect(expr.right, Type.INT, self)
             return self.translate(expr.left) * self.translate(expr.right)
+
+        if isinstance(expr, Div):
+            expect(expr.left, Type.INT, self)
+            expect(expr.right, Type.INT,self)
+
+            l = self.translate(expr.left)
+            r = self.translate(expr.right)
+            return l / r  # Z3 Int division
+
+        if isinstance(expr, AstMod):
+            expect(expr.left, Type.INT, self)
+            expect(expr.right, Type.INT, self)
+
+            l = self.translate(expr.left)
+            r = self.translate(expr.right)
+
+            return l % r #Mod(l, r)
 
         if isinstance(expr, Compare):
             lt = model_ast.typeof(expr.left)

@@ -60,6 +60,16 @@ class Mul(Expr): #Multiplication
     left: Expr
     right: Expr
 
+@dataclass(frozen=True)
+class Div(Expr):
+    left: Expr
+    right: Expr
+
+@dataclass(frozen=True)
+class Mod(Expr):
+    left: Expr
+    right: Expr
+
 # Comparisons
 @dataclass(frozen=True)
 class Compare(Expr):
@@ -81,7 +91,7 @@ def typeof(expr: Expr) -> Type:
     if isinstance(expr, UnaryMinus):
         return Type.INT
 
-    if isinstance(expr, (Add, Sub, Mul)):
+    if isinstance(expr, (Add, Sub, Mul, Div, Mod)):
         return Type.INT
 
     if isinstance(expr, (And, Or, Not)):
@@ -99,7 +109,11 @@ def typeof(expr: Expr) -> Type:
 
     raise TypeError(expr)
 
-def expect(expr, expected):
+def expect(expr: Expr, expected: Type, translator=None):
     t = typeof(expr)
     if t is not None and t != expected:
         raise TypeError(f"Expected {expected}, got {t}")
+
+    # t is None -> expr is a Var
+    if isinstance(expr, Var) and translator is not None:
+        translator._expect_var_type(expr, expected)

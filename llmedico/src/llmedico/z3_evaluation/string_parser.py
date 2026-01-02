@@ -69,12 +69,18 @@ class StringParser:
                 expr = Sub(expr, right)
         return expr
 
-    # Multiplication
+    # Multiplication, Division, Modulo
     def _parse_mul(self) -> Expr:
         expr = self._parse_unary()
-        while self.peek() == "*":
-            self.consume("*")
-            expr = Mul(expr, self._parse_unary())
+        while self.peek() in {"*", "/", "%"}:
+            op = self.consume()
+            right = self._parse_unary()
+            if op == "*":
+                expr = Mul(expr, right)
+            elif op == "/":
+                expr = Div(expr, right)
+            else:  # %
+                expr = Mod(expr, right)
         return expr
 
     # Unary
@@ -119,5 +125,5 @@ class StringParser:
     def parse(self) -> Expr:
         ast = self.parse_expr()
         if self.peek() is not None:
-            raise ParseError("Extra tokens at end")
+            raise ParseError(f"Extra tokens at end: {self.peek()}")
         return ast
