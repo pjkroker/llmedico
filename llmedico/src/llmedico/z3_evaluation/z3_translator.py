@@ -4,16 +4,21 @@ from z3 import *
 from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
-    Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect, NullConst,
+    Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect, NullConst, Method,
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
 
 class Z3Translator:
+    INT_RETURN_METHODS = {
+        "size",
+        "length",
+        "count",
+    }
 
     def __init__(self):
         self.ctx = Z3Context()
-        self.var_types: dict[str, model_ast.Type] = {}  # name -> Type.INT | Type.BOOL
+        self.var_types: dict[str, model_ast.Type] = {}  # name -> Type.INT | Type.BOOL | Type:REF
 
     def _expect_var_type(self, var: Var, expected: model_ast.Type):
         name = var.name
@@ -105,6 +110,48 @@ class Z3Translator:
 
             return l % r #Mod(l, r)
 
+        if isinstance(expr, Method):
+            # arguments: infer from context if possible
+            for arg in expr.parameters:
+                if isinstance(arg, Var):
+                    # heuristic: predicate methods usually take refs
+                    self._expect_var_type(arg, Type.REF)
+            args = [self.translate(a) for a in expr.parameters]
+
+            if expr.receiver is not None and isinstance(expr.receiver, Var):
+                self._expect_var_type(expr.receiver, Type.REF)
+            # translate receiver if present
+            if expr.receiver is not None:
+                receiver = self.translate(expr.receiver)
+                all_args = [receiver] + args
+                arg_sorts = [receiver.sort()] + [a.sort() for a in args]
+            else:
+                all_args = args
+                arg_sorts = [a.sort() for a in args]
+
+            # a.equals(b) OR equals(a, b)
+            if expr.name == "equals" and len(all_args) == 2:
+                return all_args[0] == all_args[1]
+
+            # x.isEmpty()
+            if expr.name == "isEmpty" and len(all_args) == 1:
+                f = self.ctx.get_func(
+                    "isEmpty",
+                    [arg_sorts[0]],
+                    BoolSort()
+                )
+                return f(all_args[0])
+
+            # generic uninterpreted function
+            # heuristic: boolean-valued predicates
+            if expr.name.startswith("is") or expr.name.startswith("has"):
+                ret_sort = BoolSort()
+            else:
+                ret_sort = self.ctx.ref_sort  # reference-like result
+
+            f = self.ctx.get_func(expr.name, arg_sorts, ret_sort)
+            return f(*all_args)
+
         if isinstance(expr, Compare):
             lt = model_ast.typeof(expr.left)
             rt = model_ast.typeof(expr.right)
@@ -123,6 +170,7 @@ class Z3Translator:
 
                 # If both sides have known (non-var) types they must match
                 if lt is not None and rt is not None and lt != rt:
+                    print(lt, rt)
                     raise TypeError("Equality requires operands of same type")
 
                 # If one side has a known type, force the other side to that type (infers vars)
