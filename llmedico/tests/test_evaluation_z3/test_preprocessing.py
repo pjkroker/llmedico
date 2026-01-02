@@ -38,3 +38,13 @@ def test_tokenizer_bool():
 
     tokens = tokenize("false")
     assert tokens == ["false"]
+
+def test_tokenize_functions():
+    tokens = tokenize("isValid(x) == true")
+    assert tokens == ["isValid","(","x",")", "==" ,"true"]
+
+    tokens = tokenize("equals(x,y)")
+    assert tokens == ['equals', '(', 'x', ',', 'y', ')']
+
+    tokens = tokenize("x.equals(y)")
+    assert tokens == ['x', '.', 'equals', '(', 'y', ')']

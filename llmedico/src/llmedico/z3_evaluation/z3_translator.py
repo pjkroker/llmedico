@@ -5,16 +5,13 @@ from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
     Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect, NullConst, Method,
+    INT_RETURN_METHODS,
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
 
 class Z3Translator:
-    INT_RETURN_METHODS = {
-        "size",
-        "length",
-        "count",
-    }
+
 
     def __init__(self):
         self.ctx = Z3Context()
@@ -111,6 +108,7 @@ class Z3Translator:
             return l % r #Mod(l, r)
 
         if isinstance(expr, Method):
+            print(expr.name)
             # arguments: infer from context if possible
             for arg in expr.parameters:
                 if isinstance(arg, Var):
@@ -129,12 +127,25 @@ class Z3Translator:
                 all_args = args
                 arg_sorts = [a.sort() for a in args]
 
-            # a.equals(b) OR equals(a, b)
-            if expr.name == "equals" and len(all_args) == 2:
+            # =====================
+            # return type handling
+            # =====================
+
+            # numeric-returning methods (e.g. size(x))
+
+            if expr.name in INT_RETURN_METHODS:
+                # arguments must be references
+                for arg in expr.parameters:
+                    if isinstance(arg, Var):
+                        self._expect_var_type(arg, Type.REF)
+
+                ret_sort = IntSort()
+
+            # boolean predicates
+            elif expr.name == "equals":
                 return all_args[0] == all_args[1]
 
-            # x.isEmpty()
-            if expr.name == "isEmpty" and len(all_args) == 1:
+            elif expr.name == "isEmpty" and len(all_args) == 1:
                 f = self.ctx.get_func(
                     "isEmpty",
                     [arg_sorts[0]],
@@ -142,12 +153,12 @@ class Z3Translator:
                 )
                 return f(all_args[0])
 
-            # generic uninterpreted function
-            # heuristic: boolean-valued predicates
-            if expr.name.startswith("is") or expr.name.startswith("has"):
+            elif expr.name.startswith("is") or expr.name.startswith("has"):
                 ret_sort = BoolSort()
+
+            # default: opaque object-valued method
             else:
-                ret_sort = self.ctx.ref_sort  # reference-like result
+                ret_sort = self.ctx.ref_sort
 
             f = self.ctx.get_func(expr.name, arg_sorts, ret_sort)
             return f(*all_args)

@@ -1,6 +1,6 @@
 from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst, Type, \
-    NullConst
+    NullConst, Method
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser
 
@@ -89,4 +89,45 @@ def test_typeof():
     ast = parser.parse()
     assert ast.left == NullConst()
     assert model_ast.typeof(ast) == Type.BOOL
+
+def test_method():
+    parser = StringParser(tokenize("isValid(x)"))
+    ast = parser.parse()
+    assert ast == Method(receiver=None, name='isValid', parameters=[Var(name='x')])
+
+    parser = StringParser(tokenize("isValid(x) == true"))
+    ast = parser.parse()
+    assert ast == Compare(left=Method(receiver=None, name='isValid', parameters=[Var(name='x')]), op='==', right=BoolConst(value=True))
+    assert model_ast.typeof(ast) == Type.BOOL
+
+    parser = StringParser(tokenize("foo(x) == x"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast.left) == Type.REF
+    assert model_ast.typeof(ast.right) == None
+
+    parser = StringParser(tokenize("getUser(x) != null"))
+    ast = parser.parse()
+    assert ast == Compare(left=Method(receiver=None, name='getUser', parameters=[Var(name='x')]), op='!=', right=NullConst())
+
+    parser = StringParser(tokenize("size(x) == 0"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast.left) == Type.INT
+    assert model_ast.typeof(ast.right) == Type.INT
+    assert  model_ast.typeof(ast) == Type.BOOL
+
+    parser = StringParser(tokenize("equals(x,y)"))
+    ast = parser.parse()
+    assert ast == Method(receiver=None, name='equals', parameters=[Var(name='x'), Var(name='y')])
+    assert model_ast.typeof(ast) == Type.BOOL
+
+    parser = StringParser(tokenize("x.equals(y)"))
+    ast = parser.parse()
+    assert ast == Method(receiver=Var(name='x'), name='equals', parameters=[Var(name='y')])
+
+
+
+
+
+
+
 

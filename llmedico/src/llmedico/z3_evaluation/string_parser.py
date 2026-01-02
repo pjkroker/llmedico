@@ -114,8 +114,16 @@ class StringParser:
                 return BoolConst(False)
             if tok == "null":
                 return NullConst()
-            return Var(tok)
-           # return Var(tok) TODO check
+
+            # function / method call
+            if self.peek() == "(":
+                self.consume("(")
+                args = self._parse_args()
+                self.consume(")")
+                return Method(receiver=None, name=tok, parameters=args)
+            else:
+                expr = Var(tok)
+            return self._parse_postfix(expr)
 
         if tok == "(":
             self.consume("(")
@@ -124,6 +132,36 @@ class StringParser:
             return expr
 
         raise ParseError(f"Unexpected token: {tok}")
+
+    def _parse_args(self) -> list[Expr]:
+        args = []
+
+        if self.peek() == ")":
+            return args
+
+        while True:
+            args.append(self.parse_expr())
+            if self.peek() == ",":
+                self.consume(",")
+            else:
+                break
+
+        return args
+
+    def _parse_postfix(self, expr: Expr) -> Expr:
+        while self.peek() == ".":
+            self.consume(".")
+            name = self.consume()  # method name
+            if not name.isidentifier():
+                raise ParseError("Expected method name after '.'")
+
+            self.consume("(")
+            args = self._parse_args()
+            self.consume(")")
+
+            expr = Method(receiver=expr, name=name, parameters=args)
+
+        return expr
 
     def parse(self) -> Expr:
         ast = self.parse_expr()

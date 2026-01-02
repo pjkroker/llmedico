@@ -20,6 +20,7 @@ class Z3Context:
         self.ref_sort = DeclareSort("Ref")
         self._refs = {}
         self._null = None
+        self.funcs = {}
 
     def bool(self, name: str):
         if name not in self.vars:
@@ -42,3 +43,9 @@ class Z3Context:
         if self._null is None:
             self._null = Const("null", self.ref_sort)
         return self._null
+
+    def get_func(self, name, arg_sorts, ret_sort):
+        key = (name, tuple(arg_sorts), ret_sort)
+        if key not in self.funcs:
+            self.funcs[key] = Function(name, *arg_sorts, ret_sort)
+        return self.funcs[key]

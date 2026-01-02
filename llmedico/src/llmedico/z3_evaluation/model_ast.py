@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 
 class Expr:
@@ -76,6 +77,12 @@ class Mod(Expr):
     left: Expr
     right: Expr
 
+@dataclass(frozen=True)
+class Method(Expr):
+    receiver: Expr | None #a.b(x), a is the reciever
+    name: str
+    parameters: List[Expr]
+
 # Comparisons
 @dataclass(frozen=True)
 class Compare(Expr):
@@ -87,6 +94,13 @@ class Type(Enum):
     INT = "int"
     BOOL = "bool"
     REF = "ref" #objects, null
+    FUNC = "func"
+
+INT_RETURN_METHODS = {
+        "size",
+        "length",
+        "count",
+    }
 
 def typeof(expr: Expr) -> Type:
     if isinstance(expr, IntConst):
@@ -115,6 +129,20 @@ def typeof(expr: Expr) -> Type:
         return None  # context-dependent (handled in translator)
 
     if isinstance(expr, NullConst):
+        return Type.REF
+
+    if isinstance(expr, Method): #check TODO
+        if expr.name in INT_RETURN_METHODS:
+            return Type.INT
+        # predicates
+        if expr.name.startswith("is") or expr.name.startswith("has"):
+            return Type.BOOL
+
+        # equals() always boolean
+        if expr.name == "equals":
+            return Type.BOOL
+
+        # otherwise: object-valued method
         return Type.REF
 
     raise TypeError(expr)

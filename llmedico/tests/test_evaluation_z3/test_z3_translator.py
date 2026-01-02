@@ -2,13 +2,20 @@ import z3
 import pytest
 from z3 import IntVal, BoolVal
 
-from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, Add, UnaryMinus, BoolConst, Not, Type
+from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, Add, UnaryMinus, BoolConst, Not, Type, Method
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser
 from llmedico.z3_evaluation.z3_context import Z3Context
 from llmedico.z3_evaluation.z3_translator import Z3Translator
 
 
+def translate_expression(expr: str):
+    parser = StringParser(tokenize(expr))
+    logic_ast = parser.parse()
+
+    trans = Z3Translator()
+    z3_expr = trans.translate(logic_ast)
+    return z3_expr
 
 def infer(expr_str):
     tokens = tokenize(expr_str)
@@ -142,4 +149,31 @@ def test_obj_not_null():
 #     with pytest.raises(TypeError):
 #         infer("true == null")
 
+def test_methods():
+    types = infer("isValid(x) == true")
+    assert types["x"] == Type.REF
+
+    types = infer("isValid(x) == y")
+    assert types["x"] == Type.REF
+    assert types["y"] == Type.BOOL
+
+    types = infer("foo(x) == foo(y)")
+    assert types["x"] == Type.REF
+    assert types["y"] == Type.REF
+
+
+    z3_expr = translate_expression("getUser(x)")
+    assert type(z3_expr) == z3.z3.ExprRef
+
+    z3_expr = translate_expression("getUser(x) != null")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("equals(x,y)")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("x.equals(y)")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("0 > size(x)")
+    assert type(z3_expr) == z3.z3.BoolRef
 

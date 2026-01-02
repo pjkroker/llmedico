@@ -81,3 +81,60 @@ def test_null():
     evaluator = AssertionEvaluator()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
+
+def test_methods():
+    expr = normalize_expression("assert getUser(x) != null;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert getUser(x) != null;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    assert result.relation == AssertionRelation.EQUIVALENT
+
+    expr = normalize_expression("assert equals(x,y);")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert x == y;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    assert result.relation == AssertionRelation.EQUIVALENT
+
+    expr = normalize_expression("assert x.equals(y);")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert x == y;")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    assert result.relation == AssertionRelation.EQUIVALENT
+
+    expr = normalize_expression("assert 0+1 > size(x);")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+
+    expr = normalize_expression("assert 5-4 > size(x);")
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    evaluator = AssertionEvaluator()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+    assert result.relation == AssertionRelation.EQUIVALENT
