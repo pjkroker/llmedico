@@ -1,5 +1,6 @@
 from llmedico.z3_evaluation import model_ast
-from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst, Type
+from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst, Type, \
+    NullConst
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser
 
@@ -79,3 +80,13 @@ def test_typeof():
     parser = StringParser(tokenize("x == y;"))
     ast = parser.parse()
     assert model_ast.typeof(ast) == Type.BOOL #BOOL is default, but could also be INT!!!
+
+    parser = StringParser(tokenize("null"))
+    ast = parser.parse()
+    assert model_ast.typeof(ast) == Type.REF
+
+    parser = StringParser(tokenize("null == x"))
+    ast = parser.parse()
+    assert ast.left == NullConst()
+    assert model_ast.typeof(ast) == Type.BOOL
+
