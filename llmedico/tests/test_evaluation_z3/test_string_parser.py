@@ -143,7 +143,7 @@ def test_ignore_cast():
 
     parser = StringParser(tokenize("(methodResultID != null) == ((org.jgrapht.Graph)args[0]).addEdge(args[1], args[2]) != null"))
     ast = parser.parse()
-    print(ast)
+    assert ast == Compare(left=Compare(left=Compare(left=Var(name='methodResultID'), op='!=', right=NullConst()), op='==', right=Method(receiver=Var(name='args[0]'), name='addEdge', parameters=[Var(name='args[1]'), Var(name='args[2]')])), op='!=', right=NullConst())
 
     ast = get_ast("cond ? (Type) a : (Other) b")
     assert ast == Conditional(cond=Var(name='cond'), then=Var(name='a'), otherwise=Var(name='b'))

@@ -1,6 +1,7 @@
 from llmedico.z3_evaluation.model_ast import *
 import logging
 logger = logging.getLogger(__name__)
+import re
 
 class ParseError(Exception):
     pass
@@ -18,6 +19,8 @@ class StringParser:
     7.unary ! -
     7.atoms
     """
+    ARRAY_VAR_RE = re.compile(r"[a-zA-Z_]\w*\[\d+\]")
+
     def __init__(self, tokens: list[str]):
         self.tokens = tokens
         self.pos = 0
@@ -66,10 +69,10 @@ class StringParser:
         left = self._parse_add()
         if self.peek() == "instanceof":
             raise ParseError("The 'instanceof' operator is not supported")
-        if self.peek() in {">", ">=", "<", "<=", "==", "!="}:
+        while self.peek() in {"==", "!=", "<", "<=", ">", ">="}:
             op = self.consume()
             right = self._parse_add()
-            return Compare(left, op, right)
+            left = Compare(left, op, right)
         return left
 
     # Addition and Subtraction
@@ -126,7 +129,7 @@ class StringParser:
             self.consume()
             return IntConst(int(tok))
 
-        if tok.isidentifier():# default assumption: boolean variable TODO?
+        if tok.isidentifier() or self.ARRAY_VAR_RE.fullmatch(tok):# default assumption: boolean variable TODO?
             self.consume()
             if tok == "true":
                 return BoolConst(True)
