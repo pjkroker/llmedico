@@ -183,7 +183,6 @@ class Z3Translator:
 
                 # If both sides have known (non-var) types they must match
                 if lt is not None and rt is not None and lt != rt:
-                    print(lt, rt)
                     raise TypeError("Equality requires operands of same type")
 
                 # If one side has a known type, force the other side to that type (infers vars)

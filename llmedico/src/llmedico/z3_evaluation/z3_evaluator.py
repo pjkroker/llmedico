@@ -1,10 +1,10 @@
 import z3
 from llmedico.z3_evaluation.z3_translator import Z3Translator
-from llmedico.z3_evaluation.result import EvaluationResult, AssertionRelation
+from llmedico.evaluation.result import EvaluationResult, AssertionRelation
 from llmedico.z3_evaluation.model_ast import Expr
 
 
-class AssertionEvaluator:
+class AssertionEvaluatorZ:
 
     def evaluate(self, expected: Expr, generated: Expr) -> EvaluationResult:
         """

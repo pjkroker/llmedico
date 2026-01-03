@@ -1,7 +1,7 @@
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
-from llmedico.z3_evaluation.result import AssertionRelation
+from llmedico.evaluation.result import AssertionRelation
 from llmedico.z3_evaluation.string_parser import StringParser
-from llmedico.z3_evaluation.z3_evaluator import AssertionEvaluator
+from llmedico.z3_evaluation.z3_evaluator import AssertionEvaluatorZ
 
 
 def test_evaluator_equal():
@@ -15,7 +15,7 @@ def test_evaluator_equal():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
 
@@ -31,7 +31,7 @@ def test_evaluator_equivalent():
     generated_ast = parser.parse()
 
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
 
@@ -47,7 +47,7 @@ def test_evaluator_weaker():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     print(result)
 
@@ -63,7 +63,7 @@ def test_evaluator_stronger():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     print(result)
 
@@ -78,7 +78,7 @@ def test_null():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
 
@@ -93,7 +93,7 @@ def test_methods():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
 
@@ -107,7 +107,7 @@ def test_methods():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
 
@@ -121,7 +121,7 @@ def test_methods():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
 
@@ -135,7 +135,7 @@ def test_methods():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
 
@@ -150,6 +150,6 @@ def test_terniary():
     parser = StringParser(tokens)
     generated_ast = parser.parse()
 
-    evaluator = AssertionEvaluator()
+    evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
     assert result.relation == AssertionRelation.EQUIVALENT
