@@ -60,6 +60,6 @@ def test_casts():
 
     tokens = tokenize("(org.jgrapht.Graph)args[0]")
     print(tokens)
-    assert tokens == ['(', 'org', '.', 'jgrapht', '.', 'Graph', ')', 'args', '[0]']
+    assert tokens == ['(', 'org', '.', 'jgrapht', '.', 'Graph', ')', 'args[0]']
 
 

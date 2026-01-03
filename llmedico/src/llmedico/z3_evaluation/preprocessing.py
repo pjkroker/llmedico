@@ -9,7 +9,12 @@ def normalize_expression(expr: str) -> str:
     return expr
 
 TOKEN_REGEX = re.compile(
-    r"\s*(>=|<=|==|!=|\|\||&&|[-+*/%,.?:()]|[<>!]|[a-zA-Z_]\w*|\d+)\s*"
+    r"\s*(>=|<=|==|!=|\|\||&&|"
+    r"[a-zA-Z_]\w*\[\d+\]|"
+    r"[-+*/(),%.?:]|"
+    r"[<>!]|"
+    r"[a-zA-Z_]\w*|"
+    r"\d+)\s*"
 )
 
 def tokenize(expr: str) -> list[str]:
