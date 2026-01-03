@@ -207,12 +207,37 @@ class StringParser:
                 return False
             self.consume()
 
+        # skip generic arguments <?>
+        if self.peek() == "<":
+            if not self._skip_generics():
+                self.pos = save
+                return False
+
         if self.peek() != ")":
             self.pos = save
             return False
 
         self.consume(")")
-        logger.warning(f"Ignoring Casting expression")
+        logger.warning(f"Ignoring Casting/Generic expression")
+        return True
+
+    def _skip_generics(self):
+        if self.peek() != "<":
+            return True
+
+        depth = 0
+        while True:
+            tok = self.peek()
+            if tok is None:
+                return False
+            if tok == "<":
+                depth += 1
+            elif tok == ">":
+                depth -= 1
+                if depth == 0:
+                    self.consume(">")
+                    break
+            self.consume()
         return True
 
     def parse(self) -> Expr:

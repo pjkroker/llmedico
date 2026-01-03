@@ -182,3 +182,57 @@ def test_terniary():
     assert type(z3_expr) == z3.z3.BoolRef
     types = infer("x < y ? true : false")
     assert types == {'x': Type.INT, 'y': Type.INT}
+
+def test_llmedico_examples():
+    z3_expr = translate_expression("args[0] != null")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("args[3] >= 0")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    #use as feedback in generation  loop
+    # z3_expr = translate_expression("methodResultID == null ? methodResultID : (methodResultID != null && ((org.jgrapht.Graph)args[0]).containsEdge(((java.lang.Object)args[1]), ((java.lang.Object)args[2])))")
+    # assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("methodResultID == true")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    #not supported
+    # z3_expr = translate_expression("args[0] instanceof org.jgrapht.Graph")
+    # assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("!Double.isNaN(args[3])")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("methodResultID == null ? (g.containsKey(sourceVertex) && g.containsKey(targetVertex)) : true")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    #not supported
+    # z3_expr = translate_expression("!(args[0] instanceof java.util.Observable)")
+    # assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("methodResultID == (args[0].getVertexCount() != args[1].getVertexCount()) || (args[0].getEdgeSet().size() != args[1].getEdgeSet().size())")
+    assert type(z3_expr) == z3.z3.BoolRef
+    #lambda is no first oder logic, rewrite or reject
+    # z3_expr = translate_expression("args[1].stream().anyMatch(v -> v == null) || args[0] == null")
+    # assert type(z3_expr) == z3.z3.BoolRef
+
+    #<> is the problem --> gets ignored like casts
+    z3_expr = translate_expression("methodResultID != null && ((org.jgrapht.graph.DirectedGraph<? extends org.jgrapht.graph.DefaultEdge>) args[0]).getSuccessors(args[1]) == methodResultID")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("methodResultID == ((org.jgrapht.Graph)args[0]).containsEdge((java.lang.Object)args[1], (java.lang.Object)args[2])")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+
+    #args[3] >= 0
+    #methodResultID == null ? methodResultID : (methodResultID != null && ((org.jgrapht.Graph)args[0]).containsEdge(((java.lang.Object)args[1]), ((java.lang.Object)args[2])))
+    #methodResultID == true
+    #args[0] instanceof org.jgrapht.Graph
+    #!Double.isNaN(args[3])
+    #methodResultID == null ? (g.containsKey(sourceVertex) && g.containsKey(targetVertex)) : true
+    #!(args[0] instanceof java.util.Observable)
+    #methodResultID == (args[0].getVertexCount() != args[1].getVertexCount()) || (args[0].getEdgeSet().size() != args[1].getEdgeSet().size())
+    #assert args[1].stream().anyMatch(v -> v == null) || args[0] == null
+    #methodResultID != null && ((org.jgrapht.graph.DirectedGraph<? extends org.jgrapht.graph.DefaultEdge>) args[0]).getSuccessors(args[1]) == methodResultID
+    #methodResultID == ((org.jgrapht.Graph)args[0]).containsEdge((java.lang.Object)args[1], (java.lang.Object)args[2])

@@ -108,6 +108,17 @@ INT_RETURN_METHODS = {
         "count",
     }
 
+BOOL_RETURN_METHODS = {
+    "isEmpty",
+    "equals",
+    "contains",
+    "containsKey",
+    "containsValue",
+    "hasNext",
+    "addEdge",
+}
+
+
 def typeof(expr: Expr) -> Type:
     if isinstance(expr, IntConst):
         return Type.INT
@@ -141,12 +152,14 @@ def typeof(expr: Expr) -> Type:
         if expr.name in INT_RETURN_METHODS:
             return Type.INT
         # predicates
-        if expr.name.startswith("is") or expr.name.startswith("has"):
+        if expr.name in BOOL_RETURN_METHODS or \
+                expr.name.startswith("is") or \
+                expr.name.startswith("has"):
             return Type.BOOL
 
-        # equals() always boolean
-        if expr.name == "equals":
-            return Type.BOOL
+        # # equals() always boolean
+        # if expr.name == "equals":
+        #     return Type.BOOL
 
         # otherwise: object-valued method
         return Type.REF

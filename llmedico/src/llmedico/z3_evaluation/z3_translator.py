@@ -5,7 +5,7 @@ from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
     Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect, NullConst, Method,
-    INT_RETURN_METHODS, Conditional,
+    INT_RETURN_METHODS, Conditional, BOOL_RETURN_METHODS,
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
@@ -108,7 +108,7 @@ class Z3Translator:
             return l % r #Mod(l, r)
 
         if isinstance(expr, Method):
-            print(expr.name)
+
             # arguments: infer from context if possible
             for arg in expr.parameters:
                 if isinstance(arg, Var):
@@ -153,7 +153,9 @@ class Z3Translator:
                 )
                 return f(all_args[0])
 
-            elif expr.name.startswith("is") or expr.name.startswith("has"):
+            elif expr.name in BOOL_RETURN_METHODS or \
+                    expr.name.startswith("is") or \
+                    expr.name.startswith("has"):
                 ret_sort = BoolSort()
 
             # default: opaque object-valued method

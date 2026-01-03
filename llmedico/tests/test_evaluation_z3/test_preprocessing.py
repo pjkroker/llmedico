@@ -55,11 +55,13 @@ def test_ternary():
 
 def test_casts():
     tokens = tokenize("(int)x > 0")
-    print(tokens)
     assert tokens == ['(', 'int', ')', "x", '>', '0']
 
     tokens = tokenize("(org.jgrapht.Graph)args[0]")
     print(tokens)
     assert tokens == ['(', 'org', '.', 'jgrapht', '.', 'Graph', ')', 'args[0]']
+
+    tokens = tokenize("<? extends org.jgrapht.graph.DefaultEdge>x")
+    assert tokens == ['<', '?', 'extends', 'org', '.', 'jgrapht', '.', 'graph', '.', 'DefaultEdge', '>', 'x']
 
 
