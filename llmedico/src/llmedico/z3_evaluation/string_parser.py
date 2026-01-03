@@ -1,5 +1,6 @@
 from llmedico.z3_evaluation.model_ast import *
-
+import logging
+logger = logging.getLogger(__name__)
 
 class ParseError(Exception):
     pass
@@ -114,6 +115,10 @@ class StringParser:
         if tok is None:
             raise ParseError("Unexpected end")
 
+        # Ignore casts: (Type) expr
+        if self._try_parse_cast():
+            return self._parse_atom()
+
         if tok.isdigit():
             self.consume()
             return IntConst(int(tok))
@@ -174,6 +179,35 @@ class StringParser:
             expr = Method(receiver=expr, name=name, parameters=args)
 
         return expr
+
+    def _try_parse_cast(self):
+        # Lookahead for: '(' Identifier ('.' Identifier)* ')'
+        if self.peek() != "(":
+            return False
+
+        save = self.pos
+        self.consume("(")
+
+        if not self.peek() or not self.peek().isidentifier():
+            self.pos = save
+            return False
+
+        self.consume()  # first identifier
+
+        while self.peek() == ".":
+            self.consume(".")
+            if not self.peek() or not self.peek().isidentifier():
+                self.pos = save
+                return False
+            self.consume()
+
+        if self.peek() != ")":
+            self.pos = save
+            return False
+
+        self.consume(")")
+        logger.warning(f"Ignoring Casting expression")
+        return True
 
     def parse(self) -> Expr:
         ast = self.parse_expr()

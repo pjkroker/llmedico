@@ -128,6 +128,15 @@ def test_ternary():
     parser = StringParser(tokenize("x>0 ? true : false"))
     ast = parser.parse()
     print(ast)
+#assert args[0] instanceof org.jgrapht.Graph;
+def test_ignore_cast():
+    parser = StringParser(tokenize("(int)x > 0"))
+    ast = parser.parse()
+    assert ast == Compare(left=Var(name='x'), op='>', right=IntConst(value=0))
+
+    parser = StringParser(tokenize("(methodResultID != null) == ((org.jgrapht.Graph)args[0]).addEdge(args[1], args[2]) != null"))
+    ast = parser.parse()
+    print(ast)
 
 
 

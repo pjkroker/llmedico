@@ -51,5 +51,15 @@ def test_tokenize_functions():
 
 def test_ternary():
     tokens = tokenize("x > 5 ? true : false")
-    print(tokens)
     assert tokens == ['x', '>', '5', '?', 'true', ":" ,'false']
+
+def test_casts():
+    tokens = tokenize("(int)x > 0")
+    print(tokens)
+    assert tokens == ['(', 'int', ')', "x", '>', '0']
+
+    tokens = tokenize("(org.jgrapht.Graph)args[0]")
+    print(tokens)
+    assert tokens == ['(', 'org', '.', 'jgrapht', '.', 'Graph', ')', 'args', '[0]']
+
+
