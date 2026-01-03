@@ -1,9 +1,16 @@
+import pytest
+
 from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst, Type, \
-    NullConst, Method
+    NullConst, Method, Expr, Conditional
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
-from llmedico.z3_evaluation.string_parser import StringParser
+from llmedico.z3_evaluation.string_parser import StringParser, ParseError
 
+def get_ast(expression: str) -> Expr:
+    normalized_expression = normalize_expression(expression)
+    tokens = tokenize(normalized_expression)
+    parser = StringParser(tokens)
+    return parser.parse()
 
 def test_parser():
     expr = normalize_expression("assert x >= 0 && x <= 10;")
@@ -137,6 +144,17 @@ def test_ignore_cast():
     parser = StringParser(tokenize("(methodResultID != null) == ((org.jgrapht.Graph)args[0]).addEdge(args[1], args[2]) != null"))
     ast = parser.parse()
     print(ast)
+
+    ast = get_ast("cond ? (Type) a : (Other) b")
+    assert ast == Conditional(cond=Var(name='cond'), then=Var(name='a'), otherwise=Var(name='b'))
+
+    ast = get_ast("((Foo.Bar) y).equals(z)")
+    assert ast ==  Method(receiver=Var(name='y'), name='equals', parameters=[Var(name='z')])
+
+def test_raise_error_instanceof():
+    with pytest.raises(ParseError):
+        parser = StringParser(tokenize("x instanceof Graph"))
+        ast = parser.parse()
 
 
 

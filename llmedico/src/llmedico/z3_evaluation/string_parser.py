@@ -64,6 +64,8 @@ class StringParser:
     # Comparison
     def _parse_cmp(self) -> Expr:
         left = self._parse_add()
+        if self.peek() == "instanceof":
+            raise ParseError("The 'instanceof' operator is not supported")
         if self.peek() in {">", ">=", "<", "<=", "==", "!="}:
             op = self.consume()
             right = self._parse_add()
@@ -117,7 +119,8 @@ class StringParser:
 
         # Ignore casts: (Type) expr
         if self._try_parse_cast():
-            return self._parse_atom()
+            expr = self._parse_atom()
+            return self._parse_postfix(expr)
 
         if tok.isdigit():
             self.consume()
@@ -146,7 +149,7 @@ class StringParser:
             self.consume("(")
             expr = self.parse_expr()
             self.consume(")")
-            return expr
+            return self._parse_postfix(expr)
 
         raise ParseError(f"Unexpected token: {tok}")
 
