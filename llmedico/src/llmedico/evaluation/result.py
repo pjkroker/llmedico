@@ -6,6 +6,7 @@ from typing import Optional
 class AssertionRelation(Enum):
     IDENTICAL = "identical"
     EQUIVALENT = "equivalent"
+    DUAL = "dual"
     STRONGER = "stronger"
     WEAKER = "weaker"
     INCOMPARABLE = "incomparable"
