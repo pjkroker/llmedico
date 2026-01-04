@@ -1,4 +1,7 @@
+from typing import List
+
 from llmedico.conditions.model import Condition, ClassModel, ConditionKind
+from llmedico.evaluation.evaluation_row import EvaluationRow
 from llmedico.evaluation.result import EvaluationResult, AssertionRelation
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser
@@ -16,7 +19,7 @@ def _evaluate_assertions(expected: str, generated:str) -> EvaluationResult:
     if expected == "":
         return EvaluationResult(relation=AssertionRelation.UNEXPECTED) #TODO evaluate anyway
     if generated == "":
-        return EvaluationResult(relation=AssertionRelation.MISSING)
+        return EvaluationResult(relation=AssertionRelation.MISSING) #TODO evaluate anyway
     # 2. Identical (string-based)
     if _normalize(expected) == _normalize(generated):
         relation = AssertionRelation.IDENTICAL
@@ -42,36 +45,42 @@ def _evaluate_assertions(expected: str, generated:str) -> EvaluationResult:
     evaluator = AssertionEvaluatorZ()
     return evaluator.evaluate(expected_ast, generated_ast)
 
-def evaluate_class(expected: ClassModel, generated: ClassModel) -> EvaluationResult:
+def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[EvaluationRow]:
+    evaluation_rows = []
+    class_name = expected.name
     for i, method_exp in enumerate(expected.methods):
+        method_signature = method_exp.signature.name
+
         params_exp = method_exp.param_conditions
         params_gen = generated.methods[i].param_conditions
         for j, condition_exp in enumerate(params_exp):
-            print(f"expected: {condition_exp.expression}")
-            print(f"generated: {params_gen[j].expression}")
             result = _evaluate_assertions(condition_exp.expression, params_gen[j].expression)
-            print(result)
+            evaluation_rows.append(EvaluationRow(class_name,method_signature, expected=condition_exp.expression,
+                                         generated=params_gen[j].expression,
+                                         relation=result.relation,
+                                         reason=result.reason))
 
         throws_exp = method_exp.throws_conditions
         throws_gen = generated.methods[i].throws_conditions
         for j, condition_exp in enumerate(throws_exp):
-            print(f"expected: {condition_exp.expression}")
-            print(f"generated: {throws_gen[j].expression}")
             result = _evaluate_assertions(condition_exp.expression, throws_gen[j].expression)
-            print(result)
+            evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=condition_exp.expression,
+                                         generated=throws_gen[j].expression,
+                                         relation=result.relation,
+                                         reason=result.reason))
 
         return_exp = method_exp.return_conditions
         return_gen = generated.methods[i].return_conditions
         if not return_exp and not return_gen: #contains no return
-            EvaluationResult(relation=AssertionRelation.UNSUPPORTED)
             pass
         else:
-            print(f"expected: {return_exp[0].expression}")
-            print(f"generated: {return_gen[0].expression}")
             result = _evaluate_assertions(return_exp[0].expression, return_gen[0].expression)
-            print(result)
+            evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=return_exp[0].expression,
+                                         generated=return_gen[0].expression,
+                                         relation=result.relation,
+                                         reason=result.reason))
 
-    return EvaluationResult(relation=AssertionRelation.UNSUPPORTED)
+    return evaluation_rows
 
 
 

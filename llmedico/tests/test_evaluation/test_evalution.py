@@ -4,6 +4,7 @@ from pathlib import Path
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.builder.class_model_builder_jdoctor import ClassModelBuilderJdoctor
 from llmedico.conditions.model import ClassModel
+from llmedico.evaluation.evaluation_csv_writer import EvaluationCSVWriter
 from llmedico.evaluation.evaluator import _evaluate_assertions, evaluate_class
 from llmedico.evaluation.result import AssertionRelation
 
@@ -73,6 +74,27 @@ def test_evaluation_with_builder():
     expected_cls = builder.build_class(extracted_conditions)
     result = evaluate_class(expected_cls, generated_cls)
 
+def test_evaluation_with_writer():
+    builder = ClassModelBuilder()
+    input_path = Path(
+        __file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.generate.Graph.json"
+    with open(input_path, "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    generated_cls = builder.build_class(extracted_conditions[0])
+
+    builder = ClassModelBuilderJdoctor()
+    input_path = Path(__file__).parent.parent / "data" / "input" / "org.jgrapht.Graph_goal.json"
+    with open(input_path, "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    expected_cls = builder.build_class(extracted_conditions)
+    result = evaluate_class(expected_cls, generated_cls)
+
+    path_outputfile = Path(__file__).parent.parent / "data" / "output" / "result.csv"
+    with EvaluationCSVWriter(path_outputfile) as writer:
+        for row in result:
+            writer.write(row)
+
+    assert path_outputfile.is_file()
 
 
 
