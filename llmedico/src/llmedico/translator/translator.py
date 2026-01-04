@@ -11,8 +11,7 @@ import copy
 from typing import Iterable, Dict, List
 
 from llm_caller.models.ollama import Ollama
-from llm_caller.prompts import PRE_CONDITION_PROMPT, RETURN_CONDITION_PROMPT, THROWS_CONDITION_PROMPT, \
-    PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON, PRE_CONDITION_PROMPT_JSON_FEEDBACK, \
+from llm_caller.prompts import PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON, PRE_CONDITION_PROMPT_JSON_FEEDBACK, \
     RETURN_CONDITION_PROMPT_JSON_FEEDBACK, THROWS_CONDITION_PROMPT_JSON_FEEDBACK, RETURN_CONDITION_PROMPT_JSON
 from llm_caller.utils.processing import extract_java_assertions, extract_conditions
 
