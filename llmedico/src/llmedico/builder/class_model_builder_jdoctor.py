@@ -14,7 +14,7 @@ class ClassModelBuilderJdoctor(ClassModelBuilderBase):
                                   expression=f"assert {expression};" if expression else "",
                                   content=param["comment"],
                                   description=param["comment"],
-                                  name=param["parameter"]["type"]["name"])
+                                  name=param["parameter"]["name"])
             conditions.append(condition)
 
         for throw in method_data['throwsTags']:

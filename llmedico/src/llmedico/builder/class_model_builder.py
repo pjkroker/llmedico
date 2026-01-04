@@ -4,15 +4,17 @@ class ClassModelBuilder:
 
     def _build_conditions(self, method_data: dict) -> list[Condition]:
         conditions = []
-        for tag in method_data["tags"]:
-            if ConditionKind.is_condition_kind(tag["tag"]):
-                condition = Condition(kind=ConditionKind(tag["tag"].upper()),
-                                      expression=tag["assertion"],
-                                      content=tag["content"],
-                                      description=tag["description"])
-                if type(tag["name"]) == str: condition.name = tag["name"]
-                else: condition.name = None #return type has no name
-                conditions.append(condition)
+        tags_order = ["param", "throws", "return"] #insert with fix order
+        for selected_tag in tags_order:
+            for tag in method_data["tags"]:
+                if tag["tag"] == selected_tag and ConditionKind.is_condition_kind(tag["tag"]):
+                    condition = Condition(kind=ConditionKind(tag["tag"].upper()),
+                                          expression=tag["assertion"],
+                                          content=tag["content"],
+                                          description=tag["description"])
+                    if type(tag["name"]) == str: condition.name = tag["name"]
+                    else: condition.name = None #return type has no name
+                    conditions.append(condition)
         return conditions
 
     def _build_type(self, parameter_data: dict) -> TypeModel:

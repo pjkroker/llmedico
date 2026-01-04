@@ -17,6 +17,10 @@ class EvaluationCSVWriter:
             fieldnames=[
                 "class",
                 "method",
+                "kind_exp",
+                "name_exp",
+                "kind_gen",
+                "name_gen",
                 "expected",
                 "generated",
                 "relation",
@@ -30,6 +34,10 @@ class EvaluationCSVWriter:
         self._writer.writerow({
             "class": row.class_name,
             "method": row.method_signature,
+            "kind_exp": row.kind_exp,
+            "name_exp": row.name_exp,
+            "kind_gen": row.kind_gen,
+            "name_gen": row.name_gen,
             "expected": row.expected,
             "generated": row.generated,
             "relation": row.relation,

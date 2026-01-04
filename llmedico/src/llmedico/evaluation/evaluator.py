@@ -49,36 +49,56 @@ def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[Evaluati
     evaluation_rows = []
     class_name = expected.name
     for i, method_exp in enumerate(expected.methods):
-        method_signature = method_exp.signature.name
+        method_signature = method_exp.signature.name + "(" +  " ".join(p.name for p in method_exp.signature.parameters) + ")"
 
-        params_exp = method_exp.param_conditions
-        params_gen = generated.methods[i].param_conditions
-        for j, condition_exp in enumerate(params_exp):
-            result = _evaluate_assertions(condition_exp.expression, params_gen[j].expression)
-            evaluation_rows.append(EvaluationRow(class_name,method_signature, expected=condition_exp.expression,
-                                         generated=params_gen[j].expression,
-                                         relation=result.relation,
-                                         reason=result.reason))
+        for j, condition_exp in enumerate(method_exp.conditions):
+            expected_condition = condition_exp.expression
+            generated_condition = generated.methods[i].conditions[j].expression
+            result = _evaluate_assertions(expected_condition, generated_condition )
+            evaluation_rows.append(EvaluationRow(class_name, method_signature,
+                                                 kind_exp=condition_exp.kind,
+                                                 name_exp=condition_exp.name,
+                                                 kind_gen=generated.methods[i].conditions[j].kind,
+                                                 name_gen=generated.methods[i].conditions[j].name,
+                                                 expected=expected_condition,
+                                                 generated=generated_condition,
+                                                 relation=result.relation,
+                                                 reason=result.reason))
 
-        throws_exp = method_exp.throws_conditions
-        throws_gen = generated.methods[i].throws_conditions
-        for j, condition_exp in enumerate(throws_exp):
-            result = _evaluate_assertions(condition_exp.expression, throws_gen[j].expression)
-            evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=condition_exp.expression,
-                                         generated=throws_gen[j].expression,
-                                         relation=result.relation,
-                                         reason=result.reason))
 
-        return_exp = method_exp.return_conditions
-        return_gen = generated.methods[i].return_conditions
-        if not return_exp and not return_gen: #contains no return
-            pass
-        else:
-            result = _evaluate_assertions(return_exp[0].expression, return_gen[0].expression)
-            evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=return_exp[0].expression,
-                                         generated=return_gen[0].expression,
-                                         relation=result.relation,
-                                         reason=result.reason))
+
+
+
+
+
+        # params_exp = method_exp.param_conditions
+        # params_gen = generated.methods[i].param_conditions
+        # for j, condition_exp in enumerate(params_exp):
+        #     result = _evaluate_assertions(condition_exp.expression, params_gen[j].expression)
+        #     evaluation_rows.append(EvaluationRow(class_name,method_signature, expected=condition_exp.expression,
+        #                                  generated=params_gen[j].expression,
+        #                                  relation=result.relation,
+        #                                  reason=result.reason))
+        #
+        # throws_exp = method_exp.throws_conditions
+        # throws_gen = generated.methods[i].throws_conditions
+        # for j, condition_exp in enumerate(throws_exp):
+        #     result = _evaluate_assertions(condition_exp.expression, throws_gen[j].expression)
+        #     evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=condition_exp.expression,
+        #                                  generated=throws_gen[j].expression,
+        #                                  relation=result.relation,
+        #                                  reason=result.reason))
+        #
+        # return_exp = method_exp.return_conditions
+        # return_gen = generated.methods[i].return_conditions
+        # if not return_exp and not return_gen: #contains no return
+        #     pass
+        # else:
+        #     result = _evaluate_assertions(return_exp[0].expression, return_gen[0].expression)
+        #     evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=return_exp[0].expression,
+        #                                  generated=return_gen[0].expression,
+        #                                  relation=result.relation,
+        #                                  reason=result.reason))
 
     return evaluation_rows
 
