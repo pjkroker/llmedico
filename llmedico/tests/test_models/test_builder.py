@@ -18,6 +18,12 @@ def test_condition_kind():
 
     assert c.kind == ConditionKind.PARAM
 
+def test_is_condition_kind():
+    tag = "param"
+    assert ConditionKind.is_condition_kind(tag) is True
+    tag = "see"
+    assert ConditionKind.is_condition_kind(tag) is False
+
 def test_build_condition():
     null = None
     tags = {"tags":[

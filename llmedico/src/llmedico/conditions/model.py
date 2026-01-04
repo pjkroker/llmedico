@@ -8,6 +8,10 @@ class ConditionKind(Enum):
     RETURN = "RETURN"
     THROWS = "THROWS"
 
+    @classmethod
+    def is_condition_kind(cls, value: str) -> bool:
+        return value.upper() in (e.value for e in cls)
+
 @dataclass
 class Condition:
     kind: ConditionKind

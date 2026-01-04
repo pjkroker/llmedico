@@ -7,6 +7,7 @@ import re
 from llm_caller.models.litellm import LiteLLMModel
 from llm_caller.models.ollama import Ollama
 from llmedico.builder.class_model_builder import ClassModelBuilder
+from llmedico.conditions.model import ConditionKind
 from llmedico.config.config import Config
 from llmedico.converters.jdoctor import JDoctorConditionConverter
 
@@ -89,8 +90,11 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         # get modes {PARAM, RETURN, THROWS} and their #tags in the doctring
         modes = {}
         for tag in java_extractions[0]["members"][i]["tags"]:
-            key = tag["tag"].upper()
-            modes[key] = modes.get(key, 0) + 1
+            if ConditionKind.is_condition_kind(tag["tag"]):
+                key = tag["tag"].upper()
+                modes[key] = modes.get(key, 0) + 1
+            else:
+                logger.debug(f"unsupported tag: {tag}")
         if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
         logger.debug(f"found modes and their frequencies: {modes}")
 
@@ -108,17 +112,19 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
     for i, member in enumerate(java_extractions[0]["members"]):
         for j, tag in enumerate(member["tags"]):
-            for condition in conditions[i]["conditions"][tag["tag"].upper()]:
-                if (tag["name"] == condition["name"]
-                        and (not tag["name"] == "throws" or _normalize_text(tag["content"]) == _normalize_text(condition["content"]))): #two @throws can have same name (exception)
-                    tag["assertion"] = condition["assertion"]
-                    tag["description"] = condition["description"]
+            if ConditionKind.is_condition_kind(tag["tag"]): #skip unsuported ones like @see
+                for condition in conditions[i]["conditions"][tag["tag"].upper()]:
+                    if (tag["name"] == condition["name"]
+                            and (not tag["name"] == "throws" or _normalize_text(tag["content"]) == _normalize_text(condition["content"]))): #two @throws can have same name (exception)
+                        tag["assertion"] = condition["assertion"]
+                        tag["description"] = condition["description"]
 
     # check if there is now an assertion for every tag, if not llm has most likely extracted content poorly
     for member in java_extractions[0]["members"]:
         for tag in member["tags"]:
-            if len(tag) != 5:
-                logger.critical(f"insertion failed for {tag}") #TODO what to do in this case?
+            if ConditionKind.is_condition_kind(tag["tag"]):  # skip unsuported ones like @see
+                if len(tag) != 5:
+                    logger.critical(f"insertion failed for {tag}") #TODO what to do in this case?
 
     # Convert to pretty JSON string for logging
     json_preview = json.dumps(java_extractions, indent=2, ensure_ascii=False)
