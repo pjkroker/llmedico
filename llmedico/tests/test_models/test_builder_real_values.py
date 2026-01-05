@@ -14,7 +14,7 @@ def test_build_complete_graph_generator():
     assert cls is not None
 
 def test_build_graph():
-    file = Path(__file__).parent.parent / 'data' / 'input' / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.generate.Graph.json"
+    file = Path(__file__).parent.parent / 'data' / 'input' / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.Graph.json"
     with open(file) as f:
         llmedico_trans_conditions = json.load(f)
     print(llmedico_trans_conditions)

@@ -62,7 +62,7 @@ def test_evaluate_class():
 
 def test_evaluation_with_builder():
     builder = ClassModelBuilder()
-    input_path = Path(__file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.generate.Graph.json"
+    input_path = Path(__file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.Graph.json"
     with open(input_path, "r", encoding="utf-8") as f:
         extracted_conditions = json.load(f)
     generated_cls = builder.build_class(extracted_conditions[0])
@@ -78,19 +78,19 @@ def test_evaluation_with_writer():
     #Graph
     builder = ClassModelBuilder()
     input_path = Path(
-        __file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.generate.Graph.json"
+        __file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.Graph.json"
     with open(input_path, "r", encoding="utf-8") as f:
         extracted_conditions = json.load(f)
     generated_cls = builder.build_class(extracted_conditions[0])
 
     builder = ClassModelBuilderJdoctor()
-    input_path = Path(__file__).parent.parent / "data" / "input" / "org.jgrapht.Graph_goal.json"
+    input_path = Path(__file__).parent.parent / "data" / "input" / "generated_conditions" / "toradocu-condition_translator-org.jgrapht.Graph.json"
     with open(input_path, "r", encoding="utf-8") as f:
         extracted_conditions = json.load(f)
     expected_cls = builder.build_class(extracted_conditions)
     result = evaluate_class(expected_cls, generated_cls)
 
-    path_outputfile = Path(__file__).parent.parent / "data" / "output" / "result_Graph.csv"
+    path_outputfile = Path(__file__).parent.parent / "data" / "output" / "result_Graph_neu_llm_jdoctor.csv"
     with EvaluationCSVWriter(path_outputfile) as writer:
         for row in result:
             writer.write(row)
@@ -135,7 +135,7 @@ def test_evaluation_with_writer():
     expected_cls = builder.build_class(extracted_conditions)
     result = evaluate_class(expected_cls, generated_cls)
 
-    path_outputfile = Path(__file__).parent.parent / "data" / "output" / "result_Graphs.csv"
+    path_outputfile = Path(__file__).parent.parent / "data" / "output" / "result_Graphs_alt.csv"
     with EvaluationCSVWriter(path_outputfile) as writer:
         for row in result:
             writer.write(row)
