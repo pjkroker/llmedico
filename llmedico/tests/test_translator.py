@@ -5,6 +5,7 @@ from typing import List
 
 from llm_caller.models.ollama import Ollama
 from llm_caller.utils.processing import extract_conditions
+from llmedico.java_utils.java_verifier import get_compile_errors
 from llmedico.java_utils.javapy import JavaParser
 from llmedico.translator.translator import Translator, ToradocuCondition
 
@@ -92,3 +93,22 @@ def test_extract_conditions():
     assert type(condition) == list
     assert condition[0]["assertion"] == "assert args[0] > 0;"
     assert condition[2]["assertion"] == "assert args[2] != null;"
+
+def test_repair_loop_unsuccessful():
+    current_tags = [{'tag': 'param', 'name': 'sourceVertex', 'content': 'source vertex of the edge.'}, {'tag': 'param', 'name': 'targetVertex', 'content': 'target vertex of the edge.'}]
+    for i in range(len(current_tags)):
+        current_tags[i]["assertion"] = ""
+    empty_response = ",".join(json.dumps(current_tag) for current_tag in current_tags)
+    llm_response = f"```json\n[{empty_response}]\n```"
+
+    assert type(llm_response) == str
+    extracted_conditions = extract_conditions(llm_response)
+    assert type(extracted_conditions) == list
+    assert type(extracted_conditions[0]) == dict
+
+def test_repair_loop_get_java_compiler_errors():
+    error = get_compile_errors("assert i == 0")
+    assert error.endswith("1 error\n")
+
+
+
