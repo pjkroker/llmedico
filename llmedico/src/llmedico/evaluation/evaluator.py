@@ -13,9 +13,10 @@ def _normalize(s: str) -> str:
 
 def _evaluate_assertions(expected: str, generated:str) -> EvaluationResult:
     relation: AssertionRelation
-    # 1. Error/Unexpected/Missing
+    # 1. Empty/Unexpected/Missing
     if expected == generated == "":
-        raise ValueError("Both assertions are empty")
+        return EvaluationResult(relation=AssertionRelation.EMPTY)
+        #raise ValueError("Both assertions are empty")
     if expected == "":
         return EvaluationResult(relation=AssertionRelation.UNEXPECTED) #TODO evaluate anyway
     if generated == "":
