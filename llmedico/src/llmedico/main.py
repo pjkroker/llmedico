@@ -89,7 +89,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         tags = java_extractions[0]["members"][i]["tags"]
         type = java_extractions[0]["members"][i]["type"]
 
-        # get modes {PARAM, RETURN, THROWS} and their #tags in the doctring
+        # get modes {PARAM, RETURN, THROWS} and their #tags in the docstring
         modes = {}
         for tag in java_extractions[0]["members"][i]["tags"]:
             if ConditionKind.is_condition_kind(tag["tag"]):
@@ -124,7 +124,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     # check if there is now an assertion for every tag, if not llm has most likely extracted content poorly
     for member in java_extractions[0]["members"]:
         for tag in member["tags"]:
-            if ConditionKind.is_condition_kind(tag["tag"]):  # skip unsuported ones like @see
+            if ConditionKind.is_condition_kind(tag["tag"]):  # skip unsupported ones like @see
                 if len(tag) != 5:
                     logger.critical(f"insertion failed for {tag}") #TODO what to do in this case?
 
@@ -149,7 +149,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.jgrapht.graph.AbstractGraph"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "org.jgrapht.Graph"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
