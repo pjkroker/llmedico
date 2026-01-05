@@ -114,22 +114,18 @@ class Translator():
                 raise ValueError(f"Unsupported mode: {mode}")
 
             current_tags = [tag for tag in tags if tag["tag"] == mode.lower()]
-            logger.debug(f"Check current tags: {current_tags}")
-
-            logger.debug(f"translating for current mode: {mode}")
+            logger.debug(f"translating for current mode: {mode} with the following tags: \n{tags}")
             expected_len = modes[mode]
             result = self._translate_once(javadoc, parameters, return_type, mode, [], "")
             validator = ConditionValidator("json")
             errors = validator.validate(result, expected_len)
             if errors:
                 logger.warning(f"Found the following errors while validating the response: {errors}")
-                logger.debug("start feedback repair loop")
-                #raise NotImplementedError
+                logger.debug("Start feedback repair loop")
                 repair = TranslationRepairLoop(self, validator, self.max_iters_repair)
                 result = repair.translate_with_repair(javadoc, parameters, return_type, mode, errors, expected_len, result)
-                logger.debug(f"end feedback repair loop, result is: {result}")
-                if result == "```json\n[]\n```": #TODO check if this is right#Provide an empty result if Repair Loop failed
-                    logger.debug(f"Could not repair llm response, constructing an empty response!!")
+                if result == "```json\n[]\n```": #Provide an empty result if Repair Loop failed
+                    logger.warning(f"Could not repair llm response, constructing an empty response!!")
                     for i in range(len(current_tags)):
                         current_tags[i]["assertion"] = ""
                         current_tags[i]["description"] = current_tags[i]["content"]
@@ -138,7 +134,6 @@ class Translator():
             extracted_conditions = extract_conditions(result)
             logger.debug(f"extracted the following assertions: {extracted_conditions}")
             output[mode] = extracted_conditions
-        #logger.debug(f"final Conditions: {output}") # for this one method
         return output
 
     def _translate_once(self,javadoc: str, parameters: list[str], return_type:str, mode, feedback: [],previous_output: str="") -> str:
