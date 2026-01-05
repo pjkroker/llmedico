@@ -58,7 +58,7 @@ def test_condition_translator():
                 "content": "test"}]
                 ```
                 """
-    assert validator.validate(raw_response, 2)[0].endswith("is not a valid java assertion")
+    assert validator.validate(raw_response, 2)[0].startswith("the generated assertion")
     raw_response = """Here are the Java assertion statements generated from the Javadoc and input parameters:
                     ```json
                     [{"description": "if the specified prevPathElementList or edge is null.",

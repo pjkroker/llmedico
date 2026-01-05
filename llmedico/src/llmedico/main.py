@@ -85,9 +85,11 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         javadoc = java_extractions[0]["members"][i]["javadoc"]
         logger.debug(f"has the following javadoc: {javadoc}")
         parameters = java_extractions[0]["members"][i]["parameters"]
+        return_type = java_extractions[0]["members"][i].get("return_type", None)
+        tags = java_extractions[0]["members"][i]["tags"]
         type = java_extractions[0]["members"][i]["type"]
 
-        # get modes {PARAM, RETURN, THROWS} and their #tags in the doctring
+        # get modes {PARAM, RETURN, THROWS} and their #tags in the docstring
         modes = {}
         for tag in java_extractions[0]["members"][i]["tags"]:
             if ConditionKind.is_condition_kind(tag["tag"]):
@@ -98,7 +100,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
         logger.debug(f"found modes and their frequencies: {modes}")
 
-        java_assertions = trans.translate_javadoc(javadoc, parameters, modes=modes)
+        java_assertions = trans.translate_javadoc(javadoc, parameters, return_type, tags, modes=modes)
         logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
         member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
         conditions.append(member)
@@ -122,7 +124,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     # check if there is now an assertion for every tag, if not llm has most likely extracted content poorly
     for member in java_extractions[0]["members"]:
         for tag in member["tags"]:
-            if ConditionKind.is_condition_kind(tag["tag"]):  # skip unsuported ones like @see
+            if ConditionKind.is_condition_kind(tag["tag"]):  # skip unsupported ones like @see
                 if len(tag) != 5:
                     logger.critical(f"insertion failed for {tag}") #TODO what to do in this case?
 
@@ -147,7 +149,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.jgrapht.alg.AbstractPathElementList"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "org.jgrapht.Graph"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir

@@ -1,3 +1,4 @@
+import json
 import logging
 
 from llm_caller.models.model import Model
@@ -11,8 +12,7 @@ import copy
 from typing import Iterable, Dict, List
 
 from llm_caller.models.ollama import Ollama
-from llm_caller.prompts import PRE_CONDITION_PROMPT, RETURN_CONDITION_PROMPT, THROWS_CONDITION_PROMPT, \
-    PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON, PRE_CONDITION_PROMPT_JSON_FEEDBACK, \
+from llm_caller.prompts import PRE_CONDITION_PROMPT_JSON, THROWS_CONDITION_PROMPT_JSON, PRE_CONDITION_PROMPT_JSON_FEEDBACK, \
     RETURN_CONDITION_PROMPT_JSON_FEEDBACK, THROWS_CONDITION_PROMPT_JSON_FEEDBACK, RETURN_CONDITION_PROMPT_JSON
 from llm_caller.utils.processing import extract_java_assertions, extract_conditions
 
@@ -101,7 +101,7 @@ class Translator():
         self.max_iters_repair = max_iters_repair
         #self.data = load_json(self.PATH_JSON)
 
-    def translate_javadoc(self, javadoc:str, parameters: list[str], modes) -> ConditionOutput:
+    def translate_javadoc(self, javadoc:str, parameters: list[str], return_type: str, tags,  modes) -> ConditionOutput:
         """
         Generates for a given Java Docstring meaningful Java assertions.
         :param javadoc:
@@ -113,28 +113,34 @@ class Translator():
             if mode not in self.MODE_TO_PROMPT:
                 raise ValueError(f"Unsupported mode: {mode}")
 
-            logger.debug(f"translating for current mode: {mode}")
+            current_tags = [tag for tag in tags if tag["tag"] == mode.lower()]
+            logger.debug(f"translating for current mode: {mode} with the following tags: \n{tags}")
             expected_len = modes[mode]
-            result = self._translate_once(javadoc, parameters,mode, [], "")
+            result = self._translate_once(javadoc, parameters, return_type, mode, [], "")
             validator = ConditionValidator("json")
             errors = validator.validate(result, expected_len)
             if errors:
                 logger.warning(f"Found the following errors while validating the response: {errors}")
-                logger.debug("start feedback repair loop")
-                #raise NotImplementedError
+                logger.debug("Start feedback repair loop")
                 repair = TranslationRepairLoop(self, validator, self.max_iters_repair)
-                result = repair.translate_with_repair(javadoc, parameters, mode, errors, expected_len, result)
+                result = repair.translate_with_repair(javadoc, parameters, return_type, mode, errors, expected_len, result)
+                if result == "```json\n[]\n```": #Provide an empty result if Repair Loop failed
+                    logger.warning(f"Could not repair llm response, constructing an empty response!!")
+                    for i in range(len(current_tags)):
+                        current_tags[i]["assertion"] = ""
+                        current_tags[i]["description"] = current_tags[i]["content"]
+                    empty_response = ",".join(json.dumps(current_tag) for current_tag in current_tags)
+                    result = f"```json\n[{empty_response}]\n```"
             extracted_conditions = extract_conditions(result)
             logger.debug(f"extracted the following assertions: {extracted_conditions}")
             output[mode] = extracted_conditions
-        #logger.debug(f"final Conditions: {output}") # for this one method
         return output
 
-    def _translate_once(self,javadoc: str, parameters: list[str],mode, feedback: [],previous_output: str="") -> str:
+    def _translate_once(self,javadoc: str, parameters: list[str], return_type:str, mode, feedback: [],previous_output: str="") -> str:
         if feedback == [] and previous_output=="":#TODO make better
-            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc, parameters=parameters)
+            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc, parameters=parameters, return_type=return_type)
         else:
-            prompt = self.MODE_TO_PROMPT_REPAIR[mode].format(javadoc=javadoc, parameters=parameters, errors=feedback, previous_output=previous_output)
+            prompt = self.MODE_TO_PROMPT_REPAIR[mode].format(javadoc=javadoc, parameters=parameters, return_type=return_type, errors=feedback, previous_output=previous_output)
         result = self.llm.generate(prompt)
         return result
 

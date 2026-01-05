@@ -1,6 +1,7 @@
 import json
 
 from llm_caller.utils.processing import extract_code_by_language
+from llmedico.java_utils.java_verifier import get_compile_errors
 from llmedico.java_utils.javapy import JavaParser
 
 
@@ -38,7 +39,8 @@ class ConditionValidator:
             json_list = json.loads(code_block)
             for condition in json_list:
                 if not jp.is_valid_java_assert(condition["assertion"]):
-                    errors.append(f"the generated assertion {condition['assertion']} for {condition['name']} is not a valid java assertion")
+                    compiler_error = get_compile_errors(condition["assertion"])
+                    errors.append(f"the generated assertion {condition['assertion']} for {condition['name']} is not a valid java assertion. Use the following errors from the java compiler: {compiler_error}")
         return errors
 
     #TODO expected_length means #tags in the mode
@@ -49,9 +51,12 @@ class ConditionValidator:
             return ["Top-level JSON value must be a list"]
 
         if expected_len is not None and len(obj) != expected_len:
-            errors.append(
-                f"Expected {expected_len} conditions, but got {len(obj)}"
-            )
+            if len(obj) > expected_len:
+                errors.append(
+                    f"Expected exactly {expected_len} conditions, but got {len(obj)}. Remove the additional condition(s) and make sure that you generate exactly one JSON element for each tag element!"
+                )
+            elif len(obj) < expected_len:
+                errors.append(f"Expected exactly {expected_len} conditions, but only got {len(obj)}. Generate additional condition(s) and make sure that you generate exactly one JSON element for each tag element!")
 
         for i, entry in enumerate(obj):
             if not isinstance(entry, dict):
