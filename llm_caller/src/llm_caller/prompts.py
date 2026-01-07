@@ -147,6 +147,15 @@ CONDITION_BASE_STRING = """You are a Java expert.
     I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
     The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
     Additionally, I will provide the parameters and the return type.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
     General Requirements:
     A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
     B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
@@ -240,6 +249,8 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
     "{parameters}"
     And the following Return Type:
     "{return_type}"
+    And the following available instance methods:
+    "{methods}"
     """
 PRE_CONDITION_PROMPT_JSON = PromptBuilder(CONDITION_BASE_STRING + PRE_CONDITION_PROMPT_JSON_STRING)
 PRE_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(CONDITION_BASE_STRING + PRE_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
@@ -378,6 +389,8 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """
     "{parameters}"
     And the following Return Type:
     "{return_type}"
+    And the following available instance methods:
+    "{methods}"
     """
 RETURN_CONDITION_PROMPT_JSON = PromptBuilder(CONDITION_BASE_STRING + RETURN_CONDITION_PROMPT_JSON_STRING)
 RETURN_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(CONDITION_BASE_STRING + RETURN_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
@@ -526,6 +539,8 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """
     "{parameters}"
     And the following Return Type:
     "{return_type}"
+    And the following available instance methods:
+    "{methods}"
     """
 THROWS_CONDITION_PROMPT_JSON = PromptBuilder(CONDITION_BASE_STRING + THROWS_CONDITION_PROMPT_JSON_STRING)
 THROWS_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(CONDITION_BASE_STRING + THROWS_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
