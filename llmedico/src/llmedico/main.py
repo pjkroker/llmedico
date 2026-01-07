@@ -10,6 +10,7 @@ from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.conditions.model import ConditionKind
 from llmedico.config.config import Config
 from llmedico.converters.jdoctor import JDoctorConditionConverter
+from llmedico.translator.method_selector import MethodSelector
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,16 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     trans = Translator(llm, trans_config["iteration_repairloop"])
     conditions = []
     logger.debug("translating every method of the class")
+
+    #build class model TODO make this consistent
+    builder = ClassModelBuilder()
+    with open(path_output_dir / "llmedico-javadoc_extractor.json", "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    cls = builder.build_class(extracted_conditions[0])
+    #select methods
+    selector = MethodSelector(cls)
+    method_selection = selector.get_methods_to_str()
+
     for i in range(0, len(java_extractions[0]["members"])):
         method_name = java_extractions[0]["members"][i]["name"]
         logger.debug(f"current method name: {method_name}")
@@ -100,7 +111,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
         logger.debug(f"found modes and their frequencies: {modes}")
 
-        java_assertions = trans.translate_javadoc(javadoc, parameters, return_type, tags, modes=modes)
+        java_assertions = trans.translate_javadoc(javadoc, parameters, return_type, method_selection, tags, modes=modes)
         logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
         member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
         conditions.append(member)

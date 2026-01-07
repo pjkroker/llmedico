@@ -101,7 +101,7 @@ class Translator():
         self.max_iters_repair = max_iters_repair
         #self.data = load_json(self.PATH_JSON)
 
-    def translate_javadoc(self, javadoc:str, parameters: list[str], return_type: str, tags,  modes) -> ConditionOutput:
+    def translate_javadoc(self, javadoc:str, parameters: list[str], return_type: str, method_selection:str, tags,  modes) -> ConditionOutput:
         """
         Generates for a given Java Docstring meaningful Java assertions.
         :param javadoc:
@@ -116,14 +116,14 @@ class Translator():
             current_tags = [tag for tag in tags if tag["tag"] == mode.lower()]
             logger.debug(f"translating for current mode: {mode} with the following tags: \n{tags}")
             expected_len = modes[mode]
-            result = self._translate_once(javadoc, parameters, return_type, mode, [], "")
+            result = self._translate_once(javadoc, parameters, return_type, method_selection, mode, [], "")
             validator = ConditionValidator("json")
             errors = validator.validate(result, expected_len)
             if errors:
                 logger.warning(f"Found the following errors while validating the response: {errors}")
                 logger.debug("Start feedback repair loop")
                 repair = TranslationRepairLoop(self, validator, self.max_iters_repair)
-                result = repair.translate_with_repair(javadoc, parameters, return_type, mode, errors, expected_len, result)
+                result = repair.translate_with_repair(javadoc, parameters, return_type, method_selection, mode, errors, expected_len, result)
                 if result == "```json\n[]\n```": #Provide an empty result if Repair Loop failed
                     logger.warning(f"Could not repair llm response, constructing an empty response!!")
                     for i in range(len(current_tags)):
@@ -136,11 +136,11 @@ class Translator():
             output[mode] = extracted_conditions
         return output
 
-    def _translate_once(self,javadoc: str, parameters: list[str], return_type:str, mode, feedback: [],previous_output: str="") -> str:
+    def _translate_once(self,javadoc: str, parameters: list[str], return_type:str, method_selection:str, mode, feedback: [],previous_output: str="") -> str:
         if feedback == [] and previous_output=="":#TODO make better
-            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc, parameters=parameters, return_type=return_type)
+            prompt = self.MODE_TO_PROMPT[mode].format(javadoc=javadoc, parameters=parameters, return_type=return_type, methods=method_selection)
         else:
-            prompt = self.MODE_TO_PROMPT_REPAIR[mode].format(javadoc=javadoc, parameters=parameters, return_type=return_type, errors=feedback, previous_output=previous_output)
+            prompt = self.MODE_TO_PROMPT_REPAIR[mode].format(javadoc=javadoc, parameters=parameters, return_type=return_type, methods=method_selection, errors=feedback, previous_output=previous_output)
         result = self.llm.generate(prompt)
         return result
 
