@@ -7,11 +7,9 @@ from llmedico.builder.class_model_builder_jdoctor import ClassModelBuilderJdocto
 from llmedico.conditions.model import ClassModel
 from llmedico.evaluation.evaluation_csv_writer import EvaluationCSVWriter
 from llmedico.evaluation.evaluation_row import EvaluationRow
-from llmedico.evaluation_metrics.evaluator_stats import _precision_jdoc, _recall_jdoc, \
-    _compute_metrics_class
 from llmedico.evaluation.evaluator import _evaluate_assertions, evaluate_class
 from llmedico.evaluation.result import AssertionRelation
-from llmedico.evaluation_metrics.writer_metrics import EvaluationMetricsCSVWriter
+
 
 
 def get_row_evaluation() -> List[EvaluationRow]:

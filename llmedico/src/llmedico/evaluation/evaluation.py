@@ -2,10 +2,12 @@ import json
 import os
 from enum import Enum
 from pathlib import Path
+from typing import List
 
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.builder.class_model_builder_jdoctor import ClassModelBuilderJdoctor
 from llmedico.evaluation.evaluation_csv_writer import EvaluationCSVWriter
+from llmedico.evaluation.evaluation_row import EvaluationRow
 from llmedico.evaluation.evaluator import evaluate_class
 
 
@@ -13,7 +15,7 @@ class InputFormat(Enum):
     JDOCTOR = "jdoctor"
     LLMEDICO = "llmedico"
 
-def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generated: str | Path, type_generated: InputFormat,path_output: str | Path | None, path_result: str | Path | None=None,debug: bool=True, silent: bool=False):
+def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generated: str | Path, type_generated: InputFormat,path_output: str | Path | None, path_result: str | Path | None=None,debug: bool=True, silent: bool=False) -> List[EvaluationRow]:
     if Path(path_output) is not None and not Path(path_output).exists():
         os.makedirs(path_output)
 
@@ -47,6 +49,8 @@ def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generat
     with EvaluationCSVWriter(path_outputfile) as writer:
         for row in result:
             writer.write(row)
+
+    return result
 
 
 if __name__ == '__main__':
