@@ -37,6 +37,13 @@ class StringParser:
         self.pos += 1
         return tok
 
+    def _parse_type_name(self) -> str:
+        parts = [self.consume()]
+        while self.peek() == ".":
+            self.consume(".")
+            parts.append(self.consume())
+        return ".".join(parts)
+
     def _is_lambda_start(self) -> bool:
         tok = self.peek()
         return (tok is not None and tok.isidentifier()
@@ -89,7 +96,9 @@ class StringParser:
     def _parse_cmp(self) -> Expr:
         left = self._parse_add()
         if self.peek() == "instanceof":
-            raise ParseError("The 'instanceof' operator is not supported")
+            self.consume("instanceof")
+            type_name = self._parse_type_name()
+            return InstanceOf(left, type_name)
         while self.peek() in {"==", "!=", "<", "<=", ">", ">="}:
             op = self.consume()
             right = self._parse_add()

@@ -151,10 +151,6 @@ def test_ignore_cast():
     ast = get_ast("((Foo.Bar) y).equals(z)")
     assert ast ==  Method(receiver=Var(name='y'), name='equals', parameters=[Var(name='z')])
 
-def test_raise_error_instanceof():
-    with pytest.raises(ParseError):
-        parser = StringParser(tokenize("x instanceof Graph"))
-        ast = parser.parse()
 
 def test_lamda():
     tokens = tokenize("assert list.stream().anyMatch(x -> x > 0);")

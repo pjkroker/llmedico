@@ -101,6 +101,11 @@ class Compare(Expr):
     op: str   # ">", ">=", "<", "<=", "==", "!="
     right: Expr
 
+@dataclass(frozen=True)
+class InstanceOf(Expr):
+    expr: Expr
+    type_name: str
+
 class Type(Enum):
     INT = "int"
     BOOL = "bool"

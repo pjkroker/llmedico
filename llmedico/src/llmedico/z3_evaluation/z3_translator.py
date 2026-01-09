@@ -5,7 +5,7 @@ from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
     Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect, NullConst, Method,
-    INT_RETURN_METHODS, Conditional, BOOL_RETURN_METHODS, MATCH_METHODS, LambdaExpr,
+    INT_RETURN_METHODS, Conditional, BOOL_RETURN_METHODS, MATCH_METHODS, LambdaExpr, InstanceOf,
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
@@ -288,3 +288,15 @@ class Z3Translator:
             e = self.translate(expr.otherwise)
 
             return If(c, t, e)
+
+        if isinstance(expr, InstanceOf):
+            expect(expr.expr, Type.REF, self)
+            obj = self.translate(expr.expr)
+
+            f = self.ctx.get_func(
+                f"instanceof_{expr.type_name.replace('.', '_')}",
+                [obj.sort()],
+                BoolSort()
+            )
+            return f(obj)
+

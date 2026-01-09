@@ -212,9 +212,8 @@ def test_llmedico_examples():
     z3_expr = translate_expression("methodResultID == true")
     assert type(z3_expr) == z3.z3.BoolRef
 
-    #not supported
-    # z3_expr = translate_expression("args[0] instanceof org.jgrapht.Graph")
-    # assert type(z3_expr) == z3.z3.BoolRef
+    z3_expr = translate_expression("args[0] instanceof org.jgrapht.Graph")
+    assert type(z3_expr) == z3.z3.BoolRef
 
     z3_expr = translate_expression("!Double.isNaN(args[3])")
     assert type(z3_expr) == z3.z3.BoolRef
@@ -222,9 +221,9 @@ def test_llmedico_examples():
     z3_expr = translate_expression("methodResultID == null ? (g.containsKey(sourceVertex) && g.containsKey(targetVertex)) : true")
     assert type(z3_expr) == z3.z3.BoolRef
 
-    #not supported
-    # z3_expr = translate_expression("!(args[0] instanceof java.util.Observable)")
-    # assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("!(args[0] instanceof java.util.Observable)")
+    assert type(z3_expr) == z3.z3.BoolRef
 
     z3_expr = translate_expression("methodResultID == (args[0].getVertexCount() != args[1].getVertexCount()) || (args[0].getEdgeSet().size() != args[1].getEdgeSet().size())")
     assert type(z3_expr) == z3.z3.BoolRef

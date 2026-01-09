@@ -61,8 +61,7 @@ def test_evaluate_expressions():
     assert result.reason == "Variable 'x' used as both Type.INT and Type.BOOL"
     #instanceof
     result = _evaluate_assertions("args[0] instanceof org.jgrapht.Graph", "args[0].getClass().getName() == 'org.jgrapht.Graph'")
-    assert result.relation == AssertionRelation.UNSUPPORTED
-    assert result.reason.startswith("Error during parsing")
+    assert result.relation == AssertionRelation.INCOMPARABLE
 
     #lambda
     result = _evaluate_assertions("args[1].stream().anyMatch(v -> v == null)", "args[0] == null")
