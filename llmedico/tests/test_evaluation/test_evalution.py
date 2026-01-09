@@ -66,7 +66,7 @@ def test_evaluate_expressions():
 
     #lambda
     result = _evaluate_assertions("args[1].stream().anyMatch(v -> v == null)", "args[0] == null")
-    assert result.relation == AssertionRelation.UNSUPPORTED
+    assert result.relation == AssertionRelation.INCOMPARABLE
 
 def test_evaluate_class():
     ...

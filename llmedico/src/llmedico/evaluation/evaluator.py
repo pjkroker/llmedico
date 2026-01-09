@@ -3,7 +3,7 @@ from typing import List
 from llmedico.conditions.model import Condition, ClassModel, ConditionKind
 from llmedico.evaluation.evaluation_row import EvaluationRow
 from llmedico.evaluation.result import EvaluationResult, AssertionRelation
-from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
+from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize, rewrite_method_references
 from llmedico.z3_evaluation.string_parser import StringParser
 from llmedico.z3_evaluation.z3_evaluator import AssertionEvaluatorZ
 
@@ -30,11 +30,11 @@ def _evaluate_assertions(expected: str, generated:str) -> EvaluationResult:
     #preprocessing
     try:
         #expected
-        expected_tokens = tokenize(normalize_expression(expected))
+        expected_tokens = tokenize(rewrite_method_references(normalize_expression(expected)))
         parser = StringParser(expected_tokens)
         expected_ast = parser.parse()
         #generated
-        generated_tokens = tokenize(normalize_expression(generated))
+        generated_tokens = tokenize(rewrite_method_references(normalize_expression(generated)))
         parser = StringParser(generated_tokens)
         generated_ast = parser.parse()
     except Exception as e:
