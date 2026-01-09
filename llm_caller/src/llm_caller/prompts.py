@@ -168,6 +168,8 @@ CONDITION_BASE_STRING = """You are a Java expert.
     I. If the exact method name is unknown, choose a reasonable name that reflects the documented behavior (e.g., membership, containment). Do not invent unrelated checks (such as null checks).
     J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
     K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
     
 """
 PRE_CONDITION_PROMPT_JSON_STRING = """
@@ -319,7 +321,8 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """
         - If the return type is an object, relate it via equality to other objects.
         - If the return type is numeric, use arithmetic expressions as appropriate.
     9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
-    Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
     Example:
     Input Javadoc:
     /**
@@ -452,6 +455,7 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """
         Do not replace such conditions with generic null checks unless null is explicitly mentioned.
     10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
     11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters. Do not use receiver state unless explicitly stated in the Javadoc.
     Example:
     Input Javadoc:
     /**
