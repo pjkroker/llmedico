@@ -90,45 +90,46 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     selector = MethodSelector(cls)
     method_selection = selector.get_methods_to_str()
 
-    # for i in range(0, len(java_extractions[0]["members"])):
-    #     method_name = java_extractions[0]["members"][i]["name"]
-    #     logger.debug(f"current method name: {method_name}")
-    #     javadoc = java_extractions[0]["members"][i]["javadoc"]
-    #     logger.debug(f"has the following javadoc: {javadoc}")
-    #     parameters = java_extractions[0]["members"][i]["parameters"]
-    #     return_type = java_extractions[0]["members"][i].get("return_type", None)
-    #     tags = java_extractions[0]["members"][i]["tags"]
-    #     type = java_extractions[0]["members"][i]["type"]
-    #
-    #     # get modes {PARAM, RETURN, THROWS} and their #tags in the docstring
-    #     modes = {}
-    #     for tag in java_extractions[0]["members"][i]["tags"]:
-    #         if ConditionKind.is_condition_kind(tag["tag"]):
-    #             key = tag["tag"].upper()
-    #             modes[key] = modes.get(key, 0) + 1
-    #         else:
-    #             logger.debug(f"unsupported tag: {tag}")
-    #     if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
-    #     logger.debug(f"found modes and their frequencies: {modes}")
-    #
-    #     java_assertions = trans.translate_javadoc(javadoc, parameters, return_type, method_selection, tags, modes=modes)
-    #     logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
-    #     member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
-    #     conditions.append(member)
-    #
-    # save_realy_json_to_file(conditions, path_output_dir / "llmedico-conditions.json")
-    # logger.debug(f"the following java assertions have been generated for {fq_class_name}: \n {conditions}")
-    #
+    for i in range(0, len(java_extractions[0]["members"])):
+        method_name = java_extractions[0]["members"][i]["name"]
+        logger.debug(f"current method name: {method_name}")
+        javadoc = java_extractions[0]["members"][i]["javadoc"]
+        logger.debug(f"has the following javadoc: {javadoc}")
+        parameters = java_extractions[0]["members"][i]["parameters"]
+        return_type = java_extractions[0]["members"][i].get("return_type", None)
+        tags = java_extractions[0]["members"][i]["tags"]
+        type = java_extractions[0]["members"][i]["type"]
+
+        # get modes {PARAM, RETURN, THROWS} and their #tags in the docstring
+        modes = {}
+        for tag in java_extractions[0]["members"][i]["tags"]:
+            if ConditionKind.is_condition_kind(tag["tag"]):
+                key = tag["tag"].upper()
+                modes[key] = modes.get(key, 0) + 1
+            else:
+                logger.debug(f"unsupported tag: {tag}")
+        if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
+        logger.debug(f"found modes and their frequencies: {modes}")
+
+        java_assertions = trans.translate_javadoc(javadoc, parameters, return_type, method_selection, tags, modes=modes)
+        logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
+        member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
+        conditions.append(member)
+
+    save_realy_json_to_file(conditions, path_output_dir / "llmedico-conditions.json")
+    logger.debug(f"the following java assertions have been generated for {fq_class_name}: \n {conditions}")
+
 
     logger.debug("---Inserting Generated Conditions into LLMedico File---")
-    conditions = load_json(path_output_dir / "llmedico-conditions.json")
+    #conditions = load_json(path_output_dir / "llmedico-conditions.json")
 
     for i, member in enumerate(java_extractions[0]["members"]):
         for j, tag in enumerate(member["tags"]):
             if ConditionKind.is_condition_kind(tag["tag"]): #skip unsuported ones like @see
-                for condition in conditions[i]["conditions"][tag["tag"].upper()]: # TODO fix bug
+                for condition in conditions[i]["conditions"][tag["tag"].upper()]:
                     if (tag["name"] == condition["name"]
-                            and (not tag["tag"] == "throws" or _normalize_text(tag["content"]) == _normalize_text(condition["content"]))): #two @throws can have same name (exception)
+                            and (not tag["tag"] == "throws" or len(conditions[i]["conditions"][tag["tag"].upper()]) == 1 #two @throws can have same name (exception)
+                                 or _normalize_text(tag["content"]) == _normalize_text(condition["content"]))): #if there's more than one, make sure content is equal
                         tag["assertion"] = condition["assertion"]
                         tag["description"] = condition["description"]
 
@@ -160,7 +161,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.jgrapht.alg.AbstractPathElementList"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "org.jgrapht.graph.GraphDelegator"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
