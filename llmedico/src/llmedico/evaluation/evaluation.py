@@ -54,9 +54,9 @@ def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generat
 
 
 if __name__ == '__main__':
-    PATH_EXPECTED = Path(__file__).parent.parent.parent.parent / "storage" / "goal-output-groundtruth" / "jgrapht-core-0.9.2" / "org.jgrapht.Graph_goal.json"
+    PATH_EXPECTED = Path(__file__).parent.parent.parent.parent / "storage" / "goal-output-groundtruth" / "jgrapht-core-0.9.2" / "org.jgrapht.alg.AbstractPathElementList_goal.json"
     TYPE_EXPECTED = InputFormat.JDOCTOR
-    PATH_GENERATED = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/scripts/results-translation/jgrapht-core-0.9.2/org.jgrapht.Graph/llmedico-condition_translator.json")
+    PATH_GENERATED = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output/llmedico-condition_translator.json")
     TYPE_GENERATED = InputFormat.LLMEDICO
     PATH_OUT_DIR = Path(__file__).parent.parent.parent.parent / "data" / "output"
     PATH_RESULT = None #Path(__file__).parent.parent.parent.parent / "data" / "output" / "llmedico-evaluation-org.project.MyClass.csv"

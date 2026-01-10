@@ -12,11 +12,13 @@ class Ollama(Model):
         """
         super().__init__(model_name)
 
-    def generate(self, prompt: str, temperature: float = 0.7, **kwargs) -> str:
-        logger.debug("Ollama: generating prompt: %s", prompt)
+    def generate(self, prompt: str, system_prompt: str="Rules and behavior", temperature: float = 0.7, **kwargs) -> str:
+        logger.debug("Ollama: system prompt is: %s", system_prompt)
+        logger.info("Ollama: user prompt: %s", prompt)
         response = ollama.chat(
             model=self.model_name,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{ "role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}],
             options={"temperature": temperature, **kwargs}
         )
         striped_response = response["message"]["content"].strip()

@@ -10,7 +10,7 @@ class Model(ABC):
         self.model_name = model_name
 
     @abstractmethod
-    def generate(self, prompt: str, **kwargs) -> str:
+    def generate(self, prompt: str, user_prompt: str, **kwargs) -> str:
         """Generate a response from the model given a prompt."""
         pass
 

@@ -111,7 +111,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
         logger.debug(f"found modes and their frequencies: {modes}")
 
-        java_assertions = trans.translate_javadoc(javadoc, parameters, return_type, method_selection, tags, modes=modes)
+        java_assertions = trans.translate_javadoc(javadoc, method_name, parameters, return_type, method_selection, tags, modes=modes)
         logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
         member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
         conditions.append(member)
@@ -161,7 +161,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.jgrapht.graph.GraphDelegator"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "org.jgrapht.alg.AbstractPathElementList"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
