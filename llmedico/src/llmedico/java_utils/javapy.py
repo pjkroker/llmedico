@@ -181,22 +181,18 @@ class JavaParser(JavaPy):
             # Constructors
             # --------------------
             for ctor in clazz.getConstructors():
-                ctor_info = {
-                    "type": "constructor",
-                    "name": str(clazz.getName()),
-                    "parameters": [
-                        self._extract_parameter(p)
-                        for p in ctor.getParameters()
-                    ],
-                    "javadoc": self._get_raw_javadoc(ctor),
-                    "tags": [],
-                    "code": str(ctor.toString()),
-                }
+                parameters = [
+                    self._extract_parameter(p)
+                    for p in ctor.getParameters()
+                ]
+
+                tags = []
+                raw_javadoc = self._get_raw_javadoc(ctor)
 
                 if ctor.getJavadoc().isPresent():
                     javadoc = ctor.getJavadoc().get()
                     for tag in javadoc.getBlockTags():
-                        ctor_info["tags"].append({
+                        tags.append({
                             "tag": str(tag.getTagName()),
                             "name": (
                                 str(tag.getName().orElse(None))
@@ -205,6 +201,20 @@ class JavaParser(JavaPy):
                             ),
                             "content": str(tag.getContent().toText()),
                         })
+
+                # EXCLUSION RULE
+                if not parameters and not tags:
+                    # Parameterless constructor with no semantic tags → skip
+                    continue
+
+                ctor_info = {
+                    "type": "constructor",
+                    "name": str(clazz.getName()),
+                    "parameters": parameters,
+                    "javadoc": raw_javadoc,
+                    "tags": tags,
+                    "code": str(ctor.toString()),
+                }
 
                 class_info["members"].append(ctor_info)
 
