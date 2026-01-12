@@ -10,15 +10,15 @@ def main(fq_class_name: str, path_data_dir: Path, path_source_dir, path_class_di
     jdoc = PyJDoctor("", "pjkroker/toradocu-3.0-x86", path_data_dir, path_output_dir)
 
     jdoc.start_container()
-    #jdoc.translate_conditions(fq_class_name)
-    jdoc.generate_statistics(fq_class_name,"/input/test_llmedico_conditions_jdoc_format.json")
+    jdoc.translate_conditions(fq_class_name)
+    #jdoc.generate_statistics(fq_class_name,"/input/test_llmedico_conditions_jdoc_format.json")
     metrics = jdoc.compute_metrics(path_output_dir / "stats.csv")
     # jdoc.generate_statistics(fq_class_name, "/input/llmedico-toradocu-condition_translator.json")
     jdoc.stop_container()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    fq_class_name = "org.jgrapht.alg.AbstractPathElementList"
+    fq_class_name = "org.jgrapht.Graph"
     path_data_dir = Path(__file__).parent.parent / "data" / "input" / "jgrapht-jgrapht-0.9.2" / "jgrapht-core"
     path_source_dir = ""
     path_class_dir = ""

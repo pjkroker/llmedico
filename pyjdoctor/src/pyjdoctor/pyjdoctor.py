@@ -77,6 +77,7 @@ class PyJDoctor:
 
     def set_source_dir_r(self, source_dir: Path) -> None:
         self.SOURCEDIR_R = source_dir
+
     def set_class_dir_r(self, class_dir: Path) -> None:
         self.CLASSDIR_R = class_dir
 
