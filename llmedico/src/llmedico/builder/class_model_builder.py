@@ -18,6 +18,7 @@ class ClassModelBuilder:
         return conditions
 
     def _build_type(self, parameter_data: dict) -> TypeModel:
+        print(parameter_data)
         type_model = TypeModel(qualified_name=parameter_data["type"]["qualified_name"],
                                simple_name=parameter_data["type"]["simple_name"],
                                is_array=parameter_data["type"]["is_array"])

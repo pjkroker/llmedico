@@ -181,6 +181,10 @@ class JavaParser(JavaPy):
             # Constructors
             # --------------------
             for ctor in clazz.getConstructors():
+                # Exclude private constructors (jdoctor behavior)
+                if ctor.isPrivate():
+                    continue
+
                 parameters = [
                     self._extract_parameter(p)
                     for p in ctor.getParameters()
@@ -192,8 +196,11 @@ class JavaParser(JavaPy):
                 if ctor.getJavadoc().isPresent():
                     javadoc = ctor.getJavadoc().get()
                     for tag in javadoc.getBlockTags():
+                        tag_name = str(tag.getTagName()) #normalize
+                        if tag_name == "exception":
+                            tag_name = "throws"
                         tags.append({
-                            "tag": str(tag.getTagName()),
+                            "tag": tag_name,
                             "name": (
                                 str(tag.getName().orElse(None))
                                 if tag.getName().isPresent()
@@ -238,8 +245,11 @@ class JavaParser(JavaPy):
                 if method.getJavadoc().isPresent():
                     javadoc = method.getJavadoc().get()
                     for tag in javadoc.getBlockTags():
+                        tag_name = str(tag.getTagName())
+                        if tag_name == "exception": #normalize
+                            tag_name = "throws"
                         method_info["tags"].append({
-                            "tag": str(tag.getTagName()),
+                            "tag": tag_name,
                             "name": (
                                 str(tag.getName().orElse(None))
                                 if tag.getName().isPresent()
