@@ -1,0 +1,856 @@
+[
+  {
+    "name": "Graph",
+    "package": "org.jgrapht",
+    "qualified_name": "org.jgrapht.Graph",
+    "javadoc": "/**\n * The root interface in the graph hierarchy. A mathematical graph-theory graph\n * object <tt>G(V,E)</tt> contains a set <tt>V</tt> of vertices and a set <tt>\n * E</tt> of edges. Each edge e=(v1,v2) in E connects vertex v1 to vertex v2.\n * for more information about graphs and their related definitions see <a\n * href=\"http://mathworld.wolfram.com/Graph.html\">\n * http://mathworld.wolfram.com/Graph.html</a>.\n *\n * <p>This library generally follows the terminology found at: <a\n * href=\"http://mathworld.wolfram.com/topics/GraphTheory.html\">\n * http://mathworld.wolfram.com/topics/GraphTheory.html</a>. Implementation of\n * this interface can provide simple-graphs, multigraphs, pseudographs etc. The\n * package <code>org.jgrapht.graph</code> provides a gallery of abstract and\n * concrete graph implementations.</p>\n *\n * <p>This library works best when vertices represent arbitrary objects and\n * edges represent the relationships between them. Vertex and edge instances may\n * be shared by more than one graph.</p>\n *\n * <p>Through generics, a graph can be typed to specific classes for vertices\n * <code>V</code> and edges <code>E&lt;T&gt;</code>. Such a graph can contain\n * vertices of type <code>V</code> and all sub-types and Edges of type <code>\n * E</code> and all sub-types.</p>\n *\n * <p>For guidelines on vertex and edge classes, see <a\n * href=\"https://github.com/jgrapht/jgrapht/wiki/EqualsAndHashCode\">this wiki\n * page</a>.\n *\n * @author Barak Naveh\n * @since Jul 14, 2003\n */\n",
+    "code": "/**\n * The root interface in the graph hierarchy. A mathematical graph-theory graph\n * object <tt>G(V,E)</tt> contains a set <tt>V</tt> of vertices and a set <tt>\n * E</tt> of edges. Each edge e=(v1,v2) in E connects vertex v1 to vertex v2.\n * for more information about graphs and their related definitions see <a\n * href=\"http://mathworld.wolfram.com/Graph.html\">\n * http://mathworld.wolfram.com/Graph.html</a>.\n *\n * <p>This library generally follows the terminology found at: <a\n * href=\"http://mathworld.wolfram.com/topics/GraphTheory.html\">\n * http://mathworld.wolfram.com/topics/GraphTheory.html</a>. Implementation of\n * this interface can provide simple-graphs, multigraphs, pseudographs etc. The\n * package <code>org.jgrapht.graph</code> provides a gallery of abstract and\n * concrete graph implementations.</p>\n *\n * <p>This library works best when vertices represent arbitrary objects and\n * edges represent the relationships between them. Vertex and edge instances may\n * be shared by more than one graph.</p>\n *\n * <p>Through generics, a graph can be typed to specific classes for vertices\n * <code>V</code> and edges <code>E&lt;T&gt;</code>. Such a graph can contain\n * vertices of type <code>V</code> and all sub-types and Edges of type <code>\n * E</code> and all sub-types.</p>\n *\n * <p>For guidelines on vertex and edge classes, see <a\n * href=\"https://github.com/jgrapht/jgrapht/wiki/EqualsAndHashCode\">this wiki\n * page</a>.\n *\n * @author Barak Naveh\n * @since Jul 14, 2003\n */\npublic interface Graph<V, E> {\n\n    /**\n     * Returns a set of all edges connecting source vertex to target vertex if\n     * such vertices exist in this graph. If any of the vertices does not exist\n     * or is <code>null</code>, returns <code>null</code>. If both vertices\n     * exist but no edges found, returns an empty set.\n     *\n     * <p>In undirected graphs, some of the returned edges may have their source\n     * and target vertices in the opposite order. In simple graphs the returned\n     * set is either singleton set or empty set.</p>\n     *\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     *\n     * @return a set of all edges connecting source vertex to target vertex.\n     */\n    public Set<E> getAllEdges(V sourceVertex, V targetVertex);\n\n    /**\n     * Returns an edge connecting source vertex to target vertex if such\n     * vertices and such edge exist in this graph. Otherwise returns <code>\n     * null</code>. If any of the specified vertices is <code>null</code>\n     * returns <code>null</code>\n     *\n     * <p>In undirected graphs, the returned edge may have its source and target\n     * vertices in the opposite order.</p>\n     *\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     *\n     * @return an edge connecting source vertex to target vertex.\n     */\n    public E getEdge(V sourceVertex, V targetVertex);\n\n    /**\n     * Returns the edge factory using which this graph creates new edges. The\n     * edge factory is defined when the graph is constructed and must not be\n     * modified.\n     *\n     * @return the edge factory using which this graph creates new edges.\n     */\n    public EdgeFactory<V, E> getEdgeFactory();\n\n    /**\n     * Creates a new edge in this graph, going from the source vertex to the\n     * target vertex, and returns the created edge. Some graphs do not allow\n     * edge-multiplicity. In such cases, if the graph already contains an edge\n     * from the specified source to the specified target, than this method does\n     * not change the graph and returns <code>null</code>.\n     *\n     * <p>The source and target vertices must already be contained in this\n     * graph. If they are not found in graph IllegalArgumentException is\n     * thrown.</p>\n     *\n     * <p>This method creates the new edge <code>e</code> using this graph's\n     * <code>EdgeFactory</code>. For the new edge to be added <code>e</code>\n     * must <i>not</i> be equal to any other edge the graph (even if the graph\n     * allows edge-multiplicity). More formally, the graph must not contain any\n     * edge <code>e2</code> such that <code>e2.equals(e)</code>. If such <code>\n     * e2</code> is found then the newly created edge <code>e</code> is\n     * abandoned, the method leaves this graph unchanged returns <code>\n     * null</code>.</p>\n     *\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     *\n     * @return The newly created edge if added to the graph, otherwise <code>\n     * null</code>.\n     *\n     * @throws IllegalArgumentException if source or target vertices are not\n     * found in the graph.\n     * @throws NullPointerException if any of the specified vertices is <code>\n     * null</code>.\n     *\n     * @see #getEdgeFactory()\n     */\n    public E addEdge(V sourceVertex, V targetVertex);\n\n    /**\n     * Adds the specified edge to this graph, going from the source vertex to\n     * the target vertex. More formally, adds the specified edge, <code>\n     * e</code>, to this graph if this graph contains no edge <code>e2</code>\n     * such that <code>e2.equals(e)</code>. If this graph already contains such\n     * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.\n     * Some graphs do not allow edge-multiplicity. In such cases, if the graph\n     * already contains an edge from the specified source to the specified\n     * target, than this method does not change the graph and returns <code>\n     * false</code>. If the edge was added to the graph, returns <code>\n     * true</code>.\n     *\n     * <p>The source and target vertices must already be contained in this\n     * graph. If they are not found in graph IllegalArgumentException is\n     * thrown.</p>\n     *\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     * @param e edge to be added to this graph.\n     *\n     * @return <tt>true</tt> if this graph did not already contain the specified\n     * edge.\n     *\n     * @throws IllegalArgumentException if source or target vertices are not\n     * found in the graph.\n     * @throws ClassCastException if the specified edge is not assignment\n     * compatible with the class of edges produced by the edge factory of this\n     * graph.\n     * @throws NullPointerException if any of the specified vertices is <code>\n     * null</code>.\n     *\n     * @see #addEdge(Object, Object)\n     * @see #getEdgeFactory()\n     */\n    public boolean addEdge(V sourceVertex, V targetVertex, E e);\n\n    /**\n     * Adds the specified vertex to this graph if not already present. More\n     * formally, adds the specified vertex, <code>v</code>, to this graph if\n     * this graph contains no vertex <code>u</code> such that <code>\n     * u.equals(v)</code>. If this graph already contains such vertex, the call\n     * leaves this graph unchanged and returns <tt>false</tt>. In combination\n     * with the restriction on constructors, this ensures that graphs never\n     * contain duplicate vertices.\n     *\n     * @param v vertex to be added to this graph.\n     *\n     * @return <tt>true</tt> if this graph did not already contain the specified\n     * vertex.\n     *\n     * @throws NullPointerException if the specified vertex is <code>\n     * null</code>.\n     */\n    public boolean addVertex(V v);\n\n    /**\n     * Returns <tt>true</tt> if and only if this graph contains an edge going\n     * from the source vertex to the target vertex. In undirected graphs the\n     * same result is obtained when source and target are inverted. If any of\n     * the specified vertices does not exist in the graph, or if is <code>\n     * null</code>, returns <code>false</code>.\n     *\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     *\n     * @return <tt>true</tt> if this graph contains the specified edge.\n     */\n    public boolean containsEdge(V sourceVertex, V targetVertex);\n\n    /**\n     * Returns <tt>true</tt> if this graph contains the specified edge. More\n     * formally, returns <tt>true</tt> if and only if this graph contains an\n     * edge <code>e2</code> such that <code>e.equals(e2)</code>. If the\n     * specified edge is <code>null</code> returns <code>false</code>.\n     *\n     * @param e edge whose presence in this graph is to be tested.\n     *\n     * @return <tt>true</tt> if this graph contains the specified edge.\n     */\n    public boolean containsEdge(E e);\n\n    /**\n     * Returns <tt>true</tt> if this graph contains the specified vertex. More\n     * formally, returns <tt>true</tt> if and only if this graph contains a\n     * vertex <code>u</code> such that <code>u.equals(v)</code>. If the\n     * specified vertex is <code>null</code> returns <code>false</code>.\n     *\n     * @param v vertex whose presence in this graph is to be tested.\n     *\n     * @return <tt>true</tt> if this graph contains the specified vertex.\n     */\n    public boolean containsVertex(V v);\n\n    /**\n     * Returns a set of the edges contained in this graph. The set is backed by\n     * the graph, so changes to the graph are reflected in the set. If the graph\n     * is modified while an iteration over the set is in progress, the results\n     * of the iteration are undefined.\n     *\n     * <p>The graph implementation may maintain a particular set ordering (e.g.\n     * via {@link java.util.LinkedHashSet}) for deterministic iteration, but\n     * this is not required. It is the responsibility of callers who rely on\n     * this behavior to only use graph implementations which support it.</p>\n     *\n     * @return a set of the edges contained in this graph.\n     */\n    public Set<E> edgeSet();\n\n    /**\n     * Returns a set of all edges touching the specified vertex. If no edges are\n     * touching the specified vertex returns an empty set.\n     *\n     * @param vertex the vertex for which a set of touching edges is to be\n     * returned.\n     *\n     * @return a set of all edges touching the specified vertex.\n     *\n     * @throws IllegalArgumentException if vertex is not found in the graph.\n     * @throws NullPointerException if vertex is <code>null</code>.\n     */\n    public Set<E> edgesOf(V vertex);\n\n    /**\n     * Removes all the edges in this graph that are also contained in the\n     * specified edge collection. After this call returns, this graph will\n     * contain no edges in common with the specified edges. This method will\n     * invoke the {@link #removeEdge(Object)} method.\n     *\n     * @param edges edges to be removed from this graph.\n     *\n     * @return <tt>true</tt> if this graph changed as a result of the call\n     *\n     * @throws NullPointerException if the specified edge collection is <tt>\n     * null</tt>.\n     *\n     * @see #removeEdge(Object)\n     * @see #containsEdge(Object)\n     */\n    public boolean removeAllEdges(Collection<? extends E> edges);\n\n    /**\n     * Removes all the edges going from the specified source vertex to the\n     * specified target vertex, and returns a set of all removed edges. Returns\n     * <code>null</code> if any of the specified vertices does not exist in the\n     * graph. If both vertices exist but no edge is found, returns an empty set.\n     * This method will either invoke the {@link #removeEdge(Object)} method, or\n     * the {@link #removeEdge(Object, Object)} method.\n     *\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     *\n     * @return the removed edges, or <code>null</code> if either vertex is not\n     * part of graph\n     */\n    public Set<E> removeAllEdges(V sourceVertex, V targetVertex);\n\n    /**\n     * Removes all the vertices in this graph that are also contained in the\n     * specified vertex collection. After this call returns, this graph will\n     * contain no vertices in common with the specified vertices. This method\n     * will invoke the {@link #removeVertex(Object)} method.\n     *\n     * @param vertices vertices to be removed from this graph.\n     *\n     * @return <tt>true</tt> if this graph changed as a result of the call\n     *\n     * @throws NullPointerException if the specified vertex collection is <tt>\n     * null</tt>.\n     *\n     * @see #removeVertex(Object)\n     * @see #containsVertex(Object)\n     */\n    public boolean removeAllVertices(Collection<? extends V> vertices);\n\n    /**\n     * Removes an edge going from source vertex to target vertex, if such\n     * vertices and such edge exist in this graph. Returns the edge if removed\n     * or <code>null</code> otherwise.\n     *\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     *\n     * @return The removed edge, or <code>null</code> if no edge removed.\n     */\n    public E removeEdge(V sourceVertex, V targetVertex);\n\n    /**\n     * Removes the specified edge from the graph. Removes the specified edge\n     * from this graph if it is present. More formally, removes an edge <code>\n     * e2</code> such that <code>e2.equals(e)</code>, if the graph contains such\n     * edge. Returns <tt>true</tt> if the graph contained the specified edge.\n     * (The graph will not contain the specified edge once the call returns).\n     *\n     * <p>If the specified edge is <code>null</code> returns <code>\n     * false</code>.</p>\n     *\n     * @param e edge to be removed from this graph, if present.\n     *\n     * @return <code>true</code> if and only if the graph contained the\n     * specified edge.\n     */\n    public boolean removeEdge(E e);\n\n    /**\n     * Removes the specified vertex from this graph including all its touching\n     * edges if present. More formally, if the graph contains a vertex <code>\n     * u</code> such that <code>u.equals(v)</code>, the call removes all edges\n     * that touch <code>u</code> and then removes <code>u</code> itself. If no\n     * such <code>u</code> is found, the call leaves the graph unchanged.\n     * Returns <tt>true</tt> if the graph contained the specified vertex. (The\n     * graph will not contain the specified vertex once the call returns).\n     *\n     * <p>If the specified vertex is <code>null</code> returns <code>\n     * false</code>.</p>\n     *\n     * @param v vertex to be removed from this graph, if present.\n     *\n     * @return <code>true</code> if the graph contained the specified vertex;\n     * <code>false</code> otherwise.\n     */\n    public boolean removeVertex(V v);\n\n    /**\n     * Returns a set of the vertices contained in this graph. The set is backed\n     * by the graph, so changes to the graph are reflected in the set. If the\n     * graph is modified while an iteration over the set is in progress, the\n     * results of the iteration are undefined.\n     *\n     * <p>The graph implementation may maintain a particular set ordering (e.g.\n     * via {@link java.util.LinkedHashSet}) for deterministic iteration, but\n     * this is not required. It is the responsibility of callers who rely on\n     * this behavior to only use graph implementations which support it.</p>\n     *\n     * @return a set view of the vertices contained in this graph.\n     */\n    public Set<V> vertexSet();\n\n    /**\n     * Returns the source vertex of an edge. For an undirected graph, source and\n     * target are distinguishable designations (but without any mathematical\n     * meaning).\n     *\n     * @param e edge of interest\n     *\n     * @return source vertex\n     */\n    public V getEdgeSource(E e);\n\n    /**\n     * Returns the target vertex of an edge. For an undirected graph, source and\n     * target are distinguishable designations (but without any mathematical\n     * meaning).\n     *\n     * @param e edge of interest\n     *\n     * @return target vertex\n     */\n    public V getEdgeTarget(E e);\n\n    /**\n     * Returns the weight assigned to a given edge. Unweighted graphs return 1.0\n     * (as defined by {@link WeightedGraph#DEFAULT_EDGE_WEIGHT}), allowing\n     * weighted-graph algorithms to apply to them where meaningful.\n     *\n     * @param e edge of interest\n     *\n     * @return edge weight\n     *\n     * @see WeightedGraph\n     */\n    public double getEdgeWeight(E e);\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "getAllEdges",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * Returns a set of all edges connecting source vertex to target vertex if\n * such vertices exist in this graph. If any of the vertices does not exist\n * or is <code>null</code>, returns <code>null</code>. If both vertices\n * exist but no edges found, returns an empty set.\n *\n * <p>In undirected graphs, some of the returned edges may have their source\n * and target vertices in the opposite order. In simple graphs the returned\n * set is either singleton set or empty set.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return a set of all edges connecting source vertex to target vertex.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a set of all edges connecting source vertex to target vertex."
+          }
+        ],
+        "code": "/**\n * Returns a set of all edges connecting source vertex to target vertex if\n * such vertices exist in this graph. If any of the vertices does not exist\n * or is <code>null</code>, returns <code>null</code>. If both vertices\n * exist but no edges found, returns an empty set.\n *\n * <p>In undirected graphs, some of the returned edges may have their source\n * and target vertices in the opposite order. In simple graphs the returned\n * set is either singleton set or empty set.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return a set of all edges connecting source vertex to target vertex.\n */\npublic Set<E> getAllEdges(V sourceVertex, V targetVertex);"
+      },
+      {
+        "type": "method",
+        "name": "getEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * Returns an edge connecting source vertex to target vertex if such\n * vertices and such edge exist in this graph. Otherwise returns <code>\n * null</code>. If any of the specified vertices is <code>null</code>\n * returns <code>null</code>\n *\n * <p>In undirected graphs, the returned edge may have its source and target\n * vertices in the opposite order.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return an edge connecting source vertex to target vertex.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "an edge connecting source vertex to target vertex."
+          }
+        ],
+        "code": "/**\n * Returns an edge connecting source vertex to target vertex if such\n * vertices and such edge exist in this graph. Otherwise returns <code>\n * null</code>. If any of the specified vertices is <code>null</code>\n * returns <code>null</code>\n *\n * <p>In undirected graphs, the returned edge may have its source and target\n * vertices in the opposite order.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return an edge connecting source vertex to target vertex.\n */\npublic E getEdge(V sourceVertex, V targetVertex);"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeFactory",
+        "return_type": {
+          "qualified_name": "org.jgrapht.EdgeFactory",
+          "simple_name": "EdgeFactory",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the edge factory using which this graph creates new edges. The\n * edge factory is defined when the graph is constructed and must not be\n * modified.\n *\n * @return the edge factory using which this graph creates new edges.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the edge factory using which this graph creates new edges."
+          }
+        ],
+        "code": "/**\n * Returns the edge factory using which this graph creates new edges. The\n * edge factory is defined when the graph is constructed and must not be\n * modified.\n *\n * @return the edge factory using which this graph creates new edges.\n */\npublic EdgeFactory<V, E> getEdgeFactory();"
+      },
+      {
+        "type": "method",
+        "name": "addEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new edge in this graph, going from the source vertex to the\n * target vertex, and returns the created edge. Some graphs do not allow\n * edge-multiplicity. In such cases, if the graph already contains an edge\n * from the specified source to the specified target, than this method does\n * not change the graph and returns <code>null</code>.\n *\n * <p>The source and target vertices must already be contained in this\n * graph. If they are not found in graph IllegalArgumentException is\n * thrown.</p>\n *\n * <p>This method creates the new edge <code>e</code> using this graph's\n * <code>EdgeFactory</code>. For the new edge to be added <code>e</code>\n * must <i>not</i> be equal to any other edge the graph (even if the graph\n * allows edge-multiplicity). More formally, the graph must not contain any\n * edge <code>e2</code> such that <code>e2.equals(e)</code>. If such <code>\n * e2</code> is found then the newly created edge <code>e</code> is\n * abandoned, the method leaves this graph unchanged returns <code>\n * null</code>.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n *\n * @throws IllegalArgumentException if source or target vertices are not\n * found in the graph.\n * @throws NullPointerException if any of the specified vertices is <code>\n * null</code>.\n *\n * @see #getEdgeFactory()\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The newly created edge if added to the graph, otherwise <code>\nnull</code>."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if source or target vertices are not\nfound in the graph."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any of the specified vertices is <code>\nnull</code>."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#getEdgeFactory()"
+          }
+        ],
+        "code": "/**\n * Creates a new edge in this graph, going from the source vertex to the\n * target vertex, and returns the created edge. Some graphs do not allow\n * edge-multiplicity. In such cases, if the graph already contains an edge\n * from the specified source to the specified target, than this method does\n * not change the graph and returns <code>null</code>.\n *\n * <p>The source and target vertices must already be contained in this\n * graph. If they are not found in graph IllegalArgumentException is\n * thrown.</p>\n *\n * <p>This method creates the new edge <code>e</code> using this graph's\n * <code>EdgeFactory</code>. For the new edge to be added <code>e</code>\n * must <i>not</i> be equal to any other edge the graph (even if the graph\n * allows edge-multiplicity). More formally, the graph must not contain any\n * edge <code>e2</code> such that <code>e2.equals(e)</code>. If such <code>\n * e2</code> is found then the newly created edge <code>e</code> is\n * abandoned, the method leaves this graph unchanged returns <code>\n * null</code>.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n *\n * @throws IllegalArgumentException if source or target vertices are not\n * found in the graph.\n * @throws NullPointerException if any of the specified vertices is <code>\n * null</code>.\n *\n * @see #getEdgeFactory()\n */\npublic E addEdge(V sourceVertex, V targetVertex);"
+      },
+      {
+        "type": "method",
+        "name": "addEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * Adds the specified edge to this graph, going from the source vertex to\n * the target vertex. More formally, adds the specified edge, <code>\n * e</code>, to this graph if this graph contains no edge <code>e2</code>\n * such that <code>e2.equals(e)</code>. If this graph already contains such\n * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.\n * Some graphs do not allow edge-multiplicity. In such cases, if the graph\n * already contains an edge from the specified source to the specified\n * target, than this method does not change the graph and returns <code>\n * false</code>. If the edge was added to the graph, returns <code>\n * true</code>.\n *\n * <p>The source and target vertices must already be contained in this\n * graph. If they are not found in graph IllegalArgumentException is\n * thrown.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n * @param e edge to be added to this graph.\n *\n * @return <tt>true</tt> if this graph did not already contain the specified\n * edge.\n *\n * @throws IllegalArgumentException if source or target vertices are not\n * found in the graph.\n * @throws ClassCastException if the specified edge is not assignment\n * compatible with the class of edges produced by the edge factory of this\n * graph.\n * @throws NullPointerException if any of the specified vertices is <code>\n * null</code>.\n *\n * @see #addEdge(Object, Object)\n * @see #getEdgeFactory()\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge to be added to this graph."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph did not already contain the specified\nedge."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if source or target vertices are not\nfound in the graph."
+          },
+          {
+            "tag": "throws",
+            "name": "ClassCastException",
+            "content": "if the specified edge is not assignment\ncompatible with the class of edges produced by the edge factory of this\ngraph."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any of the specified vertices is <code>\nnull</code>."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#addEdge(Object, Object)"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#getEdgeFactory()"
+          }
+        ],
+        "code": "/**\n * Adds the specified edge to this graph, going from the source vertex to\n * the target vertex. More formally, adds the specified edge, <code>\n * e</code>, to this graph if this graph contains no edge <code>e2</code>\n * such that <code>e2.equals(e)</code>. If this graph already contains such\n * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.\n * Some graphs do not allow edge-multiplicity. In such cases, if the graph\n * already contains an edge from the specified source to the specified\n * target, than this method does not change the graph and returns <code>\n * false</code>. If the edge was added to the graph, returns <code>\n * true</code>.\n *\n * <p>The source and target vertices must already be contained in this\n * graph. If they are not found in graph IllegalArgumentException is\n * thrown.</p>\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n * @param e edge to be added to this graph.\n *\n * @return <tt>true</tt> if this graph did not already contain the specified\n * edge.\n *\n * @throws IllegalArgumentException if source or target vertices are not\n * found in the graph.\n * @throws ClassCastException if the specified edge is not assignment\n * compatible with the class of edges produced by the edge factory of this\n * graph.\n * @throws NullPointerException if any of the specified vertices is <code>\n * null</code>.\n *\n * @see #addEdge(Object, Object)\n * @see #getEdgeFactory()\n */\npublic boolean addEdge(V sourceVertex, V targetVertex, E e);"
+      },
+      {
+        "type": "method",
+        "name": "addVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Adds the specified vertex to this graph if not already present. More\n * formally, adds the specified vertex, <code>v</code>, to this graph if\n * this graph contains no vertex <code>u</code> such that <code>\n * u.equals(v)</code>. If this graph already contains such vertex, the call\n * leaves this graph unchanged and returns <tt>false</tt>. In combination\n * with the restriction on constructors, this ensures that graphs never\n * contain duplicate vertices.\n *\n * @param v vertex to be added to this graph.\n *\n * @return <tt>true</tt> if this graph did not already contain the specified\n * vertex.\n *\n * @throws NullPointerException if the specified vertex is <code>\n * null</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vertex to be added to this graph."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph did not already contain the specified\nvertex."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified vertex is <code>\nnull</code>."
+          }
+        ],
+        "code": "/**\n * Adds the specified vertex to this graph if not already present. More\n * formally, adds the specified vertex, <code>v</code>, to this graph if\n * this graph contains no vertex <code>u</code> such that <code>\n * u.equals(v)</code>. If this graph already contains such vertex, the call\n * leaves this graph unchanged and returns <tt>false</tt>. In combination\n * with the restriction on constructors, this ensures that graphs never\n * contain duplicate vertices.\n *\n * @param v vertex to be added to this graph.\n *\n * @return <tt>true</tt> if this graph did not already contain the specified\n * vertex.\n *\n * @throws NullPointerException if the specified vertex is <code>\n * null</code>.\n */\npublic boolean addVertex(V v);"
+      },
+      {
+        "type": "method",
+        "name": "containsEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * Returns <tt>true</tt> if and only if this graph contains an edge going\n * from the source vertex to the target vertex. In undirected graphs the\n * same result is obtained when source and target are inverted. If any of\n * the specified vertices does not exist in the graph, or if is <code>\n * null</code>, returns <code>false</code>.\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return <tt>true</tt> if this graph contains the specified edge.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph contains the specified edge."
+          }
+        ],
+        "code": "/**\n * Returns <tt>true</tt> if and only if this graph contains an edge going\n * from the source vertex to the target vertex. In undirected graphs the\n * same result is obtained when source and target are inverted. If any of\n * the specified vertices does not exist in the graph, or if is <code>\n * null</code>, returns <code>false</code>.\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return <tt>true</tt> if this graph contains the specified edge.\n */\npublic boolean containsEdge(V sourceVertex, V targetVertex);"
+      },
+      {
+        "type": "method",
+        "name": "containsEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * Returns <tt>true</tt> if this graph contains the specified edge. More\n * formally, returns <tt>true</tt> if and only if this graph contains an\n * edge <code>e2</code> such that <code>e.equals(e2)</code>. If the\n * specified edge is <code>null</code> returns <code>false</code>.\n *\n * @param e edge whose presence in this graph is to be tested.\n *\n * @return <tt>true</tt> if this graph contains the specified edge.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge whose presence in this graph is to be tested."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph contains the specified edge."
+          }
+        ],
+        "code": "/**\n * Returns <tt>true</tt> if this graph contains the specified edge. More\n * formally, returns <tt>true</tt> if and only if this graph contains an\n * edge <code>e2</code> such that <code>e.equals(e2)</code>. If the\n * specified edge is <code>null</code> returns <code>false</code>.\n *\n * @param e edge whose presence in this graph is to be tested.\n *\n * @return <tt>true</tt> if this graph contains the specified edge.\n */\npublic boolean containsEdge(E e);"
+      },
+      {
+        "type": "method",
+        "name": "containsVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Returns <tt>true</tt> if this graph contains the specified vertex. More\n * formally, returns <tt>true</tt> if and only if this graph contains a\n * vertex <code>u</code> such that <code>u.equals(v)</code>. If the\n * specified vertex is <code>null</code> returns <code>false</code>.\n *\n * @param v vertex whose presence in this graph is to be tested.\n *\n * @return <tt>true</tt> if this graph contains the specified vertex.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vertex whose presence in this graph is to be tested."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph contains the specified vertex."
+          }
+        ],
+        "code": "/**\n * Returns <tt>true</tt> if this graph contains the specified vertex. More\n * formally, returns <tt>true</tt> if and only if this graph contains a\n * vertex <code>u</code> such that <code>u.equals(v)</code>. If the\n * specified vertex is <code>null</code> returns <code>false</code>.\n *\n * @param v vertex whose presence in this graph is to be tested.\n *\n * @return <tt>true</tt> if this graph contains the specified vertex.\n */\npublic boolean containsVertex(V v);"
+      },
+      {
+        "type": "method",
+        "name": "edgeSet",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a set of the edges contained in this graph. The set is backed by\n * the graph, so changes to the graph are reflected in the set. If the graph\n * is modified while an iteration over the set is in progress, the results\n * of the iteration are undefined.\n *\n * <p>The graph implementation may maintain a particular set ordering (e.g.\n * via {@link java.util.LinkedHashSet}) for deterministic iteration, but\n * this is not required. It is the responsibility of callers who rely on\n * this behavior to only use graph implementations which support it.</p>\n *\n * @return a set of the edges contained in this graph.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a set of the edges contained in this graph."
+          }
+        ],
+        "code": "/**\n * Returns a set of the edges contained in this graph. The set is backed by\n * the graph, so changes to the graph are reflected in the set. If the graph\n * is modified while an iteration over the set is in progress, the results\n * of the iteration are undefined.\n *\n * <p>The graph implementation may maintain a particular set ordering (e.g.\n * via {@link java.util.LinkedHashSet}) for deterministic iteration, but\n * this is not required. It is the responsibility of callers who rely on\n * this behavior to only use graph implementations which support it.</p>\n *\n * @return a set of the edges contained in this graph.\n */\npublic Set<E> edgeSet();"
+      },
+      {
+        "type": "method",
+        "name": "edgesOf",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * Returns a set of all edges touching the specified vertex. If no edges are\n * touching the specified vertex returns an empty set.\n *\n * @param vertex the vertex for which a set of touching edges is to be\n * returned.\n *\n * @return a set of all edges touching the specified vertex.\n *\n * @throws IllegalArgumentException if vertex is not found in the graph.\n * @throws NullPointerException if vertex is <code>null</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "vertex",
+            "content": "the vertex for which a set of touching edges is to be\nreturned."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a set of all edges touching the specified vertex."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if vertex is not found in the graph."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if vertex is <code>null</code>."
+          }
+        ],
+        "code": "/**\n * Returns a set of all edges touching the specified vertex. If no edges are\n * touching the specified vertex returns an empty set.\n *\n * @param vertex the vertex for which a set of touching edges is to be\n * returned.\n *\n * @return a set of all edges touching the specified vertex.\n *\n * @throws IllegalArgumentException if vertex is not found in the graph.\n * @throws NullPointerException if vertex is <code>null</code>.\n */\npublic Set<E> edgesOf(V vertex);"
+      },
+      {
+        "type": "method",
+        "name": "removeAllEdges",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.util.Collection",
+              "simple_name": "Collection",
+              "is_array": false
+            },
+            "name": "edges"
+          }
+        ],
+        "javadoc": "/**\n * Removes all the edges in this graph that are also contained in the\n * specified edge collection. After this call returns, this graph will\n * contain no edges in common with the specified edges. This method will\n * invoke the {@link #removeEdge(Object)} method.\n *\n * @param edges edges to be removed from this graph.\n *\n * @return <tt>true</tt> if this graph changed as a result of the call\n *\n * @throws NullPointerException if the specified edge collection is <tt>\n * null</tt>.\n *\n * @see #removeEdge(Object)\n * @see #containsEdge(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "edges",
+            "content": "edges to be removed from this graph."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph changed as a result of the call"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified edge collection is <tt>\nnull</tt>."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#removeEdge(Object)"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#containsEdge(Object)"
+          }
+        ],
+        "code": "/**\n * Removes all the edges in this graph that are also contained in the\n * specified edge collection. After this call returns, this graph will\n * contain no edges in common with the specified edges. This method will\n * invoke the {@link #removeEdge(Object)} method.\n *\n * @param edges edges to be removed from this graph.\n *\n * @return <tt>true</tt> if this graph changed as a result of the call\n *\n * @throws NullPointerException if the specified edge collection is <tt>\n * null</tt>.\n *\n * @see #removeEdge(Object)\n * @see #containsEdge(Object)\n */\npublic boolean removeAllEdges(Collection<? extends E> edges);"
+      },
+      {
+        "type": "method",
+        "name": "removeAllEdges",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * Removes all the edges going from the specified source vertex to the\n * specified target vertex, and returns a set of all removed edges. Returns\n * <code>null</code> if any of the specified vertices does not exist in the\n * graph. If both vertices exist but no edge is found, returns an empty set.\n * This method will either invoke the {@link #removeEdge(Object)} method, or\n * the {@link #removeEdge(Object, Object)} method.\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return the removed edges, or <code>null</code> if either vertex is not\n * part of graph\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the removed edges, or <code>null</code> if either vertex is not\npart of graph"
+          }
+        ],
+        "code": "/**\n * Removes all the edges going from the specified source vertex to the\n * specified target vertex, and returns a set of all removed edges. Returns\n * <code>null</code> if any of the specified vertices does not exist in the\n * graph. If both vertices exist but no edge is found, returns an empty set.\n * This method will either invoke the {@link #removeEdge(Object)} method, or\n * the {@link #removeEdge(Object, Object)} method.\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return the removed edges, or <code>null</code> if either vertex is not\n * part of graph\n */\npublic Set<E> removeAllEdges(V sourceVertex, V targetVertex);"
+      },
+      {
+        "type": "method",
+        "name": "removeAllVertices",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.util.Collection",
+              "simple_name": "Collection",
+              "is_array": false
+            },
+            "name": "vertices"
+          }
+        ],
+        "javadoc": "/**\n * Removes all the vertices in this graph that are also contained in the\n * specified vertex collection. After this call returns, this graph will\n * contain no vertices in common with the specified vertices. This method\n * will invoke the {@link #removeVertex(Object)} method.\n *\n * @param vertices vertices to be removed from this graph.\n *\n * @return <tt>true</tt> if this graph changed as a result of the call\n *\n * @throws NullPointerException if the specified vertex collection is <tt>\n * null</tt>.\n *\n * @see #removeVertex(Object)\n * @see #containsVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "vertices",
+            "content": "vertices to be removed from this graph."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph changed as a result of the call"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified vertex collection is <tt>\nnull</tt>."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#removeVertex(Object)"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#containsVertex(Object)"
+          }
+        ],
+        "code": "/**\n * Removes all the vertices in this graph that are also contained in the\n * specified vertex collection. After this call returns, this graph will\n * contain no vertices in common with the specified vertices. This method\n * will invoke the {@link #removeVertex(Object)} method.\n *\n * @param vertices vertices to be removed from this graph.\n *\n * @return <tt>true</tt> if this graph changed as a result of the call\n *\n * @throws NullPointerException if the specified vertex collection is <tt>\n * null</tt>.\n *\n * @see #removeVertex(Object)\n * @see #containsVertex(Object)\n */\npublic boolean removeAllVertices(Collection<? extends V> vertices);"
+      },
+      {
+        "type": "method",
+        "name": "removeEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * Removes an edge going from source vertex to target vertex, if such\n * vertices and such edge exist in this graph. Returns the edge if removed\n * or <code>null</code> otherwise.\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return The removed edge, or <code>null</code> if no edge removed.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The removed edge, or <code>null</code> if no edge removed."
+          }
+        ],
+        "code": "/**\n * Removes an edge going from source vertex to target vertex, if such\n * vertices and such edge exist in this graph. Returns the edge if removed\n * or <code>null</code> otherwise.\n *\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return The removed edge, or <code>null</code> if no edge removed.\n */\npublic E removeEdge(V sourceVertex, V targetVertex);"
+      },
+      {
+        "type": "method",
+        "name": "removeEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * Removes the specified edge from the graph. Removes the specified edge\n * from this graph if it is present. More formally, removes an edge <code>\n * e2</code> such that <code>e2.equals(e)</code>, if the graph contains such\n * edge. Returns <tt>true</tt> if the graph contained the specified edge.\n * (The graph will not contain the specified edge once the call returns).\n *\n * <p>If the specified edge is <code>null</code> returns <code>\n * false</code>.</p>\n *\n * @param e edge to be removed from this graph, if present.\n *\n * @return <code>true</code> if and only if the graph contained the\n * specified edge.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge to be removed from this graph, if present."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<code>true</code> if and only if the graph contained the\nspecified edge."
+          }
+        ],
+        "code": "/**\n * Removes the specified edge from the graph. Removes the specified edge\n * from this graph if it is present. More formally, removes an edge <code>\n * e2</code> such that <code>e2.equals(e)</code>, if the graph contains such\n * edge. Returns <tt>true</tt> if the graph contained the specified edge.\n * (The graph will not contain the specified edge once the call returns).\n *\n * <p>If the specified edge is <code>null</code> returns <code>\n * false</code>.</p>\n *\n * @param e edge to be removed from this graph, if present.\n *\n * @return <code>true</code> if and only if the graph contained the\n * specified edge.\n */\npublic boolean removeEdge(E e);"
+      },
+      {
+        "type": "method",
+        "name": "removeVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Removes the specified vertex from this graph including all its touching\n * edges if present. More formally, if the graph contains a vertex <code>\n * u</code> such that <code>u.equals(v)</code>, the call removes all edges\n * that touch <code>u</code> and then removes <code>u</code> itself. If no\n * such <code>u</code> is found, the call leaves the graph unchanged.\n * Returns <tt>true</tt> if the graph contained the specified vertex. (The\n * graph will not contain the specified vertex once the call returns).\n *\n * <p>If the specified vertex is <code>null</code> returns <code>\n * false</code>.</p>\n *\n * @param v vertex to be removed from this graph, if present.\n *\n * @return <code>true</code> if the graph contained the specified vertex;\n * <code>false</code> otherwise.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vertex to be removed from this graph, if present."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<code>true</code> if the graph contained the specified vertex;\n<code>false</code> otherwise."
+          }
+        ],
+        "code": "/**\n * Removes the specified vertex from this graph including all its touching\n * edges if present. More formally, if the graph contains a vertex <code>\n * u</code> such that <code>u.equals(v)</code>, the call removes all edges\n * that touch <code>u</code> and then removes <code>u</code> itself. If no\n * such <code>u</code> is found, the call leaves the graph unchanged.\n * Returns <tt>true</tt> if the graph contained the specified vertex. (The\n * graph will not contain the specified vertex once the call returns).\n *\n * <p>If the specified vertex is <code>null</code> returns <code>\n * false</code>.</p>\n *\n * @param v vertex to be removed from this graph, if present.\n *\n * @return <code>true</code> if the graph contained the specified vertex;\n * <code>false</code> otherwise.\n */\npublic boolean removeVertex(V v);"
+      },
+      {
+        "type": "method",
+        "name": "vertexSet",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a set of the vertices contained in this graph. The set is backed\n * by the graph, so changes to the graph are reflected in the set. If the\n * graph is modified while an iteration over the set is in progress, the\n * results of the iteration are undefined.\n *\n * <p>The graph implementation may maintain a particular set ordering (e.g.\n * via {@link java.util.LinkedHashSet}) for deterministic iteration, but\n * this is not required. It is the responsibility of callers who rely on\n * this behavior to only use graph implementations which support it.</p>\n *\n * @return a set view of the vertices contained in this graph.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a set view of the vertices contained in this graph."
+          }
+        ],
+        "code": "/**\n * Returns a set of the vertices contained in this graph. The set is backed\n * by the graph, so changes to the graph are reflected in the set. If the\n * graph is modified while an iteration over the set is in progress, the\n * results of the iteration are undefined.\n *\n * <p>The graph implementation may maintain a particular set ordering (e.g.\n * via {@link java.util.LinkedHashSet}) for deterministic iteration, but\n * this is not required. It is the responsibility of callers who rely on\n * this behavior to only use graph implementations which support it.</p>\n *\n * @return a set view of the vertices contained in this graph.\n */\npublic Set<V> vertexSet();"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeSource",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * Returns the source vertex of an edge. For an undirected graph, source and\n * target are distinguishable designations (but without any mathematical\n * meaning).\n *\n * @param e edge of interest\n *\n * @return source vertex\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge of interest"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "source vertex"
+          }
+        ],
+        "code": "/**\n * Returns the source vertex of an edge. For an undirected graph, source and\n * target are distinguishable designations (but without any mathematical\n * meaning).\n *\n * @param e edge of interest\n *\n * @return source vertex\n */\npublic V getEdgeSource(E e);"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeTarget",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * Returns the target vertex of an edge. For an undirected graph, source and\n * target are distinguishable designations (but without any mathematical\n * meaning).\n *\n * @param e edge of interest\n *\n * @return target vertex\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge of interest"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "target vertex"
+          }
+        ],
+        "code": "/**\n * Returns the target vertex of an edge. For an undirected graph, source and\n * target are distinguishable designations (but without any mathematical\n * meaning).\n *\n * @param e edge of interest\n *\n * @return target vertex\n */\npublic V getEdgeTarget(E e);"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeWeight",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * Returns the weight assigned to a given edge. Unweighted graphs return 1.0\n * (as defined by {@link WeightedGraph#DEFAULT_EDGE_WEIGHT}), allowing\n * weighted-graph algorithms to apply to them where meaningful.\n *\n * @param e edge of interest\n *\n * @return edge weight\n *\n * @see WeightedGraph\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge of interest"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "edge weight"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "WeightedGraph"
+          }
+        ],
+        "code": "/**\n * Returns the weight assigned to a given edge. Unweighted graphs return 1.0\n * (as defined by {@link WeightedGraph#DEFAULT_EDGE_WEIGHT}), allowing\n * weighted-graph algorithms to apply to them where meaningful.\n *\n * @param e edge of interest\n *\n * @return edge weight\n *\n * @see WeightedGraph\n */\npublic double getEdgeWeight(E e);"
+      }
+    ]
+  }
+]

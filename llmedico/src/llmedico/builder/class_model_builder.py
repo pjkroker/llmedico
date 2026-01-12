@@ -9,15 +9,16 @@ class ClassModelBuilder:
             for tag in method_data["tags"]:
                 if tag["tag"] == selected_tag and ConditionKind.is_condition_kind(tag["tag"]):
                     condition = Condition(kind=ConditionKind(tag["tag"].upper()),
-                                          expression=tag["assertion"],
+                                          expression=tag.get("assertion", ""),
                                           content=tag["content"],
-                                          description=tag["description"])
+                                          description=tag.get("description", ""))
                     if type(tag["name"]) == str: condition.name = tag["name"]
                     else: condition.name = None #return type has no name
                     conditions.append(condition)
         return conditions
 
     def _build_type(self, parameter_data: dict) -> TypeModel:
+        print(parameter_data)
         type_model = TypeModel(qualified_name=parameter_data["type"]["qualified_name"],
                                simple_name=parameter_data["type"]["simple_name"],
                                is_array=parameter_data["type"]["is_array"])

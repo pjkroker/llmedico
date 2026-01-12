@@ -5,7 +5,7 @@ from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import (
     Expr, And as AstAnd, Or as AstOr, Not as AstNot,
     Var, IntConst, Compare, UnaryMinus, Add, Sub, Mul, BoolConst, Type, Div, Mod as AstMod, expect, NullConst, Method,
-    INT_RETURN_METHODS, Conditional, BOOL_RETURN_METHODS,
+    INT_RETURN_METHODS, Conditional, BOOL_RETURN_METHODS, MATCH_METHODS, LambdaExpr, InstanceOf,
 )
 from llmedico.z3_evaluation.z3_context import Z3Context
 
@@ -27,8 +27,29 @@ class Z3Translator:
         if self.var_types[name] != expected:
             raise TypeError(
                 f"Variable '{name}' used as both "
-                f"{self.var_types[name]} and {expected}"
-            )
+                f"{self.var_types[name]} and {expected}")
+
+    def _infer_lambda_param_type(self, body: Expr) -> Type | None:
+        """
+        Infer the type of a lambda parameter from its body.
+        Currently supports INT inference only.
+        """
+        if isinstance(body, Compare):
+            if body.op in {"<", "<=", ">", ">="}:
+                return Type.INT
+
+        if isinstance(body, (Add, Sub, Mul, Div, AstMod)):
+            return Type.INT
+
+        # recurse if needed
+        if isinstance(body, (AstAnd, AstOr)):
+            return self._infer_lambda_param_type(body.left) or \
+                self._infer_lambda_param_type(body.right)
+
+        if isinstance(body, AstNot):
+            return self._infer_lambda_param_type(body.expr)
+
+        return None
 
     def translate(self, expr: Expr) -> BoolRef:
         if isinstance(expr, AstAnd):
@@ -49,6 +70,11 @@ class Z3Translator:
             return Not(self.translate(expr.expr))
 
         if isinstance(expr, Var):
+            #for lambda
+            bound = self.ctx.lookup(expr.name)
+            if bound is not None:
+                return bound
+
             t = self.var_types.get(expr.name)
             if t == Type.INT:
                 return self.ctx.int(expr.name)
@@ -59,7 +85,7 @@ class Z3Translator:
             t = self.var_types.get(expr.name)
             # if t is None:
             #     raise RuntimeError(f"Uninferred variable: {expr.name}")
-            return self.ctx.ref(expr.name) #default: unresolved vars are reference-like objects TODO check if this makes sense
+            return self.ctx.ref(expr.name) #default: unresolved vars are reference-like objects
 
         if isinstance(expr, NullConst):
             return self.ctx.null()
@@ -108,7 +134,47 @@ class Z3Translator:
             return l % r #Mod(l, r)
 
         if isinstance(expr, Method):
+            #for lambda
+            if expr.name == "stream" and len(expr.parameters) == 0:
+                return self.translate(expr.receiver)
+            # anyMatch / allMatch / noneMatch
+            if expr.name in MATCH_METHODS:
+                if len(expr.parameters) != 1 or not isinstance(expr.parameters[0], LambdaExpr):
+                    raise TypeError(f"{expr.name} expects a single lambda")
 
+                collection = self.translate(expr.receiver)
+                lam: LambdaExpr = expr.parameters[0]
+
+                # fresh index variable
+                i = self.ctx.fresh_int("i")
+
+                # infer lambda parameter type
+                param_type = self._infer_lambda_param_type(lam.body)
+
+                # choose element sort accordingly
+                if param_type == Type.INT:
+                    elem = self.ctx.select_int(collection, i)
+                else:
+                    elem = self.ctx.select(collection, i)
+
+                self.ctx.push_env()
+                self.ctx.bind(lam.param, elem)
+                predicate = self.translate(lam.body)
+                self.ctx.pop_env()
+
+                length = self.ctx.length(collection)
+                in_bounds = And(i >= 0, i < length)
+
+                if expr.name == "anyMatch":
+                    return Exists([i], And(in_bounds, predicate))
+
+                if expr.name == "allMatch":
+                    return ForAll([i], Implies(in_bounds, predicate))
+
+                if expr.name == "noneMatch":
+                    return Not(Exists([i], And(in_bounds, predicate)))
+
+            #regular Methods
             # arguments: infer from context if possible
             for arg in expr.parameters:
                 if isinstance(arg, Var):
@@ -127,10 +193,7 @@ class Z3Translator:
                 all_args = args
                 arg_sorts = [a.sort() for a in args]
 
-            # =====================
             # return type handling
-            # =====================
-
             # numeric-returning methods (e.g. size(x))
 
             if expr.name in INT_RETURN_METHODS:
@@ -225,3 +288,15 @@ class Z3Translator:
             e = self.translate(expr.otherwise)
 
             return If(c, t, e)
+
+        if isinstance(expr, InstanceOf):
+            expect(expr.expr, Type.REF, self)
+            obj = self.translate(expr.expr)
+
+            f = self.ctx.get_func(
+                f"instanceof_{expr.type_name.replace('.', '_')}",
+                [obj.sort()],
+                BoolSort()
+            )
+            return f(obj)
+

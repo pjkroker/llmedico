@@ -37,8 +37,36 @@ class StringParser:
         self.pos += 1
         return tok
 
-    #?
+    def _parse_type_name(self) -> str:
+        parts = [self.consume()]
+        while self.peek() == ".":
+            self.consume(".")
+            parts.append(self.consume())
+        return ".".join(parts)
+
+    def _is_lambda_start(self) -> bool:
+        tok = self.peek()
+        return (tok is not None and tok.isidentifier()
+                and self.pos + 1 < len(self.tokens) and self.tokens[self.pos + 1] == "->")
+    def _parse_lambda(self) -> Expr:
+        #param -> body
+        param = self.consume()
+        if not param.isidentifier():
+            raise ParseError("Expected identifier as lambda parameter")
+
+        self.consume("->")
+
+        body = self.parse_expr()
+        return LambdaExpr(param=param, body=body)
+    #lamda
     def parse_expr(self) -> Expr:
+        # Lambda has lowest precedence: IDENT -> expr
+        if self._is_lambda_start():
+            return self._parse_lambda()
+        return self._parse_terniary()
+
+    #?
+    def _parse_terniary(self) -> Expr:
         expr = self._parse_or()
         if self.peek() == "?":
             self.consume("?")
@@ -68,7 +96,9 @@ class StringParser:
     def _parse_cmp(self) -> Expr:
         left = self._parse_add()
         if self.peek() == "instanceof":
-            raise ParseError("The 'instanceof' operator is not supported")
+            self.consume("instanceof")
+            type_name = self._parse_type_name()
+            return InstanceOf(left, type_name)
         while self.peek() in {"==", "!=", "<", "<=", ">", ">="}:
             op = self.consume()
             right = self._parse_add()
@@ -143,7 +173,7 @@ class StringParser:
                 self.consume("(")
                 args = self._parse_args()
                 self.consume(")")
-                return Method(receiver=None, name=tok, parameters=args)
+                expr = Method(receiver=None, name=tok, parameters=args)
             else:
                 expr = Var(tok)
             return self._parse_postfix(expr)
@@ -178,11 +208,14 @@ class StringParser:
             if not name.isidentifier():
                 raise ParseError("Expected method name after '.'")
 
-            self.consume("(")
-            args = self._parse_args()
-            self.consume(")")
-
-            expr = Method(receiver=expr, name=name, parameters=args)
+            #If followed by '(', it's a method call: a.b(...)
+            if self.peek() == "(":
+                self.consume("(")
+                args = self._parse_args()
+                self.consume(")")
+                expr = Method(receiver=expr, name=name, parameters=args)
+            else: #Otherwise it's a field access: a.b
+                expr = Method(receiver=expr, name=name, parameters=[])
 
         return expr
 

@@ -1,0 +1,727 @@
+[
+  {
+    "name": "GraphDelegator",
+    "package": "org.jgrapht.graph",
+    "qualified_name": "org.jgrapht.graph.GraphDelegator",
+    "javadoc": "/**\n * A graph backed by the the graph specified at the constructor, which delegates\n * all its methods to the backing graph. Operations on this graph \"pass through\"\n * to the to the backing graph. Any modification made to this graph or the\n * backing graph is reflected by the other.\n *\n * <p>This graph does <i>not</i> pass the hashCode and equals operations through\n * to the backing graph, but relies on <tt>Object</tt>'s <tt>equals</tt> and\n * <tt>hashCode</tt> methods.</p>\n *\n * <p>This class is mostly used as a base for extending subclasses.</p>\n *\n * @author Barak Naveh\n * @since Jul 20, 2003\n */\n",
+    "code": "/**\n * A graph backed by the the graph specified at the constructor, which delegates\n * all its methods to the backing graph. Operations on this graph \"pass through\"\n * to the to the backing graph. Any modification made to this graph or the\n * backing graph is reflected by the other.\n *\n * <p>This graph does <i>not</i> pass the hashCode and equals operations through\n * to the backing graph, but relies on <tt>Object</tt>'s <tt>equals</tt> and\n * <tt>hashCode</tt> methods.</p>\n *\n * <p>This class is mostly used as a base for extending subclasses.</p>\n *\n * @author Barak Naveh\n * @since Jul 20, 2003\n */\npublic class GraphDelegator<V, E> extends AbstractGraph<V, E> implements Graph<V, E>, Serializable {\n\n    private static final long serialVersionUID = 3257005445226181425L;\n\n    /**\n     * The graph to which operations are delegated.\n     */\n    private Graph<V, E> delegate;\n\n    /**\n     * Constructor for GraphDelegator.\n     *\n     * @param g the backing graph (the delegate).\n     *\n     * @throws IllegalArgumentException iff <code>g==null</code>\n     */\n    public GraphDelegator(Graph<V, E> g) {\n        super();\n        if (g == null) {\n            throw new IllegalArgumentException(\"g must not be null.\");\n        }\n        delegate = g;\n    }\n\n    /**\n     * @see Graph#getAllEdges(Object, Object)\n     */\n    @Override\n    public Set<E> getAllEdges(V sourceVertex, V targetVertex) {\n        return delegate.getAllEdges(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#getEdge(Object, Object)\n     */\n    @Override\n    public E getEdge(V sourceVertex, V targetVertex) {\n        return delegate.getEdge(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#getEdgeFactory()\n     */\n    @Override\n    public EdgeFactory<V, E> getEdgeFactory() {\n        return delegate.getEdgeFactory();\n    }\n\n    /**\n     * @see Graph#addEdge(Object, Object)\n     */\n    @Override\n    public E addEdge(V sourceVertex, V targetVertex) {\n        return delegate.addEdge(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#addEdge(Object, Object, Object)\n     */\n    @Override\n    public boolean addEdge(V sourceVertex, V targetVertex, E e) {\n        return delegate.addEdge(sourceVertex, targetVertex, e);\n    }\n\n    /**\n     * @see Graph#addVertex(Object)\n     */\n    @Override\n    public boolean addVertex(V v) {\n        return delegate.addVertex(v);\n    }\n\n    /**\n     * @see Graph#containsEdge(Object)\n     */\n    @Override\n    public boolean containsEdge(E e) {\n        return delegate.containsEdge(e);\n    }\n\n    /**\n     * @see Graph#containsVertex(Object)\n     */\n    @Override\n    public boolean containsVertex(V v) {\n        return delegate.containsVertex(v);\n    }\n\n    /**\n     * @see UndirectedGraph#degreeOf(Object)\n     */\n    public int degreeOf(V vertex) {\n        return ((UndirectedGraph<V, E>) delegate).degreeOf(vertex);\n    }\n\n    /**\n     * @see Graph#edgeSet()\n     */\n    @Override\n    public Set<E> edgeSet() {\n        return delegate.edgeSet();\n    }\n\n    /**\n     * @see Graph#edgesOf(Object)\n     */\n    @Override\n    public Set<E> edgesOf(V vertex) {\n        return delegate.edgesOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#inDegreeOf(Object)\n     */\n    public int inDegreeOf(V vertex) {\n        return ((DirectedGraph<V, ? extends E>) delegate).inDegreeOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#incomingEdgesOf(Object)\n     */\n    public Set<E> incomingEdgesOf(V vertex) {\n        return ((DirectedGraph<V, E>) delegate).incomingEdgesOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#outDegreeOf(Object)\n     */\n    public int outDegreeOf(V vertex) {\n        return ((DirectedGraph<V, ? extends E>) delegate).outDegreeOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#outgoingEdgesOf(Object)\n     */\n    public Set<E> outgoingEdgesOf(V vertex) {\n        return ((DirectedGraph<V, E>) delegate).outgoingEdgesOf(vertex);\n    }\n\n    /**\n     * @see Graph#removeEdge(Object)\n     */\n    @Override\n    public boolean removeEdge(E e) {\n        return delegate.removeEdge(e);\n    }\n\n    /**\n     * @see Graph#removeEdge(Object, Object)\n     */\n    @Override\n    public E removeEdge(V sourceVertex, V targetVertex) {\n        return delegate.removeEdge(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#removeVertex(Object)\n     */\n    @Override\n    public boolean removeVertex(V v) {\n        return delegate.removeVertex(v);\n    }\n\n    /**\n     * @see java.lang.Object#toString()\n     */\n    @Override\n    public String toString() {\n        return delegate.toString();\n    }\n\n    /**\n     * @see Graph#vertexSet()\n     */\n    @Override\n    public Set<V> vertexSet() {\n        return delegate.vertexSet();\n    }\n\n    /**\n     * @see Graph#getEdgeSource(Object)\n     */\n    @Override\n    public V getEdgeSource(E e) {\n        return delegate.getEdgeSource(e);\n    }\n\n    /**\n     * @see Graph#getEdgeTarget(Object)\n     */\n    @Override\n    public V getEdgeTarget(E e) {\n        return delegate.getEdgeTarget(e);\n    }\n\n    /**\n     * @see Graph#getEdgeWeight(Object)\n     */\n    @Override\n    public double getEdgeWeight(E e) {\n        return delegate.getEdgeWeight(e);\n    }\n\n    /**\n     * @see WeightedGraph#setEdgeWeight(Object, double)\n     */\n    public void setEdgeWeight(E e, double weight) {\n        ((WeightedGraph<V, E>) delegate).setEdgeWeight(e, weight);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "GraphDelegator",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "g"
+          }
+        ],
+        "javadoc": "/**\n * Constructor for GraphDelegator.\n *\n * @param g the backing graph (the delegate).\n *\n * @throws IllegalArgumentException iff <code>g==null</code>\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the backing graph (the delegate)."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "iff <code>g==null</code>"
+          }
+        ],
+        "code": "/**\n * Constructor for GraphDelegator.\n *\n * @param g the backing graph (the delegate).\n *\n * @throws IllegalArgumentException iff <code>g==null</code>\n */\npublic GraphDelegator(Graph<V, E> g) {\n    super();\n    if (g == null) {\n        throw new IllegalArgumentException(\"g must not be null.\");\n    }\n    delegate = g;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAllEdges",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getAllEdges(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getAllEdges(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getAllEdges(Object, Object)\n */\n@Override\npublic Set<E> getAllEdges(V sourceVertex, V targetVertex) {\n    return delegate.getAllEdges(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdge(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdge(Object, Object)\n */\n@Override\npublic E getEdge(V sourceVertex, V targetVertex) {\n    return delegate.getEdge(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeFactory",
+        "return_type": {
+          "qualified_name": "org.jgrapht.EdgeFactory",
+          "simple_name": "EdgeFactory",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see Graph#getEdgeFactory()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeFactory()"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeFactory()\n */\n@Override\npublic EdgeFactory<V, E> getEdgeFactory() {\n    return delegate.getEdgeFactory();\n}"
+      },
+      {
+        "type": "method",
+        "name": "addEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#addEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#addEdge(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#addEdge(Object, Object)\n */\n@Override\npublic E addEdge(V sourceVertex, V targetVertex) {\n    return delegate.addEdge(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#addEdge(Object, Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#addEdge(Object, Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#addEdge(Object, Object, Object)\n */\n@Override\npublic boolean addEdge(V sourceVertex, V targetVertex, E e) {\n    return delegate.addEdge(sourceVertex, targetVertex, e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#addVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#addVertex(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#addVertex(Object)\n */\n@Override\npublic boolean addVertex(V v) {\n    return delegate.addVertex(v);\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#containsEdge(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#containsEdge(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#containsEdge(Object)\n */\n@Override\npublic boolean containsEdge(E e) {\n    return delegate.containsEdge(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#containsVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#containsVertex(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#containsVertex(Object)\n */\n@Override\npublic boolean containsVertex(V v) {\n    return delegate.containsVertex(v);\n}"
+      },
+      {
+        "type": "method",
+        "name": "degreeOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see UndirectedGraph#degreeOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "UndirectedGraph#degreeOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see UndirectedGraph#degreeOf(Object)\n */\npublic int degreeOf(V vertex) {\n    return ((UndirectedGraph<V, E>) delegate).degreeOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "edgeSet",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see Graph#edgeSet()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#edgeSet()"
+          }
+        ],
+        "code": "/**\n * @see Graph#edgeSet()\n */\n@Override\npublic Set<E> edgeSet() {\n    return delegate.edgeSet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "edgesOf",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#edgesOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#edgesOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#edgesOf(Object)\n */\n@Override\npublic Set<E> edgesOf(V vertex) {\n    return delegate.edgesOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "inDegreeOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#inDegreeOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#inDegreeOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#inDegreeOf(Object)\n */\npublic int inDegreeOf(V vertex) {\n    return ((DirectedGraph<V, ? extends E>) delegate).inDegreeOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "incomingEdgesOf",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#incomingEdgesOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#incomingEdgesOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#incomingEdgesOf(Object)\n */\npublic Set<E> incomingEdgesOf(V vertex) {\n    return ((DirectedGraph<V, E>) delegate).incomingEdgesOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "outDegreeOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#outDegreeOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#outDegreeOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#outDegreeOf(Object)\n */\npublic int outDegreeOf(V vertex) {\n    return ((DirectedGraph<V, ? extends E>) delegate).outDegreeOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "outgoingEdgesOf",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#outgoingEdgesOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#outgoingEdgesOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#outgoingEdgesOf(Object)\n */\npublic Set<E> outgoingEdgesOf(V vertex) {\n    return ((DirectedGraph<V, E>) delegate).outgoingEdgesOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeEdge(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeEdge(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeEdge(Object)\n */\n@Override\npublic boolean removeEdge(E e) {\n    return delegate.removeEdge(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeEdge(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeEdge(Object, Object)\n */\n@Override\npublic E removeEdge(V sourceVertex, V targetVertex) {\n    return delegate.removeEdge(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeVertex(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeVertex(Object)\n */\n@Override\npublic boolean removeVertex(V v) {\n    return delegate.removeVertex(v);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": "java.lang.String",
+          "simple_name": "String",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see java.lang.Object#toString()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "java.lang.Object#toString()"
+          }
+        ],
+        "code": "/**\n * @see java.lang.Object#toString()\n */\n@Override\npublic String toString() {\n    return delegate.toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "vertexSet",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see Graph#vertexSet()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#vertexSet()"
+          }
+        ],
+        "code": "/**\n * @see Graph#vertexSet()\n */\n@Override\npublic Set<V> vertexSet() {\n    return delegate.vertexSet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeSource",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdgeSource(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeSource(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeSource(Object)\n */\n@Override\npublic V getEdgeSource(E e) {\n    return delegate.getEdgeSource(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeTarget",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdgeTarget(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeTarget(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeTarget(Object)\n */\n@Override\npublic V getEdgeTarget(E e) {\n    return delegate.getEdgeTarget(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeWeight",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdgeWeight(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeWeight(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeWeight(Object)\n */\n@Override\npublic double getEdgeWeight(E e) {\n    return delegate.getEdgeWeight(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "setEdgeWeight",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false
+            },
+            "name": "weight"
+          }
+        ],
+        "javadoc": "/**\n * @see WeightedGraph#setEdgeWeight(Object, double)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "WeightedGraph#setEdgeWeight(Object, double)"
+          }
+        ],
+        "code": "/**\n * @see WeightedGraph#setEdgeWeight(Object, double)\n */\npublic void setEdgeWeight(E e, double weight) {\n    ((WeightedGraph<V, E>) delegate).setEdgeWeight(e, weight);\n}"
+      }
+    ]
+  }
+]

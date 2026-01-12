@@ -1,0 +1,374 @@
+[
+  {
+    "method": "isOutOfBoundsIndex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "bitIndex"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "isEqualBitKey",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "bitIndex"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "isNullBitKey",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "bitIndex"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "isValidBitIndex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "bitIndex"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "bitsPerElement",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the number of bits per element",
+          "assertion": "assert methodResultID == receiverObjectID.bitsPerElement();",
+          "name": null,
+          "content": "the number of bits per element"
+        }
+      ]
+    }
+  },
+  {
+    "method": "lengthInBits",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "key"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "",
+          "assertion": "assert receiverObjectID instanceof java.lang.Integer;",
+          "name": "key",
+          "content": "the key"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the bit length of the key",
+          "assertion": "assert methodResultID == receiverObjectID.lengthInBits(args[0]);",
+          "name": null,
+          "content": "the bit length of the key"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isBitSet",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "key"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "bitIndex"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "lengthInBits"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "key",
+          "content": "may not be null"
+        },
+        {
+          "description": "bitIndex must be an integer",
+          "assertion": "assert args[1] instanceof Integer && ((Integer)args[1]).intValue() >= 0;",
+          "name": "bitIndex",
+          "content": ""
+        },
+        {
+          "description": "lengthInBits must be an integer and non-negative",
+          "assertion": "assert args[2] instanceof Integer && ((Integer)args[2]).intValue() >= 0;",
+          "name": "lengthInBits",
+          "content": ""
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns whether or not a bit is set.",
+          "assertion": "assert methodResultID == args[1] >= 0 && receiverObjectID.lengthInBits(args[0]) > args[1];",
+          "name": null,
+          "content": "Returns whether or not a bit is set."
+        }
+      ]
+    }
+  },
+  {
+    "method": "bitIndex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "key"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "offsetInBits"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "lengthInBits"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "other"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "otherOffsetInBits"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "otherLengthInBits"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "key",
+          "content": "the key to use",
+          "assertion": "",
+          "description": "the key to use"
+        },
+        {
+          "tag": "param",
+          "name": "offsetInBits",
+          "content": "the bit offset in the key",
+          "assertion": "",
+          "description": "the bit offset in the key"
+        },
+        {
+          "tag": "param",
+          "name": "lengthInBits",
+          "content": "the maximum key length in bits to use",
+          "assertion": "",
+          "description": "the maximum key length in bits to use"
+        },
+        {
+          "tag": "param",
+          "name": "other",
+          "content": "the other key to use",
+          "assertion": "",
+          "description": "the other key to use"
+        },
+        {
+          "tag": "param",
+          "name": "otherOffsetInBits",
+          "content": "the bit offset in the other key",
+          "assertion": "",
+          "description": "the bit offset in the other key"
+        },
+        {
+          "tag": "param",
+          "name": "otherLengthInBits",
+          "content": "the maximum key length in bits for the other key",
+          "assertion": "",
+          "description": "the maximum key length in bits for the other key"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns the n-th different bit between key and other. This starts the comparison in key at 'offsetInBits' and goes for 'lengthInBits' bits, and compares to the other key starting at 'otherOffsetInBits' and going for 'otherLengthInBits' bits.",
+          "assertion": "assert methodResultID != -1;",
+          "name": null,
+          "content": "Returns the n-th different bit between key and other. This starts the comparison in key at 'offsetInBits' and goes for 'lengthInBits' bits, and compares to the other key starting at 'otherOffsetInBits' and going for 'otherLengthInBits' bits."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isPrefix",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "prefix"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "offsetInBits"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "name": "lengthInBits"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "key"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the prefix to check",
+          "assertion": "assert args[0] != null;",
+          "name": "prefix",
+          "content": "the prefix to check"
+        },
+        {
+          "description": "offsetInBits must be an integer",
+          "assertion": "assert args[1] instanceof Integer;",
+          "name": "offsetInBits",
+          "content": ""
+        },
+        {
+          "description": "lengthInBits must be an integer",
+          "assertion": "assert args[2] instanceof Integer;",
+          "name": "lengthInBits",
+          "content": ""
+        },
+        {
+          "description": "key must not be null",
+          "assertion": "assert args[3] != null;",
+          "name": "key",
+          "content": "the key to check"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this is a valid prefix for the given key",
+          "assertion": "assert methodResultID == receiverObjectID.isPrefix(args[0], args[1], args[3]);",
+          "name": null,
+          "content": "true if this is a valid prefix for the given key"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "o1"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "o2"
+      }
+    ],
+    "conditions": {}
+  }
+]

@@ -31,6 +31,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 Linux:
 
 ### Compiling Project and Building Jar
+Maven:
 ```
 mvn package
 ```
@@ -39,6 +40,16 @@ Old projects often have failing tests.
 ```
 mvn package -DskipTests
 mvn package -Dmaven.test.skip=true
+```
+
+Ant:
+```
+ant
+```
+
+Gradle
+```
+./gradlew build
 ```
 
 

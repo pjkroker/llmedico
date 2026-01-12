@@ -10,6 +10,7 @@ class ConditionValidator:
     def __init__(self, language: str):
         self.language = language
 
+    #TODO rewrite for multiple code blocks
     def validate(self, raw_response:str, expected_len: int) -> list[str]:
         errors = []
 
@@ -19,6 +20,10 @@ class ConditionValidator:
         except RuntimeError as e:
             errors.append(str(e))
             return errors  # early exit: nothing else makes sense
+
+        if len(code_blocks) > 1:
+            errors.append("Found more than one block of JSON elements. Make sure your response contains exactly one code block. Only provide the fixed one, not the wrong one!")
+            return errors
 
         # 2. Check if code matches the right format.
         for code_block in code_blocks:
@@ -30,7 +35,7 @@ class ConditionValidator:
         #3. Check if json actually has the right format TODO check static values like name and comment
         for code_block in code_blocks:
             json_list = json.loads(code_block)
-            errors = self._validate_condition_schema(json_list, expected_len)
+            errors = self._validate_condition_schema(json_list, expected_len) # TODO which codeblock to use
         if errors: #has at least one error, len(errors) > 1
             return errors
         #4. Check if the assertions are valid Java assertions TODO get compiler errors

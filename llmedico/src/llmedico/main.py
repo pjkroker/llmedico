@@ -10,13 +10,14 @@ from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.conditions.model import ConditionKind
 from llmedico.config.config import Config
 from llmedico.converters.jdoctor import JDoctorConditionConverter
+from llmedico.translator.method_selector import MethodSelector
 
 logger = logging.getLogger(__name__)
 
 
 from llmedico.java_utils.javapy import JavaParser
 from llmedico.translator.translator import Translator
-from se_helpers.files.files import save_json_to_file, save_realy_json_to_file
+from se_helpers.files.files import save_json_to_file, save_realy_json_to_file, load_json
 
 
 def _normalize_text(text: str) -> str:
@@ -44,7 +45,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     relative_path = fq_class_name.replace(".", "/") + ".java"
 
     if path_data_dir is None:
-        pass
+        path_java_class = path_source_dir / "main" / "java" / relative_path #TODO add "main" / "java" to path in run
     else:
         path_java_class = path_data_dir / "src" / "main" / "java" / relative_path
     # Set up basic configuration for logging
@@ -61,24 +62,37 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
     logger.debug("---Starting LLMedico---")
     cnfg = Config(Path(__file__).parent.parent.parent / "config.toml")
-    llm_config = cnfg.section("config")
+    llm_config = cnfg.section("llm")
     trans_config = cnfg.section("translation")
 
     logger.debug("---Starting JavaParser - Extracting JavaDoc---")
     #result_json = start_java_parser(path_output_dir, path_java_class)
     jp = JavaParser()
     java_extractions = jp.extract_to_json(path_java_class, path_jar)
+
     save_json_to_file(java_extractions, path_output_dir / "llmedico-javadoc_extractor.json")
     java_extractions = json.loads(java_extractions) #TODO load var directly and not file
 
 
     logger.debug("---Starting Translator - Translating JavaDoc to Conditions---")
-    #conditions = start_translator_everything(result_json)
-    llm = Ollama("llama3.1")
-    #llm = LiteLLMModel(model_name="openai/deepseek-ai/deepseek-coder-33b-instruct", api_base="http://127.0.0.1:8010/v1", api_key="dummy")
+    if "/" not in llm_config["model"]:
+        llm = Ollama(llm_config["model"], temperature=llm_config["temperature"], top_k=llm_config["top_k"]
+                     , top_p=llm_config["top_p"], repeat_penalty=llm_config["repeat_penalty"])
+    else:
+        llm = LiteLLMModel(model_name=llm_config["model"], api_base=llm_config["LITELLM_API_BASE"], api_key="dummy")
     trans = Translator(llm, trans_config["iteration_repairloop"])
     conditions = []
     logger.debug("translating every method of the class")
+
+    #build class model TODO make this consistent
+    builder = ClassModelBuilder()
+    with open(path_output_dir / "llmedico-javadoc_extractor.json", "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    cls = builder.build_class(extracted_conditions[0])
+    #select methods
+    selector = MethodSelector(cls)
+    method_selection = selector.get_methods_to_str()
+
     for i in range(0, len(java_extractions[0]["members"])):
         method_name = java_extractions[0]["members"][i]["name"]
         logger.debug(f"current method name: {method_name}")
@@ -100,7 +114,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         if not modes: logger.warning(f"{method_name} contains not tags?")  # TODO improve, what to do in this case
         logger.debug(f"found modes and their frequencies: {modes}")
 
-        java_assertions = trans.translate_javadoc(javadoc, parameters, return_type, tags, modes=modes)
+        java_assertions = trans.translate_javadoc(javadoc, method_name, parameters, return_type, method_selection, tags, modes=modes)
         logger.debug(f"the following java assertion have been generated for {modes} for {method_name}:\n {java_assertions}")
         member = {"method": method_name, "type": type, "parameters": parameters, "conditions": java_assertions}
         conditions.append(member)
@@ -117,7 +131,8 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
             if ConditionKind.is_condition_kind(tag["tag"]): #skip unsuported ones like @see
                 for condition in conditions[i]["conditions"][tag["tag"].upper()]:
                     if (tag["name"] == condition["name"]
-                            and (not tag["name"] == "throws" or _normalize_text(tag["content"]) == _normalize_text(condition["content"]))): #two @throws can have same name (exception)
+                            and (not tag["tag"] == "throws" or len(conditions[i]["conditions"][tag["tag"].upper()]) == 1 #two @throws can have same name (exception)
+                                 or _normalize_text(tag["content"]) == _normalize_text(condition["content"]))): #if there's more than one, make sure content is equal
                         tag["assertion"] = condition["assertion"]
                         tag["description"] = condition["description"]
 
@@ -149,12 +164,13 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.jgrapht.Graph"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/")  # --data-dir
+    #/pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java
     path_jar = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar")
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/target/commons-math3-3.6.1.jar")
 
     PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory

@@ -21,6 +21,8 @@ class Z3Context:
         self._refs = {}
         self._null = None
         self.funcs = {}
+        self.env_stack: list[dict[str, ExprRef]] = [{}]
+        self._fresh_counter = 0
 
     def bool(self, name: str):
         if name not in self.vars:
@@ -49,3 +51,35 @@ class Z3Context:
         if key not in self.funcs:
             self.funcs[key] = Function(name, *arg_sorts, ret_sort)
         return self.funcs[key]
+
+    #to support lambda ->
+    def push_env(self):
+        self.env_stack.append({})
+
+    def pop_env(self):
+        self.env_stack.pop()
+
+    def bind(self, name: str, value: ExprRef):
+        self.env_stack[-1][name] = value
+
+    def lookup(self, name: str):
+        for env in reversed(self.env_stack):
+            if name in env:
+                return env[name]
+        return None
+
+    def length(self, collection):
+        return self.get_func("length", [collection.sort()], IntSort())(collection)
+
+    def select(self, collection, idx):
+        return self.get_func("select", [collection.sort(), IntSort()], self.ref_sort)(
+            collection, idx
+        )
+
+    def fresh_int(self, prefix: str = "i"):
+        self._fresh_counter += 1
+        return Int(f"{prefix}_{self._fresh_counter}")
+
+    def select_int(self, collection, idx):
+        return self.get_func("select_int",[collection.sort(), IntSort()],IntSort())(collection, idx)
+

@@ -53,5 +53,5 @@ def extract_java_assertions(llm_response: str) -> List[str]:
 
 def extract_conditions(llm_response: str) -> list:
     raw_json = extract_code_by_language(llm_response, "json")
-    conditions = json.loads(raw_json[0])
+    conditions = json.loads(raw_json[0]) # TODO what if more than one codeblock
     return conditions

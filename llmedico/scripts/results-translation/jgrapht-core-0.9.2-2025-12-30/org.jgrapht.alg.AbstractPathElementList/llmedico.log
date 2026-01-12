@@ -1,0 +1,1676 @@
+2025-12-30 23:11:45,327 - DEBUG - llmedico.main - ---Starting LLMedico---
+2025-12-30 23:11:45,328 - DEBUG - llmedico.config.config - Loaded config from /Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/config.toml
+2025-12-30 23:11:45,328 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2025-12-30 23:11:45,354 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2025-12-30 23:11:45,354 - DEBUG - llmedico.main - translating every method of the class
+2025-12-30 23:11:45,354 - DEBUG - llmedico.main - current method name: AbstractPathElementList
+2025-12-30 23:11:45,354 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Creates paths obtained by concatenating the specified edge to the
+ * specified paths.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ * @param elementList paths, list of <code>AbstractPathElement</code>.
+ * @param edge edge reaching the end vertex of the created paths.
+ *
+ * @throws NullPointerException if the specified prevPathElementList or edge
+ * is <code>null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ */
+
+2025-12-30 23:11:45,354 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 3, 'THROWS': 2}
+2025-12-30 23:11:45,354 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM
+2025-12-30 23:11:45,354 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates paths obtained by concatenating the specified edge to the
+ * specified paths.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ * @param elementList paths, list of <code>AbstractPathElement</code>.
+ * @param edge edge reaching the end vertex of the created paths.
+ *
+ * @throws NullPointerException if the specified prevPathElementList or edge
+ * is <code>null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'org.jgrapht.alg.AbstractPathElementList', 'simple_name': 'AbstractPathElementList', 'is_array': False}, 'name': 'elementList'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'edge'}]"
+    
+2025-12-30 23:11:59,225 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {"description": "maxSize must be positive",
+   "assertion": "assert args[1] > 0;",
+   "name": "maxSize",
+   "content": "maximum number of paths the list is able to store."}
+]
+```
+2025-12-30 23:11:59,226 - WARNING - llmedico.translator.translator - Found the following errors while validating the response: ['Expected 3 conditions, but got 1']
+2025-12-30 23:11:59,226 - DEBUG - llmedico.translator.translator - start feedback repair loop
+2025-12-30 23:11:59,226 - DEBUG - llmedico.translator.translation_repair_loop - Trying to fix initial solution with repair loop.
+2025-12-30 23:11:59,226 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 1
+2025-12-30 23:11:59,226 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates paths obtained by concatenating the specified edge to the
+ * specified paths.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ * @param elementList paths, list of <code>AbstractPathElement</code>.
+ * @param edge edge reaching the end vertex of the created paths.
+ *
+ * @throws NullPointerException if the specified prevPathElementList or edge
+ * is <code>null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'org.jgrapht.alg.AbstractPathElementList', 'simple_name': 'AbstractPathElementList', 'is_array': False}, 'name': 'elementList'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'edge'}]"
+    PREVIOUS OUTPUT:
+    "```json
+[
+  {"description": "maxSize must be positive",
+   "assertion": "assert args[1] > 0;",
+   "name": "maxSize",
+   "content": "maximum number of paths the list is able to store."}
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['Expected 3 conditions, but got 1']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    
+2025-12-30 23:12:15,801 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {"description": "maxSize must be positive",
+   "assertion": "assert args[1] > 0;",
+   "name": "maxSize",
+   "content": "maximum number of paths the list is able to store."},
+  {"description": "elementList cannot be null",
+   "assertion": "assert args[2] != null;",
+   "name": "elementList",
+   "content": "list of <code>AbstractPathElement</code>"},
+  {"description": "edge cannot be null",
+   "assertion": "assert args[3] != null;",
+   "name": "edge",
+   "content": "<code>null</code>"}
+]
+```
+2025-12-30 23:12:15,805 - INFO - llmedico.translator.translation_repair_loop - Repair successful, after 1 out of a maximum of 5 iterations.
+2025-12-30 23:12:15,805 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'maxSize must be positive', 'assertion': 'assert args[1] > 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store.'}, {'description': 'elementList cannot be null', 'assertion': 'assert args[2] != null;', 'name': 'elementList', 'content': 'list of <code>AbstractPathElement</code>'}, {'description': 'edge cannot be null', 'assertion': 'assert args[3] != null;', 'name': 'edge', 'content': '<code>null</code>'}]
+2025-12-30 23:12:15,805 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS
+2025-12-30 23:12:15,805 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each inside its own JSON element.
+    10. Each assertion must include a short description comment following the format as shown in the example.
+    11. Output only the JSON, with no additional explanations or commentary.
+    12. Include the exception's name related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+     * Creates paths obtained by concatenating the specified edge to the
+     * specified paths.
+     *
+     * @param maxSize maximum number of paths the list is able to store.
+     * @param elementList paths, list of <code>AbstractPathElement</code>.
+     * @param edge edge reaching the end vertex of the created paths.
+     *
+     * @throws NullPointerException if the specified prevPathElementList or edge
+     * is <code>null</code>.
+     * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+     * 0.
+     */
+     Input Parameters:
+     [{"type": {
+            "qualified_name": "org.jgrapht.Graph",
+            "name": "Graph",
+            "is_array": false
+        },
+        "name": "graph"},
+        {"type": {
+            "qualified_name": "int",
+            "name": "int",
+            "is_array": false},
+        "name": "maxSize"},
+        {"type": {
+            "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+            "name": "AbstractPathElementList",
+            "is_array": false},
+            "name": "elementList"},
+        {"type": {
+            "qualifiedName": "java.lang.Object",
+            "name": "Object",
+            "isArray": false},
+        "name": "edge"}]
+     Output Java assertions:
+    ```json
+    [{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException",
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."},
+    {"description": "if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException",
+    "content": "if <code>maxSize</code> is negative or\n0."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Creates paths obtained by concatenating the specified edge to the
+ * specified paths.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ * @param elementList paths, list of <code>AbstractPathElement</code>.
+ * @param edge edge reaching the end vertex of the created paths.
+ *
+ * @throws NullPointerException if the specified prevPathElementList or edge
+ * is <code>null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'org.jgrapht.alg.AbstractPathElementList', 'simple_name': 'AbstractPathElementList', 'is_array': False}, 'name': 'elementList'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'edge'}]"
+    
+2025-12-30 23:12:45,470 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here is the output in JSON format:
+
+```json
+[
+  {
+    "description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException",
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."
+  },
+  {
+    "description": "if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException",
+    "content": "if <code>maxSize</code> is negative or\n0."
+  }
+]
+```
+
+This output represents the Java assertions for the given Javadoc and parameters. Each assertion includes a description of the condition, the actual assertion statement, the exception name, and a content string that matches the @throws tag description.
+2025-12-30 23:12:45,472 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if the specified prevPathElementList or edge is null.', 'assertion': 'assert args[2]==null || args[3]==null;', 'name': 'NullPointerException', 'content': 'if the specified prevPathElementList or edge is <code>null</code>.'}, {'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1]<0 || args[1]==0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}]
+2025-12-30 23:12:45,473 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 3, 'THROWS': 2} for AbstractPathElementList:
+ {'PARAM': [{'description': 'maxSize must be positive', 'assertion': 'assert args[1] > 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store.'}, {'description': 'elementList cannot be null', 'assertion': 'assert args[2] != null;', 'name': 'elementList', 'content': 'list of <code>AbstractPathElement</code>'}, {'description': 'edge cannot be null', 'assertion': 'assert args[3] != null;', 'name': 'edge', 'content': '<code>null</code>'}], 'THROWS': [{'description': 'if the specified prevPathElementList or edge is null.', 'assertion': 'assert args[2]==null || args[3]==null;', 'name': 'NullPointerException', 'content': 'if the specified prevPathElementList or edge is <code>null</code>.'}, {'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1]<0 || args[1]==0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}]}
+2025-12-30 23:12:45,473 - DEBUG - llmedico.main - current method name: AbstractPathElementList
+2025-12-30 23:12:45,473 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Creates a list with an empty path. The list size is 1.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws NullPointerException if the specified path-element is <code>
+ * null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ * @throws IllegalArgumentException if <code>pathElement</code> is not
+ * empty.
+ */
+
+2025-12-30 23:12:45,473 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'THROWS': 3}
+2025-12-30 23:12:45,473 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM
+2025-12-30 23:12:45,473 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates a list with an empty path. The list size is 1.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws NullPointerException if the specified path-element is <code>
+ * null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ * @throws IllegalArgumentException if <code>pathElement</code> is not
+ * empty.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'pathElement'}]"
+    
+2025-12-30 23:13:07,634 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {
+    "description": "maxSize must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be empty",
+    "assertion": "assert !args[2].equals(null) && !((org.jgrapht.Graph)arg[0]).vertexSet().isEmpty();",
+    "name": "pathElement",
+    "content": "path-element is not <code> null</code> and the graph is not empty."
+  }
+]
+```
+2025-12-30 23:13:07,635 - WARNING - llmedico.translator.translator - Found the following errors while validating the response: ['Expected 1 conditions, but got 2']
+2025-12-30 23:13:07,635 - DEBUG - llmedico.translator.translator - start feedback repair loop
+2025-12-30 23:13:07,635 - DEBUG - llmedico.translator.translation_repair_loop - Trying to fix initial solution with repair loop.
+2025-12-30 23:13:07,635 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 1
+2025-12-30 23:13:07,635 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates a list with an empty path. The list size is 1.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws NullPointerException if the specified path-element is <code>
+ * null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ * @throws IllegalArgumentException if <code>pathElement</code> is not
+ * empty.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'pathElement'}]"
+    PREVIOUS OUTPUT:
+    "```json
+[
+  {
+    "description": "maxSize must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be empty",
+    "assertion": "assert !args[2].equals(null) && !((org.jgrapht.Graph)arg[0]).vertexSet().isEmpty();",
+    "name": "pathElement",
+    "content": "path-element is not <code> null</code> and the graph is not empty."
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['Expected 1 conditions, but got 2']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    
+2025-12-30 23:13:25,019 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {
+    "description": "maxSize must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be null and the graph must not be empty",
+    "assertion": "assert !args[2].equals(null) && !((org.jgrapht.Graph)arg[0]).vertexSet().isEmpty();",
+    "name": "pathElement",
+    "content": "path-element is not <code> null</code> and the graph is not empty."
+  }
+]
+```
+2025-12-30 23:13:25,020 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 2
+2025-12-30 23:13:25,020 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates a list with an empty path. The list size is 1.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws NullPointerException if the specified path-element is <code>
+ * null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ * @throws IllegalArgumentException if <code>pathElement</code> is not
+ * empty.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'pathElement'}]"
+    PREVIOUS OUTPUT:
+    "```json
+[
+  {
+    "description": "maxSize must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be null and the graph must not be empty",
+    "assertion": "assert !args[2].equals(null) && !((org.jgrapht.Graph)arg[0]).vertexSet().isEmpty();",
+    "name": "pathElement",
+    "content": "path-element is not <code> null</code> and the graph is not empty."
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['Expected 1 conditions, but got 2']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    
+2025-12-30 23:13:38,513 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {
+    "description": "maxSize must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be null",
+    "assertion": "assert !args[2].equals(null);",
+    "name": "pathElement",
+    "content": "path-element is <code> null</code>"
+  }
+]
+```
+2025-12-30 23:13:38,514 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 3
+2025-12-30 23:13:38,514 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates a list with an empty path. The list size is 1.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws NullPointerException if the specified path-element is <code>
+ * null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ * @throws IllegalArgumentException if <code>pathElement</code> is not
+ * empty.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'pathElement'}]"
+    PREVIOUS OUTPUT:
+    "```json
+[
+  {
+    "description": "maxSize must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be null",
+    "assertion": "assert !args[2].equals(null);",
+    "name": "pathElement",
+    "content": "path-element is <code> null</code>"
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['Expected 1 conditions, but got 2']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    
+2025-12-30 23:13:52,294 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {
+    "description": "maxSize must be non-negative",
+    "assertion": "assert args[1] >= 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be null",
+    "assertion": "assert !args[2].equals(null);",
+    "name": "pathElement",
+    "content": "path-element is &lt;code&gt; null&lt;/code&gt;"
+  }
+]
+```
+2025-12-30 23:13:52,294 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 4
+2025-12-30 23:13:52,295 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates a list with an empty path. The list size is 1.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws NullPointerException if the specified path-element is <code>
+ * null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ * @throws IllegalArgumentException if <code>pathElement</code> is not
+ * empty.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'pathElement'}]"
+    PREVIOUS OUTPUT:
+    "```json
+[
+  {
+    "description": "maxSize must be non-negative",
+    "assertion": "assert args[1] >= 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  },
+  {
+    "description": "pathElement must not be null",
+    "assertion": "assert !args[2].equals(null);",
+    "name": "pathElement",
+    "content": "path-element is &lt;code&gt; null&lt;/code&gt;"
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['Expected 1 conditions, but got 2']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    
+2025-12-30 23:14:00,508 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {
+    "description": "maxSize must be non-negative",
+    "assertion": "assert args[1] >= 0;",
+    "name": "maxSize",
+    "content": "maximum number of paths the list is able to store."
+  }
+]
+```
+2025-12-30 23:14:00,509 - INFO - llmedico.translator.translation_repair_loop - Repair successful, after 4 out of a maximum of 5 iterations.
+2025-12-30 23:14:00,509 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'maxSize must be non-negative', 'assertion': 'assert args[1] >= 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store.'}]
+2025-12-30 23:14:00,510 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS
+2025-12-30 23:14:00,510 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each inside its own JSON element.
+    10. Each assertion must include a short description comment following the format as shown in the example.
+    11. Output only the JSON, with no additional explanations or commentary.
+    12. Include the exception's name related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+     * Creates paths obtained by concatenating the specified edge to the
+     * specified paths.
+     *
+     * @param maxSize maximum number of paths the list is able to store.
+     * @param elementList paths, list of <code>AbstractPathElement</code>.
+     * @param edge edge reaching the end vertex of the created paths.
+     *
+     * @throws NullPointerException if the specified prevPathElementList or edge
+     * is <code>null</code>.
+     * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+     * 0.
+     */
+     Input Parameters:
+     [{"type": {
+            "qualified_name": "org.jgrapht.Graph",
+            "name": "Graph",
+            "is_array": false
+        },
+        "name": "graph"},
+        {"type": {
+            "qualified_name": "int",
+            "name": "int",
+            "is_array": false},
+        "name": "maxSize"},
+        {"type": {
+            "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+            "name": "AbstractPathElementList",
+            "is_array": false},
+            "name": "elementList"},
+        {"type": {
+            "qualifiedName": "java.lang.Object",
+            "name": "Object",
+            "isArray": false},
+        "name": "edge"}]
+     Output Java assertions:
+    ```json
+    [{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException",
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."},
+    {"description": "if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException",
+    "content": "if <code>maxSize</code> is negative or\n0."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Creates a list with an empty path. The list size is 1.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws NullPointerException if the specified path-element is <code>
+ * null</code>.
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ * @throws IllegalArgumentException if <code>pathElement</code> is not
+ * empty.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'pathElement'}]"
+    
+2025-12-30 23:14:31,892 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here are the Java assertion statements generated from the provided Javadoc:
+
+```json
+[
+  {"description": "if the specified path-element is null.",
+  "assertion": "assert args[2]==null;",
+  "name": "NullPointerException",
+  "content": "if the specified <code>pathElement</code> is <code>null</code>."},
+  
+  {"description": "if maxSize is negative or 0.",
+  "assertion": "assert args[1]<0 || args[1]==0;",
+  "name": "IllegalArgumentException",
+  "content": "if <code>maxSize</code> is negative or\n0."},
+  
+  {"description": "if pathElement is not empty.",
+  "assertion": "assert (args[2]!=null && ((org.jgrapht.alg.AbstractPathElement) args[2]).size() > 0);",
+  "name": "IllegalArgumentException",
+  "content": "if <code>pathElement</code> is not\nempty."}
+]
+```
+2025-12-30 23:14:31,894 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if the specified path-element is null.', 'assertion': 'assert args[2]==null;', 'name': 'NullPointerException', 'content': 'if the specified <code>pathElement</code> is <code>null</code>.'}, {'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1]<0 || args[1]==0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}, {'description': 'if pathElement is not empty.', 'assertion': 'assert (args[2]!=null && ((org.jgrapht.alg.AbstractPathElement) args[2]).size() > 0);', 'name': 'IllegalArgumentException', 'content': 'if <code>pathElement</code> is not\nempty.'}]
+2025-12-30 23:14:31,894 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'THROWS': 3} for AbstractPathElementList:
+ {'PARAM': [{'description': 'maxSize must be non-negative', 'assertion': 'assert args[1] >= 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store.'}], 'THROWS': [{'description': 'if the specified path-element is null.', 'assertion': 'assert args[2]==null;', 'name': 'NullPointerException', 'content': 'if the specified <code>pathElement</code> is <code>null</code>.'}, {'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1]<0 || args[1]==0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}, {'description': 'if pathElement is not empty.', 'assertion': 'assert (args[2]!=null && ((org.jgrapht.alg.AbstractPathElement) args[2]).size() > 0);', 'name': 'IllegalArgumentException', 'content': 'if <code>pathElement</code> is not\nempty.'}]}
+2025-12-30 23:14:31,894 - DEBUG - llmedico.main - current method name: AbstractPathElementList
+2025-12-30 23:14:31,894 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Creates an empty list. The list size is 0.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ */
+
+2025-12-30 23:14:31,895 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'THROWS': 1}
+2025-12-30 23:14:31,895 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM
+2025-12-30 23:14:31,895 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Creates an empty list. The list size is 0.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]"
+    
+2025-12-30 23:14:51,445 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here is the output JSON with Java pre-condition assertions:
+
+```json
+[
+  {"description": "maxSize must not be negative or 0",
+  "assertion": "assert args[1] > 0;",
+  "name": "maxSize",
+  "content": "maximum number of paths the list is able to store"}
+]
+```
+
+Note that I've ignored `graph` and `vertex` parameters as they don't have any @param tags in the Javadoc. Also, I've only considered the parameter `maxSize` which has a description in the @param tag.
+2025-12-30 23:14:51,446 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'maxSize must not be negative or 0', 'assertion': 'assert args[1] > 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store'}]
+2025-12-30 23:14:51,446 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS
+2025-12-30 23:14:51,446 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each inside its own JSON element.
+    10. Each assertion must include a short description comment following the format as shown in the example.
+    11. Output only the JSON, with no additional explanations or commentary.
+    12. Include the exception's name related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+     * Creates paths obtained by concatenating the specified edge to the
+     * specified paths.
+     *
+     * @param maxSize maximum number of paths the list is able to store.
+     * @param elementList paths, list of <code>AbstractPathElement</code>.
+     * @param edge edge reaching the end vertex of the created paths.
+     *
+     * @throws NullPointerException if the specified prevPathElementList or edge
+     * is <code>null</code>.
+     * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+     * 0.
+     */
+     Input Parameters:
+     [{"type": {
+            "qualified_name": "org.jgrapht.Graph",
+            "name": "Graph",
+            "is_array": false
+        },
+        "name": "graph"},
+        {"type": {
+            "qualified_name": "int",
+            "name": "int",
+            "is_array": false},
+        "name": "maxSize"},
+        {"type": {
+            "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+            "name": "AbstractPathElementList",
+            "is_array": false},
+            "name": "elementList"},
+        {"type": {
+            "qualifiedName": "java.lang.Object",
+            "name": "Object",
+            "isArray": false},
+        "name": "edge"}]
+     Output Java assertions:
+    ```json
+    [{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException",
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."},
+    {"description": "if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException",
+    "content": "if <code>maxSize</code> is negative or\n0."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Creates an empty list. The list size is 0.
+ *
+ * @param maxSize maximum number of paths the list is able to store.
+ *
+ * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+ * 0.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]"
+    
+2025-12-30 23:15:14,374 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here are the Java assertion statements generated from the provided Javadoc and parameters:
+
+```json
+[
+    {
+        "description": "if maxSize is negative or 0.",
+        "assertion": "assert args[1] < 0 || args[1] == 0;",
+        "name": "IllegalArgumentException",
+        "content": "if <code>maxSize</code> is negative or\n0."
+    }
+]
+```
+
+Note that the assertion statement checks if `args[1]` (which represents the `maxSize` parameter) is either less than 0 or equal to 0, which matches the description in the Javadoc.
+2025-12-30 23:15:14,376 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1] < 0 || args[1] == 0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}]
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'THROWS': 1} for AbstractPathElementList:
+ {'PARAM': [{'description': 'maxSize must not be negative or 0', 'assertion': 'assert args[1] > 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store'}], 'THROWS': [{'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1] < 0 || args[1] == 0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}]}
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - current method name: get
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Returns path <code>AbstractPathElement</code> stored at the specified
+ * index.
+ */
+
+2025-12-30 23:15:14,377 - WARNING - llmedico.main - get contains not tags?
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - the following java assertion have been generated for {} for get:
+ {}
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - current method name: getVertex
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Returns target vertex.
+ */
+
+2025-12-30 23:15:14,377 - WARNING - llmedico.main - getVertex contains not tags?
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getVertex:
+ {}
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - current method name: size
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Returns the number of paths stored in the list.
+ */
+
+2025-12-30 23:15:14,377 - WARNING - llmedico.main - size contains not tags?
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:15:14,377 - DEBUG - llmedico.main - the following java assertion have been generated for {} for size:
+ {}
+2025-12-30 23:15:14,380 - DEBUG - llmedico.main - the following java assertions have been generated for org.jgrapht.alg.AbstractPathElementList: 
+ [{'method': 'AbstractPathElementList', 'type': 'constructor', 'parameters': [{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'org.jgrapht.alg.AbstractPathElementList', 'simple_name': 'AbstractPathElementList', 'is_array': False}, 'name': 'elementList'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'edge'}], 'conditions': {'PARAM': [{'description': 'maxSize must be positive', 'assertion': 'assert args[1] > 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store.'}, {'description': 'elementList cannot be null', 'assertion': 'assert args[2] != null;', 'name': 'elementList', 'content': 'list of <code>AbstractPathElement</code>'}, {'description': 'edge cannot be null', 'assertion': 'assert args[3] != null;', 'name': 'edge', 'content': '<code>null</code>'}], 'THROWS': [{'description': 'if the specified prevPathElementList or edge is null.', 'assertion': 'assert args[2]==null || args[3]==null;', 'name': 'NullPointerException', 'content': 'if the specified prevPathElementList or edge is <code>null</code>.'}, {'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1]<0 || args[1]==0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}]}}, {'method': 'AbstractPathElementList', 'type': 'constructor', 'parameters': [{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'pathElement'}], 'conditions': {'PARAM': [{'description': 'maxSize must be non-negative', 'assertion': 'assert args[1] >= 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store.'}], 'THROWS': [{'description': 'if the specified path-element is null.', 'assertion': 'assert args[2]==null;', 'name': 'NullPointerException', 'content': 'if the specified <code>pathElement</code> is <code>null</code>.'}, {'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1]<0 || args[1]==0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}, {'description': 'if pathElement is not empty.', 'assertion': 'assert (args[2]!=null && ((org.jgrapht.alg.AbstractPathElement) args[2]).size() > 0);', 'name': 'IllegalArgumentException', 'content': 'if <code>pathElement</code> is not\nempty.'}]}}, {'method': 'AbstractPathElementList', 'type': 'constructor', 'parameters': [{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'graph'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'maxSize'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}], 'conditions': {'PARAM': [{'description': 'maxSize must not be negative or 0', 'assertion': 'assert args[1] > 0;', 'name': 'maxSize', 'content': 'maximum number of paths the list is able to store'}], 'THROWS': [{'description': 'if maxSize is negative or 0.', 'assertion': 'assert args[1] < 0 || args[1] == 0;', 'name': 'IllegalArgumentException', 'content': 'if <code>maxSize</code> is negative or\n0.'}]}}, {'method': 'get', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'index'}], 'conditions': {}}, {'method': 'getVertex', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'size', 'type': 'method', 'parameters': [], 'conditions': {}}]
+2025-12-30 23:15:14,380 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2025-12-30 23:15:14,380 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "AbstractPathElementList",
+    "package": "org.jgrapht.alg",
+    "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+    "javadoc": "/**\n * List of paths <code>AbstractPathElement</code> with same target vertex.\n *\n * @author Guillaume Boulmier\n * @since July 5, 2007\n */\n",
+    "code": "/**\n * List of paths <code>AbstractPathElement</code> with same target vertex.\n *\n * @author Guillaume Boulmier\n * @since July 5, 2007\n */\nabstract class AbstractPathElementList<V, E, T extends AbstractPathElement<V, E>> extends AbstractList<T> {\n\n    protected Graph<V, E> graph;\n\n    /**\n     * Max number of stored paths.\n     */\n    protected int maxSize;\n\n    /**\n     * Stored paths, list of <code>AbstractPathElement</code>.\n     */\n    protected ArrayList<T> pathElements = new ArrayList<T>();\n\n    /**\n     * Target vertex of the paths.\n     */\n    protected V vertex;\n\n    /**\n     * Creates paths obtained by concatenating the specified edge to the\n     * specified paths.\n     *\n     * @param maxSize maximum number of paths the list is able to store.\n     * @param elementList paths, list of <code>AbstractPathElement</code>.\n     * @param edge edge reaching the end vertex of the created paths.\n     *\n     * @throws NullPointerException if the specified prevPathElementList or edge\n     * is <code>null</code>.\n     * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n     * 0.\n     */\n    protected AbstractPathElementList(Graph<V, E> graph, int maxSize, AbstractPathElementList<V, E, T> elementList, E edge) {\n        if (maxSize <= 0) {\n            throw new IllegalArgumentException(\"maxSize is negative or 0\");\n        }\n        if (elementList == null) {\n            throw new NullPointerException(\"elementList is null\");\n        }\n        if (edge == null) {\n            throw new NullPointerException(\"edge is null\");\n        }\n        this.graph = graph;\n        this.maxSize = maxSize;\n        this.vertex = Graphs.getOppositeVertex(graph, edge, elementList.getVertex());\n    }\n\n    /**\n     * Creates a list with an empty path. The list size is 1.\n     *\n     * @param maxSize maximum number of paths the list is able to store.\n     *\n     * @throws NullPointerException if the specified path-element is <code>\n     * null</code>.\n     * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n     * 0.\n     * @throws IllegalArgumentException if <code>pathElement</code> is not\n     * empty.\n     */\n    protected AbstractPathElementList(Graph<V, E> graph, int maxSize, T pathElement) {\n        if (maxSize <= 0) {\n            throw new IllegalArgumentException(\"maxSize is negative or 0\");\n        }\n        if (pathElement == null) {\n            throw new NullPointerException(\"pathElement is null\");\n        }\n        if (pathElement.getPrevEdge() != null) {\n            throw new IllegalArgumentException(\"path must be empty\");\n        }\n        this.graph = graph;\n        this.maxSize = maxSize;\n        this.vertex = pathElement.getVertex();\n        this.pathElements.add(pathElement);\n    }\n\n    /**\n     * Creates an empty list. The list size is 0.\n     *\n     * @param maxSize maximum number of paths the list is able to store.\n     *\n     * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n     * 0.\n     */\n    protected AbstractPathElementList(Graph<V, E> graph, int maxSize, V vertex) {\n        if (maxSize <= 0) {\n            throw new IllegalArgumentException(\"maxSize is negative or 0\");\n        }\n        this.graph = graph;\n        this.maxSize = maxSize;\n        this.vertex = vertex;\n    }\n\n    /**\n     * Returns path <code>AbstractPathElement</code> stored at the specified\n     * index.\n     */\n    @Override\n    public T get(int index) {\n        return this.pathElements.get(index);\n    }\n\n    /**\n     * Returns target vertex.\n     */\n    public V getVertex() {\n        return this.vertex;\n    }\n\n    /**\n     * Returns the number of paths stored in the list.\n     */\n    @Override\n    public int size() {\n        return this.pathElements.size();\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "AbstractPathElementList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "graph"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+              "simple_name": "AbstractPathElementList",
+              "is_array": false
+            },
+            "name": "elementList"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "edge"
+          }
+        ],
+        "javadoc": "/**\n * Creates paths obtained by concatenating the specified edge to the\n * specified paths.\n *\n * @param maxSize maximum number of paths the list is able to store.\n * @param elementList paths, list of <code>AbstractPathElement</code>.\n * @param edge edge reaching the end vertex of the created paths.\n *\n * @throws NullPointerException if the specified prevPathElementList or edge\n * is <code>null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "maximum number of paths the list is able to store.",
+            "assertion": "assert args[1] > 0;",
+            "description": "maxSize must be positive"
+          },
+          {
+            "tag": "param",
+            "name": "elementList",
+            "content": "paths, list of <code>AbstractPathElement</code>.",
+            "assertion": "assert args[2] != null;",
+            "description": "elementList cannot be null"
+          },
+          {
+            "tag": "param",
+            "name": "edge",
+            "content": "edge reaching the end vertex of the created paths.",
+            "assertion": "assert args[3] != null;",
+            "description": "edge cannot be null"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified prevPathElementList or edge\nis <code>null</code>.",
+            "assertion": "assert args[2]==null || args[3]==null;",
+            "description": "if the specified prevPathElementList or edge is null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>maxSize</code> is negative or\n0.",
+            "assertion": "assert args[1]<0 || args[1]==0;",
+            "description": "if maxSize is negative or 0."
+          }
+        ],
+        "code": "/**\n * Creates paths obtained by concatenating the specified edge to the\n * specified paths.\n *\n * @param maxSize maximum number of paths the list is able to store.\n * @param elementList paths, list of <code>AbstractPathElement</code>.\n * @param edge edge reaching the end vertex of the created paths.\n *\n * @throws NullPointerException if the specified prevPathElementList or edge\n * is <code>null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\nprotected AbstractPathElementList(Graph<V, E> graph, int maxSize, AbstractPathElementList<V, E, T> elementList, E edge) {\n    if (maxSize <= 0) {\n        throw new IllegalArgumentException(\"maxSize is negative or 0\");\n    }\n    if (elementList == null) {\n        throw new NullPointerException(\"elementList is null\");\n    }\n    if (edge == null) {\n        throw new NullPointerException(\"edge is null\");\n    }\n    this.graph = graph;\n    this.maxSize = maxSize;\n    this.vertex = Graphs.getOppositeVertex(graph, edge, elementList.getVertex());\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "AbstractPathElementList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "graph"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "pathElement"
+          }
+        ],
+        "javadoc": "/**\n * Creates a list with an empty path. The list size is 1.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws NullPointerException if the specified path-element is <code>\n * null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n * @throws IllegalArgumentException if <code>pathElement</code> is not\n * empty.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "maximum number of paths the list is able to store.",
+            "assertion": "assert args[1] >= 0;",
+            "description": "maxSize must be non-negative"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified path-element is <code>\nnull</code>.",
+            "assertion": "assert args[2]==null;",
+            "description": "if the specified path-element is null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>maxSize</code> is negative or\n0.",
+            "assertion": "assert (args[2]!=null && ((org.jgrapht.alg.AbstractPathElement) args[2]).size() > 0);",
+            "description": "if pathElement is not empty."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>pathElement</code> is not\nempty.",
+            "assertion": "assert (args[2]!=null && ((org.jgrapht.alg.AbstractPathElement) args[2]).size() > 0);",
+            "description": "if pathElement is not empty."
+          }
+        ],
+        "code": "/**\n * Creates a list with an empty path. The list size is 1.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws NullPointerException if the specified path-element is <code>\n * null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n * @throws IllegalArgumentException if <code>pathElement</code> is not\n * empty.\n */\nprotected AbstractPathElementList(Graph<V, E> graph, int maxSize, T pathElement) {\n    if (maxSize <= 0) {\n        throw new IllegalArgumentException(\"maxSize is negative or 0\");\n    }\n    if (pathElement == null) {\n        throw new NullPointerException(\"pathElement is null\");\n    }\n    if (pathElement.getPrevEdge() != null) {\n        throw new IllegalArgumentException(\"path must be empty\");\n    }\n    this.graph = graph;\n    this.maxSize = maxSize;\n    this.vertex = pathElement.getVertex();\n    this.pathElements.add(pathElement);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "AbstractPathElementList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "graph"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * Creates an empty list. The list size is 0.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "maximum number of paths the list is able to store.",
+            "assertion": "assert args[1] > 0;",
+            "description": "maxSize must not be negative or 0"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>maxSize</code> is negative or\n0.",
+            "assertion": "assert args[1] < 0 || args[1] == 0;",
+            "description": "if maxSize is negative or 0."
+          }
+        ],
+        "code": "/**\n * Creates an empty list. The list size is 0.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\nprotected AbstractPathElementList(Graph<V, E> graph, int maxSize, V vertex) {\n    if (maxSize <= 0) {\n        throw new IllegalArgumentException(\"maxSize is negative or 0\");\n    }\n    this.graph = graph;\n    this.maxSize = maxSize;\n    this.vertex = vertex;\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false
+            },
+            "name": "index"
+          }
+        ],
+        "javadoc": "/**\n * Returns path <code>AbstractPathElement</code> stored at the specified\n * index.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns path <code>AbstractPathElement</code> stored at the specified\n * index.\n */\n@Override\npublic T get(int index) {\n    return this.pathElements.get(index);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getVertex",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns target vertex.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns target vertex.\n */\npublic V getVertex() {\n    return this.vertex;\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the number of paths stored in the list.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns the number of paths stored in the list.\n */\n@Override\npublic int size() {\n    return this.pathElements.size();\n}"
+      }
+    ]
+  }
+]
+2025-12-30 23:15:14,381 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2025-12-30 23:15:14,381 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2025-12-30 23:15:14,383 - DEBUG - llmedico.main - ---Ending LLMedico---

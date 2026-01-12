@@ -1,0 +1,1210 @@
+2025-12-30 23:25:31,914 - DEBUG - llmedico.main - ---Starting LLMedico---
+2025-12-30 23:25:31,915 - DEBUG - llmedico.config.config - Loaded config from /Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/config.toml
+2025-12-30 23:25:31,915 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2025-12-30 23:25:31,954 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2025-12-30 23:25:31,954 - DEBUG - llmedico.main - translating every method of the class
+2025-12-30 23:25:31,954 - DEBUG - llmedico.main - current method name: GraphDelegator
+2025-12-30 23:25:31,954 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Constructor for GraphDelegator.
+ *
+ * @param g the backing graph (the delegate).
+ *
+ * @throws IllegalArgumentException iff <code>g==null</code>
+ */
+
+2025-12-30 23:25:31,954 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'THROWS': 1}
+2025-12-30 23:25:31,954 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM
+2025-12-30 23:25:31,954 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Constructor for GraphDelegator.
+ *
+ * @param g the backing graph (the delegate).
+ *
+ * @throws IllegalArgumentException iff <code>g==null</code>
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'g'}]"
+    
+2025-12-30 23:25:45,975 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {
+    "description": "the backing graph (the delegate) must not be null",
+    "assertion": "assert args[0] != null;",
+    "name": "g",
+    "content": "the backing graph (the delegate) <br> @see org.jgrapht.Graph"
+  }
+]
+```
+2025-12-30 23:25:45,976 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the backing graph (the delegate) must not be null', 'assertion': 'assert args[0] != null;', 'name': 'g', 'content': 'the backing graph (the delegate) <br> @see org.jgrapht.Graph'}]
+2025-12-30 23:25:45,976 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS
+2025-12-30 23:25:45,976 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each inside its own JSON element.
+    10. Each assertion must include a short description comment following the format as shown in the example.
+    11. Output only the JSON, with no additional explanations or commentary.
+    12. Include the exception's name related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+     * Creates paths obtained by concatenating the specified edge to the
+     * specified paths.
+     *
+     * @param maxSize maximum number of paths the list is able to store.
+     * @param elementList paths, list of <code>AbstractPathElement</code>.
+     * @param edge edge reaching the end vertex of the created paths.
+     *
+     * @throws NullPointerException if the specified prevPathElementList or edge
+     * is <code>null</code>.
+     * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+     * 0.
+     */
+     Input Parameters:
+     [{"type": {
+            "qualified_name": "org.jgrapht.Graph",
+            "name": "Graph",
+            "is_array": false
+        },
+        "name": "graph"},
+        {"type": {
+            "qualified_name": "int",
+            "name": "int",
+            "is_array": false},
+        "name": "maxSize"},
+        {"type": {
+            "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+            "name": "AbstractPathElementList",
+            "is_array": false},
+            "name": "elementList"},
+        {"type": {
+            "qualifiedName": "java.lang.Object",
+            "name": "Object",
+            "isArray": false},
+        "name": "edge"}]
+     Output Java assertions:
+    ```json
+    [{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException",
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."},
+    {"description": "if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException",
+    "content": "if <code>maxSize</code> is negative or\n0."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Constructor for GraphDelegator.
+ *
+ * @param g the backing graph (the delegate).
+ *
+ * @throws IllegalArgumentException iff <code>g==null</code>
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'g'}]"
+    
+2025-12-30 23:26:05,212 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here is the JSON output with Java assertion statements:
+
+```json
+[
+  {
+    "description": "iff g==null",
+    "assertion": "assert args[0] == null;",
+    "name": "IllegalArgumentException",
+    "content": "iff <code>g==null</code>"
+  }
+]
+```
+
+This JSON output includes one Java assertion statement, which represents the condition under which the `IllegalArgumentException` is thrown. The assertion checks if the parameter `g` is equal to `null`.
+2025-12-30 23:26:05,216 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'iff g==null', 'assertion': 'assert args[0] == null;', 'name': 'IllegalArgumentException', 'content': 'iff <code>g==null</code>'}]
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'THROWS': 1} for GraphDelegator:
+ {'PARAM': [{'description': 'the backing graph (the delegate) must not be null', 'assertion': 'assert args[0] != null;', 'name': 'g', 'content': 'the backing graph (the delegate) <br> @see org.jgrapht.Graph'}], 'THROWS': [{'description': 'iff g==null', 'assertion': 'assert args[0] == null;', 'name': 'IllegalArgumentException', 'content': 'iff <code>g==null</code>'}]}
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - current method name: getAllEdges
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#getAllEdges(Object, Object)
+ */
+
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#getAllEdges(Object, Object)'}
+2025-12-30 23:26:05,216 - WARNING - llmedico.main - getAllEdges contains not tags?
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getAllEdges:
+ {}
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - current method name: getEdge
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#getEdge(Object, Object)
+ */
+
+2025-12-30 23:26:05,216 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#getEdge(Object, Object)'}
+2025-12-30 23:26:05,217 - WARNING - llmedico.main - getEdge contains not tags?
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getEdge:
+ {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - current method name: getEdgeFactory
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#getEdgeFactory()
+ */
+
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#getEdgeFactory()'}
+2025-12-30 23:26:05,217 - WARNING - llmedico.main - getEdgeFactory contains not tags?
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getEdgeFactory:
+ {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - current method name: addEdge
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#addEdge(Object, Object)
+ */
+
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#addEdge(Object, Object)'}
+2025-12-30 23:26:05,217 - WARNING - llmedico.main - addEdge contains not tags?
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - the following java assertion have been generated for {} for addEdge:
+ {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - current method name: addEdge
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#addEdge(Object, Object, Object)
+ */
+
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#addEdge(Object, Object, Object)'}
+2025-12-30 23:26:05,217 - WARNING - llmedico.main - addEdge contains not tags?
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - the following java assertion have been generated for {} for addEdge:
+ {}
+2025-12-30 23:26:05,217 - DEBUG - llmedico.main - current method name: addVertex
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#addVertex(Object)
+ */
+
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#addVertex(Object)'}
+2025-12-30 23:26:05,218 - WARNING - llmedico.main - addVertex contains not tags?
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - the following java assertion have been generated for {} for addVertex:
+ {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - current method name: containsEdge
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#containsEdge(Object)
+ */
+
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#containsEdge(Object)'}
+2025-12-30 23:26:05,218 - WARNING - llmedico.main - containsEdge contains not tags?
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - the following java assertion have been generated for {} for containsEdge:
+ {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - current method name: containsVertex
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#containsVertex(Object)
+ */
+
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#containsVertex(Object)'}
+2025-12-30 23:26:05,218 - WARNING - llmedico.main - containsVertex contains not tags?
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - the following java assertion have been generated for {} for containsVertex:
+ {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - current method name: degreeOf
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see UndirectedGraph#degreeOf(Object)
+ */
+
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'UndirectedGraph#degreeOf(Object)'}
+2025-12-30 23:26:05,218 - WARNING - llmedico.main - degreeOf contains not tags?
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - the following java assertion have been generated for {} for degreeOf:
+ {}
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - current method name: edgeSet
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#edgeSet()
+ */
+
+2025-12-30 23:26:05,218 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#edgeSet()'}
+2025-12-30 23:26:05,218 - WARNING - llmedico.main - edgeSet contains not tags?
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - the following java assertion have been generated for {} for edgeSet:
+ {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - current method name: edgesOf
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#edgesOf(Object)
+ */
+
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#edgesOf(Object)'}
+2025-12-30 23:26:05,219 - WARNING - llmedico.main - edgesOf contains not tags?
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - the following java assertion have been generated for {} for edgesOf:
+ {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - current method name: inDegreeOf
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see DirectedGraph#inDegreeOf(Object)
+ */
+
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'DirectedGraph#inDegreeOf(Object)'}
+2025-12-30 23:26:05,219 - WARNING - llmedico.main - inDegreeOf contains not tags?
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - the following java assertion have been generated for {} for inDegreeOf:
+ {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - current method name: incomingEdgesOf
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see DirectedGraph#incomingEdgesOf(Object)
+ */
+
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'DirectedGraph#incomingEdgesOf(Object)'}
+2025-12-30 23:26:05,219 - WARNING - llmedico.main - incomingEdgesOf contains not tags?
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - the following java assertion have been generated for {} for incomingEdgesOf:
+ {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - current method name: outDegreeOf
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see DirectedGraph#outDegreeOf(Object)
+ */
+
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'DirectedGraph#outDegreeOf(Object)'}
+2025-12-30 23:26:05,219 - WARNING - llmedico.main - outDegreeOf contains not tags?
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - the following java assertion have been generated for {} for outDegreeOf:
+ {}
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - current method name: outgoingEdgesOf
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see DirectedGraph#outgoingEdgesOf(Object)
+ */
+
+2025-12-30 23:26:05,219 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'DirectedGraph#outgoingEdgesOf(Object)'}
+2025-12-30 23:26:05,220 - WARNING - llmedico.main - outgoingEdgesOf contains not tags?
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - the following java assertion have been generated for {} for outgoingEdgesOf:
+ {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - current method name: removeEdge
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#removeEdge(Object)
+ */
+
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#removeEdge(Object)'}
+2025-12-30 23:26:05,220 - WARNING - llmedico.main - removeEdge contains not tags?
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - the following java assertion have been generated for {} for removeEdge:
+ {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - current method name: removeEdge
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#removeEdge(Object, Object)
+ */
+
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#removeEdge(Object, Object)'}
+2025-12-30 23:26:05,220 - WARNING - llmedico.main - removeEdge contains not tags?
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - the following java assertion have been generated for {} for removeEdge:
+ {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - current method name: removeVertex
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#removeVertex(Object)
+ */
+
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#removeVertex(Object)'}
+2025-12-30 23:26:05,220 - WARNING - llmedico.main - removeVertex contains not tags?
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - the following java assertion have been generated for {} for removeVertex:
+ {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - current method name: toString
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see java.lang.Object#toString()
+ */
+
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'java.lang.Object#toString()'}
+2025-12-30 23:26:05,220 - WARNING - llmedico.main - toString contains not tags?
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - the following java assertion have been generated for {} for toString:
+ {}
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - current method name: vertexSet
+2025-12-30 23:26:05,220 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#vertexSet()
+ */
+
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#vertexSet()'}
+2025-12-30 23:26:05,221 - WARNING - llmedico.main - vertexSet contains not tags?
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - the following java assertion have been generated for {} for vertexSet:
+ {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - current method name: getEdgeSource
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#getEdgeSource(Object)
+ */
+
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#getEdgeSource(Object)'}
+2025-12-30 23:26:05,221 - WARNING - llmedico.main - getEdgeSource contains not tags?
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getEdgeSource:
+ {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - current method name: getEdgeTarget
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#getEdgeTarget(Object)
+ */
+
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#getEdgeTarget(Object)'}
+2025-12-30 23:26:05,221 - WARNING - llmedico.main - getEdgeTarget contains not tags?
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getEdgeTarget:
+ {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - current method name: getEdgeWeight
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see Graph#getEdgeWeight(Object)
+ */
+
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'Graph#getEdgeWeight(Object)'}
+2025-12-30 23:26:05,221 - WARNING - llmedico.main - getEdgeWeight contains not tags?
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getEdgeWeight:
+ {}
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - current method name: setEdgeWeight
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - has the following javadoc: /**
+ * @see WeightedGraph#setEdgeWeight(Object, double)
+ */
+
+2025-12-30 23:26:05,221 - DEBUG - llmedico.main - unsupported tag: {'tag': 'see', 'name': None, 'content': 'WeightedGraph#setEdgeWeight(Object, double)'}
+2025-12-30 23:26:05,221 - WARNING - llmedico.main - setEdgeWeight contains not tags?
+2025-12-30 23:26:05,222 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,222 - DEBUG - llmedico.main - the following java assertion have been generated for {} for setEdgeWeight:
+ {}
+2025-12-30 23:26:05,223 - DEBUG - llmedico.main - the following java assertions have been generated for org.jgrapht.graph.GraphDelegator: 
+ [{'method': 'GraphDelegator', 'type': 'constructor', 'parameters': [{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'g'}], 'conditions': {'PARAM': [{'description': 'the backing graph (the delegate) must not be null', 'assertion': 'assert args[0] != null;', 'name': 'g', 'content': 'the backing graph (the delegate) <br> @see org.jgrapht.Graph'}], 'THROWS': [{'description': 'iff g==null', 'assertion': 'assert args[0] == null;', 'name': 'IllegalArgumentException', 'content': 'iff <code>g==null</code>'}]}}, {'method': 'getAllEdges', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}], 'conditions': {}}, {'method': 'getEdge', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}], 'conditions': {}}, {'method': 'getEdgeFactory', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'addEdge', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}], 'conditions': {}}, {'method': 'addEdge', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}], 'conditions': {}}, {'method': 'addVertex', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'v'}], 'conditions': {}}, {'method': 'containsEdge', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}], 'conditions': {}}, {'method': 'containsVertex', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'v'}], 'conditions': {}}, {'method': 'degreeOf', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}], 'conditions': {}}, {'method': 'edgeSet', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'edgesOf', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}], 'conditions': {}}, {'method': 'inDegreeOf', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}], 'conditions': {}}, {'method': 'incomingEdgesOf', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}], 'conditions': {}}, {'method': 'outDegreeOf', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}], 'conditions': {}}, {'method': 'outgoingEdgesOf', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}], 'conditions': {}}, {'method': 'removeEdge', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}], 'conditions': {}}, {'method': 'removeEdge', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}], 'conditions': {}}, {'method': 'removeVertex', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'v'}], 'conditions': {}}, {'method': 'toString', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'vertexSet', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'getEdgeSource', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}], 'conditions': {}}, {'method': 'getEdgeTarget', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}], 'conditions': {}}, {'method': 'getEdgeWeight', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}], 'conditions': {}}, {'method': 'setEdgeWeight', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': False}, 'name': 'weight'}], 'conditions': {}}]
+2025-12-30 23:26:05,223 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2025-12-30 23:26:05,225 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "GraphDelegator",
+    "package": "org.jgrapht.graph",
+    "qualified_name": "org.jgrapht.graph.GraphDelegator",
+    "javadoc": "/**\n * A graph backed by the the graph specified at the constructor, which delegates\n * all its methods to the backing graph. Operations on this graph \"pass through\"\n * to the to the backing graph. Any modification made to this graph or the\n * backing graph is reflected by the other.\n *\n * <p>This graph does <i>not</i> pass the hashCode and equals operations through\n * to the backing graph, but relies on <tt>Object</tt>'s <tt>equals</tt> and\n * <tt>hashCode</tt> methods.</p>\n *\n * <p>This class is mostly used as a base for extending subclasses.</p>\n *\n * @author Barak Naveh\n * @since Jul 20, 2003\n */\n",
+    "code": "/**\n * A graph backed by the the graph specified at the constructor, which delegates\n * all its methods to the backing graph. Operations on this graph \"pass through\"\n * to the to the backing graph. Any modification made to this graph or the\n * backing graph is reflected by the other.\n *\n * <p>This graph does <i>not</i> pass the hashCode and equals operations through\n * to the backing graph, but relies on <tt>Object</tt>'s <tt>equals</tt> and\n * <tt>hashCode</tt> methods.</p>\n *\n * <p>This class is mostly used as a base for extending subclasses.</p>\n *\n * @author Barak Naveh\n * @since Jul 20, 2003\n */\npublic class GraphDelegator<V, E> extends AbstractGraph<V, E> implements Graph<V, E>, Serializable {\n\n    private static final long serialVersionUID = 3257005445226181425L;\n\n    /**\n     * The graph to which operations are delegated.\n     */\n    private Graph<V, E> delegate;\n\n    /**\n     * Constructor for GraphDelegator.\n     *\n     * @param g the backing graph (the delegate).\n     *\n     * @throws IllegalArgumentException iff <code>g==null</code>\n     */\n    public GraphDelegator(Graph<V, E> g) {\n        super();\n        if (g == null) {\n            throw new IllegalArgumentException(\"g must not be null.\");\n        }\n        delegate = g;\n    }\n\n    /**\n     * @see Graph#getAllEdges(Object, Object)\n     */\n    @Override\n    public Set<E> getAllEdges(V sourceVertex, V targetVertex) {\n        return delegate.getAllEdges(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#getEdge(Object, Object)\n     */\n    @Override\n    public E getEdge(V sourceVertex, V targetVertex) {\n        return delegate.getEdge(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#getEdgeFactory()\n     */\n    @Override\n    public EdgeFactory<V, E> getEdgeFactory() {\n        return delegate.getEdgeFactory();\n    }\n\n    /**\n     * @see Graph#addEdge(Object, Object)\n     */\n    @Override\n    public E addEdge(V sourceVertex, V targetVertex) {\n        return delegate.addEdge(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#addEdge(Object, Object, Object)\n     */\n    @Override\n    public boolean addEdge(V sourceVertex, V targetVertex, E e) {\n        return delegate.addEdge(sourceVertex, targetVertex, e);\n    }\n\n    /**\n     * @see Graph#addVertex(Object)\n     */\n    @Override\n    public boolean addVertex(V v) {\n        return delegate.addVertex(v);\n    }\n\n    /**\n     * @see Graph#containsEdge(Object)\n     */\n    @Override\n    public boolean containsEdge(E e) {\n        return delegate.containsEdge(e);\n    }\n\n    /**\n     * @see Graph#containsVertex(Object)\n     */\n    @Override\n    public boolean containsVertex(V v) {\n        return delegate.containsVertex(v);\n    }\n\n    /**\n     * @see UndirectedGraph#degreeOf(Object)\n     */\n    public int degreeOf(V vertex) {\n        return ((UndirectedGraph<V, E>) delegate).degreeOf(vertex);\n    }\n\n    /**\n     * @see Graph#edgeSet()\n     */\n    @Override\n    public Set<E> edgeSet() {\n        return delegate.edgeSet();\n    }\n\n    /**\n     * @see Graph#edgesOf(Object)\n     */\n    @Override\n    public Set<E> edgesOf(V vertex) {\n        return delegate.edgesOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#inDegreeOf(Object)\n     */\n    public int inDegreeOf(V vertex) {\n        return ((DirectedGraph<V, ? extends E>) delegate).inDegreeOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#incomingEdgesOf(Object)\n     */\n    public Set<E> incomingEdgesOf(V vertex) {\n        return ((DirectedGraph<V, E>) delegate).incomingEdgesOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#outDegreeOf(Object)\n     */\n    public int outDegreeOf(V vertex) {\n        return ((DirectedGraph<V, ? extends E>) delegate).outDegreeOf(vertex);\n    }\n\n    /**\n     * @see DirectedGraph#outgoingEdgesOf(Object)\n     */\n    public Set<E> outgoingEdgesOf(V vertex) {\n        return ((DirectedGraph<V, E>) delegate).outgoingEdgesOf(vertex);\n    }\n\n    /**\n     * @see Graph#removeEdge(Object)\n     */\n    @Override\n    public boolean removeEdge(E e) {\n        return delegate.removeEdge(e);\n    }\n\n    /**\n     * @see Graph#removeEdge(Object, Object)\n     */\n    @Override\n    public E removeEdge(V sourceVertex, V targetVertex) {\n        return delegate.removeEdge(sourceVertex, targetVertex);\n    }\n\n    /**\n     * @see Graph#removeVertex(Object)\n     */\n    @Override\n    public boolean removeVertex(V v) {\n        return delegate.removeVertex(v);\n    }\n\n    /**\n     * @see java.lang.Object#toString()\n     */\n    @Override\n    public String toString() {\n        return delegate.toString();\n    }\n\n    /**\n     * @see Graph#vertexSet()\n     */\n    @Override\n    public Set<V> vertexSet() {\n        return delegate.vertexSet();\n    }\n\n    /**\n     * @see Graph#getEdgeSource(Object)\n     */\n    @Override\n    public V getEdgeSource(E e) {\n        return delegate.getEdgeSource(e);\n    }\n\n    /**\n     * @see Graph#getEdgeTarget(Object)\n     */\n    @Override\n    public V getEdgeTarget(E e) {\n        return delegate.getEdgeTarget(e);\n    }\n\n    /**\n     * @see Graph#getEdgeWeight(Object)\n     */\n    @Override\n    public double getEdgeWeight(E e) {\n        return delegate.getEdgeWeight(e);\n    }\n\n    /**\n     * @see WeightedGraph#setEdgeWeight(Object, double)\n     */\n    public void setEdgeWeight(E e, double weight) {\n        ((WeightedGraph<V, E>) delegate).setEdgeWeight(e, weight);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "GraphDelegator",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "g"
+          }
+        ],
+        "javadoc": "/**\n * Constructor for GraphDelegator.\n *\n * @param g the backing graph (the delegate).\n *\n * @throws IllegalArgumentException iff <code>g==null</code>\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the backing graph (the delegate).",
+            "assertion": "assert args[0] != null;",
+            "description": "the backing graph (the delegate) must not be null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "iff <code>g==null</code>",
+            "assertion": "assert args[0] == null;",
+            "description": "iff g==null"
+          }
+        ],
+        "code": "/**\n * Constructor for GraphDelegator.\n *\n * @param g the backing graph (the delegate).\n *\n * @throws IllegalArgumentException iff <code>g==null</code>\n */\npublic GraphDelegator(Graph<V, E> g) {\n    super();\n    if (g == null) {\n        throw new IllegalArgumentException(\"g must not be null.\");\n    }\n    delegate = g;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAllEdges",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getAllEdges(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getAllEdges(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getAllEdges(Object, Object)\n */\n@Override\npublic Set<E> getAllEdges(V sourceVertex, V targetVertex) {\n    return delegate.getAllEdges(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdge(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdge(Object, Object)\n */\n@Override\npublic E getEdge(V sourceVertex, V targetVertex) {\n    return delegate.getEdge(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeFactory",
+        "return_type": {
+          "qualified_name": "org.jgrapht.EdgeFactory",
+          "simple_name": "EdgeFactory",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see Graph#getEdgeFactory()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeFactory()"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeFactory()\n */\n@Override\npublic EdgeFactory<V, E> getEdgeFactory() {\n    return delegate.getEdgeFactory();\n}"
+      },
+      {
+        "type": "method",
+        "name": "addEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#addEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#addEdge(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#addEdge(Object, Object)\n */\n@Override\npublic E addEdge(V sourceVertex, V targetVertex) {\n    return delegate.addEdge(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#addEdge(Object, Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#addEdge(Object, Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#addEdge(Object, Object, Object)\n */\n@Override\npublic boolean addEdge(V sourceVertex, V targetVertex, E e) {\n    return delegate.addEdge(sourceVertex, targetVertex, e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#addVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#addVertex(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#addVertex(Object)\n */\n@Override\npublic boolean addVertex(V v) {\n    return delegate.addVertex(v);\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#containsEdge(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#containsEdge(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#containsEdge(Object)\n */\n@Override\npublic boolean containsEdge(E e) {\n    return delegate.containsEdge(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#containsVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#containsVertex(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#containsVertex(Object)\n */\n@Override\npublic boolean containsVertex(V v) {\n    return delegate.containsVertex(v);\n}"
+      },
+      {
+        "type": "method",
+        "name": "degreeOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see UndirectedGraph#degreeOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "UndirectedGraph#degreeOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see UndirectedGraph#degreeOf(Object)\n */\npublic int degreeOf(V vertex) {\n    return ((UndirectedGraph<V, E>) delegate).degreeOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "edgeSet",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see Graph#edgeSet()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#edgeSet()"
+          }
+        ],
+        "code": "/**\n * @see Graph#edgeSet()\n */\n@Override\npublic Set<E> edgeSet() {\n    return delegate.edgeSet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "edgesOf",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#edgesOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#edgesOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#edgesOf(Object)\n */\n@Override\npublic Set<E> edgesOf(V vertex) {\n    return delegate.edgesOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "inDegreeOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#inDegreeOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#inDegreeOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#inDegreeOf(Object)\n */\npublic int inDegreeOf(V vertex) {\n    return ((DirectedGraph<V, ? extends E>) delegate).inDegreeOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "incomingEdgesOf",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#incomingEdgesOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#incomingEdgesOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#incomingEdgesOf(Object)\n */\npublic Set<E> incomingEdgesOf(V vertex) {\n    return ((DirectedGraph<V, E>) delegate).incomingEdgesOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "outDegreeOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#outDegreeOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#outDegreeOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#outDegreeOf(Object)\n */\npublic int outDegreeOf(V vertex) {\n    return ((DirectedGraph<V, ? extends E>) delegate).outDegreeOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "outgoingEdgesOf",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * @see DirectedGraph#outgoingEdgesOf(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "DirectedGraph#outgoingEdgesOf(Object)"
+          }
+        ],
+        "code": "/**\n * @see DirectedGraph#outgoingEdgesOf(Object)\n */\npublic Set<E> outgoingEdgesOf(V vertex) {\n    return ((DirectedGraph<V, E>) delegate).outgoingEdgesOf(vertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeEdge(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeEdge(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeEdge(Object)\n */\n@Override\npublic boolean removeEdge(E e) {\n    return delegate.removeEdge(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeEdge(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeEdge(Object, Object)\n */\n@Override\npublic E removeEdge(V sourceVertex, V targetVertex) {\n    return delegate.removeEdge(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeVertex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeVertex(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeVertex(Object)\n */\n@Override\npublic boolean removeVertex(V v) {\n    return delegate.removeVertex(v);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": "java.lang.String",
+          "simple_name": "String",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see java.lang.Object#toString()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "java.lang.Object#toString()"
+          }
+        ],
+        "code": "/**\n * @see java.lang.Object#toString()\n */\n@Override\npublic String toString() {\n    return delegate.toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "vertexSet",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * @see Graph#vertexSet()\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#vertexSet()"
+          }
+        ],
+        "code": "/**\n * @see Graph#vertexSet()\n */\n@Override\npublic Set<V> vertexSet() {\n    return delegate.vertexSet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeSource",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdgeSource(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeSource(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeSource(Object)\n */\n@Override\npublic V getEdgeSource(E e) {\n    return delegate.getEdgeSource(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeTarget",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdgeTarget(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeTarget(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeTarget(Object)\n */\n@Override\npublic V getEdgeTarget(E e) {\n    return delegate.getEdgeTarget(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEdgeWeight",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#getEdgeWeight(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#getEdgeWeight(Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#getEdgeWeight(Object)\n */\n@Override\npublic double getEdgeWeight(E e) {\n    return delegate.getEdgeWeight(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "setEdgeWeight",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "e"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false
+            },
+            "name": "weight"
+          }
+        ],
+        "javadoc": "/**\n * @see WeightedGraph#setEdgeWeight(Object, double)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "WeightedGraph#setEdgeWeight(Object, double)"
+          }
+        ],
+        "code": "/**\n * @see WeightedGraph#setEdgeWeight(Object, double)\n */\npublic void setEdgeWeight(E e, double weight) {\n    ((WeightedGraph<V, E>) delegate).setEdgeWeight(e, weight);\n}"
+      }
+    ]
+  }
+]
+2025-12-30 23:26:05,227 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2025-12-30 23:26:05,228 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2025-12-30 23:26:05,230 - DEBUG - llmedico.main - ---Ending LLMedico---

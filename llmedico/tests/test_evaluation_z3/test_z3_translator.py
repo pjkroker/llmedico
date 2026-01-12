@@ -1,15 +1,17 @@
 import z3
 import pytest
-from z3 import IntVal, BoolVal
+from z3 import IntVal, BoolVal, Exists
 
 from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, Add, UnaryMinus, BoolConst, Not, Type, Method
-from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
+from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize, rewrite_method_references
 from llmedico.z3_evaluation.string_parser import StringParser
 from llmedico.z3_evaluation.z3_context import Z3Context
 from llmedico.z3_evaluation.z3_translator import Z3Translator
 
 
 def translate_expression(expr: str):
+    expr = rewrite_method_references(expr)
+    print(expr)
     parser = StringParser(tokenize(expr))
     logic_ast = parser.parse()
 
@@ -183,6 +185,18 @@ def test_terniary():
     types = infer("x < y ? true : false")
     assert types == {'x': Type.INT, 'y': Type.INT}
 
+def test_lambda():
+    z3_expr = translate_expression("list.anyMatch(x -> x > 0)")
+    assert type(z3_expr) == z3.z3.QuantifierRef
+    z3_expr = translate_expression("list().anyMatch(null::equals)")
+    assert type(z3_expr) == z3.z3.QuantifierRef
+    z3_expr = translate_expression("vertices.stream().anyMatch(null::equals)")
+    z3_expr = translate_expression("receiverObjectID.vertices.stream().anyMatch(null::equals)")
+    z3_expr = translate_expression("receiverObjectID.vertices == null || receiverObjectID.vertices.stream().anyMatch(_x -> _x == null)")
+
+
+
+
 def test_llmedico_examples():
     #TODO support them all
     z3_expr = translate_expression("args[0] != null")
@@ -198,9 +212,8 @@ def test_llmedico_examples():
     z3_expr = translate_expression("methodResultID == true")
     assert type(z3_expr) == z3.z3.BoolRef
 
-    #not supported
-    # z3_expr = translate_expression("args[0] instanceof org.jgrapht.Graph")
-    # assert type(z3_expr) == z3.z3.BoolRef
+    z3_expr = translate_expression("args[0] instanceof org.jgrapht.Graph")
+    assert type(z3_expr) == z3.z3.BoolRef
 
     z3_expr = translate_expression("!Double.isNaN(args[3])")
     assert type(z3_expr) == z3.z3.BoolRef
@@ -208,13 +221,13 @@ def test_llmedico_examples():
     z3_expr = translate_expression("methodResultID == null ? (g.containsKey(sourceVertex) && g.containsKey(targetVertex)) : true")
     assert type(z3_expr) == z3.z3.BoolRef
 
-    #not supported
-    # z3_expr = translate_expression("!(args[0] instanceof java.util.Observable)")
-    # assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("!(args[0] instanceof java.util.Observable)")
+    assert type(z3_expr) == z3.z3.BoolRef
 
     z3_expr = translate_expression("methodResultID == (args[0].getVertexCount() != args[1].getVertexCount()) || (args[0].getEdgeSet().size() != args[1].getEdgeSet().size())")
     assert type(z3_expr) == z3.z3.BoolRef
-    #lambda is no first oder logic, rewrite or reject
+    #lambda is no first oder logic, rewrite or reject. Can only support special cases!!
     z3_expr = translate_expression("args[1].stream().anyMatch(v -> v == null) || args[0] == null")
     assert type(z3_expr) == z3.z3.BoolRef
 
@@ -224,3 +237,8 @@ def test_llmedico_examples():
 
     z3_expr = translate_expression("methodResultID == ((org.jgrapht.Graph)args[0]).containsEdge((java.lang.Object)args[1], (java.lang.Object)args[2])")
     assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("(args[1]==null)==false && args[1].contains(null)||args[1]==null")
+    assert type(z3_expr) == z3.z3.BoolRef
+
+    z3_expr = translate_expression("(args[1]==null)==false && args[1].contains(null)||args[1]==null")

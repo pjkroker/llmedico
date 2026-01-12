@@ -1,4 +1,4 @@
-from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
+from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize, rewrite_method_references
 
 
 def test_normalize_expression():
@@ -63,5 +63,11 @@ def test_casts():
 
     tokens = tokenize("<? extends org.jgrapht.graph.DefaultEdge>x")
     assert tokens == ['<', '?', 'extends', 'org', '.', 'jgrapht', '.', 'graph', '.', 'DefaultEdge', '>', 'x']
+
+def test_lambda_null_edge_case():
+    expr = "receiverObjectID.vertices == null || receiverObjectID.vertices.stream().anyMatch(null::equals)"
+    expr = rewrite_method_references(expr)
+    assert expr == "receiverObjectID.vertices == null || receiverObjectID.vertices.stream().anyMatch(_x -> _x == null)"
+
 
 

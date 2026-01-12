@@ -1,0 +1,81 @@
+[
+  {
+    "method": "StepFunction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "x must be sorted in strictly increasing order and x[0] is ignored but it must be strictly less than x[1]",
+          "assertion": "assert args[0].length > 1 && args[0][0] < args[0][1];",
+          "name": "x",
+          "content": "Domain values where the function changes value."
+        },
+        {
+          "description": "y must not be null and have the same length as x",
+          "assertion": "assert args[1] != null && args[1].length == args[0].length;",
+          "name": "y",
+          "content": "Values of the function."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the x array is not sorted in strictly increasing order.",
+          "assertion": "assert hasUnorderedPair(args[0]);",
+          "name": "NonMonotonicSequenceException",
+          "content": "if the {@code x} array is not sorted in strictly increasing order."
+        },
+        {
+          "description": "if x or y are null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullArgumentException",
+          "content": "if {@code x} or {@code y} are {@code null}."
+        },
+        {
+          "description": "if x or y are zero-length.",
+          "assertion": "assert args[0].length == 0 || args[1].length == 0;",
+          "name": "NoDataException",
+          "content": "if {@code x} or {@code y} are zero-length."
+        },
+        {
+          "description": "if x and y do not have the same length.",
+          "assertion": "assert args[0].length != args[1].length;",
+          "name": "DimensionMismatchException",
+          "content": "if {@code x} and {@code y} do not have the same length."
+        }
+      ]
+    }
+  },
+  {
+    "method": "value",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {}
+  }
+]

@@ -49,10 +49,12 @@ class JDoctorConditionConverter(ConditionConverter):
     def param_condition_to_jdoctor(self, cond: Condition, method: MethodModel) -> dict:
         # find the matching parameter by name
         param = next(
-            p for p in method.signature.parameters
-            if p.name == cond.name
-        )
+            (p for p in method.signature.parameters if p.name == cond.name),
+            None)
 
+        # Condition does not refer to a real method parameter (e.g. <E>)
+        if param is None:
+            return None
         return {
             "parameter": self.parameter_to_jdoctor(param),
             "comment": self.normalize_javadoc_text(cond.content),
@@ -113,7 +115,9 @@ class JDoctorConditionConverter(ConditionConverter):
 
         for cond in method.conditions:
             if cond.kind == ConditionKind.PARAM:
-                param_tags.append(self.param_condition_to_jdoctor(cond, method))
+                param_condition = self.param_condition_to_jdoctor(cond, method)
+                if param_condition:
+                    param_tags.append(param_condition)
 
             elif cond.kind == ConditionKind.THROWS:
                 throws_tags.append(self.throws_condition_to_jdoctor(cond, method))

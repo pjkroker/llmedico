@@ -67,24 +67,30 @@ class JavaParser(JavaPy):
         """
         Returns a structured type model dict:
         {
-          type: { simple_name, qualified_name }
+          qualified_name,
+          simple_name,
+          is_array,
+          array_dimensions
         }
         """
-        #t = p.getType() #TODO remove?
 
-        # --- array detection ---
-        is_array = t.isArrayType()
-        if is_array:
+        # --- unwrap arrays recursively ---
+        array_dimensions = 0
+        while t.isArrayType():
+            array_dimensions += 1
             t = t.asArrayType().getComponentType()
+
+        is_array = array_dimensions > 0
 
         # --- Primitive types ---
         if t.isPrimitiveType():
             prim = str(t.asPrimitiveType().toString())
             return {
-                    "qualified_name": prim,
-                    "simple_name": prim,
-                    "is_array": is_array
-                }
+                "qualified_name": prim,
+                "simple_name": prim,
+                "is_array": is_array,
+                "array_dimensions": array_dimensions,
+            }
 
         # --- Reference types (classes, generics, etc.) ---
         try:
@@ -92,33 +98,36 @@ class JavaParser(JavaPy):
 
             # --- type variable (E, T, V, etc.) ---
             if resolved.isTypeVariable():
-                return  {
-                        "qualified_name": "java.lang.Object",
-                        "simple_name": "Object",
-                        "is_array": is_array,
-                    }
+                return {
+                    "qualified_name": "java.lang.Object",
+                    "simple_name": "Object",
+                    "is_array": is_array,
+                    "array_dimensions": array_dimensions,
+                }
 
             # --- reference type ---
             if resolved.isReferenceType():
                 ref = resolved.asReferenceType()
-                qualified = str(ref.getQualifiedName())  # e.g. org.jgrapht.alg.AbstractPathElementList
+                qualified = ref.getQualifiedName()
                 simple = qualified.split(".")[-1]
 
-                return  {
-                        "qualified_name": qualified,
-                        "simple_name": simple,
-                        "is_array": is_array,
-                    }
+                return {
+                    "qualified_name": qualified,
+                    "simple_name": simple,
+                    "is_array": is_array,
+                    "array_dimensions": array_dimensions,
+                }
 
         except Exception:
-            # Fallback: unresolved (still useful)
+            # --- Fallback: unresolved ---
             raw = str(t.toString())
             simple = raw.split("<")[0]
             return {
-                    "qualified_name": None,
-                    "simple_name": simple,
-                    "isArray": is_array
-                }
+                "qualified_name": None,
+                "simple_name": simple,
+                "is_array": is_array,
+                "array_dimensions": array_dimensions,
+            }
 
     def _extract_parameter(self, p):
         return {
@@ -181,23 +190,26 @@ class JavaParser(JavaPy):
             # Constructors
             # --------------------
             for ctor in clazz.getConstructors():
-                ctor_info = {
-                    "type": "constructor",
-                    "name": str(clazz.getName()),
-                    "parameters": [
-                        self._extract_parameter(p)
-                        for p in ctor.getParameters()
-                    ],
-                    "javadoc": self._get_raw_javadoc(ctor),
-                    "tags": [],
-                    "code": str(ctor.toString()),
-                }
+                # Exclude private constructors (jdoctor behavior)
+                if ctor.isPrivate():
+                    continue
+
+                parameters = [
+                    self._extract_parameter(p)
+                    for p in ctor.getParameters()
+                ]
+
+                tags = []
+                raw_javadoc = self._get_raw_javadoc(ctor)
 
                 if ctor.getJavadoc().isPresent():
                     javadoc = ctor.getJavadoc().get()
                     for tag in javadoc.getBlockTags():
-                        ctor_info["tags"].append({
-                            "tag": str(tag.getTagName()),
+                        tag_name = str(tag.getTagName()) #normalize
+                        if tag_name == "exception":
+                            tag_name = "throws"
+                        tags.append({
+                            "tag": tag_name,
                             "name": (
                                 str(tag.getName().orElse(None))
                                 if tag.getName().isPresent()
@@ -206,12 +218,31 @@ class JavaParser(JavaPy):
                             "content": str(tag.getContent().toText()),
                         })
 
+                # REFINED EXCLUSION RULE
+                if not parameters and not tags:
+                    body = ctor.getBody()
+                    if body is None or body.getStatements().isEmpty():
+                        continue
+
+                ctor_info = {
+                    "type": "constructor",
+                    "name": str(clazz.getName()),
+                    "parameters": parameters,
+                    "javadoc": raw_javadoc,
+                    "tags": tags,
+                    "code": str(ctor.toString()),
+                }
+
                 class_info["members"].append(ctor_info)
 
             # --------------------
             # Methods
             # --------------------
             for method in clazz.getMethods():
+                # Exclude private methods (jdoctor behavior)
+                if method.isPrivate():
+                    continue
+
                 method_info = {
                     "type": "method",
                     "name": str(method.getName()),
@@ -228,8 +259,11 @@ class JavaParser(JavaPy):
                 if method.getJavadoc().isPresent():
                     javadoc = method.getJavadoc().get()
                     for tag in javadoc.getBlockTags():
+                        tag_name = str(tag.getTagName())
+                        if tag_name == "exception": #normalize
+                            tag_name = "throws"
                         method_info["tags"].append({
-                            "tag": str(tag.getTagName()),
+                            "tag": tag_name,
                             "name": (
                                 str(tag.getName().orElse(None))
                                 if tag.getName().isPresent()

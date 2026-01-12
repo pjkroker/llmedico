@@ -1,13 +1,35 @@
 import json
 from pathlib import Path
+from typing import List
 
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.builder.class_model_builder_jdoctor import ClassModelBuilderJdoctor
 from llmedico.conditions.model import ClassModel
 from llmedico.evaluation.evaluation_csv_writer import EvaluationCSVWriter
+from llmedico.evaluation.evaluation_row import EvaluationRow
 from llmedico.evaluation.evaluator import _evaluate_assertions, evaluate_class
 from llmedico.evaluation.result import AssertionRelation
 
+
+
+def get_row_evaluation() -> List[EvaluationRow]:
+    # Graph
+    builder = ClassModelBuilder()
+    input_path = Path(
+        __file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.Graph_prompt_mit_methods.json"
+    with open(input_path, "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    generated_cls = builder.build_class(extracted_conditions[0])
+
+    builder = ClassModelBuilderJdoctor()
+    input_path = Path(
+        __file__).parent.parent / "data" / "input" / "generated_conditions" / "toradocu-condition_translator-org.jgrapht.Graph.json"
+    input_path = Path(__file__).parent.parent / "data" / "input" / "org.jgrapht.Graph_goal.json"
+    with open(input_path, "r", encoding="utf-8") as f:
+        extracted_conditions = json.load(f)
+    expected_cls = builder.build_class(extracted_conditions)
+    result = evaluate_class(expected_cls, generated_cls)
+    return result
 
 def test_evaluate_expressions():
     result = _evaluate_assertions("x > 0", "")
@@ -39,26 +61,16 @@ def test_evaluate_expressions():
     assert result.reason == "Variable 'x' used as both Type.INT and Type.BOOL"
     #instanceof
     result = _evaluate_assertions("args[0] instanceof org.jgrapht.Graph", "args[0].getClass().getName() == 'org.jgrapht.Graph'")
-    assert result.relation == AssertionRelation.UNSUPPORTED
-    assert result.reason.startswith("Error during parsing")
+    assert result.relation == AssertionRelation.INCOMPARABLE
 
     #lambda
     result = _evaluate_assertions("args[1].stream().anyMatch(v -> v == null)", "args[0] == null")
-    assert result.relation == AssertionRelation.UNSUPPORTED
+    assert result.relation == AssertionRelation.INCOMPARABLE
 
 def test_evaluate_class():
-    builder = ClassModelBuilder()
-    input_path = Path(__file__).parent.parent / "data" / "input" / "llmedico-condition_translator.json"
-    with open(input_path, "r", encoding="utf-8") as f:
-        extracted_conditions = json.load(f)
-    expected_cls = builder.build_class(extracted_conditions[0])
-    # result = evaluate_class(expected_cls, expected_cls) #todo assert alles gleich
+    ...
 
-    input_path = Path(__file__).parent.parent / "data" / "input" / "llmedico-condition_translator_copy.json"
-    with open(input_path, "r", encoding="utf-8") as f:
-        extracted_conditions = json.load(f)
-    generated_cls = builder.build_class(extracted_conditions[0])
-    result = evaluate_class(expected_cls, generated_cls)
+
 
 def test_evaluation_with_builder():
     builder = ClassModelBuilder()
@@ -78,19 +90,20 @@ def test_evaluation_with_writer():
     #Graph
     builder = ClassModelBuilder()
     input_path = Path(
-        __file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.Graph.json"
+        __file__).parent.parent / "data" / "input" / "generated_conditions" / "llmedico-condition_translator-org.jgrapht.Graph_prompt_mit_methods.json"
     with open(input_path, "r", encoding="utf-8") as f:
         extracted_conditions = json.load(f)
     generated_cls = builder.build_class(extracted_conditions[0])
 
     builder = ClassModelBuilderJdoctor()
     input_path = Path(__file__).parent.parent / "data" / "input" / "generated_conditions" / "toradocu-condition_translator-org.jgrapht.Graph.json"
+    input_path = Path(__file__).parent.parent / "data" / "input" / "org.jgrapht.Graph_goal.json"
     with open(input_path, "r", encoding="utf-8") as f:
         extracted_conditions = json.load(f)
     expected_cls = builder.build_class(extracted_conditions)
     result = evaluate_class(expected_cls, generated_cls)
 
-    path_outputfile = Path(__file__).parent.parent / "data" / "output" / "result_Graph_neu_llm_jdoctor.csv"
+    path_outputfile = Path(__file__).parent.parent / "data" / "output" / "result_Graph_neu_llm_mit_prompts_goal.csv"
     with EvaluationCSVWriter(path_outputfile) as writer:
         for row in result:
             writer.write(row)

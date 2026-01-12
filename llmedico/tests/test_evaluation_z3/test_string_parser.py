@@ -2,7 +2,7 @@ import pytest
 
 from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.model_ast import And, Compare, Var, IntConst, UnaryMinus, Sub, Add, Mul, BoolConst, Type, \
-    NullConst, Method, Expr, Conditional
+    NullConst, Method, Expr, Conditional, LambdaExpr
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize
 from llmedico.z3_evaluation.string_parser import StringParser, ParseError
 
@@ -151,11 +151,26 @@ def test_ignore_cast():
     ast = get_ast("((Foo.Bar) y).equals(z)")
     assert ast ==  Method(receiver=Var(name='y'), name='equals', parameters=[Var(name='z')])
 
-def test_raise_error_instanceof():
-    with pytest.raises(ParseError):
-        parser = StringParser(tokenize("x instanceof Graph"))
-        ast = parser.parse()
 
+def test_lamda():
+    tokens = tokenize("assert list.stream().anyMatch(x -> x > 0);")
+    assert tokens == ['assert', 'list', '.', 'stream', '(', ')', '.', 'anyMatch', '(', 'x', '->', 'x', '>', '0', ')']
+
+    parser = StringParser(tokenize("x -> x > 0"))
+    ast = parser.parse()
+    print(ast)
+    assert ast == LambdaExpr(param='x', body=Compare(left=Var(name='x'), op='>', right=IntConst(value=0)))
+
+    parser = StringParser(tokenize("anyMatch(x -> x > 0)"))
+    ast = parser.parse()
+    print(ast)
+    assert ast == Method(receiver=None, name='anyMatch', parameters=[LambdaExpr(param='x', body=Compare(left=Var(name='x'), op='>', right=IntConst(value=0)))])
+
+    #"list.stream().anyMatch(x -> x > 0)"
+    parser = StringParser(tokenize("list.stream().anyMatch(x -> x > 0)"))
+    ast = parser.parse()
+    print(ast)
+    assert ast == Method(receiver=Method(receiver=Var(name='list'), name='stream', parameters=[]), name='anyMatch', parameters=[LambdaExpr(param='x', body=Compare(left=Var(name='x'), op='>', right=IntConst(value=0)))])
 
 
 

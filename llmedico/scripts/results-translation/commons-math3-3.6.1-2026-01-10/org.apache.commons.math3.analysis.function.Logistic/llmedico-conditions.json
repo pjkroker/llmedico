@@ -1,0 +1,242 @@
+[
+  {
+    "method": "Logistic",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "q"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "k If b > 0, value of the function for x going towards +∞. If b < 0, value of the function for x going towards -∞.",
+          "assertion": "assert true;",
+          "name": "k",
+          "content": "If b > 0, value of the function for x going towards +∞. If b < 0, value of the function for x going towards -∞."
+        },
+        {
+          "description": "m Abscissa of maximum growth.",
+          "assertion": "assert true;",
+          "name": "m",
+          "content": "Abscissa of maximum growth."
+        },
+        {
+          "description": "b Growth rate.",
+          "assertion": "assert true;",
+          "name": "b",
+          "content": "Growth rate."
+        },
+        {
+          "description": "q Parameter that affects the position of the curve along the ordinate axis.",
+          "assertion": "assert true;",
+          "name": "q",
+          "content": "Parameter that affects the position of the curve along the ordinate axis."
+        },
+        {
+          "description": "a If b > 0, value of the function for x going towards -∞. If b < 0, value of the function for x going towards +∞.",
+          "assertion": "assert true;",
+          "name": "a",
+          "content": "If b > 0, value of the function for x going towards -∞. If b < 0, value of the function for x going towards +∞."
+        },
+        {
+          "description": "n must be strictly positive",
+          "assertion": "assert args[5] > 0;",
+          "name": "n",
+          "content": "Parameter that affects near which asymptote the maximum growth occurs."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n is less than or equal to 0.",
+          "assertion": "assert args[5] <= 0;",
+          "name": "NotStrictlyPositiveException",
+          "content": "if {@code n <= 0}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "value",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "derivative",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "value",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "mMinusX"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "q"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false
+        },
+        "name": "oneOverN"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "mMinusX must be valid",
+          "assertion": "assert true;",
+          "name": "mMinusX",
+          "content": "m - x"
+        },
+        {
+          "description": "k must be valid",
+          "assertion": "assert true;",
+          "name": "k",
+          "content": "k"
+        },
+        {
+          "description": "b must be valid",
+          "assertion": "assert true;",
+          "name": "b",
+          "content": "b"
+        },
+        {
+          "description": "q must be valid",
+          "assertion": "assert true;",
+          "name": "q",
+          "content": "q"
+        },
+        {
+          "description": "a must be valid",
+          "assertion": "assert true;",
+          "name": "a",
+          "content": "a"
+        },
+        {
+          "description": "oneOverN must be valid",
+          "assertion": "assert true;",
+          "name": "oneOverN",
+          "content": "1 / n"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the value of the function.",
+          "assertion": "assert Double.isFinite(methodResultID);",
+          "name": null,
+          "content": "the value of the function."
+        }
+      ]
+    }
+  },
+  {
+    "method": "value",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "org.apache.commons.math3.analysis.differentiation.DerivativeStructure",
+          "simple_name": "DerivativeStructure",
+          "is_array": false
+        },
+        "name": "t"
+      }
+    ],
+    "conditions": {}
+  }
+]

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 
 class Expr:
@@ -31,7 +31,7 @@ class IntVar(Expr):
     name: str
 
 @dataclass(frozen=True)
-class NullConst(Expr): #TODO check does this work?
+class NullConst(Expr):
     def __repr__(self):
         return "NullConst()"
 
@@ -89,12 +89,22 @@ class Conditional(Expr):
     then: Expr
     otherwise: Expr
 
+@dataclass(frozen=True)
+class LambdaExpr(Expr):
+    param: str         # "x"
+    body: Expr         # e.g. (x > 0)
+
 # Comparisons
 @dataclass(frozen=True)
 class Compare(Expr):
     left: Expr
     op: str   # ">", ">=", "<", "<=", "==", "!="
     right: Expr
+
+@dataclass(frozen=True)
+class InstanceOf(Expr):
+    expr: Expr
+    type_name: str
 
 class Type(Enum):
     INT = "int"
@@ -121,6 +131,7 @@ BOOL_RETURN_METHODS = {
     "addEdge",
 }
 
+MATCH_METHODS = {"anyMatch", "allMatch", "noneMatch"} # for lambda ->
 
 def typeof(expr: Expr) -> Type:
     if isinstance(expr, IntConst):
@@ -152,6 +163,9 @@ def typeof(expr: Expr) -> Type:
         return Type.REF
 
     if isinstance(expr, Method): #check TODO
+        if expr.name in MATCH_METHODS:
+            return Type.BOOL
+
         if expr.name in INT_RETURN_METHODS:
             return Type.INT
         # predicates
@@ -179,6 +193,9 @@ def typeof(expr: Expr) -> Type:
             raise TypeError("Both branches of ?: must have same type")
 
         return t_then or t_else
+
+    if isinstance(expr, LambdaExpr):
+        return Type.FUNC
 
     raise TypeError(expr)
 
