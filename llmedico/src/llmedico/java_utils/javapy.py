@@ -67,24 +67,30 @@ class JavaParser(JavaPy):
         """
         Returns a structured type model dict:
         {
-          type: { simple_name, qualified_name }
+          qualified_name,
+          simple_name,
+          is_array,
+          array_dimensions
         }
         """
-        #t = p.getType() #TODO remove?
 
-        # --- array detection ---
-        is_array = t.isArrayType()
-        if is_array:
+        # --- unwrap arrays recursively ---
+        array_dimensions = 0
+        while t.isArrayType():
+            array_dimensions += 1
             t = t.asArrayType().getComponentType()
+
+        is_array = array_dimensions > 0
 
         # --- Primitive types ---
         if t.isPrimitiveType():
             prim = str(t.asPrimitiveType().toString())
             return {
-                    "qualified_name": prim,
-                    "simple_name": prim,
-                    "is_array": is_array
-                }
+                "qualified_name": prim,
+                "simple_name": prim,
+                "is_array": is_array,
+                "array_dimensions": array_dimensions,
+            }
 
         # --- Reference types (classes, generics, etc.) ---
         try:
@@ -92,33 +98,36 @@ class JavaParser(JavaPy):
 
             # --- type variable (E, T, V, etc.) ---
             if resolved.isTypeVariable():
-                return  {
-                        "qualified_name": "java.lang.Object",
-                        "simple_name": "Object",
-                        "is_array": is_array,
-                    }
+                return {
+                    "qualified_name": "java.lang.Object",
+                    "simple_name": "Object",
+                    "is_array": is_array,
+                    "array_dimensions": array_dimensions,
+                }
 
             # --- reference type ---
             if resolved.isReferenceType():
                 ref = resolved.asReferenceType()
-                qualified = str(ref.getQualifiedName())  # e.g. org.jgrapht.alg.AbstractPathElementList
+                qualified = ref.getQualifiedName()
                 simple = qualified.split(".")[-1]
 
-                return  {
-                        "qualified_name": qualified,
-                        "simple_name": simple,
-                        "is_array": is_array,
-                    }
+                return {
+                    "qualified_name": qualified,
+                    "simple_name": simple,
+                    "is_array": is_array,
+                    "array_dimensions": array_dimensions,
+                }
 
         except Exception:
-            # Fallback: unresolved (still useful)
+            # --- Fallback: unresolved ---
             raw = str(t.toString())
             simple = raw.split("<")[0]
             return {
-                    "qualified_name": None,
-                    "simple_name": simple,
-                    "isArray": is_array
-                }
+                "qualified_name": None,
+                "simple_name": simple,
+                "is_array": is_array,
+                "array_dimensions": array_dimensions,
+            }
 
     def _extract_parameter(self, p):
         return {
@@ -209,10 +218,11 @@ class JavaParser(JavaPy):
                             "content": str(tag.getContent().toText()),
                         })
 
-                # EXCLUSION RULE
+                # REFINED EXCLUSION RULE
                 if not parameters and not tags:
-                    # Parameterless constructor with no semantic tags → skip
-                    continue
+                    body = ctor.getBody()
+                    if body is None or body.getStatements().isEmpty():
+                        continue
 
                 ctor_info = {
                     "type": "constructor",
