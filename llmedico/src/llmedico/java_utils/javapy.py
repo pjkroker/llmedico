@@ -239,6 +239,10 @@ class JavaParser(JavaPy):
             # Methods
             # --------------------
             for method in clazz.getMethods():
+                # Exclude private methods (jdoctor behavior)
+                if method.isPrivate():
+                    continue
+
                 method_info = {
                     "type": "method",
                     "name": str(method.getName()),
