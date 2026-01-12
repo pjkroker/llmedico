@@ -45,7 +45,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     relative_path = fq_class_name.replace(".", "/") + ".java"
 
     if path_data_dir is None:
-        pass
+        path_java_class = path_source_dir / "main" / "java" / relative_path #TODO add "main" / "java" to path in run
     else:
         path_java_class = path_data_dir / "src" / "main" / "java" / relative_path
     # Set up basic configuration for logging
@@ -62,21 +62,24 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
     logger.debug("---Starting LLMedico---")
     cnfg = Config(Path(__file__).parent.parent.parent / "config.toml")
-    llm_config = cnfg.section("config")
+    llm_config = cnfg.section("llm")
     trans_config = cnfg.section("translation")
 
     logger.debug("---Starting JavaParser - Extracting JavaDoc---")
     #result_json = start_java_parser(path_output_dir, path_java_class)
     jp = JavaParser()
     java_extractions = jp.extract_to_json(path_java_class, path_jar)
+
     save_json_to_file(java_extractions, path_output_dir / "llmedico-javadoc_extractor.json")
     java_extractions = json.loads(java_extractions) #TODO load var directly and not file
 
 
     logger.debug("---Starting Translator - Translating JavaDoc to Conditions---")
-    #conditions = start_translator_everything(result_json)
-    llm = Ollama("llama3.1")
-    #llm = LiteLLMModel(model_name="openai/deepseek-ai/deepseek-coder-33b-instruct", api_base="http://127.0.0.1:8010/v1", api_key="dummy")
+    if "/" not in llm_config["model"]:
+        llm = Ollama(llm_config["model"], temperature=llm_config["temperature"], top_k=llm_config["top_k"]
+                     , top_p=llm_config["top_p"], repeat_penalty=llm_config["repeat_penalty"])
+    else:
+        llm = LiteLLMModel(model_name=llm_config["model"], api_base=llm_config["LITELLM_API_BASE"], api_key="dummy")
     trans = Translator(llm, trans_config["iteration_repairloop"])
     conditions = []
     logger.debug("translating every method of the class")
@@ -161,12 +164,13 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.jgrapht.alg.AbstractPathElementList"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core")  # --data-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/")  # --data-dir
+    #/pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java
     path_jar = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/jgrapht-jgrapht-0.9.2/jgrapht-core/target/jgrapht-core-0.9.2.jar")
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/target/commons-math3-3.6.1.jar")
 
     PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
