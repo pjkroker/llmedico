@@ -1,0 +1,323 @@
+2025-12-30 23:11:10,413 - DEBUG - llmedico.main - ---Starting LLMedico---
+2025-12-30 23:11:10,414 - DEBUG - llmedico.config.config - Loaded config from /Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/config.toml
+2025-12-30 23:11:10,414 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2025-12-30 23:11:10,446 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2025-12-30 23:11:10,446 - DEBUG - llmedico.main - translating every method of the class
+2025-12-30 23:11:10,446 - DEBUG - llmedico.main - current method name: EmptyGraphGenerator
+2025-12-30 23:11:10,446 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Construct a new EmptyGraphGenerator.
+ *
+ * @param size number of vertices to be generated
+ *
+ * @throws IllegalArgumentException if the specified size is negative.
+ */
+
+2025-12-30 23:11:10,446 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'THROWS': 1}
+2025-12-30 23:11:10,446 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM
+2025-12-30 23:11:10,447 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Construct a new EmptyGraphGenerator.
+ *
+ * @param size number of vertices to be generated
+ *
+ * @throws IllegalArgumentException if the specified size is negative.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'size'}]"
+    
+2025-12-30 23:11:26,841 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here are the Java pre-condition assertions in the provided output format:
+
+```json
+[{
+  "description": "the specified size must be positive",
+  "assertion": "assert args[0] >= 0;",
+  "name": "size",
+  "content": "number of vertices to be generated"
+}]
+```
+
+Note: I've used `>=` instead of `>` because the Javadoc description says "negative" which implies that zero is also not allowed.
+2025-12-30 23:11:26,843 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the specified size must be positive', 'assertion': 'assert args[0] >= 0;', 'name': 'size', 'content': 'number of vertices to be generated'}]
+2025-12-30 23:11:26,843 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS
+2025-12-30 23:11:26,843 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each inside its own JSON element.
+    10. Each assertion must include a short description comment following the format as shown in the example.
+    11. Output only the JSON, with no additional explanations or commentary.
+    12. Include the exception's name related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+     * Creates paths obtained by concatenating the specified edge to the
+     * specified paths.
+     *
+     * @param maxSize maximum number of paths the list is able to store.
+     * @param elementList paths, list of <code>AbstractPathElement</code>.
+     * @param edge edge reaching the end vertex of the created paths.
+     *
+     * @throws NullPointerException if the specified prevPathElementList or edge
+     * is <code>null</code>.
+     * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+     * 0.
+     */
+     Input Parameters:
+     [{"type": {
+            "qualified_name": "org.jgrapht.Graph",
+            "name": "Graph",
+            "is_array": false
+        },
+        "name": "graph"},
+        {"type": {
+            "qualified_name": "int",
+            "name": "int",
+            "is_array": false},
+        "name": "maxSize"},
+        {"type": {
+            "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+            "name": "AbstractPathElementList",
+            "is_array": false},
+            "name": "elementList"},
+        {"type": {
+            "qualifiedName": "java.lang.Object",
+            "name": "Object",
+            "isArray": false},
+        "name": "edge"}]
+     Output Java assertions:
+    ```json
+    [{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException",
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."},
+    {"description": "if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException",
+    "content": "if <code>maxSize</code> is negative or\n0."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Construct a new EmptyGraphGenerator.
+ *
+ * @param size number of vertices to be generated
+ *
+ * @throws IllegalArgumentException if the specified size is negative.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'size'}]"
+    
+2025-12-30 23:11:45,319 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here are the Java assertion statements generated from the provided Javadoc:
+
+```json
+[{"description": "if the specified size is negative.",
+"assertion": "assert args[0] < 0;",
+"name": "IllegalArgumentException",
+"content": "if the specified size is negative."}]
+```
+
+This JSON output represents one Java assert statement per @throws tag, each inside its own JSON element. The assertion includes a short description comment following the format as shown in the example.
+2025-12-30 23:11:45,321 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if the specified size is negative.', 'assertion': 'assert args[0] < 0;', 'name': 'IllegalArgumentException', 'content': 'if the specified size is negative.'}]
+2025-12-30 23:11:45,322 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'THROWS': 1} for EmptyGraphGenerator:
+ {'PARAM': [{'description': 'the specified size must be positive', 'assertion': 'assert args[0] >= 0;', 'name': 'size', 'content': 'number of vertices to be generated'}], 'THROWS': [{'description': 'if the specified size is negative.', 'assertion': 'assert args[0] < 0;', 'name': 'IllegalArgumentException', 'content': 'if the specified size is negative.'}]}
+2025-12-30 23:11:45,322 - DEBUG - llmedico.main - current method name: generateGraph
+2025-12-30 23:11:45,322 - DEBUG - llmedico.main - has the following javadoc: /**
+ * {@inheritDoc}
+ */
+
+2025-12-30 23:11:45,322 - WARNING - llmedico.main - generateGraph contains not tags?
+2025-12-30 23:11:45,322 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:11:45,322 - DEBUG - llmedico.main - the following java assertion have been generated for {} for generateGraph:
+ {}
+2025-12-30 23:11:45,323 - DEBUG - llmedico.main - the following java assertions have been generated for org.jgrapht.generate.EmptyGraphGenerator: 
+ [{'method': 'EmptyGraphGenerator', 'type': 'constructor', 'parameters': [{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False}, 'name': 'size'}], 'conditions': {'PARAM': [{'description': 'the specified size must be positive', 'assertion': 'assert args[0] >= 0;', 'name': 'size', 'content': 'number of vertices to be generated'}], 'THROWS': [{'description': 'if the specified size is negative.', 'assertion': 'assert args[0] < 0;', 'name': 'IllegalArgumentException', 'content': 'if the specified size is negative.'}]}}, {'method': 'generateGraph', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'org.jgrapht.Graph', 'simple_name': 'Graph', 'is_array': False}, 'name': 'target'}, {'type': {'qualified_name': 'org.jgrapht.VertexFactory', 'simple_name': 'VertexFactory', 'is_array': False}, 'name': 'vertexFactory'}, {'type': {'qualified_name': 'java.util.Map', 'simple_name': 'Map', 'is_array': False}, 'name': 'resultMap'}], 'conditions': {}}]
+2025-12-30 23:11:45,323 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2025-12-30 23:11:45,324 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "EmptyGraphGenerator",
+    "package": "org.jgrapht.generate",
+    "qualified_name": "org.jgrapht.generate.EmptyGraphGenerator",
+    "javadoc": "/**\n * Generates an <a href=\"http://mathworld.wolfram.com/EmptyGraph.html\">empty\n * graph</a> of any size. An empty graph is a graph that has no edges.\n *\n * @author John V. Sichi\n * @since Sep 16, 2003\n */\n",
+    "code": "/**\n * Generates an <a href=\"http://mathworld.wolfram.com/EmptyGraph.html\">empty\n * graph</a> of any size. An empty graph is a graph that has no edges.\n *\n * @author John V. Sichi\n * @since Sep 16, 2003\n */\npublic class EmptyGraphGenerator<V, E> implements GraphGenerator<V, E, V> {\n\n    private int size;\n\n    /**\n     * Construct a new EmptyGraphGenerator.\n     *\n     * @param size number of vertices to be generated\n     *\n     * @throws IllegalArgumentException if the specified size is negative.\n     */\n    public EmptyGraphGenerator(int size) {\n        if (size < 0) {\n            throw new IllegalArgumentException(\"must be non-negative\");\n        }\n        this.size = size;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public void generateGraph(Graph<V, E> target, VertexFactory<V> vertexFactory, Map<String, V> resultMap) {\n        for (int i = 0; i < size; ++i) {\n            target.addVertex(vertexFactory.createVertex());\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "EmptyGraphGenerator",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false
+            },
+            "name": "size"
+          }
+        ],
+        "javadoc": "/**\n * Construct a new EmptyGraphGenerator.\n *\n * @param size number of vertices to be generated\n *\n * @throws IllegalArgumentException if the specified size is negative.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "size",
+            "content": "number of vertices to be generated",
+            "assertion": "assert args[0] >= 0;",
+            "description": "the specified size must be positive"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the specified size is negative.",
+            "assertion": "assert args[0] < 0;",
+            "description": "if the specified size is negative."
+          }
+        ],
+        "code": "/**\n * Construct a new EmptyGraphGenerator.\n *\n * @param size number of vertices to be generated\n *\n * @throws IllegalArgumentException if the specified size is negative.\n */\npublic EmptyGraphGenerator(int size) {\n    if (size < 0) {\n        throw new IllegalArgumentException(\"must be non-negative\");\n    }\n    this.size = size;\n}"
+      },
+      {
+        "type": "method",
+        "name": "generateGraph",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "target"
+          },
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.VertexFactory",
+              "simple_name": "VertexFactory",
+              "is_array": false
+            },
+            "name": "vertexFactory"
+          },
+          {
+            "type": {
+              "qualified_name": "java.util.Map",
+              "simple_name": "Map",
+              "is_array": false
+            },
+            "name": "resultMap"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic void generateGraph(Graph<V, E> target, VertexFactory<V> vertexFactory, Map<String, V> resultMap) {\n    for (int i = 0; i < size; ++i) {\n        target.addVertex(vertexFactory.createVertex());\n    }\n}"
+      }
+    ]
+  }
+]
+2025-12-30 23:11:45,325 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2025-12-30 23:11:45,325 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2025-12-30 23:11:45,326 - DEBUG - llmedico.main - ---Ending LLMedico---

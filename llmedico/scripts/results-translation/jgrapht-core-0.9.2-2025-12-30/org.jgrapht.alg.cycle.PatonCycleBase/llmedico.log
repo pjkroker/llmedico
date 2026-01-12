@@ -1,0 +1,376 @@
+2025-12-30 23:26:05,230 - DEBUG - llmedico.main - ---Starting LLMedico---
+2025-12-30 23:26:05,231 - DEBUG - llmedico.config.config - Loaded config from /Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/config.toml
+2025-12-30 23:26:05,231 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2025-12-30 23:26:05,252 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - translating every method of the class
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - current method name: PatonCycleBase
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Create a cycle base finder with an unspecified graph.
+ */
+
+2025-12-30 23:26:05,253 - WARNING - llmedico.main - PatonCycleBase contains not tags?
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - the following java assertion have been generated for {} for PatonCycleBase:
+ {}
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - current method name: PatonCycleBase
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Create a cycle base finder for the specified graph.
+ *
+ * @param graph - the DirectedGraph in which to find cycles.
+ *
+ * @throws IllegalArgumentException if the graph argument is <code>
+ * null</code>.
+ */
+
+2025-12-30 23:26:05,253 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'THROWS': 1}
+2025-12-30 23:26:05,253 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM
+2025-12-30 23:26:05,253 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the Javadoc.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion..
+    3. Ignore @return and @throws tags — output only pre-condition checks.
+    4. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    5. Only output JSON, no additional explanations or commentary.
+    6. Assume all referenced variables (including the receiver object this) are in scope.
+    7. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    8. Provide a short description for the generated assertion as shown in the example.
+    9. Refer to the parameters as args[0], and args[1] and so on.
+    10. Include the parameter's name related to the assertion as shown in the example.
+    11. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    12. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Create a cycle base finder for the specified graph.
+ *
+ * @param graph - the DirectedGraph in which to find cycles.
+ *
+ * @throws IllegalArgumentException if the graph argument is <code>
+ * null</code>.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.UndirectedGraph', 'simple_name': 'UndirectedGraph', 'is_array': False}, 'name': 'graph'}]"
+    
+2025-12-30 23:26:21,153 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: Here is the output in JSON format:
+
+```json
+[
+  {
+    "description": "the graph argument cannot be null",
+    "assertion": "assert args[0] != null;",
+    "name": "graph",
+    "content": "null"
+  }
+]
+```
+
+Note: The content of the assertion includes only the HTML Character Entity for `&lt;` because there was no actual HTML element in the Javadoc.
+2025-12-30 23:26:21,155 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the graph argument cannot be null', 'assertion': 'assert args[0] != null;', 'name': 'graph', 'content': 'null'}]
+2025-12-30 23:26:21,155 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS
+2025-12-30 23:26:21,155 - DEBUG - llm_caller.models.ollama - Ollama: generating prompt: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Use standard Java syntax (e.g., assert x < 0;).
+    7. Assume all referenced variables (including the receiver object this) are in scope.
+    8. Refer to method parameters as args[0], args[1], and so on.
+    9. Output one Java assert statement per @throws tag, each inside its own JSON element.
+    10. Each assertion must include a short description comment following the format as shown in the example.
+    11. Output only the JSON, with no additional explanations or commentary.
+    12. Include the exception's name related to the assertion as shown in the example.
+    13. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    Example:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+     * Creates paths obtained by concatenating the specified edge to the
+     * specified paths.
+     *
+     * @param maxSize maximum number of paths the list is able to store.
+     * @param elementList paths, list of <code>AbstractPathElement</code>.
+     * @param edge edge reaching the end vertex of the created paths.
+     *
+     * @throws NullPointerException if the specified prevPathElementList or edge
+     * is <code>null</code>.
+     * @throws IllegalArgumentException if <code>maxSize</code> is negative or
+     * 0.
+     */
+     Input Parameters:
+     [{"type": {
+            "qualified_name": "org.jgrapht.Graph",
+            "name": "Graph",
+            "is_array": false
+        },
+        "name": "graph"},
+        {"type": {
+            "qualified_name": "int",
+            "name": "int",
+            "is_array": false},
+        "name": "maxSize"},
+        {"type": {
+            "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+            "name": "AbstractPathElementList",
+            "is_array": false},
+            "name": "elementList"},
+        {"type": {
+            "qualifiedName": "java.lang.Object",
+            "name": "Object",
+            "isArray": false},
+        "name": "edge"}]
+     Output Java assertions:
+    ```json
+    [{"description": "if the specified prevPathElementList or edge is null.",
+    "assertion": "assert args[2]==null || args[3]==null;",
+    "name": "NullPointerException",
+    "content": "if the specified prevPathElementList or edge is <code>null</code>."},
+    {"description": "if maxSize is negative or 0.",
+    "assertion": "assert args[1]<0 || args[1]==0;",
+    "name": "IllegalArgumentException",
+    "content": "if <code>maxSize</code> is negative or\n0."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Create a cycle base finder for the specified graph.
+ *
+ * @param graph - the DirectedGraph in which to find cycles.
+ *
+ * @throws IllegalArgumentException if the graph argument is <code>
+ * null</code>.
+ */
+"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'org.jgrapht.UndirectedGraph', 'simple_name': 'UndirectedGraph', 'is_array': False}, 'name': 'graph'}]"
+    
+2025-12-30 23:26:41,632 - DEBUG - llm_caller.models.ollama - raw response from llama3.1: ```json
+[
+  {
+    "description": "if the graph argument is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "IllegalArgumentException",
+    "content": "if the graph argument is <code>null</code>."
+  }
+]
+```
+
+This output follows the required format, where each @throws tag from the Javadoc comment is converted into a single Java assert statement that matches the exception condition itself. The assertion includes a short description comment following the specified format, including the parameter's content related to the assertion.
+2025-12-30 23:26:41,635 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if the graph argument is null.', 'assertion': 'assert args[0]==null;', 'name': 'IllegalArgumentException', 'content': 'if the graph argument is <code>null</code>.'}]
+2025-12-30 23:26:41,635 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'THROWS': 1} for PatonCycleBase:
+ {'PARAM': [{'description': 'the graph argument cannot be null', 'assertion': 'assert args[0] != null;', 'name': 'graph', 'content': 'null'}], 'THROWS': [{'description': 'if the graph argument is null.', 'assertion': 'assert args[0]==null;', 'name': 'IllegalArgumentException', 'content': 'if the graph argument is <code>null</code>.'}]}
+2025-12-30 23:26:41,635 - DEBUG - llmedico.main - current method name: getGraph
+2025-12-30 23:26:41,635 - DEBUG - llmedico.main - has the following javadoc: /**
+ * {@inheritDoc}
+ */
+
+2025-12-30 23:26:41,635 - WARNING - llmedico.main - getGraph contains not tags?
+2025-12-30 23:26:41,635 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - the following java assertion have been generated for {} for getGraph:
+ {}
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - current method name: setGraph
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - has the following javadoc: /**
+ * {@inheritDoc}
+ */
+
+2025-12-30 23:26:41,636 - WARNING - llmedico.main - setGraph contains not tags?
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - the following java assertion have been generated for {} for setGraph:
+ {}
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - current method name: findCycleBase
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - has the following javadoc: /**
+ * {@inheritDoc}
+ */
+
+2025-12-30 23:26:41,636 - WARNING - llmedico.main - findCycleBase contains not tags?
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2025-12-30 23:26:41,636 - DEBUG - llmedico.main - the following java assertion have been generated for {} for findCycleBase:
+ {}
+2025-12-30 23:26:41,637 - DEBUG - llmedico.main - the following java assertions have been generated for org.jgrapht.alg.cycle.PatonCycleBase: 
+ [{'method': 'PatonCycleBase', 'type': 'constructor', 'parameters': [], 'conditions': {}}, {'method': 'PatonCycleBase', 'type': 'constructor', 'parameters': [{'type': {'qualified_name': 'org.jgrapht.UndirectedGraph', 'simple_name': 'UndirectedGraph', 'is_array': False}, 'name': 'graph'}], 'conditions': {'PARAM': [{'description': 'the graph argument cannot be null', 'assertion': 'assert args[0] != null;', 'name': 'graph', 'content': 'null'}], 'THROWS': [{'description': 'if the graph argument is null.', 'assertion': 'assert args[0]==null;', 'name': 'IllegalArgumentException', 'content': 'if the graph argument is <code>null</code>.'}]}}, {'method': 'getGraph', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'setGraph', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'org.jgrapht.UndirectedGraph', 'simple_name': 'UndirectedGraph', 'is_array': False}, 'name': 'graph'}], 'conditions': {}}, {'method': 'findCycleBase', 'type': 'method', 'parameters': [], 'conditions': {}}]
+2025-12-30 23:26:41,637 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2025-12-30 23:26:41,638 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "PatonCycleBase",
+    "package": "org.jgrapht.alg.cycle",
+    "qualified_name": "org.jgrapht.alg.cycle.PatonCycleBase",
+    "javadoc": "/**\n * Find a cycle base of an undirected graph using the Paton's algorithm.\n *\n * <p>See:<br>\n * K. Paton, An algorithm for finding a fundamental set of cycles for an\n * undirected linear graph, Comm. ACM 12 (1969), pp. 514-518.\n *\n * @param <V> the vertex type.\n * @param <E> the edge type.\n *\n * @author Nikolay Ognyanov\n */\n",
+    "code": "/**\n * Find a cycle base of an undirected graph using the Paton's algorithm.\n *\n * <p>See:<br>\n * K. Paton, An algorithm for finding a fundamental set of cycles for an\n * undirected linear graph, Comm. ACM 12 (1969), pp. 514-518.\n *\n * @param <V> the vertex type.\n * @param <E> the edge type.\n *\n * @author Nikolay Ognyanov\n */\npublic class PatonCycleBase<V, E> implements UndirectedCycleBase<V, E> {\n\n    private UndirectedGraph<V, E> graph;\n\n    /**\n     * Create a cycle base finder with an unspecified graph.\n     */\n    public PatonCycleBase() {\n    }\n\n    /**\n     * Create a cycle base finder for the specified graph.\n     *\n     * @param graph - the DirectedGraph in which to find cycles.\n     *\n     * @throws IllegalArgumentException if the graph argument is <code>\n     * null</code>.\n     */\n    public PatonCycleBase(UndirectedGraph<V, E> graph) {\n        if (graph == null) {\n            throw new IllegalArgumentException(\"Null graph argument.\");\n        }\n        this.graph = graph;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public UndirectedGraph<V, E> getGraph() {\n        return graph;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public void setGraph(UndirectedGraph<V, E> graph) {\n        if (graph == null) {\n            throw new IllegalArgumentException(\"Null graph argument.\");\n        }\n        this.graph = graph;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public List<List<V>> findCycleBase() {\n        if (graph == null) {\n            throw new IllegalArgumentException(\"Null graph.\");\n        }\n        Map<V, Set<V>> used = new HashMap<V, Set<V>>();\n        Map<V, V> parent = new HashMap<V, V>();\n        ArrayDeque<V> stack = new ArrayDeque<V>();\n        List<List<V>> cycles = new ArrayList<List<V>>();\n        for (V root : graph.vertexSet()) {\n            // Loop over the connected\n            // components of the graph.\n            if (parent.containsKey(root)) {\n                continue;\n            }\n            // Free some memory in case of\n            // multiple connected components.\n            used.clear();\n            // Prepare to walk the spanning tree.\n            parent.put(root, root);\n            used.put(root, new HashSet<V>());\n            stack.push(root);\n            // Do the walk. It is a BFS with\n            // a LIFO instead of the usual\n            // FIFO. Thus it is easier to\n            // find the cycles in the tree.\n            while (!stack.isEmpty()) {\n                V current = stack.pop();\n                Set<V> currentUsed = used.get(current);\n                for (E e : graph.edgesOf(current)) {\n                    V neighbor = graph.getEdgeTarget(e);\n                    if (neighbor.equals(current)) {\n                        neighbor = graph.getEdgeSource(e);\n                    }\n                    if (!used.containsKey(neighbor)) {\n                        // found a new node\n                        parent.put(neighbor, current);\n                        Set<V> neighbourUsed = new HashSet<V>();\n                        neighbourUsed.add(current);\n                        used.put(neighbor, neighbourUsed);\n                        stack.push(neighbor);\n                    } else if (neighbor.equals(current)) {\n                        // found a self loop\n                        List<V> cycle = new ArrayList<V>();\n                        cycle.add(current);\n                        cycles.add(cycle);\n                    } else if (!currentUsed.contains(neighbor)) {\n                        // found a cycle\n                        Set<V> neighbourUsed = used.get(neighbor);\n                        List<V> cycle = new ArrayList<V>();\n                        cycle.add(neighbor);\n                        cycle.add(current);\n                        V p = parent.get(current);\n                        while (!neighbourUsed.contains(p)) {\n                            cycle.add(p);\n                            p = parent.get(p);\n                        }\n                        cycle.add(p);\n                        cycles.add(cycle);\n                        neighbourUsed.add(current);\n                    }\n                }\n            }\n        }\n        return cycles;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "PatonCycleBase",
+        "parameters": [],
+        "javadoc": "/**\n * Create a cycle base finder with an unspecified graph.\n */\n",
+        "tags": [],
+        "code": "/**\n * Create a cycle base finder with an unspecified graph.\n */\npublic PatonCycleBase() {\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "PatonCycleBase",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.UndirectedGraph",
+              "simple_name": "UndirectedGraph",
+              "is_array": false
+            },
+            "name": "graph"
+          }
+        ],
+        "javadoc": "/**\n * Create a cycle base finder for the specified graph.\n *\n * @param graph - the DirectedGraph in which to find cycles.\n *\n * @throws IllegalArgumentException if the graph argument is <code>\n * null</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "graph",
+            "content": "- the DirectedGraph in which to find cycles.",
+            "assertion": "assert args[0] != null;",
+            "description": "the graph argument cannot be null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the graph argument is <code>\nnull</code>.",
+            "assertion": "assert args[0]==null;",
+            "description": "if the graph argument is null."
+          }
+        ],
+        "code": "/**\n * Create a cycle base finder for the specified graph.\n *\n * @param graph - the DirectedGraph in which to find cycles.\n *\n * @throws IllegalArgumentException if the graph argument is <code>\n * null</code>.\n */\npublic PatonCycleBase(UndirectedGraph<V, E> graph) {\n    if (graph == null) {\n        throw new IllegalArgumentException(\"Null graph argument.\");\n    }\n    this.graph = graph;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getGraph",
+        "return_type": {
+          "qualified_name": "org.jgrapht.UndirectedGraph",
+          "simple_name": "UndirectedGraph",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic UndirectedGraph<V, E> getGraph() {\n    return graph;\n}"
+      },
+      {
+        "type": "method",
+        "name": "setGraph",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.UndirectedGraph",
+              "simple_name": "UndirectedGraph",
+              "is_array": false
+            },
+            "name": "graph"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic void setGraph(UndirectedGraph<V, E> graph) {\n    if (graph == null) {\n        throw new IllegalArgumentException(\"Null graph argument.\");\n    }\n    this.graph = graph;\n}"
+      },
+      {
+        "type": "method",
+        "name": "findCycleBase",
+        "return_type": {
+          "qualified_name": "java.util.List",
+          "simple_name": "List",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic List<List<V>> findCycleBase() {\n    if (graph == null) {\n        throw new IllegalArgumentException(\"Null graph.\");\n    }\n    Map<V, Set<V>> used = new HashMap<V, Set<V>>();\n    Map<V, V> parent = new HashMap<V, V>();\n    ArrayDeque<V> stack = new ArrayDeque<V>();\n    List<List<V>> cycles = new ArrayList<List<V>>();\n    for (V root : graph.vertexSet()) {\n        // Loop over the connected\n        // components of the graph.\n        if (parent.containsKey(root)) {\n            continue;\n        }\n        // Free some memory in case of\n        // multiple connected components.\n        used.clear();\n        // Prepare to walk the spanning tree.\n        parent.put(root, root);\n        used.put(root, new HashSet<V>());\n        stack.push(root);\n        // Do the walk. It is a BFS with\n        // a LIFO instead of the usual\n        // FIFO. Thus it is easier to\n        // find the cycles in the tree.\n        while (!stack.isEmpty()) {\n            V current = stack.pop();\n            Set<V> currentUsed = used.get(current);\n            for (E e : graph.edgesOf(current)) {\n                V neighbor = graph.getEdgeTarget(e);\n                if (neighbor.equals(current)) {\n                    neighbor = graph.getEdgeSource(e);\n                }\n                if (!used.containsKey(neighbor)) {\n                    // found a new node\n                    parent.put(neighbor, current);\n                    Set<V> neighbourUsed = new HashSet<V>();\n                    neighbourUsed.add(current);\n                    used.put(neighbor, neighbourUsed);\n                    stack.push(neighbor);\n                } else if (neighbor.equals(current)) {\n                    // found a self loop\n                    List<V> cycle = new ArrayList<V>();\n                    cycle.add(current);\n                    cycles.add(cycle);\n                } else if (!currentUsed.contains(neighbor)) {\n                    // found a cycle\n                    Set<V> neighbourUsed = used.get(neighbor);\n                    List<V> cycle = new ArrayList<V>();\n                    cycle.add(neighbor);\n                    cycle.add(current);\n                    V p = parent.get(current);\n                    while (!neighbourUsed.contains(p)) {\n                        cycle.add(p);\n                        p = parent.get(p);\n                    }\n                    cycle.add(p);\n                    cycles.add(cycle);\n                    neighbourUsed.add(current);\n                }\n            }\n        }\n    }\n    return cycles;\n}"
+      }
+    ]
+  }
+]
+2025-12-30 23:26:41,639 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2025-12-30 23:26:41,639 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2025-12-30 23:26:41,640 - DEBUG - llmedico.main - ---Ending LLMedico---
+2025-12-30 23:26:41,661 - DEBUG - asyncio - Using selector: KqueueSelector

@@ -1,0 +1,367 @@
+[
+  {
+    "name": "IfClosure",
+    "package": "org.apache.commons.collections4.functors",
+    "qualified_name": "org.apache.commons.collections4.functors.IfClosure",
+    "javadoc": "/**\n * Closure implementation acts as an if statement calling one or other closure\n * based on a predicate.\n *\n * @since 3.0\n * @version $Id: IfClosure.java 1686855 2015-06-22 13:00:27Z tn $\n */\n",
+    "code": "/**\n * Closure implementation acts as an if statement calling one or other closure\n * based on a predicate.\n *\n * @since 3.0\n * @version $Id: IfClosure.java 1686855 2015-06-22 13:00:27Z tn $\n */\npublic class IfClosure<E> implements Closure<E>, Serializable {\n\n    /**\n     * Serial version UID\n     */\n    private static final long serialVersionUID = 3518477308466486130L;\n\n    /**\n     * The test\n     */\n    private final Predicate<? super E> iPredicate;\n\n    /**\n     * The closure to use if true\n     */\n    private final Closure<? super E> iTrueClosure;\n\n    /**\n     * The closure to use if false\n     */\n    private final Closure<? super E> iFalseClosure;\n\n    /**\n     * Factory method that performs validation.\n     * <p>\n     * This factory creates a closure that performs no action when\n     * the predicate is false.\n     *\n     * @param <E> the type that the closure acts on\n     * @param predicate  predicate to switch on\n     * @param trueClosure  closure used if true\n     * @return the <code>if</code> closure\n     * @throws NullPointerException if either argument is null\n     * @since 3.2\n     */\n    public static <E> Closure<E> ifClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure) {\n        return IfClosure.<E>ifClosure(predicate, trueClosure, NOPClosure.<E>nopClosure());\n    }\n\n    /**\n     * Factory method that performs validation.\n     *\n     * @param <E> the type that the closure acts on\n     * @param predicate  predicate to switch on\n     * @param trueClosure  closure used if true\n     * @param falseClosure  closure used if false\n     * @return the <code>if</code> closure\n     * @throws NullPointerException if any argument is null\n     */\n    public static <E> Closure<E> ifClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure, final Closure<? super E> falseClosure) {\n        if (predicate == null) {\n            throw new NullPointerException(\"Predicate must not be null\");\n        }\n        if (trueClosure == null || falseClosure == null) {\n            throw new NullPointerException(\"Closures must not be null\");\n        }\n        return new IfClosure<E>(predicate, trueClosure, falseClosure);\n    }\n\n    /**\n     * Constructor that performs no validation.\n     * Use <code>ifClosure</code> if you want that.\n     * <p>\n     * This constructor creates a closure that performs no action when\n     * the predicate is false.\n     *\n     * @param predicate  predicate to switch on, not null\n     * @param trueClosure  closure used if true, not null\n     * @since 3.2\n     */\n    public IfClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure) {\n        this(predicate, trueClosure, NOPClosure.nopClosure());\n    }\n\n    /**\n     * Constructor that performs no validation.\n     * Use <code>ifClosure</code> if you want that.\n     *\n     * @param predicate  predicate to switch on, not null\n     * @param trueClosure  closure used if true, not null\n     * @param falseClosure  closure used if false, not null\n     */\n    public IfClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure, final Closure<? super E> falseClosure) {\n        super();\n        iPredicate = predicate;\n        iTrueClosure = trueClosure;\n        iFalseClosure = falseClosure;\n    }\n\n    /**\n     * Executes the true or false closure according to the result of the predicate.\n     *\n     * @param input  the input object\n     */\n    public void execute(final E input) {\n        if (iPredicate.evaluate(input)) {\n            iTrueClosure.execute(input);\n        } else {\n            iFalseClosure.execute(input);\n        }\n    }\n\n    /**\n     * Gets the predicate.\n     *\n     * @return the predicate\n     * @since 3.1\n     */\n    public Predicate<? super E> getPredicate() {\n        return iPredicate;\n    }\n\n    /**\n     * Gets the closure called when true.\n     *\n     * @return the closure\n     * @since 3.1\n     */\n    public Closure<? super E> getTrueClosure() {\n        return iTrueClosure;\n    }\n\n    /**\n     * Gets the closure called when false.\n     *\n     * @return the closure\n     * @since 3.1\n     */\n    public Closure<? super E> getFalseClosure() {\n        return iFalseClosure;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "IfClosure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Predicate",
+              "simple_name": "Predicate",
+              "is_array": false
+            },
+            "name": "predicate"
+          },
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Closure",
+              "simple_name": "Closure",
+              "is_array": false
+            },
+            "name": "trueClosure"
+          }
+        ],
+        "javadoc": "/**\n * Constructor that performs no validation.\n * Use <code>ifClosure</code> if you want that.\n * <p>\n * This constructor creates a closure that performs no action when\n * the predicate is false.\n *\n * @param predicate  predicate to switch on, not null\n * @param trueClosure  closure used if true, not null\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "predicate to switch on, not null",
+            "assertion": "assert args[0] != null;",
+            "description": "predicate must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "trueClosure",
+            "content": "closure used if true, not null",
+            "assertion": "assert args[1] != null;",
+            "description": "trueClosure must not be null"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.2"
+          }
+        ],
+        "code": "/**\n * Constructor that performs no validation.\n * Use <code>ifClosure</code> if you want that.\n * <p>\n * This constructor creates a closure that performs no action when\n * the predicate is false.\n *\n * @param predicate  predicate to switch on, not null\n * @param trueClosure  closure used if true, not null\n * @since 3.2\n */\npublic IfClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure) {\n    this(predicate, trueClosure, NOPClosure.nopClosure());\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IfClosure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Predicate",
+              "simple_name": "Predicate",
+              "is_array": false
+            },
+            "name": "predicate"
+          },
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Closure",
+              "simple_name": "Closure",
+              "is_array": false
+            },
+            "name": "trueClosure"
+          },
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Closure",
+              "simple_name": "Closure",
+              "is_array": false
+            },
+            "name": "falseClosure"
+          }
+        ],
+        "javadoc": "/**\n * Constructor that performs no validation.\n * Use <code>ifClosure</code> if you want that.\n *\n * @param predicate  predicate to switch on, not null\n * @param trueClosure  closure used if true, not null\n * @param falseClosure  closure used if false, not null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "predicate to switch on, not null",
+            "assertion": "assert args[0] != null;",
+            "description": "predicate must be not null"
+          },
+          {
+            "tag": "param",
+            "name": "trueClosure",
+            "content": "closure used if true, not null",
+            "assertion": "assert args[1] != null;",
+            "description": "trueClosure must be not null"
+          },
+          {
+            "tag": "param",
+            "name": "falseClosure",
+            "content": "closure used if false, not null",
+            "assertion": "assert args[2] != null;",
+            "description": "falseClosure must be not null"
+          }
+        ],
+        "code": "/**\n * Constructor that performs no validation.\n * Use <code>ifClosure</code> if you want that.\n *\n * @param predicate  predicate to switch on, not null\n * @param trueClosure  closure used if true, not null\n * @param falseClosure  closure used if false, not null\n */\npublic IfClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure, final Closure<? super E> falseClosure) {\n    super();\n    iPredicate = predicate;\n    iTrueClosure = trueClosure;\n    iFalseClosure = falseClosure;\n}"
+      },
+      {
+        "type": "method",
+        "name": "ifClosure",
+        "return_type": {
+          "qualified_name": "org.apache.commons.collections4.Closure",
+          "simple_name": "Closure",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Predicate",
+              "simple_name": "Predicate",
+              "is_array": false
+            },
+            "name": "predicate"
+          },
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Closure",
+              "simple_name": "Closure",
+              "is_array": false
+            },
+            "name": "trueClosure"
+          }
+        ],
+        "javadoc": "/**\n * Factory method that performs validation.\n * <p>\n * This factory creates a closure that performs no action when\n * the predicate is false.\n *\n * @param <E> the type that the closure acts on\n * @param predicate  predicate to switch on\n * @param trueClosure  closure used if true\n * @return the <code>if</code> closure\n * @throws NullPointerException if either argument is null\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "the type that the closure acts on",
+            "assertion": "",
+            "description": "the type that the closure acts on"
+          },
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "predicate to switch on",
+            "assertion": "",
+            "description": "predicate to switch on"
+          },
+          {
+            "tag": "param",
+            "name": "trueClosure",
+            "content": "closure used if true",
+            "assertion": "",
+            "description": "closure used if true"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the <code>if</code> closure",
+            "assertion": "assert methodResultID == ifClosure(receiverObjectID.getPredicate(), receiverObjectID.getTrueClosure()).equals(receiverObjectID);",
+            "description": "Factory method that performs validation."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if either argument is null",
+            "assertion": "assert args[0] == null || args[1] == null;",
+            "description": "if either argument is null."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.2"
+          }
+        ],
+        "code": "/**\n * Factory method that performs validation.\n * <p>\n * This factory creates a closure that performs no action when\n * the predicate is false.\n *\n * @param <E> the type that the closure acts on\n * @param predicate  predicate to switch on\n * @param trueClosure  closure used if true\n * @return the <code>if</code> closure\n * @throws NullPointerException if either argument is null\n * @since 3.2\n */\npublic static <E> Closure<E> ifClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure) {\n    return IfClosure.<E>ifClosure(predicate, trueClosure, NOPClosure.<E>nopClosure());\n}"
+      },
+      {
+        "type": "method",
+        "name": "ifClosure",
+        "return_type": {
+          "qualified_name": "org.apache.commons.collections4.Closure",
+          "simple_name": "Closure",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Predicate",
+              "simple_name": "Predicate",
+              "is_array": false
+            },
+            "name": "predicate"
+          },
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Closure",
+              "simple_name": "Closure",
+              "is_array": false
+            },
+            "name": "trueClosure"
+          },
+          {
+            "type": {
+              "qualified_name": "org.apache.commons.collections4.Closure",
+              "simple_name": "Closure",
+              "is_array": false
+            },
+            "name": "falseClosure"
+          }
+        ],
+        "javadoc": "/**\n * Factory method that performs validation.\n *\n * @param <E> the type that the closure acts on\n * @param predicate  predicate to switch on\n * @param trueClosure  closure used if true\n * @param falseClosure  closure used if false\n * @return the <code>if</code> closure\n * @throws NullPointerException if any argument is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "the type that the closure acts on",
+            "assertion": "assert args[0] != null;",
+            "description": "<E> must be a valid type"
+          },
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "predicate to switch on",
+            "assertion": "assert args[1] != null;",
+            "description": "predicate must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "trueClosure",
+            "content": "closure used if true",
+            "assertion": "assert args[2] != null;",
+            "description": "trueClosure must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "falseClosure",
+            "content": "closure used if false",
+            "assertion": "assert args[3] != null;",
+            "description": "falseClosure must not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the <code>if</code> closure",
+            "assertion": "assert methodResultID == receiverObjectID.ifClosure(args[0], args[1]);",
+            "description": "the closure used if true"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any argument is null",
+            "assertion": "assert args[0] != null && args[1] != null && args[2] != null;",
+            "description": "if any argument is null."
+          }
+        ],
+        "code": "/**\n * Factory method that performs validation.\n *\n * @param <E> the type that the closure acts on\n * @param predicate  predicate to switch on\n * @param trueClosure  closure used if true\n * @param falseClosure  closure used if false\n * @return the <code>if</code> closure\n * @throws NullPointerException if any argument is null\n */\npublic static <E> Closure<E> ifClosure(final Predicate<? super E> predicate, final Closure<? super E> trueClosure, final Closure<? super E> falseClosure) {\n    if (predicate == null) {\n        throw new NullPointerException(\"Predicate must not be null\");\n    }\n    if (trueClosure == null || falseClosure == null) {\n        throw new NullPointerException(\"Closures must not be null\");\n    }\n    return new IfClosure<E>(predicate, trueClosure, falseClosure);\n}"
+      },
+      {
+        "type": "method",
+        "name": "execute",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "input"
+          }
+        ],
+        "javadoc": "/**\n * Executes the true or false closure according to the result of the predicate.\n *\n * @param input  the input object\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "input",
+            "content": "the input object",
+            "assertion": "assert args[0] != null;",
+            "description": "the input object"
+          }
+        ],
+        "code": "/**\n * Executes the true or false closure according to the result of the predicate.\n *\n * @param input  the input object\n */\npublic void execute(final E input) {\n    if (iPredicate.evaluate(input)) {\n        iTrueClosure.execute(input);\n    } else {\n        iFalseClosure.execute(input);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPredicate",
+        "return_type": {
+          "qualified_name": "org.apache.commons.collections4.Predicate",
+          "simple_name": "Predicate",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the predicate.\n *\n * @return the predicate\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the predicate",
+            "assertion": "assert methodResultID == receiverObjectID.getPredicate();",
+            "description": "the predicate"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.1"
+          }
+        ],
+        "code": "/**\n * Gets the predicate.\n *\n * @return the predicate\n * @since 3.1\n */\npublic Predicate<? super E> getPredicate() {\n    return iPredicate;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getTrueClosure",
+        "return_type": {
+          "qualified_name": "org.apache.commons.collections4.Closure",
+          "simple_name": "Closure",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the closure called when true.\n *\n * @return the closure\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the closure",
+            "assertion": "assert methodResultID == receiverObjectID.getTrueClosure();",
+            "description": "the closure"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.1"
+          }
+        ],
+        "code": "/**\n * Gets the closure called when true.\n *\n * @return the closure\n * @since 3.1\n */\npublic Closure<? super E> getTrueClosure() {\n    return iTrueClosure;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getFalseClosure",
+        "return_type": {
+          "qualified_name": "org.apache.commons.collections4.Closure",
+          "simple_name": "Closure",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the closure called when false.\n *\n * @return the closure\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the closure",
+            "assertion": "assert methodResultID == receiverObjectID.getFalseClosure();",
+            "description": "the closure"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.1"
+          }
+        ],
+        "code": "/**\n * Gets the closure called when false.\n *\n * @return the closure\n * @since 3.1\n */\npublic Closure<? super E> getFalseClosure() {\n    return iFalseClosure;\n}"
+      }
+    ]
+  }
+]

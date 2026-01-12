@@ -1,0 +1,444 @@
+[
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "canCarryTreasure",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if this Unit can carry treasure."
+        },
+        "description": "True if this Unit can carry treasure.",
+        "guard": {
+          "condition": "receiverObjectID.canCarryUnits()",
+          "description": "True if this Unit can carry treasure."
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if this Unit can carry treasure."
+        },
+        "description": "True if this Unit can carry treasure.",
+        "guard": {
+          "condition": "(receiverObjectID.canCarryUnits())==false",
+          "description": "True if this Unit can carry treasure."
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "isCarrier",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if this unit can carry goods"
+        },
+        "description": "True if this unit can carry goods",
+        "guard": {
+          "condition": "receiverObjectID.canCarryGoods()",
+          "description": "True if this unit can carry goods"
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if this unit can carry goods"
+        },
+        "description": "True if this unit can carry goods",
+        "guard": {
+          "condition": "(receiverObjectID.canCarryGoods())==false",
+          "description": "True if this unit can carry goods"
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "isOnCarrier",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if the unit is aboard a carrier."
+        },
+        "description": "True if the unit is aboard a carrier.",
+        "guard": {
+          "condition": "receiverObjectID.isCarrier()",
+          "description": "True if the unit is aboard a carrier."
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if the unit is aboard a carrier."
+        },
+        "description": "True if the unit is aboard a carrier.",
+        "guard": {
+          "condition": "(receiverObjectID.isCarrier())==false",
+          "description": "True if the unit is aboard a carrier."
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "getUnitTypeTeaching",
+      "parameterTypes": [
+        "net.sf.freecol.common.model.UnitType",
+        "net.sf.freecol.common.model.UnitType"
+      ]
+    },
+    "identifiers": {
+      "parameters": [
+        "typeTeacher",
+        "typeStudent"
+      ],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID.equals(typeTeacher)",
+          "description": "The UnitType taught."
+        },
+        "description": "The UnitType taught.",
+        "guard": {
+          "condition": "true",
+          "description": "The UnitType taught."
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "getTreasureAmount",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [
+      {
+        "exception": "java.lang.IllegalStateException",
+        "description": "@throws java.lang.IllegalStateException this is not a treasure carrying unit.",
+        "guard": {
+          "condition": "(receiverObjectID.canCarryTreasure()) == false",
+          "description": "this is not a treasure carrying unit."
+        }
+      }
+    ],
+    "post": [],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "isDefensiveUnit",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if this is a defensive unit meaning unit can be used to defend a Colony. This would normally mean that a defensive unit also will be offensive."
+        },
+        "description": "True if this is a defensive unit meaning unit can be used to defend a Colony. This would normally mean that a defensive unit also will be offensive.",
+        "guard": {
+          "condition": "receiverObjectID.couldMove()",
+          "description": "True if this is a defensive unit meaning unit can be used to defend a Colony. This would normally mean that a defensive unit also will be offensive."
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if this is a defensive unit meaning unit can be used to defend a Colony. This would normally mean that a defensive unit also will be offensive."
+        },
+        "description": "True if this is a defensive unit meaning unit can be used to defend a Colony. This would normally mean that a defensive unit also will be offensive.",
+        "guard": {
+          "condition": "(receiverObjectID.couldMove())==false",
+          "description": "True if this is a defensive unit meaning unit can be used to defend a Colony. This would normally mean that a defensive unit also will be offensive."
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "canMoveToHighSeas",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if this unit can move immediately to the high seas."
+        },
+        "description": "True if this unit can move immediately to the high seas.",
+        "guard": {
+          "condition": "receiverObjectID.hasHighSeasMove()",
+          "description": "True if this unit can move immediately to the high seas."
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if this unit can move immediately to the high seas."
+        },
+        "description": "True if this unit can move immediately to the high seas.",
+        "guard": {
+          "condition": "(receiverObjectID.hasHighSeasMove())==false",
+          "description": "True if this unit can move immediately to the high seas."
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "hasHighSeasMove",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if the unit can either move immediately to the high seas"
+        },
+        "description": "True if the unit can either move immediately to the high seas",
+        "guard": {
+          "condition": "receiverObjectID.canMoveToHighSeas()",
+          "description": "True if the unit can either move immediately to the high seas"
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if the unit can either move immediately to the high seas"
+        },
+        "description": "True if the unit can either move immediately to the high seas",
+        "guard": {
+          "condition": "(receiverObjectID.canMoveToHighSeas())==false",
+          "description": "True if the unit can either move immediately to the high seas"
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "search",
+      "parameterTypes": [
+        "net.sf.freecol.common.model.Location",
+        "net.sf.freecol.common.model.pathfinding.GoalDecider",
+        "net.sf.freecol.common.model.pathfinding.CostDecider",
+        "int",
+        "net.sf.freecol.common.model.Unit"
+      ]
+    },
+    "identifiers": {
+      "parameters": [
+        "start",
+        "gd",
+        "cd",
+        "maxTurns",
+        "carrier"
+      ],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [],
+    "pre": [
+      {
+        "description": "@param maxTurns The maximum number of turns the given Unit is allowed to move. This is the maximum search range for a goal.",
+        "guard": {
+          "condition": "receiverObjectID.couldCarry(carrier)",
+          "description": "The maximum number of turns the given Unit is allowed to move. This is the maximum search range for a goal."
+        }
+      }
+    ]
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "couldCarry",
+      "parameterTypes": [
+        "net.sf.freecol.common.model.Unit"
+      ]
+    },
+    "identifiers": {
+      "parameters": [
+        "u"
+      ],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if this unit can carry the cargo."
+        },
+        "description": "True if this unit can carry the cargo.",
+        "guard": {
+          "condition": "receiverObjectID.canCarryGoods()",
+          "description": "True if this unit can carry the cargo."
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if this unit can carry the cargo."
+        },
+        "description": "True if this unit can carry the cargo.",
+        "guard": {
+          "condition": "(receiverObjectID.canCarryGoods())==false",
+          "description": "True if this unit can carry the cargo."
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "canCarryGoods",
+      "parameterTypes": []
+    },
+    "identifiers": {
+      "parameters": [],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if the unit can carry goods."
+        },
+        "description": "True if the unit can carry goods.",
+        "guard": {
+          "condition": "receiverObjectID.canCaptureGoods()",
+          "description": "True if the unit can carry goods."
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if the unit can carry goods."
+        },
+        "description": "True if the unit can carry goods.",
+        "guard": {
+          "condition": "(receiverObjectID.canCaptureGoods())==false",
+          "description": "True if the unit can carry goods."
+        }
+      }
+    ],
+    "pre": []
+  },
+  {
+    "operation": {
+      "classname": "net.sf.freecol.common.model.Unit",
+      "name": "couldCarry",
+      "parameterTypes": [
+        "net.sf.freecol.common.model.Goods"
+      ]
+    },
+    "identifiers": {
+      "parameters": [
+        "g"
+      ],
+      "receiverName": "receiverObjectID",
+      "returnName": "methodResultID"
+    },
+    "throws": [],
+    "post": [
+      {
+        "property": {
+          "condition": "methodResultID == true",
+          "description": "True if this unit can carry the cargo."
+        },
+        "description": "True if this unit can carry the cargo.",
+        "guard": {
+          "condition": "receiverObjectID.canCarryGoods()",
+          "description": "True if this unit can carry the cargo."
+        }
+      },
+      {
+        "property": {
+          "condition": "methodResultID == false",
+          "description": "True if this unit can carry the cargo."
+        },
+        "description": "True if this unit can carry the cargo.",
+        "guard": {
+          "condition": "(receiverObjectID.canCarryGoods())==false",
+          "description": "True if this unit can carry the cargo."
+        }
+      }
+    ],
+    "pre": []
+  }
+]

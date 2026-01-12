@@ -1,0 +1,77 @@
+[
+  {
+    "name": "CompleteGraphGenerator",
+    "package": "org.jgrapht.generate",
+    "qualified_name": "org.jgrapht.generate.CompleteGraphGenerator",
+    "javadoc": "/**\n * Generates a complete graph of any size. A complete graph is a graph where\n * every vertex shares an edge with every other vertex. If it is a directed\n * graph, then edges must always exist in both directions. On a side note, a\n * complete graph is the least efficient possible graph in terms of memory and\n * cpu usage. Note: This contructor was designed for a simple undirected or\n * directed graph. It will act strangely when used with certain graph types,\n * such as undirected multigraphs. Note, though, that a complete undirected\n * multigraph is rather senseless -- you can keep adding edges and the graph is\n * never truly complete.\n *\n * @author Tim Shearouse\n * @since Nov 02, 2008\n */\n",
+    "code": "/**\n * Generates a complete graph of any size. A complete graph is a graph where\n * every vertex shares an edge with every other vertex. If it is a directed\n * graph, then edges must always exist in both directions. On a side note, a\n * complete graph is the least efficient possible graph in terms of memory and\n * cpu usage. Note: This contructor was designed for a simple undirected or\n * directed graph. It will act strangely when used with certain graph types,\n * such as undirected multigraphs. Note, though, that a complete undirected\n * multigraph is rather senseless -- you can keep adding edges and the graph is\n * never truly complete.\n *\n * @author Tim Shearouse\n * @since Nov 02, 2008\n */\npublic class CompleteGraphGenerator<V, E> implements GraphGenerator<V, E, V> {\n\n    private int size;\n\n    /**\n     * Construct a new CompleteGraphGenerator.\n     *\n     * @param size number of vertices to be generated\n     *\n     * @throws IllegalArgumentException if the specified size is negative.\n     */\n    public CompleteGraphGenerator(int size) {\n        if (size < 0) {\n            throw new IllegalArgumentException(\"must be non-negative\");\n        }\n        this.size = size;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public void generateGraph(Graph<V, E> target, VertexFactory<V> vertexFactory, Map<String, V> resultMap) {\n        if (size < 1) {\n            return;\n        }\n        //Add all the vertices to the set\n        for (int i = 0; i < size; i++) {\n            V newVertex = vertexFactory.createVertex();\n            target.addVertex(newVertex);\n        }\n        /*\n         * We want two iterators over the vertex set, one fast and one slow.\n         * The slow one will move through the set once. For each vertex,\n         * the fast iterator moves through the set, adding an edge to all\n         * vertices we haven't connected to yet.\n         *\n         * If we have an undirected graph, the second addEdge call will return\n         * nothing; it will not add a second edge.\n         */\n        Iterator<V> slowI = target.vertexSet().iterator();\n        Iterator<V> fastI;\n        while (slowI.hasNext()) {\n            //While there are more vertices in the set\n            V latestVertex = slowI.next();\n            fastI = target.vertexSet().iterator();\n            //Jump to the first vertex *past* latestVertex\n            while (fastI.next() != latestVertex) {\n                ;\n            }\n            //And, add edges to all remaining vertices\n            V temp;\n            while (fastI.hasNext()) {\n                temp = fastI.next();\n                target.addEdge(latestVertex, temp);\n                target.addEdge(temp, latestVertex);\n            }\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "CompleteGraphGenerator",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false
+            },
+            "name": "size"
+          }
+        ],
+        "javadoc": "/**\n * Construct a new CompleteGraphGenerator.\n *\n * @param size number of vertices to be generated\n *\n * @throws IllegalArgumentException if the specified size is negative.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "size",
+            "content": "number of vertices to be generated",
+            "assertion": "assert args[0] < 0;",
+            "description": "the specified size is negative"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the specified size is negative.",
+            "assertion": "assert args[0] < 0;",
+            "description": "if the specified size is negative."
+          }
+        ],
+        "code": "/**\n * Construct a new CompleteGraphGenerator.\n *\n * @param size number of vertices to be generated\n *\n * @throws IllegalArgumentException if the specified size is negative.\n */\npublic CompleteGraphGenerator(int size) {\n    if (size < 0) {\n        throw new IllegalArgumentException(\"must be non-negative\");\n    }\n    this.size = size;\n}"
+      },
+      {
+        "type": "method",
+        "name": "generateGraph",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.Graph",
+              "simple_name": "Graph",
+              "is_array": false
+            },
+            "name": "target"
+          },
+          {
+            "type": {
+              "qualified_name": "org.jgrapht.VertexFactory",
+              "simple_name": "VertexFactory",
+              "is_array": false
+            },
+            "name": "vertexFactory"
+          },
+          {
+            "type": {
+              "qualified_name": "java.util.Map",
+              "simple_name": "Map",
+              "is_array": false
+            },
+            "name": "resultMap"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic void generateGraph(Graph<V, E> target, VertexFactory<V> vertexFactory, Map<String, V> resultMap) {\n    if (size < 1) {\n        return;\n    }\n    //Add all the vertices to the set\n    for (int i = 0; i < size; i++) {\n        V newVertex = vertexFactory.createVertex();\n        target.addVertex(newVertex);\n    }\n    /*\n         * We want two iterators over the vertex set, one fast and one slow.\n         * The slow one will move through the set once. For each vertex,\n         * the fast iterator moves through the set, adding an edge to all\n         * vertices we haven't connected to yet.\n         *\n         * If we have an undirected graph, the second addEdge call will return\n         * nothing; it will not add a second edge.\n         */\n    Iterator<V> slowI = target.vertexSet().iterator();\n    Iterator<V> fastI;\n    while (slowI.hasNext()) {\n        //While there are more vertices in the set\n        V latestVertex = slowI.next();\n        fastI = target.vertexSet().iterator();\n        //Jump to the first vertex *past* latestVertex\n        while (fastI.next() != latestVertex) {\n            ;\n        }\n        //And, add edges to all remaining vertices\n        V temp;\n        while (fastI.hasNext()) {\n            temp = fastI.next();\n            target.addEdge(latestVertex, temp);\n            target.addEdge(temp, latestVertex);\n        }\n    }\n}"
+      }
+    ]
+  }
+]

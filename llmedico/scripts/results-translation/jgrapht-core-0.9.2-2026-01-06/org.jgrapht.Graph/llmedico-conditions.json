@@ -1,0 +1,808 @@
+[
+  {
+    "method": "getAllEdges",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "sourceVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "targetVertex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "sourceVertex must not be null",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "sourceVertex",
+          "content": "source vertex of the edge."
+        },
+        {
+          "description": "targetVertex must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "targetVertex",
+          "content": "target vertex of the edge."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "result must equal a set of all edges connecting source vertex to target vertex if such vertices exist in this graph.",
+          "assertion": "assert methodResultID == receiverObjectID.getAllEdges(args[0], args[1]);",
+          "name": null,
+          "content": "a set of all edges connecting source vertex to target vertex if such vertices exist in this graph. If any of the vertices does not exist or is <code>null</code>, returns <code>null</code>. If both vertices exist but no edges found, returns an empty set."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEdge",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "sourceVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "targetVertex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "sourceVertex must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "sourceVertex",
+          "content": "source vertex of the edge."
+        },
+        {
+          "description": "targetVertex must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "targetVertex",
+          "content": "target vertex of the edge."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an edge connecting source vertex to target vertex if such vertices and such edge exist in this graph.",
+          "assertion": "assert receiverObjectID.getEdge(args[0], args[1]) != null;",
+          "name": null,
+          "content": "an edge connecting source vertex to target vertex if such vertices and such edge exist in this graph. Otherwise returns <code> null</code>. If any of the specified vertices is <code> null</code> returns <code> null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEdgeFactory",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns the edge factory using which this graph creates new edges.",
+          "assertion": "assert methodResultID instanceof org.jgrapht.EdgeFactory;",
+          "name": null,
+          "content": "the edge factory using which this graph creates new edges."
+        }
+      ]
+    }
+  },
+  {
+    "method": "addEdge",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "sourceVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "targetVertex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source vertex must be contained in this graph",
+          "assertion": "assert receiverObjectID.containsVertex(args[0]);",
+          "name": "sourceVertex",
+          "content": "source vertex of the edge."
+        },
+        {
+          "description": "target vertex must be contained in this graph",
+          "assertion": "assert receiverObjectID.containsVertex(args[1]);",
+          "name": "targetVertex",
+          "content": "target vertex of the edge."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "The newly created edge if added to the graph, otherwise <code> null</code>",
+          "assertion": "assert (methodResultID != null) == receiverObjectID.addEdge(args[0], args[1]) || methodResultID == null;",
+          "name": null,
+          "content": "The newly created edge if added to the graph, otherwise <code> null</code>"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if source or target vertices are not found in the graph.",
+          "assertion": "assert !receiverObjectID.containsVertex(args[0]) || !receiverObjectID.containsVertex(args[1]);",
+          "name": "IllegalArgumentException",
+          "content": "if source or target vertices are not\nfound in the graph."
+        },
+        {
+          "description": "if any of the specified vertices is null.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if any of the specified vertices is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "addEdge",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "sourceVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "targetVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source vertex of the edge must already be contained in this graph",
+          "assertion": "assert receiverObjectID.containsVertex(args[0]);",
+          "name": "sourceVertex",
+          "content": "source vertex of the edge"
+        },
+        {
+          "description": "target vertex of the edge must already be contained in this graph",
+          "assertion": "assert receiverObjectID.containsVertex(args[1]);",
+          "name": "targetVertex",
+          "content": "target vertex of the edge"
+        },
+        {
+          "description": "edge to be added to this graph must not be null",
+          "assertion": "assert args[2] != null;",
+          "name": "e",
+          "content": "edge to be added to this graph"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this graph did not already contain the specified edge",
+          "assertion": "assert methodResultID == receiverObjectID.containsEdge(args[0], args[1]);",
+          "name": null,
+          "content": "true if this graph did not already contain the specified edge."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if source or target vertices are not found in the graph.",
+          "assertion": "assert !receiverObjectID.containsVertex(args[0]) || !receiverObjectID.containsVertex(args[1]);",
+          "name": "IllegalArgumentException",
+          "content": "if source or target vertices are not\nfound in the graph."
+        },
+        {
+          "description": "if the specified edge is not assignment compatible with the class of edges produced by the edge factory of this graph.",
+          "assertion": "assert !receiverObjectID.addEdge(args[2]).equals(receiverObjectID.getEdge(args[0], args[1]));",
+          "name": "ClassCastException",
+          "content": "if the specified edge is not assignment\ncompatible with the class of edges produced by\nthe edge factory of this graph."
+        },
+        {
+          "description": "if any of the specified vertices is null.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if any of the specified vertices is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "addVertex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "v",
+          "content": "the specified vertex; must not be <code>null</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this graph did not already contain the specified vertex.",
+          "assertion": "assert methodResultID == receiverObjectID.containsVertex(args[0]);",
+          "name": null,
+          "content": "true if this graph did not already contain the specified vertex."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the specified vertex is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the specified vertex is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "containsEdge",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "sourceVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "targetVertex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source vertex of the edge must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "sourceVertex",
+          "content": "source vertex of the edge."
+        },
+        {
+          "description": "target vertex of the edge must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "targetVertex",
+          "content": "target vertex of the edge."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this graph contains the specified edge",
+          "assertion": "assert methodResultID == receiverObjectID.containsEdge(args[0], args[1]);",
+          "name": null,
+          "content": "true if this graph contains the specified edge."
+        }
+      ]
+    }
+  },
+  {
+    "method": "containsEdge",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "edge whose presence in this graph is to be tested must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "e",
+          "content": "<tt>edge whose presence in this graph is to be tested.</tt> More formally, returns <tt>true</tt> if and only if this graph contains an edge <code>e2</code> such that <code>e.equals(e2)</code>. If the specified edge is <code>null</code> returns <code>false</code>. "
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "graph contains the specified edge e",
+          "assertion": "assert methodResultID == receiverObjectID.containsEdge(args[0]);",
+          "name": null,
+          "content": "graph contains the specified edge &lt;code&gt;e&lt;/code&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "containsVertex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "vertex v must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "v",
+          "content": "<tt>null</tt> returns <code>false</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this graph contains the specified vertex",
+          "assertion": "assert methodResultID == receiverObjectID.containsVertex(args[0]);",
+          "name": null,
+          "content": "true if this graph contains the specified vertex. More formally, returns <tt>true</tt> if and only if this graph contains a vertex &lt;code&gt;u&lt;/code&gt; such that &lt;code&gt;u.equals(v)&lt;/code&gt;. If the specified vertex is &lt;code&gt;null&lt;/code&gt; returns &lt;code&gt;false&lt;/code&gt;."
+        }
+      ]
+    }
+  },
+  {
+    "method": "edgeSet",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a set of the edges contained in this graph",
+          "assertion": "assert methodResultID != null && receiverObjectID.containsEdge(args[0]) || receiverObjectID.containsEdge(args[1]);",
+          "name": null,
+          "content": "a set of the edges contained in this graph."
+        }
+      ]
+    }
+  },
+  {
+    "method": "edgesOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "vertex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "vertex must not be null",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "vertex",
+          "content": "the vertex for which a set of touching edges is to be returned"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a set of all edges touching the specified vertex. If no edges are touching the specified vertex returns an empty set.",
+          "assertion": "assert (methodResultID.isEmpty() || receiverObjectID.containsEdge(args[0]));",
+          "name": null,
+          "content": "a set of all edges touching the specified vertex. If no edges are touching the specified vertex returns an empty set."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if vertex is not found in the graph.",
+          "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+          "name": "IllegalArgumentException",
+          "content": "if vertex is not found in the graph."
+        },
+        {
+          "description": "if vertex is <code>null</code>.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if vertex is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeAllEdges",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.util.Collection",
+          "simple_name": "Collection",
+          "is_array": false
+        },
+        "name": "edges"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "edges must not be null and is a Collection of edges",
+          "assertion": "assert args[0] != null && args[0] instanceof java.util.Collection;",
+          "name": "edges",
+          "content": "edges to be removed from this graph."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this graph changed as a result of the call",
+          "assertion": "assert methodResultID == receiverObjectID.removeAllEdges(args[0]);",
+          "name": null,
+          "content": "<tt>true</tt> if this graph changed as a result of the call"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the specified edge collection is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the specified edge collection is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeAllEdges",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "sourceVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "targetVertex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "sourceVertex must exist in the graph",
+          "assertion": "assert receiverObjectID.containsVertex(args[0]);",
+          "name": "sourceVertex",
+          "content": "source vertex of the edge."
+        },
+        {
+          "description": "targetVertex must exist in the graph",
+          "assertion": "assert receiverObjectID.containsVertex(args[1]);",
+          "name": "targetVertex",
+          "content": "target vertex of the edge."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the removed edges, or null if either vertex is not part of graph",
+          "assertion": "assert methodResultID == receiverObjectID.removeAllEdges(args[0], args[1]);",
+          "name": null,
+          "content": "the removed edges, or <code>null</code> if either vertex is not part of graph"
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeAllVertices",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.util.Collection",
+          "simple_name": "Collection",
+          "is_array": false
+        },
+        "name": "vertices"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "vertices must be a collection of vertices",
+          "assertion": "assert args[0] instanceof java.util.Collection;",
+          "name": "vertices",
+          "content": "vertices to be removed from this graph."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this graph changed as a result of the call",
+          "assertion": "assert methodResultID == receiverObjectID.removeAllVertices(args[0]);",
+          "name": null,
+          "content": "true if this graph changed as a result of the call"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the specified vertex collection is <null>.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the specified vertex collection is <tt>\n* null</tt>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeEdge",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "sourceVertex"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "targetVertex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "sourceVertex must be an existing vertex",
+          "assertion": "assert receiverObjectID.containsVertex(args[0]);",
+          "name": "sourceVertex",
+          "content": "source vertex of the edge."
+        },
+        {
+          "description": "targetVertex must be an existing vertex",
+          "assertion": "assert receiverObjectID.containsVertex(args[1]);",
+          "name": "targetVertex",
+          "content": "target vertex of the edge."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "The removed edge, or <code>null</code> if no edge removed.",
+          "assertion": "assert methodResultID == receiverObjectID.removeEdge(args[0], args[1]);",
+          "name": null,
+          "content": "The removed edge, or &lt;code&gt;nul&lt;/code&gt; if no edge removed."
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeEdge",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "e",
+          "content": "edge to be removed from this graph, if present.",
+          "assertion": "",
+          "description": "edge to be removed from this graph, if present."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns true if and only if the graph contained the specified edge.",
+          "assertion": "assert methodResultID == receiverObjectID.containsEdge(args[0]);",
+          "name": null,
+          "content": "true if and only if the graph contained the specified edge."
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeVertex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "v",
+          "content": "vertex to be removed from this graph, if present."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns <tt>true</tt> if the graph contained the specified vertex; <tt>false</tt> otherwise.",
+          "assertion": "assert methodResultID == receiverObjectID.containsVertex(args[0]);",
+          "name": null,
+          "content": "true if the graph contained the specified vertex; false otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "vertexSet",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a set view of the vertices contained in this graph.",
+          "assertion": "assert methodResultID.containsAll(receiverObjectID.getAllVertices()) && methodResultID.equals(receiverObjectID.getAllVertices());",
+          "name": null,
+          "content": "a set view of the vertices contained in this graph. The set is backed by the graph, so changes to the graph are reflected in the set. If the graph is modified while an iteration over the set is in progress, the results of the iteration are undefined.<br><p>The graph implementation may maintain a particular set ordering (e.g. via {@link java.util.LinkedHashSet}) for deterministic iteration, but this is not required.</p>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEdgeSource",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the edge must be valid",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "e",
+          "content": "edge of interest"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "source vertex",
+          "assertion": "assert methodResultID == receiverObjectID.getEdgeSource(args[0]);",
+          "name": null,
+          "content": "source vertex"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEdgeTarget",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "e must be an edge",
+          "assertion": "assert receiverObjectID.containsEdge(args[0]);",
+          "name": "e",
+          "content": "edge of interest"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "target vertex",
+          "assertion": "assert methodResultID == receiverObjectID.getEdgeTarget(args[0]);",
+          "name": null,
+          "content": "target vertex"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEdgeWeight",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "e must be an edge",
+          "assertion": "assert receiverObjectID.containsEdge(args[0]);",
+          "name": "e",
+          "content": "edge of interest"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "edge weight",
+          "assertion": "assert methodResultID == receiverObjectID.getEdgeWeight(args[0]);",
+          "name": null,
+          "content": "edge weight"
+        }
+      ]
+    }
+  }
+]

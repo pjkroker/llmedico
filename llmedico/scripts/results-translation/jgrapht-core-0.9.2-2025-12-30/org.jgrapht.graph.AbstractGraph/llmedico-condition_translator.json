@@ -1,0 +1,401 @@
+[
+  {
+    "name": "AbstractGraph",
+    "package": "org.jgrapht.graph",
+    "qualified_name": "org.jgrapht.graph.AbstractGraph",
+    "javadoc": "/**\n * A skeletal implementation of the <tt>Graph</tt> interface, to minimize the\n * effort required to implement graph interfaces. This implementation is\n * applicable to both: directed graphs and undirected graphs.\n *\n * @author Barak Naveh\n * @see Graph\n * @see DirectedGraph\n * @see UndirectedGraph\n */\n",
+    "code": "/**\n * A skeletal implementation of the <tt>Graph</tt> interface, to minimize the\n * effort required to implement graph interfaces. This implementation is\n * applicable to both: directed graphs and undirected graphs.\n *\n * @author Barak Naveh\n * @see Graph\n * @see DirectedGraph\n * @see UndirectedGraph\n */\npublic abstract class AbstractGraph<V, E> implements Graph<V, E> {\n\n    /**\n     * Construct a new empty graph object.\n     */\n    protected AbstractGraph() {\n    }\n\n    /**\n     * @see Graph#containsEdge(Object, Object)\n     */\n    @Override\n    public boolean containsEdge(V sourceVertex, V targetVertex) {\n        return getEdge(sourceVertex, targetVertex) != null;\n    }\n\n    /**\n     * @see Graph#removeAllEdges(Collection)\n     */\n    @Override\n    public boolean removeAllEdges(Collection<? extends E> edges) {\n        boolean modified = false;\n        for (E e : edges) {\n            modified |= removeEdge(e);\n        }\n        return modified;\n    }\n\n    /**\n     * @see Graph#removeAllEdges(Object, Object)\n     */\n    @Override\n    public Set<E> removeAllEdges(V sourceVertex, V targetVertex) {\n        Set<E> removed = getAllEdges(sourceVertex, targetVertex);\n        if (removed == null) {\n            return null;\n        }\n        removeAllEdges(removed);\n        return removed;\n    }\n\n    /**\n     * @see Graph#removeAllVertices(Collection)\n     */\n    @Override\n    public boolean removeAllVertices(Collection<? extends V> vertices) {\n        boolean modified = false;\n        for (V v : vertices) {\n            modified |= removeVertex(v);\n        }\n        return modified;\n    }\n\n    /**\n     * Returns a string of the parenthesized pair (V, E) representing this\n     * G=(V,E) graph. 'V' is the string representation of the vertex set, and\n     * 'E' is the string representation of the edge set.\n     *\n     * @return a string representation of this graph.\n     */\n    @Override\n    public String toString() {\n        return toStringFromSets(vertexSet(), edgeSet(), (this instanceof DirectedGraph<?, ?>));\n    }\n\n    /**\n     * Ensures that the specified vertex exists in this graph, or else throws\n     * exception.\n     *\n     * @param v vertex\n     *\n     * @return <code>true</code> if this assertion holds.\n     *\n     * @throws NullPointerException if specified vertex is <code>null</code>.\n     * @throws IllegalArgumentException if specified vertex does not exist in\n     * this graph.\n     */\n    protected boolean assertVertexExist(V v) {\n        if (containsVertex(v)) {\n            return true;\n        } else if (v == null) {\n            throw new NullPointerException();\n        } else {\n            throw new IllegalArgumentException(\"no such vertex in graph: \" + v.toString());\n        }\n    }\n\n    /**\n     * Removes all the edges in this graph that are also contained in the\n     * specified edge array. After this call returns, this graph will contain no\n     * edges in common with the specified edges. This method will invoke the\n     * {@link Graph#removeEdge(Object)} method.\n     *\n     * @param edges edges to be removed from this graph.\n     *\n     * @return <tt>true</tt> if this graph changed as a result of the call.\n     *\n     * @see Graph#removeEdge(Object)\n     * @see Graph#containsEdge(Object)\n     */\n    protected boolean removeAllEdges(E[] edges) {\n        boolean modified = false;\n        for (int i = 0; i < edges.length; i++) {\n            modified |= removeEdge(edges[i]);\n        }\n        return modified;\n    }\n\n    /**\n     * Helper for subclass implementations of toString( ).\n     *\n     * @param vertexSet the vertex set V to be printed\n     * @param edgeSet the edge set E to be printed\n     * @param directed true to use parens for each edge (representing directed);\n     * false to use curly braces (representing undirected)\n     *\n     * @return a string representation of (V,E)\n     */\n    protected String toStringFromSets(Collection<? extends V> vertexSet, Collection<? extends E> edgeSet, boolean directed) {\n        List<String> renderedEdges = new ArrayList<String>();\n        StringBuffer sb = new StringBuffer();\n        for (E e : edgeSet) {\n            if ((e.getClass() != DefaultEdge.class) && (e.getClass() != DefaultWeightedEdge.class)) {\n                sb.append(e.toString());\n                sb.append(\"=\");\n            }\n            if (directed) {\n                sb.append(\"(\");\n            } else {\n                sb.append(\"{\");\n            }\n            sb.append(getEdgeSource(e));\n            sb.append(\",\");\n            sb.append(getEdgeTarget(e));\n            if (directed) {\n                sb.append(\")\");\n            } else {\n                sb.append(\"}\");\n            }\n            // REVIEW jvs 29-May-2006:  dump weight somewhere?\n            renderedEdges.add(sb.toString());\n            sb.setLength(0);\n        }\n        return \"(\" + vertexSet + \", \" + renderedEdges + \")\";\n    }\n\n    /**\n     * Returns a hash code value for this graph. The hash code of a graph is\n     * defined to be the sum of the hash codes of vertices and edges in the\n     * graph. It is also based on graph topology and edges weights.\n     *\n     * @return the hash code value this graph\n     *\n     * @see Object#hashCode()\n     */\n    @Override\n    public int hashCode() {\n        int hash = vertexSet().hashCode();\n        for (E e : edgeSet()) {\n            int part = e.hashCode();\n            int source = getEdgeSource(e).hashCode();\n            int target = getEdgeTarget(e).hashCode();\n            // see http://en.wikipedia.org/wiki/Pairing_function (VK);\n            int pairing = ((source + target) * (source + target + 1) / 2) + target;\n            part = (27 * part) + pairing;\n            long weight = (long) getEdgeWeight(e);\n            part = (27 * part) + (int) (weight ^ (weight >>> 32));\n            hash += part;\n        }\n        return hash;\n    }\n\n    /**\n     * Indicates whether some other object is \"equal to\" this graph. Returns\n     * <code>true</code> if the given object is also a graph, the two graphs are\n     * instances of the same graph class, have identical vertices and edges sets\n     * with the same weights.\n     *\n     * @param obj object to be compared for equality with this graph\n     *\n     * @return <code>true</code> if the specified object is equal to this graph\n     *\n     * @see Object#equals(Object)\n     */\n    @Override\n    public boolean equals(Object obj) {\n        if (this == obj) {\n            return true;\n        }\n        if ((obj == null) || (getClass() != obj.getClass())) {\n            return false;\n        }\n        TypeUtil<Graph<V, E>> typeDecl = null;\n        Graph<V, E> g = TypeUtil.uncheckedCast(obj, typeDecl);\n        if (!vertexSet().equals(g.vertexSet())) {\n            return false;\n        }\n        if (edgeSet().size() != g.edgeSet().size()) {\n            return false;\n        }\n        for (E e : edgeSet()) {\n            V source = getEdgeSource(e);\n            V target = getEdgeTarget(e);\n            if (!g.containsEdge(e)) {\n                return false;\n            }\n            if (!g.getEdgeSource(e).equals(source) || !g.getEdgeTarget(e).equals(target)) {\n                return false;\n            }\n            if (Math.abs(getEdgeWeight(e) - g.getEdgeWeight(e)) > 10e-7) {\n                return false;\n            }\n        }\n        return true;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "AbstractGraph",
+        "parameters": [],
+        "javadoc": "/**\n * Construct a new empty graph object.\n */\n",
+        "tags": [],
+        "code": "/**\n * Construct a new empty graph object.\n */\nprotected AbstractGraph() {\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsEdge",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#containsEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#containsEdge(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#containsEdge(Object, Object)\n */\n@Override\npublic boolean containsEdge(V sourceVertex, V targetVertex) {\n    return getEdge(sourceVertex, targetVertex) != null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeAllEdges",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.util.Collection",
+              "simple_name": "Collection",
+              "is_array": false
+            },
+            "name": "edges"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeAllEdges(Collection)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeAllEdges(Collection)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeAllEdges(Collection)\n */\n@Override\npublic boolean removeAllEdges(Collection<? extends E> edges) {\n    boolean modified = false;\n    for (E e : edges) {\n        modified |= removeEdge(e);\n    }\n    return modified;\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeAllEdges",
+        "return_type": {
+          "qualified_name": "java.util.Set",
+          "simple_name": "Set",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeAllEdges(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeAllEdges(Object, Object)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeAllEdges(Object, Object)\n */\n@Override\npublic Set<E> removeAllEdges(V sourceVertex, V targetVertex) {\n    Set<E> removed = getAllEdges(sourceVertex, targetVertex);\n    if (removed == null) {\n        return null;\n    }\n    removeAllEdges(removed);\n    return removed;\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeAllVertices",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.util.Collection",
+              "simple_name": "Collection",
+              "is_array": false
+            },
+            "name": "vertices"
+          }
+        ],
+        "javadoc": "/**\n * @see Graph#removeAllVertices(Collection)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeAllVertices(Collection)"
+          }
+        ],
+        "code": "/**\n * @see Graph#removeAllVertices(Collection)\n */\n@Override\npublic boolean removeAllVertices(Collection<? extends V> vertices) {\n    boolean modified = false;\n    for (V v : vertices) {\n        modified |= removeVertex(v);\n    }\n    return modified;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": "java.lang.String",
+          "simple_name": "String",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a string of the parenthesized pair (V, E) representing this\n * G=(V,E) graph. 'V' is the string representation of the vertex set, and\n * 'E' is the string representation of the edge set.\n *\n * @return a string representation of this graph.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a string representation of this graph.",
+            "assertion": "assert methodResultID instanceof String;",
+            "description": "a string representation of this graph."
+          }
+        ],
+        "code": "/**\n * Returns a string of the parenthesized pair (V, E) representing this\n * G=(V,E) graph. 'V' is the string representation of the vertex set, and\n * 'E' is the string representation of the edge set.\n *\n * @return a string representation of this graph.\n */\n@Override\npublic String toString() {\n    return toStringFromSets(vertexSet(), edgeSet(), (this instanceof DirectedGraph<?, ?>));\n}"
+      },
+      {
+        "type": "method",
+        "name": "assertVertexExist",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Ensures that the specified vertex exists in this graph, or else throws\n * exception.\n *\n * @param v vertex\n *\n * @return <code>true</code> if this assertion holds.\n *\n * @throws NullPointerException if specified vertex is <code>null</code>.\n * @throws IllegalArgumentException if specified vertex does not exist in\n * this graph.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vertex",
+            "assertion": "assert args[0] != null;",
+            "description": "vertex cannot be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<code>true</code> if this assertion holds.",
+            "assertion": "assert methodResultID == true;",
+            "description": "specified vertex exists in this graph"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if specified vertex is <code>null</code>.",
+            "assertion": "assert args[0] == null;",
+            "description": "if specified vertex is null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if specified vertex does not exist in\nthis graph.",
+            "assertion": "assert false;",
+            "description": "if specified vertex does not exist in this graph."
+          }
+        ],
+        "code": "/**\n * Ensures that the specified vertex exists in this graph, or else throws\n * exception.\n *\n * @param v vertex\n *\n * @return <code>true</code> if this assertion holds.\n *\n * @throws NullPointerException if specified vertex is <code>null</code>.\n * @throws IllegalArgumentException if specified vertex does not exist in\n * this graph.\n */\nprotected boolean assertVertexExist(V v) {\n    if (containsVertex(v)) {\n        return true;\n    } else if (v == null) {\n        throw new NullPointerException();\n    } else {\n        throw new IllegalArgumentException(\"no such vertex in graph: \" + v.toString());\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeAllEdges",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true
+            },
+            "name": "edges"
+          }
+        ],
+        "javadoc": "/**\n * Removes all the edges in this graph that are also contained in the\n * specified edge array. After this call returns, this graph will contain no\n * edges in common with the specified edges. This method will invoke the\n * {@link Graph#removeEdge(Object)} method.\n *\n * @param edges edges to be removed from this graph.\n *\n * @return <tt>true</tt> if this graph changed as a result of the call.\n *\n * @see Graph#removeEdge(Object)\n * @see Graph#containsEdge(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "edges",
+            "content": "edges to be removed from this graph.",
+            "assertion": "assert args[0] instanceof Object[];",
+            "description": "edges must be an array of objects"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<tt>true</tt> if this graph changed as a result of the call.",
+            "assertion": "assert methodResultID == true;",
+            "description": "true if this graph changed as a result of the call."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#removeEdge(Object)"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Graph#containsEdge(Object)"
+          }
+        ],
+        "code": "/**\n * Removes all the edges in this graph that are also contained in the\n * specified edge array. After this call returns, this graph will contain no\n * edges in common with the specified edges. This method will invoke the\n * {@link Graph#removeEdge(Object)} method.\n *\n * @param edges edges to be removed from this graph.\n *\n * @return <tt>true</tt> if this graph changed as a result of the call.\n *\n * @see Graph#removeEdge(Object)\n * @see Graph#containsEdge(Object)\n */\nprotected boolean removeAllEdges(E[] edges) {\n    boolean modified = false;\n    for (int i = 0; i < edges.length; i++) {\n        modified |= removeEdge(edges[i]);\n    }\n    return modified;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toStringFromSets",
+        "return_type": {
+          "qualified_name": "java.lang.String",
+          "simple_name": "String",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.util.Collection",
+              "simple_name": "Collection",
+              "is_array": false
+            },
+            "name": "vertexSet"
+          },
+          {
+            "type": {
+              "qualified_name": "java.util.Collection",
+              "simple_name": "Collection",
+              "is_array": false
+            },
+            "name": "edgeSet"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false
+            },
+            "name": "directed"
+          }
+        ],
+        "javadoc": "/**\n * Helper for subclass implementations of toString( ).\n *\n * @param vertexSet the vertex set V to be printed\n * @param edgeSet the edge set E to be printed\n * @param directed true to use parens for each edge (representing directed);\n * false to use curly braces (representing undirected)\n *\n * @return a string representation of (V,E)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "vertexSet",
+            "content": "the vertex set V to be printed",
+            "assertion": "assert args[0] instanceof java.util.Collection;",
+            "description": "vertexSet must be a Collection"
+          },
+          {
+            "tag": "param",
+            "name": "edgeSet",
+            "content": "the edge set E to be printed",
+            "assertion": "assert args[1] instanceof java.util.Collection;",
+            "description": "edgeSet must be a Collection"
+          },
+          {
+            "tag": "param",
+            "name": "directed",
+            "content": "true to use parens for each edge (representing directed);\nfalse to use curly braces (representing undirected)",
+            "assertion": "assert args[2] instanceof Boolean;",
+            "description": "directed must be boolean"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a string representation of (V,E)",
+            "assertion": "assert methodResultID.toString().equals(\"(\" + args[0].toString() + \",\" + args[1].toString() + \")\");",
+            "description": "a string representation of (V,E)"
+          }
+        ],
+        "code": "/**\n * Helper for subclass implementations of toString( ).\n *\n * @param vertexSet the vertex set V to be printed\n * @param edgeSet the edge set E to be printed\n * @param directed true to use parens for each edge (representing directed);\n * false to use curly braces (representing undirected)\n *\n * @return a string representation of (V,E)\n */\nprotected String toStringFromSets(Collection<? extends V> vertexSet, Collection<? extends E> edgeSet, boolean directed) {\n    List<String> renderedEdges = new ArrayList<String>();\n    StringBuffer sb = new StringBuffer();\n    for (E e : edgeSet) {\n        if ((e.getClass() != DefaultEdge.class) && (e.getClass() != DefaultWeightedEdge.class)) {\n            sb.append(e.toString());\n            sb.append(\"=\");\n        }\n        if (directed) {\n            sb.append(\"(\");\n        } else {\n            sb.append(\"{\");\n        }\n        sb.append(getEdgeSource(e));\n        sb.append(\",\");\n        sb.append(getEdgeTarget(e));\n        if (directed) {\n            sb.append(\")\");\n        } else {\n            sb.append(\"}\");\n        }\n        // REVIEW jvs 29-May-2006:  dump weight somewhere?\n        renderedEdges.add(sb.toString());\n        sb.setLength(0);\n    }\n    return \"(\" + vertexSet + \", \" + renderedEdges + \")\";\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a hash code value for this graph. The hash code of a graph is\n * defined to be the sum of the hash codes of vertices and edges in the\n * graph. It is also based on graph topology and edges weights.\n *\n * @return the hash code value this graph\n *\n * @see Object#hashCode()\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the hash code value this graph",
+            "assertion": "assert methodResultID == (int)((this).hashCode() + ((List<Object>)(this)).edges().stream().mapToInt(e -> e.hashCode()).sum());",
+            "description": "the hash code value must be the sum of the hash codes of vertices and edges in the graph, based on graph topology and edges weights"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Object#hashCode()"
+          }
+        ],
+        "code": "/**\n * Returns a hash code value for this graph. The hash code of a graph is\n * defined to be the sum of the hash codes of vertices and edges in the\n * graph. It is also based on graph topology and edges weights.\n *\n * @return the hash code value this graph\n *\n * @see Object#hashCode()\n */\n@Override\npublic int hashCode() {\n    int hash = vertexSet().hashCode();\n    for (E e : edgeSet()) {\n        int part = e.hashCode();\n        int source = getEdgeSource(e).hashCode();\n        int target = getEdgeTarget(e).hashCode();\n        // see http://en.wikipedia.org/wiki/Pairing_function (VK);\n        int pairing = ((source + target) * (source + target + 1) / 2) + target;\n        part = (27 * part) + pairing;\n        long weight = (long) getEdgeWeight(e);\n        part = (27 * part) + (int) (weight ^ (weight >>> 32));\n        hash += part;\n    }\n    return hash;\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false
+            },
+            "name": "obj"
+          }
+        ],
+        "javadoc": "/**\n * Indicates whether some other object is \"equal to\" this graph. Returns\n * <code>true</code> if the given object is also a graph, the two graphs are\n * instances of the same graph class, have identical vertices and edges sets\n * with the same weights.\n *\n * @param obj object to be compared for equality with this graph\n *\n * @return <code>true</code> if the specified object is equal to this graph\n *\n * @see Object#equals(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "obj",
+            "content": "object to be compared for equality with this graph",
+            "assertion": "assert args[0] instanceof Graph;",
+            "description": "obj must be an instance of a graph"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<code>true</code> if the specified object is equal to this graph",
+            "assertion": "assert methodResultID == true;",
+            "description": "true if the specified object is equal to this graph"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Object#equals(Object)"
+          }
+        ],
+        "code": "/**\n * Indicates whether some other object is \"equal to\" this graph. Returns\n * <code>true</code> if the given object is also a graph, the two graphs are\n * instances of the same graph class, have identical vertices and edges sets\n * with the same weights.\n *\n * @param obj object to be compared for equality with this graph\n *\n * @return <code>true</code> if the specified object is equal to this graph\n *\n * @see Object#equals(Object)\n */\n@Override\npublic boolean equals(Object obj) {\n    if (this == obj) {\n        return true;\n    }\n    if ((obj == null) || (getClass() != obj.getClass())) {\n        return false;\n    }\n    TypeUtil<Graph<V, E>> typeDecl = null;\n    Graph<V, E> g = TypeUtil.uncheckedCast(obj, typeDecl);\n    if (!vertexSet().equals(g.vertexSet())) {\n        return false;\n    }\n    if (edgeSet().size() != g.edgeSet().size()) {\n        return false;\n    }\n    for (E e : edgeSet()) {\n        V source = getEdgeSource(e);\n        V target = getEdgeTarget(e);\n        if (!g.containsEdge(e)) {\n            return false;\n        }\n        if (!g.getEdgeSource(e).equals(source) || !g.getEdgeTarget(e).equals(target)) {\n            return false;\n        }\n        if (Math.abs(getEdgeWeight(e) - g.getEdgeWeight(e)) > 10e-7) {\n            return false;\n        }\n    }\n    return true;\n}"
+      }
+    ]
+  }
+]
