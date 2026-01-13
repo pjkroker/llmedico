@@ -57,9 +57,9 @@ class MethodSelector:
 
     def get_methods_to_str(self):
         strs = ""
+        if len(self.important_methods) >= 30:
+            self.important_methods = self.important_methods[:30]  # TODO Hotfix, implement real heuristic
         for member in self.important_methods:
-            if len(self.important_methods) >= 30:
-                self.important_methods = self.important_methods[:30] #TODO Hotfix, implement real heuristic
             strs += f"{self._get_method_to_str(member)}\n"
         return strs
 
