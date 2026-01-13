@@ -55,11 +55,31 @@ def test_java_parser_empty_constructor():
 
     result_str = jp.extract_to_json(java_file, jar_path)
     result_json = json.loads(result_str)
-    pprint(result_json[0]["members"][0])
+    #pprint(result_json[0]["members"][0])
     assert result_json[0]["members"][0]["name"] == "FluentIterable"
     assert result_json[0]["members"][0]["type"] == "constructor"
     assert result_json[0]["members"][0]["parameters"] == []
     assert result_json[0]["members"][0]["tags"] == []
+
+    #constructor with no code, but public and comments must be included
+    jar_path = Path(__file__).parent.parent / "data" / "input" / "commons-math3-3.6.1.jar"
+    java_file = Path(__file__).parent.parent / "data" / "input" / "SummaryStatistics.java"
+    result_str = jp.extract_to_json(java_file, jar_path)
+    result_json = json.loads(result_str)
+    pprint(result_json[0]["members"][0])
+    assert result_json[0]["members"][0]["name"] == "SummaryStatistics"
+    assert result_json[0]["members"][0]["type"] == "constructor"
+    assert result_json[0]["members"][0]["parameters"] == []
+
+    jar_path = Path(__file__).parent.parent / "data" / "input" / "commons-math3-3.6.1.jar"
+    java_file = Path(__file__).parent.parent / "data" / "input" / "RandomDataGenerator.java"
+    result_str = jp.extract_to_json(java_file, jar_path)
+    result_json = json.loads(result_str)
+    pprint(result_json[0]["members"][0])
+    assert result_json[0]["members"][0]["name"] == "RandomDataGenerator"
+    assert result_json[0]["members"][0]["type"] == "constructor"
+    assert result_json[0]["members"][0]["parameters"] == []
+
 
 def test_java_extractor_parameter_bug():
     jp = JavaParser()

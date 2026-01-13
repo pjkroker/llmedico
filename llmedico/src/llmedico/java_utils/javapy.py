@@ -218,10 +218,12 @@ class JavaParser(JavaPy):
                             "content": str(tag.getContent().toText()),
                         })
 
-                # REFINED EXCLUSION RULE
+                # REFINED EXCLUSION RULE (docstring-aware)
                 if not parameters and not tags:
+                    has_docstring = raw_javadoc is not None and raw_javadoc.strip() != ""
                     body = ctor.getBody()
-                    if body is None or body.getStatements().isEmpty():
+
+                    if not has_docstring and (body is None or body.getStatements().isEmpty()):
                         continue
 
                 ctor_info = {
