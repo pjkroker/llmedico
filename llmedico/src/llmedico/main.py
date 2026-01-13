@@ -41,7 +41,7 @@ def _normalize_text(text: str) -> str:
     text = text.lower()
     return text
 
-def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path, path_output_dir: Path, path_jar: Path):
+def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, path_output_dir: Path, path_jar: Path):
     if "$" in fq_class_name:
         containsNestedClasses = True
         relative_path = fq_class_name.split("$")[0].replace(".", "/") + ".java"
@@ -50,10 +50,11 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         containsNestedClasses = False
         relative_path = fq_class_name.replace(".", "/") + ".java"
 
-    if path_data_dir is None:
-        path_java_class = path_source_dir / relative_path #TODO add "main" / "java" to path in run
-    else:
-        path_java_class = path_data_dir / relative_path#/ "src" / "main" / "java" / relative_path
+    path_java_class = path_source_dir / relative_path
+    # if path_data_dir is None:
+    #     path_java_class = path_source_dir / relative_path #TODO add "main" / "java" to path in run
+    # else:
+    #     path_java_class = path_data_dir / relative_path#/ "src" / "main" / "java" / relative_path
     # Set up basic configuration for logging
     logging.basicConfig(
         filename=path_output_dir / 'llmedico.log',
@@ -176,22 +177,19 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 if __name__ == '__main__':
     FQ_CLASS_NAME = "net.sf.freecol.common.model.Player$ActivePredicate"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
-    PATH_DATA_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/src")  # --data-dir
-    #/pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java
-    path_jar = Path(
+    PATH_SOURCE_DIR = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/src")
+    PATH_JAR = Path(
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/FreeCol.jar")
+    PATH_OUTPUT_DIR = Path(__file__).parent.parent.parent / "data" / "output" # --out-dir
 
-    PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
-    PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
 
-    PATH_OUTPUT_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output")  # --out-dir
+    #PATH_DATA_DIR = Path(
+    #    "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/src")  # --data-dir
+    #/pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java
+    #PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
 
     main(fq_class_name=FQ_CLASS_NAME,
          target_method=TARGET_METHOD,
-         path_data_dir=PATH_DATA_DIR if PATH_DATA_DIR else None,
-         path_source_dir=PATH_SOURCE_DIR,
-         path_class_dir=PATH_CLASS_DIR,
+         path_source_dir=PATH_SOURCE_DIR,  #TODO use only src dir
          path_output_dir=PATH_OUTPUT_DIR,
-         path_jar=path_jar,)
+         path_jar=PATH_JAR)
