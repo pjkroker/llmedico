@@ -14,12 +14,12 @@ def _normalize(s: str) -> str:
 def _evaluate_assertions(expected: str, generated:str) -> EvaluationResult:
     relation: AssertionRelation
     # 1. Empty/Unexpected/Missing
-    if expected == generated == "":
+    if expected.strip() == generated.strip() == "":
         return EvaluationResult(relation=AssertionRelation.EMPTY)
         #raise ValueError("Both assertions are empty")
-    if expected == "":
+    if expected.strip() == "":
         return EvaluationResult(relation=AssertionRelation.UNEXPECTED) #TODO evaluate anyway
-    if generated == "":
+    if generated.strip() == "":
         return EvaluationResult(relation=AssertionRelation.MISSING) #TODO evaluate anyway
     # 2. Identical (string-based)
     if _normalize(expected) == _normalize(generated):
