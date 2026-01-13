@@ -51,7 +51,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
         relative_path = fq_class_name.replace(".", "/") + ".java"
 
     if path_data_dir is None:
-        path_java_class = path_source_dir / "main" / "java" / relative_path #TODO add "main" / "java" to path in run
+        path_java_class = path_source_dir / relative_path #TODO add "main" / "java" to path in run
     else:
         path_java_class = path_data_dir / relative_path#/ "src" / "main" / "java" / relative_path
     # Set up basic configuration for logging
@@ -87,10 +87,9 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
     logger.debug("---Starting Translator - Translating JavaDoc to Conditions---")
     if "/" not in llm_config["model"]:
-        llm = Ollama(llm_config["model"], temperature=llm_config["temperature"], top_k=llm_config["top_k"]
-                     , top_p=llm_config["top_p"], repeat_penalty=llm_config["repeat_penalty"])
+        llm = Ollama(llm_config["model"], temperature=llm_config["temperature"])
     else:
-        llm = LiteLLMModel(model_name=llm_config["model"], api_base=llm_config["LITELLM_API_BASE"], api_key="dummy")
+        llm = LiteLLMModel(model_name=llm_config["model"], api_base=llm_config["LITELLM_API_BASE"], api_key="dummy") #TODO check LiteLLM compability
     trans = Translator(llm, trans_config["iteration_repairloop"])
     conditions = []
     logger.debug("translating every method of the class")
