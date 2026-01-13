@@ -2,6 +2,7 @@ from pathlib import Path
 import jpype
 import jpype.imports  # Enable Java imports
 import json
+import re
 from jpype.types import *
 
 
@@ -53,10 +54,67 @@ class JavaParser(JavaPy):
 
     def _get_raw_javadoc(self, node) -> str | None:
         """
-        Returns the full raw Javadoc including /** and */ if present.
+        Recover raw Javadoc (/** ... */) immediately preceding a node
+        by scanning the CompilationUnit token stream.
+        Always returns a Python string or None.
         """
+
+        # 1. Fast path: directly attached Javadoc
         if node.getJavadocComment().isPresent():
             return str(node.getJavadocComment().get().toString())
+
+        cu = node.findCompilationUnit().orElse(None)
+        for tok in cu.getTokenRange().get():
+            if tok.getText().startsWith("// TODO"):
+                print("FOUND JAVADOC TOKEN:", tok.getText())
+
+        if cu is None:
+            return None
+
+        if not cu.getTokenRange().isPresent():
+            return None
+
+        if not node.getBegin().isPresent():
+            return None
+
+        node_begin = node.getBegin().get()
+
+        tokens = list(cu.getTokenRange().get())
+
+        # Find the token index where the node starts
+        start_index = None
+        for i, tok in enumerate(tokens):
+            if tok.getRange().isPresent() and tok.getRange().get().begin == node_begin:
+                start_index = i
+                break
+
+        if start_index is None:
+            return None
+
+        # Walk backwards from the node start
+        for tok in reversed(tokens[:start_index]):
+            text = tok.getText().strip()
+
+            # Ignore whitespace
+            if not text:
+                continue
+
+            # Ignore line comments
+            if text.startsWith("//"):
+                continue
+
+            # Ignore annotations
+            if text.startsWith("@"):
+                continue
+
+            #  Found Javadoc
+            if text.startsWith("/**"):
+                print(str(text))
+                return str(text)
+
+            # Hit real code → stop
+            break
+
         return None
 
     def _py_str(self, value):
@@ -135,6 +193,65 @@ class JavaParser(JavaPy):
             "name": str(p.getNameAsString())
         }
 
+    import re
+
+    def _extract_javadoc_tags(self, raw_javadoc: str | None) -> list[dict]:
+        """
+        Extract Javadoc block tags from a raw Javadoc string.
+        Returns a list of {tag, name, content}.
+        """
+        if not raw_javadoc:
+            return []
+
+        tags = []
+
+        # Remove /** */ and leading *
+        lines = raw_javadoc.splitlines()
+        cleaned = []
+        for line in lines:
+            line = line.strip()
+            if line.startswith("/**"):
+                line = line[3:]
+            if line.endswith("*/"):
+                line = line[:-2]
+            if line.startswith("*"):
+                line = line[1:]
+            cleaned.append(line.strip())
+
+        # Regex for block tags
+        tag_pattern = re.compile(r"^@(\w+)(?:\s+(\S+))?\s*(.*)")
+
+        current = None
+
+        for line in cleaned:
+            if not line:
+                continue
+
+            m = tag_pattern.match(line)
+            if m:
+                # flush previous tag
+                if current:
+                    tags.append(current)
+
+                tag_name = m.group(1)
+                if tag_name == "exception":
+                    tag_name = "throws"
+
+                current = {
+                    "tag": tag_name,
+                    "name": m.group(2),
+                    "content": m.group(3).strip(),
+                }
+            else:
+                # continuation of previous tag
+                if current:
+                    current["content"] += " " + line
+
+        if current:
+            tags.append(current)
+
+        return tags
+
     def extract_to_json(self, java_file: str, jar_path: Path) -> str:
         """
         Extract classes, constructors, methods, full raw Javadoc,
@@ -153,8 +270,17 @@ class JavaParser(JavaPy):
         symbol_solver = JavaSymbolSolver(type_solver)
 
 
-        parser = JP()
-        parser.getParserConfiguration().setSymbolResolver(symbol_solver)
+        # parser = JP()
+        # parser.getParserConfiguration().setSymbolResolver(symbol_solver)
+        from com.github.javaparser import ParserConfiguration
+
+        config = ParserConfiguration()
+        config.setSymbolResolver(symbol_solver)
+        config.setStoreTokens(True)
+
+
+        parser = JP(config)
+
         file_text = Path(java_file).read_text()
 
         parse_result = parser.parse(file_text)
@@ -258,21 +384,20 @@ class JavaParser(JavaPy):
                     "code": str(method.toString()),
                 }
 
-                if method.getJavadoc().isPresent():
-                    javadoc = method.getJavadoc().get()
-                    for tag in javadoc.getBlockTags():
-                        tag_name = str(tag.getTagName())
-                        if tag_name == "exception": #normalize
-                            tag_name = "throws"
-                        method_info["tags"].append({
-                            "tag": tag_name,
-                            "name": (
-                                str(tag.getName().orElse(None))
-                                if tag.getName().isPresent()
-                                else None
-                            ),
-                            "content": str(tag.getContent().toText()),
-                        })
+                raw_javadoc = self._get_raw_javadoc(method)
+
+                method_info = {
+                    "type": "method",
+                    "name": str(method.getName()),
+                    "return_type": self._extract_type(method.getType()),
+                    "parameters": [
+                        self._extract_parameter(p)
+                        for p in method.getParameters()
+                    ],
+                    "javadoc": raw_javadoc,
+                    "tags": self._extract_javadoc_tags(raw_javadoc),
+                    "code": str(method.toString()),
+                }
 
                 class_info["members"].append(method_info)
 

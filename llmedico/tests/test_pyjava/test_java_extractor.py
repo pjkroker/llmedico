@@ -80,6 +80,22 @@ def test_java_parser_empty_constructor():
     assert result_json[0]["members"][0]["type"] == "constructor"
     assert result_json[0]["members"][0]["parameters"] == []
 
+def test_java_extractor_docstring_with_comment():
+    jp = JavaParser()
+    jar_path = Path(__file__).parent.parent / "data" / "input" / "guava-19.0.jar"
+    java_file = Path(__file__).parent.parent / "data" / "input" / "Splitter.java"
+    result_str = jp.extract_to_json(java_file, jar_path)
+    result_json = json.loads(result_str)
+    trimResults = [class_ for class_ in result_json[0]["members"] if class_["name"] == "trimResults"]
+    pprint(trimResults)
+    assert len(trimResults) == 2
+    assert trimResults[0]["tags"] != []
+    assert trimResults[0]["javadoc"] != None
+    assert trimResults[1]["javadoc"] != None
+    assert trimResults[1]["tags"] != []
+
+
+
 
 def test_java_extractor_parameter_bug():
     jp = JavaParser()
