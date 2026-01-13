@@ -78,6 +78,7 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     if containsNestedClasses:
         java_extractions = json.loads(java_extractions)
         java_extractions = [class_ for class_ in java_extractions if class_["name"] == inner_class_name]
+        java_extractions[0]["qualified_name"] = fq_class_name #add part with "$" again
         java_extractions = json.dumps(java_extractions)
 
     save_json_to_file(java_extractions, path_output_dir / "llmedico-javadoc_extractor.json")
