@@ -26,33 +26,39 @@ class AssertionEvaluatorZ:
 
         solver = z3.Solver()
 
-        # 1. Equivalence: A <-> B
-        solver.push()
-        solver.add(z3.Xor(A, B))
-        if solver.check() == z3.unsat:
-            return EvaluationResult(AssertionRelation.EQUIVALENT)
-        solver.pop()
+        try:
+            # 1. Equivalence: A <-> B
+            solver.push()
+            solver.add(z3.Xor(A, B))
+            if solver.check() == z3.unsat:
+                return EvaluationResult(AssertionRelation.EQUIVALENT)
+            solver.pop()
 
-        # 2. DUAL: A <-> not B   (only meaningful for THROWS)
-        solver.push()
-        solver.add(z3.Xor(A, z3.Not(B)))
-        if solver.check() == z3.unsat:
-            return EvaluationResult(AssertionRelation.DUAL)
-        solver.pop()
+            # 2. DUAL: A <-> not B   (only meaningful for THROWS)
+            solver.push()
+            solver.add(z3.Xor(A, z3.Not(B)))
+            if solver.check() == z3.unsat:
+                return EvaluationResult(AssertionRelation.DUAL)
+            solver.pop()
 
-        # 3. Generated is weaker: B => A
-        solver.push()
-        solver.add(z3.And(B, z3.Not(A)))
-        if solver.check() == z3.unsat:
-            return EvaluationResult(AssertionRelation.WEAKER)
-        solver.pop()
+            # 3. Generated is weaker: B => A
+            solver.push()
+            solver.add(z3.And(B, z3.Not(A)))
+            if solver.check() == z3.unsat:
+                return EvaluationResult(AssertionRelation.WEAKER)
+            solver.pop()
 
-        # 4. Generated is stronger: A => B
-        solver.push()
-        solver.add(z3.And(A, z3.Not(B)))
-        if solver.check() == z3.unsat:
-            return EvaluationResult(AssertionRelation.STRONGER)
-        solver.pop()
+            # 4. Generated is stronger: A => B
+            solver.push()
+            solver.add(z3.And(A, z3.Not(B)))
+            if solver.check() == z3.unsat:
+                return EvaluationResult(AssertionRelation.STRONGER)
+            solver.pop()
 
-        # 5. No implication either way
-        return EvaluationResult(AssertionRelation.INCOMPARABLE)
+            # 5. No implication either way
+            return EvaluationResult(AssertionRelation.INCOMPARABLE)
+        except Exception as e:
+            return EvaluationResult(
+                relation=AssertionRelation.UNSUPPORTED,
+                reason=str(e)
+            )
