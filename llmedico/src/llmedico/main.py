@@ -42,12 +42,18 @@ def _normalize_text(text: str) -> str:
     return text
 
 def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_source_dir:Path, path_class_dir: Path, path_output_dir: Path, path_jar: Path):
-    relative_path = fq_class_name.replace(".", "/") + ".java"
+    if "$" in fq_class_name:
+        containsNestedClasses = True
+        relative_path = fq_class_name.split("$")[0].replace(".", "/") + ".java"
+        inner_class_name = fq_class_name.split("$")[1]
+    else:
+        containsNestedClasses = False
+        relative_path = fq_class_name.replace(".", "/") + ".java"
 
     if path_data_dir is None:
         path_java_class = path_source_dir / "main" / "java" / relative_path #TODO add "main" / "java" to path in run
     else:
-        path_java_class = path_data_dir / "src" / "main" / "java" / relative_path
+        path_java_class = path_data_dir / relative_path#/ "src" / "main" / "java" / relative_path
     # Set up basic configuration for logging
     logging.basicConfig(
         filename=path_output_dir / 'llmedico.log',
@@ -69,6 +75,10 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
     #result_json = start_java_parser(path_output_dir, path_java_class)
     jp = JavaParser()
     java_extractions = jp.extract_to_json(path_java_class, path_jar)
+    if containsNestedClasses:
+        java_extractions = json.loads(java_extractions)
+        java_extractions = [class_ for class_ in java_extractions if class_["name"] == inner_class_name]
+        java_extractions = json.dumps(java_extractions)
 
     save_json_to_file(java_extractions, path_output_dir / "llmedico-javadoc_extractor.json")
     java_extractions = json.loads(java_extractions) #TODO load var directly and not file
@@ -164,13 +174,13 @@ def main(fq_class_name: str, target_method: str, path_data_dir: Path, path_sourc
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "net.sf.freecol.common.model.Player$ActivePredicate"  # --target-class java class to be analyzed
     TARGET_METHOD = "isPrimee"  # --target-method#
     PATH_DATA_DIR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/")  # --data-dir
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/src")  # --data-dir
     #/pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java
     path_jar = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/target/commons-math3-3.6.1.jar")
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/FreeCol.jar")
 
     PATH_SOURCE_DIR = None #--source-dir and #--class-dir if no --data-dir was provided
     PATH_CLASS_DIR = None #TODO change if source and class are NOT in the same directory
