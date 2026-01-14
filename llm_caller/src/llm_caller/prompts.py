@@ -161,19 +161,32 @@ CONDITION_BASE_STRING = """You are a Java expert.
     A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
     B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
     C. Only output JSON, no additional explanations or commentary.
-    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
     E. Provide a short description for the generated assertion as shown in the example.
     F. Refer to the parameters as args[0], and args[1] and so on.
-    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
-    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
     I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
     J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
     K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
     L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
     M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
     N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
-    
+    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
 """
+
+FINAL_INSTRUCTION = """
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID"""
 PRE_CONDITION_PROMPT_JSON_STRING = """
     Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
     Requirements:
@@ -184,67 +197,109 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
     5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \\n character accordingly.
     6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
     7. Assertions must be type-correct with respect to the parameter’s declared type.
-    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    8. Parameter Semantic Classification Rule
+    Before generating an assertion, classify the @param description as one of:
+    Value-validating: describes nullability, range, size, or intrinsic validity of the parameter
+    Receiver-defining: describes how the parameter configures, toggles, or controls receiver state
+    Rules:
+    For value-validating parameters, assertions MUST be written only in terms of args[i]
+    For receiver-defining parameters, assertions MUST be written in terms of receiverObjectID and MUST NOT restate the condition directly on args[i]
+    Assertions must be written either purely in terms of args[i] or purely in terms of receiverObjectID.
+    Do not mix parameter checks with receiver semantics in the same assertion.
+    @param collection not null
+    Correct (value-validating):
+    assert (args[0] == null) == false;
+
+    Incorrect (receiver misuse):
+    assert !receiverObjectID.isEmpty();
     9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
+    In that case, express the assertion using receiverObjectID.
     Example:
     Input Javadoc:
     /**
-     * Sends a message over the connection.
-     * @param x must be positive
-     */
+    * Create a new Closure that calls one of the closures depending
+    * on the predicates.
+    * <p>
+    * The closure at array location 0 is called if the predicate at array
+    * location 0 returned true. Each predicate is evaluated
+    * until one returns true.
+    *
+    * @see org.apache.commons.collections4.functors.SwitchClosure
+    *
+    * @param <E>  the type that the closure acts on
+    * @param predicates  an array of predicates to check, not null
+    * @param closures  an array of closures to call, not null
+    * @return the <code>switch</code> closure
+    * @throws NullPointerException if the either array is null
+    * @throws NullPointerException if any element in the arrays is null
+    * @throws IllegalArgumentException if the arrays have different sizes
+    */
+    Input Method Name:
+    switchClosure
      Input Parameters:
-    [{{"type": {{
-      "qualified_name": "int",
-      "name": "int",
-      "is_array": false
-    }},
-    "name": "x"}}]
+    [{{'type': {{'qualified_name': None, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}}, 'name': 'predicates'}}, {{'type': {{'qualified_name': None, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}}, 'name': 'closures'}}]
     Input Return Type:
-    null
+    {{'qualified_name': None, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}}
+    And the following available instance methods:
+    None exceptionClosure()
+    None nopClosure()
+    None asClosure(None transformer)
+    None forClosure(int count,None closure)
+    None whileClosure(None predicate,None closure)
+    None doWhileClosure(None closure,None predicate)
+    None invokerClosure(None methodName)
+    None invokerClosure(None methodName,None paramTypes,None args)
+    None chainedClosure(None closures)
+    None chainedClosure(None closures)
+    None ifClosure(None predicate,None trueClosure)
+    None ifClosure(None predicate,None trueClosure,None falseClosure)
+    None switchClosure(None predicates,None closures)
+    None switchClosure(None predicates,None closures,None defaultClosure)
+    None switchClosure(None predicatesAndClosures)
+    None switchMapClosure(None objectsAndClosures)
     Output Java assertions:
     ```json
-    [{{"description": "the code must be positive",
-    "assertion": "assert args[0] > 0;",
-    "name": "x",
-    "content": "x must be positive"}}]
+    [{{"description": "an array of predicates to check, not null",
+    "assertion": "assert (args[0]==null) == false;",
+    "name": "predicates",
+    "content": "an array of predicates to check, not null"}},
+    {{"description": "an array of closures to call, not null",
+    "assertion": "assert (args[1]==null) == false;",
+    "name": "closures ",
+    "content": "an array of closures to call, not null"}}]
     ```
     Input Javadoc:
     /**
-     * Adds two positive integers and returns the result.
-     *
-     * @param x the first number; must be positive
-     * @param y the second number; must be positive
-     * @return the sum of x and y
-     * @throws IllegalArgumentException if either x or y is zero or negative
-     */
+    * Disallow the addition of new parameters. The already declared parameters
+    * are still modifiable, but no new parameter can be added.
+    * @param on If true the environment is locked.
+    */
+    Input Method Name:
+    "lockEnvironment"
      Input Parameters:
-     [{{"type": {{
-        "qualified_name": "int",
-        "name": "int",
-        "is_array": false
-    }},
-    "name": "x"}},
-    {{"type": {{
-        "qualified_name": "int",
-        "name": "int",
-        "is_array": false
-    }},
-    "name": "y"}}]
+    [{{'type': {{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}}, 'name': 'on'}}]
     Input Return Type:
-    {{"qualified_name": "boolean",
-    "simple_name": "boolean",
-    "is_array": false
-    }}
+    None
+    Instance Methods:
+    boolean isLocked()
+    boolean hasParameter(None parameter)
+    boolean getBooleanParameter(None parameter)
+    int getBooleanParameteri(None parameter)
+    double getNumberParameter(None parameter)
+    int getParameterCount()
+    void lockEnvironment(boolean on)
+    
     Output Java assertions:
     ```json
-    [{{"description": "x must be positive",
-    "assertion": "assert args[0] > 0;",
-    "name": "x",
-    "content": "the first number; must be positive"}},
-    {{"description": "y must be positive",
-    "assertion": "assert args[1] > 0;",
-    "name": "y",
-    "content": "the second number; must be positive"}}]
+    [
+        {
+        "description": "the environment is locked",
+        "assertion": "assert receiverObjectID.isLocked();",
+        "name": "on",
+        "content": "true"
+        }
+    ]
     ```
 
     Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
@@ -258,7 +313,7 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
     And the following available instance methods:
     "{methods}"
     """
-PRE_CONDITION_PROMPT_JSON = PromptBuilder(PRE_CONDITION_PROMPT_JSON_STRING)
+PRE_CONDITION_PROMPT_JSON = PromptBuilder(PRE_CONDITION_PROMPT_JSON_STRING + FINAL_INSTRUCTION)
 PRE_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(PRE_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
 
 RETURN_CONDITION_PROMPT_JSON_STRING = """
@@ -387,7 +442,7 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """
     And the following available instance methods:
     "{methods}"
     """
-RETURN_CONDITION_PROMPT_JSON = PromptBuilder(RETURN_CONDITION_PROMPT_JSON_STRING)
+RETURN_CONDITION_PROMPT_JSON = PromptBuilder(RETURN_CONDITION_PROMPT_JSON_STRING + FINAL_INSTRUCTION)
 RETURN_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(RETURN_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
 
 THROWS_CONDITION_PROMPT_JSON_STRING = """
@@ -494,5 +549,5 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """
     And the following available instance methods:
     "{methods}"
     """
-THROWS_CONDITION_PROMPT_JSON = PromptBuilder(THROWS_CONDITION_PROMPT_JSON_STRING)
+THROWS_CONDITION_PROMPT_JSON = PromptBuilder(THROWS_CONDITION_PROMPT_JSON_STRING + FINAL_INSTRUCTION)
 THROWS_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(THROWS_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING)
