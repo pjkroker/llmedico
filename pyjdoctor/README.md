@@ -1,5 +1,7 @@
 # PyJdoctor
-
+## Installation
+go to /llmedico/llemdico
+pip install .
 ### Compiling old Java Projects
 While testing, it might be necessary to compile old java projects. See the following error, for example:
 ```bash

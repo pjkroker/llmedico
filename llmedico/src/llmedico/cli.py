@@ -1,14 +1,14 @@
 import click
 
 # Import commands from the submodule
-from .commands.analyze import analyze_command
-from .commands.generate import generate_command
+from llmedico.commands.translate import translate_command
+from llmedico.commands.evaluate import evaluate_command
 
 @click.group()
 def main():
-    """jdoctor command-line tool."""
+    """LLMedico: Translate and Evaluate Conditions - command-line tool."""
     pass
 
 # Register your commands
-main.add_command(analyze_command)
-main.add_command(generate_command)
+main.add_command(translate_command)
+main.add_command(evaluate_command)

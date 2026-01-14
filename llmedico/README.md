@@ -52,16 +52,17 @@ llmedico evaluate --expected goal-conditions-org.project.MyClass.json \
 --generated llmedico-conditions-org.project.MyClass.json \
 --result result-org.project.MyClass.csv
 
-| Option                                  | Description                                                                                        |
-|-----------------------------------------|----------------------------------------------------------------------------------------------------|
-| `--expected`, `--expected-conditions` * | Path to the expected-conditions. _e.g. /data/output/goal-conditions-org.project.MyClass.json_      |
-| `--generated`, `--generated-conditons`* | Path to the generated-conditions. _e.g. /data/output/llmedico-conditions-org.project.MyClass.json_ |
-| unterschied jdoc, llmed                 |                                                                                                    |
-| `--result` *                            | Path to save the results. _e.g. /data/output/llmedico-evaluation-org.project.MyClass.csv_          |
-| `--out`, `--out-dir`                    | Path to save the results. _e.g. /data/output/_                                                     |
-| `--debug`                               | Enable fine-grained logging.                                                                       |
-| `--silent`                              | Disable all output to the command line.                                                            |
-| `--help`, `-h`                          | Print the list of available options.                                                               |
+| Option              | Description                                                                                        |
+|---------------------|----------------------------------------------------------------------------------------------------|
+| `--expected`, *     | Path to the expected-conditions. _e.g. /data/output/goal-conditions-org.project.MyClass.json_      |
+| `--expected-type`, * | Specify the format. _{llmedico, jdoctor}_                                                          |
+| `--generated`, *    | Path to the generated-conditions. _e.g. /data/output/llmedico-conditions-org.project.MyClass.json_ |
+| `--generated-type`, * | Specify the format. _{llmedico, jdoctor}_                                                          |
+| `--out`, *          | Path to save the results. _e.g. /data/output/_                                                     |
+| `--result`          | Path to save the results. _e.g. /data/output/llmedico-evaluation-org.project.MyClass.csv_          |
+| `--debug`           | Enable fine-grained logging.                                                                       |
+| `--silent`          | Disable all output to the command line.                                                            |
+| `--help`, `-h`      | Print the list of available options.                                                               |
 
 
 #TODO delete
