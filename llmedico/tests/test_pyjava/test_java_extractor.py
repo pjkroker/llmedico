@@ -87,12 +87,23 @@ def test_java_extractor_docstring_with_comment():
     result_str = jp.extract_to_json(java_file, jar_path)
     result_json = json.loads(result_str)
     trimResults = [class_ for class_ in result_json[0]["members"] if class_["name"] == "trimResults"]
-    pprint(trimResults)
+    #pprint(trimResults)
     assert len(trimResults) == 2
     assert trimResults[0]["tags"] != []
     assert trimResults[0]["javadoc"] != None
     assert trimResults[1]["javadoc"] != None
     assert trimResults[1]["tags"] != []
+
+    jar_path = Path(__file__).parent.parent / "data" / "input" / "guava-19.0.jar"
+    java_file = Path(__file__).parent.parent / "data" / "input" / "ConcurrentHashMultiset.java"
+    result_str = jp.extract_to_json(java_file, jar_path)
+    result_json = json.loads(result_str)
+    remove = [class_ for class_ in result_json[0]["members"] if class_["name"] == "remove"]
+    pprint(remove)
+    assert remove[0]["javadoc"] != None
+    assert remove[0]["tags"] != []
+
+
 
 
 

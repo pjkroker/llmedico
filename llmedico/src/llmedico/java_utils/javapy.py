@@ -56,32 +56,24 @@ class JavaParser(JavaPy):
         """
         Recover raw Javadoc (/** ... */) immediately preceding a node
         by scanning the CompilationUnit token stream.
-        Always returns a Python string or None.
+        Handles annotations, line comments, and block comments in between.
         """
 
-        # 1. Fast path: directly attached Javadoc
+        # Fast path: attached Javadoc
         if node.getJavadocComment().isPresent():
             return str(node.getJavadocComment().get().toString())
 
         cu = node.findCompilationUnit().orElse(None)
-        for tok in cu.getTokenRange().get():
-            if tok.getText().startsWith("// TODO"):
-                print("FOUND JAVADOC TOKEN:", tok.getText())
-
-        if cu is None:
-            return None
-
-        if not cu.getTokenRange().isPresent():
+        if cu is None or not cu.getTokenRange().isPresent():
             return None
 
         if not node.getBegin().isPresent():
             return None
 
         node_begin = node.getBegin().get()
-
         tokens = list(cu.getTokenRange().get())
 
-        # Find the token index where the node starts
+        # Find where the node starts
         start_index = None
         for i, tok in enumerate(tokens):
             if tok.getRange().isPresent() and tok.getRange().get().begin == node_begin:
@@ -91,25 +83,28 @@ class JavaParser(JavaPy):
         if start_index is None:
             return None
 
-        # Walk backwards from the node start
+        # Walk backwards
         for tok in reversed(tokens[:start_index]):
             text = tok.getText().strip()
 
-            # Ignore whitespace
+            # Skip whitespace
             if not text:
                 continue
 
-            # Ignore line comments
-            if text.startsWith("//"):
-                continue
-
-            # Ignore annotations
+            # Skip annotations
             if text.startsWith("@"):
                 continue
 
-            #  Found Javadoc
+            # Skip line comments
+            if text.startsWith("//"):
+                continue
+
+            # Skip non-Javadoc block comments
+            if text.startsWith("/*") and not text.startsWith("/**"):
+                continue
+
+            # Found Javadoc
             if text.startsWith("/**"):
-                print(str(text))
                 return str(text)
 
             # Hit real code → stop
@@ -242,6 +237,9 @@ class JavaParser(JavaPy):
                     "name": m.group(2),
                     "content": m.group(3).strip(),
                 }
+                if current["tag"] == "return":
+                    current["name"] = None
+
             else:
                 # continuation of previous tag
                 if current:
