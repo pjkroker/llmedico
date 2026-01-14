@@ -1,6 +1,8 @@
+from collections import Counter, defaultdict
 from typing import List
 
 from llmedico.conditions.model import Condition, ClassModel, ConditionKind
+from llmedico.evaluation.evaluation_csv_writer import EvaluationCSVWriter
 from llmedico.evaluation.evaluation_row import EvaluationRow
 from llmedico.evaluation.result import EvaluationResult, AssertionRelation
 from llmedico.z3_evaluation.preprocessing import normalize_expression, tokenize, rewrite_method_references
@@ -54,15 +56,15 @@ def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[Evaluati
 
         for j, condition_exp in enumerate(method_exp.conditions):
             expected_condition = condition_exp.expression
-            print(f"class name is {class_name}")
-            print("method expected is:")
-            print(method_exp.signature.name)
-            print("method expected conditions")
-            print(method_exp.conditions)
-            print("method gen is:")
-            print(generated.methods[i].signature.name)
-            print("generated conditins")
-            print(generated.methods[i].conditions)
+            # print(f"class name is {class_name}")
+            # print("method expected is:")
+            # print(method_exp.signature.name)
+            # print("method expected conditions")
+            # print(method_exp.conditions)
+            # print("method gen is:")
+            # print(generated.methods[i].signature.name)
+            # print("generated conditins")
+            # print(generated.methods[i].conditions)
 
             generated_condition = generated.methods[i].conditions[j].expression
             result = _evaluate_assertions(expected_condition, generated_condition )
@@ -112,7 +114,4 @@ def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[Evaluati
         #                                  reason=result.reason))
 
     return evaluation_rows
-
-
-
 
