@@ -1,3 +1,5 @@
+import random
+
 from llmedico.conditions.model import ClassModel, MethodModel
 
 #TODO where to put this??
@@ -40,10 +42,6 @@ class MethodSelector:
 
         for member in self.important_methods: ...
 
-
-
-
-
     @staticmethod
     def _get_method_to_str(method: MethodModel):
         params = ",".join(
@@ -57,8 +55,9 @@ class MethodSelector:
 
     def get_methods_to_str(self):
         strs = ""
-        if len(self.important_methods) >= 30:
-            self.important_methods = self.important_methods[:30]  # TODO Hotfix, implement real heuristic
+        rng = random.Random(42)  # fixed seed
+        if len(self.important_methods) > 30:
+            self.important_methods = rng.sample(self.important_methods, 30)  # TODO Hotfix, implement real heuristic
         for member in self.important_methods:
             strs += f"{self._get_method_to_str(member)}\n"
         return strs
