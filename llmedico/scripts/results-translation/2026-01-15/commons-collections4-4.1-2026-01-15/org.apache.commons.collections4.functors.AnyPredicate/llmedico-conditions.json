@@ -1,0 +1,166 @@
+[
+  {
+    "method": "AnyPredicate",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicates to check, not cloned, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "the predicates to check, not cloned, not null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "anyPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicates to check, cloned, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "the predicates to check, cloned, not null"
+        },
+        {
+          "description": "the predicate is returned",
+          "assertion": "assert receiverObjectID.size() <= 1;",
+          "name": "size",
+          "content": "If the array is size zero, the predicate always returns false. If the array is size one, then that predicate is returned."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>any</code> predicate",
+          "assertion": "assert methodResultID == (args[0].length == 0 ? false : args[0].length == 1 ? args[0][0] : null);",
+          "name": null,
+          "content": "If the array is size zero, the predicate always returns false. If the array is size one, then that predicate is returned."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the array is size zero.",
+          "assertion": "assert !args[0].isEmpty();",
+          "name": "NullPointerException",
+          "content": "If the array is size zero, the predicate always returns false."
+        },
+        {
+          "description": "the array is size one.",
+          "assertion": "assert args[0].size() == 1;",
+          "name": "NullPointerException",
+          "content": "If the array is size one, then that predicate is returned."
+        }
+      ]
+    }
+  },
+  {
+    "method": "anyPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicates to check, cloned, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "the predicates to check, cloned, not null"
+        },
+        {
+          "description": "the predicate queries the type that the predicate queries",
+          "assertion": "assert args.length > 0;",
+          "name": "<T>",
+          "content": "the type that the predicate queries"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "If the collection is size zero, the predicate always returns false. If the collection is size one, then that predicate is returned.",
+          "assertion": "assert methodResultID == (args[0].size() <= 1);",
+          "name": null,
+          "content": "If the collection is size zero, the predicate always returns false. If the collection is size one, then that predicate is returned."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the predicates array is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicates array is null"
+        },
+        {
+          "description": "any predicate in the array is null",
+          "assertion": "assert !args[0].isEmpty() || !args[0].stream().allMatch(p -> p == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "evaluate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input object",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "object",
+          "content": "the input object"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if any decorated predicate returns true.",
+          "assertion": "assert methodResultID == receiverObjectID.evaluate(args[0]);",
+          "name": null,
+          "content": "true if any decorated predicate returns true."
+        }
+      ]
+    }
+  }
+]

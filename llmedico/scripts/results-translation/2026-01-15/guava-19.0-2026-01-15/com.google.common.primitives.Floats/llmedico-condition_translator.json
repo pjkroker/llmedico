@@ -1,0 +1,1174 @@
+[
+  {
+    "name": "Floats",
+    "package": "com.google.common.primitives",
+    "qualified_name": "com.google.common.primitives.Floats",
+    "javadoc": "/**\n * Static utility methods pertaining to {@code float} primitives, that are not\n * already found in either {@link Float} or {@link Arrays}.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/PrimitivesExplained\">\n * primitive utilities</a>.\n *\n * @author Kevin Bourrillion\n * @since 1.0\n */\n",
+    "code": "/**\n * Static utility methods pertaining to {@code float} primitives, that are not\n * already found in either {@link Float} or {@link Arrays}.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/PrimitivesExplained\">\n * primitive utilities</a>.\n *\n * @author Kevin Bourrillion\n * @since 1.0\n */\n@CheckReturnValue\n@GwtCompatible(emulated = true)\npublic final class Floats {\n\n    private Floats() {\n    }\n\n    /**\n     * The number of bytes required to represent a primitive {@code float}\n     * value.\n     *\n     * @since 10.0\n     */\n    public static final int BYTES = Float.SIZE / Byte.SIZE;\n\n    /**\n     * Returns a hash code for {@code value}; equal to the result of invoking\n     * {@code ((Float) value).hashCode()}.\n     *\n     * @param value a primitive {@code float} value\n     * @return a hash code for the value\n     */\n    public static int hashCode(float value) {\n        // TODO(kevinb): is there a better way, that's still gwt-safe?\n        return ((Float) value).hashCode();\n    }\n\n    /**\n     * Compares the two specified {@code float} values using {@link\n     * Float#compare(float, float)}. You may prefer to invoke that method\n     * directly; this method exists only for consistency with the other utilities\n     * in this package.\n     *\n     * <p><b>Note:</b> this method simply delegates to the JDK method {@link\n     * Float#compare}. It is provided for consistency with the other primitive\n     * types, whose compare methods were not added to the JDK until JDK 7.\n     *\n     * @param a the first {@code float} to compare\n     * @param b the second {@code float} to compare\n     * @return the result of invoking {@link Float#compare(float, float)}\n     */\n    public static int compare(float a, float b) {\n        return Float.compare(a, b);\n    }\n\n    /**\n     * Returns {@code true} if {@code value} represents a real number. This is\n     * equivalent to, but not necessarily implemented as,\n     * {@code !(Float.isInfinite(value) || Float.isNaN(value))}.\n     *\n     * @since 10.0\n     */\n    public static boolean isFinite(float value) {\n        return NEGATIVE_INFINITY < value & value < POSITIVE_INFINITY;\n    }\n\n    /**\n     * Returns {@code true} if {@code target} is present as an element anywhere in\n     * {@code array}. Note that this always returns {@code false} when {@code\n     * target} is {@code NaN}.\n     *\n     * @param array an array of {@code float} values, possibly empty\n     * @param target a primitive {@code float} value\n     * @return {@code true} if {@code array[i] == target} for some value of {@code\n     *     i}\n     */\n    public static boolean contains(float[] array, float target) {\n        for (float value : array) {\n            if (value == target) {\n                return true;\n            }\n        }\n        return false;\n    }\n\n    /**\n     * Returns the index of the first appearance of the value {@code target} in\n     * {@code array}. Note that this always returns {@code -1} when {@code target}\n     * is {@code NaN}.\n     *\n     * @param array an array of {@code float} values, possibly empty\n     * @param target a primitive {@code float} value\n     * @return the least index {@code i} for which {@code array[i] == target}, or\n     *     {@code -1} if no such index exists.\n     */\n    public static int indexOf(float[] array, float target) {\n        return indexOf(array, target, 0, array.length);\n    }\n\n    // TODO(kevinb): consider making this public\n    private static int indexOf(float[] array, float target, int start, int end) {\n        for (int i = start; i < end; i++) {\n            if (array[i] == target) {\n                return i;\n            }\n        }\n        return -1;\n    }\n\n    /**\n     * Returns the start position of the first occurrence of the specified {@code\n     * target} within {@code array}, or {@code -1} if there is no such occurrence.\n     *\n     * <p>More formally, returns the lowest index {@code i} such that {@code\n     * java.util.Arrays.copyOfRange(array, i, i + target.length)} contains exactly\n     * the same elements as {@code target}.\n     *\n     * <p>Note that this always returns {@code -1} when {@code target} contains\n     * {@code NaN}.\n     *\n     * @param array the array to search for the sequence {@code target}\n     * @param target the array to search for as a sub-sequence of {@code array}\n     */\n    public static int indexOf(float[] array, float[] target) {\n        checkNotNull(array, \"array\");\n        checkNotNull(target, \"target\");\n        if (target.length == 0) {\n            return 0;\n        }\n        outer: for (int i = 0; i < array.length - target.length + 1; i++) {\n            for (int j = 0; j < target.length; j++) {\n                if (array[i + j] != target[j]) {\n                    continue outer;\n                }\n            }\n            return i;\n        }\n        return -1;\n    }\n\n    /**\n     * Returns the index of the last appearance of the value {@code target} in\n     * {@code array}. Note that this always returns {@code -1} when {@code target}\n     * is {@code NaN}.\n     *\n     * @param array an array of {@code float} values, possibly empty\n     * @param target a primitive {@code float} value\n     * @return the greatest index {@code i} for which {@code array[i] == target},\n     *     or {@code -1} if no such index exists.\n     */\n    public static int lastIndexOf(float[] array, float target) {\n        return lastIndexOf(array, target, 0, array.length);\n    }\n\n    // TODO(kevinb): consider making this public\n    private static int lastIndexOf(float[] array, float target, int start, int end) {\n        for (int i = end - 1; i >= start; i--) {\n            if (array[i] == target) {\n                return i;\n            }\n        }\n        return -1;\n    }\n\n    /**\n     * Returns the least value present in {@code array}, using the same rules of\n     * comparison as {@link Math#min(float, float)}.\n     *\n     * @param array a <i>nonempty</i> array of {@code float} values\n     * @return the value present in {@code array} that is less than or equal to\n     *     every other value in the array\n     * @throws IllegalArgumentException if {@code array} is empty\n     */\n    public static float min(float... array) {\n        checkArgument(array.length > 0);\n        float min = array[0];\n        for (int i = 1; i < array.length; i++) {\n            min = Math.min(min, array[i]);\n        }\n        return min;\n    }\n\n    /**\n     * Returns the greatest value present in {@code array}, using the same rules\n     * of comparison as {@link Math#max(float, float)}.\n     *\n     * @param array a <i>nonempty</i> array of {@code float} values\n     * @return the value present in {@code array} that is greater than or equal to\n     *     every other value in the array\n     * @throws IllegalArgumentException if {@code array} is empty\n     */\n    public static float max(float... array) {\n        checkArgument(array.length > 0);\n        float max = array[0];\n        for (int i = 1; i < array.length; i++) {\n            max = Math.max(max, array[i]);\n        }\n        return max;\n    }\n\n    /**\n     * Returns the values from each provided array combined into a single array.\n     * For example, {@code concat(new float[] {a, b}, new float[] {}, new\n     * float[] {c}} returns the array {@code {a, b, c}}.\n     *\n     * @param arrays zero or more {@code float} arrays\n     * @return a single array containing all the values from the source arrays, in\n     *     order\n     */\n    public static float[] concat(float[]... arrays) {\n        int length = 0;\n        for (float[] array : arrays) {\n            length += array.length;\n        }\n        float[] result = new float[length];\n        int pos = 0;\n        for (float[] array : arrays) {\n            System.arraycopy(array, 0, result, pos, array.length);\n            pos += array.length;\n        }\n        return result;\n    }\n\n    private static final class FloatConverter extends Converter<String, Float> implements Serializable {\n\n        static final FloatConverter INSTANCE = new FloatConverter();\n\n        @Override\n        protected Float doForward(String value) {\n            return Float.valueOf(value);\n        }\n\n        @Override\n        protected String doBackward(Float value) {\n            return value.toString();\n        }\n\n        @Override\n        public String toString() {\n            return \"Floats.stringConverter()\";\n        }\n\n        private Object readResolve() {\n            return INSTANCE;\n        }\n\n        private static final long serialVersionUID = 1;\n    }\n\n    /**\n     * Returns a serializable converter object that converts between strings and\n     * floats using {@link Float#valueOf} and {@link Float#toString()}.\n     *\n     * @since 16.0\n     */\n    @Beta\n    public static Converter<String, Float> stringConverter() {\n        return FloatConverter.INSTANCE;\n    }\n\n    /**\n     * Returns an array containing the same values as {@code array}, but\n     * guaranteed to be of a specified minimum length. If {@code array} already\n     * has a length of at least {@code minLength}, it is returned directly.\n     * Otherwise, a new array of size {@code minLength + padding} is returned,\n     * containing the values of {@code array}, and zeroes in the remaining places.\n     *\n     * @param array the source array\n     * @param minLength the minimum length the returned array must guarantee\n     * @param padding an extra amount to \"grow\" the array by if growth is\n     *     necessary\n     * @throws IllegalArgumentException if {@code minLength} or {@code padding} is\n     *     negative\n     * @return an array containing the values of {@code array}, with guaranteed\n     *     minimum length {@code minLength}\n     */\n    public static float[] ensureCapacity(float[] array, int minLength, int padding) {\n        checkArgument(minLength >= 0, \"Invalid minLength: %s\", minLength);\n        checkArgument(padding >= 0, \"Invalid padding: %s\", padding);\n        return (array.length < minLength) ? copyOf(array, minLength + padding) : array;\n    }\n\n    // Arrays.copyOf() requires Java 6\n    private static float[] copyOf(float[] original, int length) {\n        float[] copy = new float[length];\n        System.arraycopy(original, 0, copy, 0, Math.min(original.length, length));\n        return copy;\n    }\n\n    /**\n     * Returns a string containing the supplied {@code float} values, converted\n     * to strings as specified by {@link Float#toString(float)}, and separated by\n     * {@code separator}. For example, {@code join(\"-\", 1.0f, 2.0f, 3.0f)}\n     * returns the string {@code \"1.0-2.0-3.0\"}.\n     *\n     * <p>Note that {@link Float#toString(float)} formats {@code float}\n     * differently in GWT.  In the previous example, it returns the string {@code\n     * \"1-2-3\"}.\n     *\n     * @param separator the text that should appear between consecutive values in\n     *     the resulting string (but not at the start or end)\n     * @param array an array of {@code float} values, possibly empty\n     */\n    public static String join(String separator, float... array) {\n        checkNotNull(separator);\n        if (array.length == 0) {\n            return \"\";\n        }\n        // For pre-sizing a builder, just get the right order of magnitude\n        StringBuilder builder = new StringBuilder(array.length * 12);\n        builder.append(array[0]);\n        for (int i = 1; i < array.length; i++) {\n            builder.append(separator).append(array[i]);\n        }\n        return builder.toString();\n    }\n\n    /**\n     * Returns a comparator that compares two {@code float} arrays\n     * lexicographically. That is, it compares, using {@link\n     * #compare(float, float)}), the first pair of values that follow any\n     * common prefix, or when one array is a prefix of the other, treats the\n     * shorter array as the lesser. For example, {@code [] < [1.0f] < [1.0f, 2.0f]\n     * < [2.0f]}.\n     *\n     * <p>The returned comparator is inconsistent with {@link\n     * Object#equals(Object)} (since arrays support only identity equality), but\n     * it is consistent with {@link Arrays#equals(float[], float[])}.\n     *\n     * @see <a href=\"http://en.wikipedia.org/wiki/Lexicographical_order\">\n     *     Lexicographical order article at Wikipedia</a>\n     * @since 2.0\n     */\n    public static Comparator<float[]> lexicographicalComparator() {\n        return LexicographicalComparator.INSTANCE;\n    }\n\n    private enum LexicographicalComparator implements Comparator<float[]> {\n\n        INSTANCE;\n\n        @Override\n        public int compare(float[] left, float[] right) {\n            int minLength = Math.min(left.length, right.length);\n            for (int i = 0; i < minLength; i++) {\n                int result = Float.compare(left[i], right[i]);\n                if (result != 0) {\n                    return result;\n                }\n            }\n            return left.length - right.length;\n        }\n    }\n\n    /**\n     * Returns an array containing each value of {@code collection}, converted to\n     * a {@code float} value in the manner of {@link Number#floatValue}.\n     *\n     * <p>Elements are copied from the argument collection as if by {@code\n     * collection.toArray()}.  Calling this method is as thread-safe as calling\n     * that method.\n     *\n     * @param collection a collection of {@code Number} instances\n     * @return an array containing the same values as {@code collection}, in the\n     *     same order, converted to primitives\n     * @throws NullPointerException if {@code collection} or any of its elements\n     *     is null\n     * @since 1.0 (parameter was {@code Collection<Float>} before 12.0)\n     */\n    public static float[] toArray(Collection<? extends Number> collection) {\n        if (collection instanceof FloatArrayAsList) {\n            return ((FloatArrayAsList) collection).toFloatArray();\n        }\n        Object[] boxedArray = collection.toArray();\n        int len = boxedArray.length;\n        float[] array = new float[len];\n        for (int i = 0; i < len; i++) {\n            // checkNotNull for GWT (do not optimize)\n            array[i] = ((Number) checkNotNull(boxedArray[i])).floatValue();\n        }\n        return array;\n    }\n\n    /**\n     * Returns a fixed-size list backed by the specified array, similar to {@link\n     * Arrays#asList(Object[])}. The list supports {@link List#set(int, Object)},\n     * but any attempt to set a value to {@code null} will result in a {@link\n     * NullPointerException}.\n     *\n     * <p>The returned list maintains the values, but not the identities, of\n     * {@code Float} objects written to or read from it.  For example, whether\n     * {@code list.get(0) == list.get(0)} is true for the returned list is\n     * unspecified.\n     *\n     * <p>The returned list may have unexpected behavior if it contains {@code\n     * NaN}, or if {@code NaN} is used as a parameter to any of its methods.\n     *\n     * @param backingArray the array to back the list\n     * @return a list view of the array\n     */\n    public static List<Float> asList(float... backingArray) {\n        if (backingArray.length == 0) {\n            return Collections.emptyList();\n        }\n        return new FloatArrayAsList(backingArray);\n    }\n\n    @GwtCompatible\n    private static class FloatArrayAsList extends AbstractList<Float> implements RandomAccess, Serializable {\n\n        final float[] array;\n\n        final int start;\n\n        final int end;\n\n        FloatArrayAsList(float[] array) {\n            this(array, 0, array.length);\n        }\n\n        FloatArrayAsList(float[] array, int start, int end) {\n            this.array = array;\n            this.start = start;\n            this.end = end;\n        }\n\n        @Override\n        public int size() {\n            return end - start;\n        }\n\n        @Override\n        public boolean isEmpty() {\n            return false;\n        }\n\n        @Override\n        public Float get(int index) {\n            checkElementIndex(index, size());\n            return array[start + index];\n        }\n\n        @Override\n        public boolean contains(Object target) {\n            // Overridden to prevent a ton of boxing\n            return (target instanceof Float) && Floats.indexOf(array, (Float) target, start, end) != -1;\n        }\n\n        @Override\n        public int indexOf(Object target) {\n            // Overridden to prevent a ton of boxing\n            if (target instanceof Float) {\n                int i = Floats.indexOf(array, (Float) target, start, end);\n                if (i >= 0) {\n                    return i - start;\n                }\n            }\n            return -1;\n        }\n\n        @Override\n        public int lastIndexOf(Object target) {\n            // Overridden to prevent a ton of boxing\n            if (target instanceof Float) {\n                int i = Floats.lastIndexOf(array, (Float) target, start, end);\n                if (i >= 0) {\n                    return i - start;\n                }\n            }\n            return -1;\n        }\n\n        @Override\n        public Float set(int index, Float element) {\n            checkElementIndex(index, size());\n            float oldValue = array[start + index];\n            // checkNotNull for GWT (do not optimize)\n            array[start + index] = checkNotNull(element);\n            return oldValue;\n        }\n\n        @Override\n        public List<Float> subList(int fromIndex, int toIndex) {\n            int size = size();\n            checkPositionIndexes(fromIndex, toIndex, size);\n            if (fromIndex == toIndex) {\n                return Collections.emptyList();\n            }\n            return new FloatArrayAsList(array, start + fromIndex, start + toIndex);\n        }\n\n        @Override\n        public boolean equals(@Nullable Object object) {\n            if (object == this) {\n                return true;\n            }\n            if (object instanceof FloatArrayAsList) {\n                FloatArrayAsList that = (FloatArrayAsList) object;\n                int size = size();\n                if (that.size() != size) {\n                    return false;\n                }\n                for (int i = 0; i < size; i++) {\n                    if (array[start + i] != that.array[that.start + i]) {\n                        return false;\n                    }\n                }\n                return true;\n            }\n            return super.equals(object);\n        }\n\n        @Override\n        public int hashCode() {\n            int result = 1;\n            for (int i = start; i < end; i++) {\n                result = 31 * result + Floats.hashCode(array[i]);\n            }\n            return result;\n        }\n\n        @Override\n        public String toString() {\n            StringBuilder builder = new StringBuilder(size() * 12);\n            builder.append('[').append(array[start]);\n            for (int i = start + 1; i < end; i++) {\n                builder.append(\", \").append(array[i]);\n            }\n            return builder.append(']').toString();\n        }\n\n        float[] toFloatArray() {\n            // Arrays.copyOfRange() is not available under GWT\n            int size = size();\n            float[] result = new float[size];\n            System.arraycopy(array, start, result, 0, size);\n            return result;\n        }\n\n        private static final long serialVersionUID = 0;\n    }\n\n    /**\n     * Parses the specified string as a single-precision floating point value.\n     * The ASCII character {@code '-'} (<code>'&#92;u002D'</code>) is recognized\n     * as the minus sign.\n     *\n     * <p>Unlike {@link Float#parseFloat(String)}, this method returns\n     * {@code null} instead of throwing an exception if parsing fails.\n     * Valid inputs are exactly those accepted by {@link Float#valueOf(String)},\n     * except that leading and trailing whitespace is not permitted.\n     *\n     * <p>This implementation is likely to be faster than {@code\n     * Float.parseFloat} if many failures are expected.\n     *\n     * @param string the string representation of a {@code float} value\n     * @return the floating point value represented by {@code string}, or\n     *     {@code null} if {@code string} has a length of zero or cannot be\n     *     parsed as a {@code float} value\n     * @since 14.0\n     */\n    @Beta\n    @Nullable\n    @CheckForNull\n    @GwtIncompatible(\"regular expressions\")\n    public static Float tryParse(String string) {\n        if (Doubles.FLOATING_POINT_PATTERN.matcher(string).matches()) {\n            // TODO(lowasser): could be potentially optimized, but only with\n            // extensive testing\n            try {\n                return Float.parseFloat(string);\n            } catch (NumberFormatException e) {\n                // Float.parseFloat has changed specs several times, so fall through\n                // gracefully\n            }\n        }\n        return null;\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Returns a hash code for {@code value}; equal to the result of invoking\n * {@code ((Float) value).hashCode()}.\n *\n * @param value a primitive {@code float} value\n * @return a hash code for the value\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "a primitive {@code float} value",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "a primitive float value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "hash code for the value",
+            "assertion": "",
+            "description": "hash code for the value"
+          }
+        ],
+        "code": "/**\n * Returns a hash code for {@code value}; equal to the result of invoking\n * {@code ((Float) value).hashCode()}.\n *\n * @param value a primitive {@code float} value\n * @return a hash code for the value\n */\npublic static int hashCode(float value) {\n    // TODO(kevinb): is there a better way, that's still gwt-safe?\n    return ((Float) value).hashCode();\n}"
+      },
+      {
+        "type": "method",
+        "name": "compare",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": "/**\n * Compares the two specified {@code float} values using {@link\n * Float#compare(float, float)}. You may prefer to invoke that method\n * directly; this method exists only for consistency with the other utilities\n * in this package.\n *\n * <p><b>Note:</b> this method simply delegates to the JDK method {@link\n * Float#compare}. It is provided for consistency with the other primitive\n * types, whose compare methods were not added to the JDK until JDK 7.\n *\n * @param a the first {@code float} to compare\n * @param b the second {@code float} to compare\n * @return the result of invoking {@link Float#compare(float, float)}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a",
+            "content": "the first {@code float} to compare",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the first float to compare"
+          },
+          {
+            "tag": "param",
+            "name": "b",
+            "content": "the second {@code float} to compare",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the second float to compare"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "result of invoking {@link Float#compare(float, float)}",
+            "assertion": "assert methodResultID == Float.compare(args[0], args[1]);",
+            "description": "the result of invoking Float.compare(float, float)"
+          }
+        ],
+        "code": "/**\n * Compares the two specified {@code float} values using {@link\n * Float#compare(float, float)}. You may prefer to invoke that method\n * directly; this method exists only for consistency with the other utilities\n * in this package.\n *\n * <p><b>Note:</b> this method simply delegates to the JDK method {@link\n * Float#compare}. It is provided for consistency with the other primitive\n * types, whose compare methods were not added to the JDK until JDK 7.\n *\n * @param a the first {@code float} to compare\n * @param b the second {@code float} to compare\n * @return the result of invoking {@link Float#compare(float, float)}\n */\npublic static int compare(float a, float b) {\n    return Float.compare(a, b);\n}"
+      },
+      {
+        "type": "method",
+        "name": "isFinite",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Returns {@code true} if {@code value} represents a real number. This is\n * equivalent to, but not necessarily implemented as,\n * {@code !(Float.isInfinite(value) || Float.isNaN(value))}.\n *\n * @since 10.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "10.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns {@code true} if {@code value} represents a real number. This is\n * equivalent to, but not necessarily implemented as,\n * {@code !(Float.isInfinite(value) || Float.isNaN(value))}.\n *\n * @since 10.0\n */\npublic static boolean isFinite(float value) {\n    return NEGATIVE_INFINITY < value & value < POSITIVE_INFINITY;\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": "/**\n * Returns {@code true} if {@code target} is present as an element anywhere in\n * {@code array}. Note that this always returns {@code false} when {@code\n * target} is {@code NaN}.\n *\n * @param array an array of {@code float} values, possibly empty\n * @param target a primitive {@code float} value\n * @return {@code true} if {@code array[i] == target} for some value of {@code\n *     i}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "an array of {@code float} values, possibly empty",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "an array of float values, possibly empty"
+          },
+          {
+            "tag": "param",
+            "name": "target",
+            "content": "a primitive {@code float} value",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "a primitive float value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if {@code array[i] == target} for some value of {@code i}",
+            "assertion": "assert methodResultID == Arrays.stream(args[0]).anyMatch(f -> f == args[1]);",
+            "description": "true if array[i] == target for some value of i"
+          }
+        ],
+        "code": "/**\n * Returns {@code true} if {@code target} is present as an element anywhere in\n * {@code array}. Note that this always returns {@code false} when {@code\n * target} is {@code NaN}.\n *\n * @param array an array of {@code float} values, possibly empty\n * @param target a primitive {@code float} value\n * @return {@code true} if {@code array[i] == target} for some value of {@code\n *     i}\n */\npublic static boolean contains(float[] array, float target) {\n    for (float value : array) {\n        if (value == target) {\n            return true;\n        }\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "indexOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": "/**\n * Returns the index of the first appearance of the value {@code target} in\n * {@code array}. Note that this always returns {@code -1} when {@code target}\n * is {@code NaN}.\n *\n * @param array an array of {@code float} values, possibly empty\n * @param target a primitive {@code float} value\n * @return the least index {@code i} for which {@code array[i] == target}, or\n *     {@code -1} if no such index exists.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "an array of {@code float} values, possibly empty",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "an array of float values, possibly empty"
+          },
+          {
+            "tag": "param",
+            "name": "target",
+            "content": "a primitive {@code float} value",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "a primitive float value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "least index {@code i} for which {@code array[i] == target}, or {@code -1} if no such index exists.",
+            "assertion": "assert methodResultID >= 0 || Arrays.equals(array, new float[] {target});",
+            "description": "the least index i for which array[i] == target, or -1 if no such index exists."
+          }
+        ],
+        "code": "/**\n * Returns the index of the first appearance of the value {@code target} in\n * {@code array}. Note that this always returns {@code -1} when {@code target}\n * is {@code NaN}.\n *\n * @param array an array of {@code float} values, possibly empty\n * @param target a primitive {@code float} value\n * @return the least index {@code i} for which {@code array[i] == target}, or\n *     {@code -1} if no such index exists.\n */\npublic static int indexOf(float[] array, float target) {\n    return indexOf(array, target, 0, array.length);\n}"
+      },
+      {
+        "type": "method",
+        "name": "indexOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": "/**\n * Returns the start position of the first occurrence of the specified {@code\n * target} within {@code array}, or {@code -1} if there is no such occurrence.\n *\n * <p>More formally, returns the lowest index {@code i} such that {@code\n * java.util.Arrays.copyOfRange(array, i, i + target.length)} contains exactly\n * the same elements as {@code target}.\n *\n * <p>Note that this always returns {@code -1} when {@code target} contains\n * {@code NaN}.\n *\n * @param array the array to search for the sequence {@code target}\n * @param target the array to search for as a sub-sequence of {@code array}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "the array to search for the sequence {@code target}",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the array to search for the sequence target, not null"
+          },
+          {
+            "tag": "param",
+            "name": "target",
+            "content": "the array to search for as a sub-sequence of {@code array}",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the array to search for as a sub-sequence of array, not null"
+          }
+        ],
+        "code": "/**\n * Returns the start position of the first occurrence of the specified {@code\n * target} within {@code array}, or {@code -1} if there is no such occurrence.\n *\n * <p>More formally, returns the lowest index {@code i} such that {@code\n * java.util.Arrays.copyOfRange(array, i, i + target.length)} contains exactly\n * the same elements as {@code target}.\n *\n * <p>Note that this always returns {@code -1} when {@code target} contains\n * {@code NaN}.\n *\n * @param array the array to search for the sequence {@code target}\n * @param target the array to search for as a sub-sequence of {@code array}\n */\npublic static int indexOf(float[] array, float[] target) {\n    checkNotNull(array, \"array\");\n    checkNotNull(target, \"target\");\n    if (target.length == 0) {\n        return 0;\n    }\n    outer: for (int i = 0; i < array.length - target.length + 1; i++) {\n        for (int j = 0; j < target.length; j++) {\n            if (array[i + j] != target[j]) {\n                continue outer;\n            }\n        }\n        return i;\n    }\n    return -1;\n}"
+      },
+      {
+        "type": "method",
+        "name": "lastIndexOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": "/**\n * Returns the index of the last appearance of the value {@code target} in\n * {@code array}. Note that this always returns {@code -1} when {@code target}\n * is {@code NaN}.\n *\n * @param array an array of {@code float} values, possibly empty\n * @param target a primitive {@code float} value\n * @return the greatest index {@code i} for which {@code array[i] == target},\n *     or {@code -1} if no such index exists.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "an array of {@code float} values, possibly empty",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "an array of float values, possibly empty"
+          },
+          {
+            "tag": "param",
+            "name": "target",
+            "content": "a primitive {@code float} value",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "a primitive float value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "greatest index {@code i} for which {@code array[i] == target}, or {@code -1} if no such index exists.",
+            "assertion": "",
+            "description": "greatest index {@code i} for which {@code array[i] == target}, or {@code -1} if no such index exists."
+          }
+        ],
+        "code": "/**\n * Returns the index of the last appearance of the value {@code target} in\n * {@code array}. Note that this always returns {@code -1} when {@code target}\n * is {@code NaN}.\n *\n * @param array an array of {@code float} values, possibly empty\n * @param target a primitive {@code float} value\n * @return the greatest index {@code i} for which {@code array[i] == target},\n *     or {@code -1} if no such index exists.\n */\npublic static int lastIndexOf(float[] array, float target) {\n    return lastIndexOf(array, target, 0, array.length);\n}"
+      },
+      {
+        "type": "method",
+        "name": "min",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "array"
+          }
+        ],
+        "javadoc": "/**\n * Returns the least value present in {@code array}, using the same rules of\n * comparison as {@link Math#min(float, float)}.\n *\n * @param array a <i>nonempty</i> array of {@code float} values\n * @return the value present in {@code array} that is less than or equal to\n *     every other value in the array\n * @throws IllegalArgumentException if {@code array} is empty\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "a <i>nonempty</i> array of {@code float} values",
+            "assertion": "assert (args[0].length == 0) == false;",
+            "description": "a nonempty array of float values"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value present in {@code array} that is less than or equal to every other value in the array",
+            "assertion": "assert methodResultID == args[0].min();",
+            "description": "the value present in array that is less than or equal to every other value in the array"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code array} is empty",
+            "assertion": "assert args[0].length == 0;",
+            "description": "if array is empty"
+          }
+        ],
+        "code": "/**\n * Returns the least value present in {@code array}, using the same rules of\n * comparison as {@link Math#min(float, float)}.\n *\n * @param array a <i>nonempty</i> array of {@code float} values\n * @return the value present in {@code array} that is less than or equal to\n *     every other value in the array\n * @throws IllegalArgumentException if {@code array} is empty\n */\npublic static float min(float... array) {\n    checkArgument(array.length > 0);\n    float min = array[0];\n    for (int i = 1; i < array.length; i++) {\n        min = Math.min(min, array[i]);\n    }\n    return min;\n}"
+      },
+      {
+        "type": "method",
+        "name": "max",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "array"
+          }
+        ],
+        "javadoc": "/**\n * Returns the greatest value present in {@code array}, using the same rules\n * of comparison as {@link Math#max(float, float)}.\n *\n * @param array a <i>nonempty</i> array of {@code float} values\n * @return the value present in {@code array} that is greater than or equal to\n *     every other value in the array\n * @throws IllegalArgumentException if {@code array} is empty\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "a <i>nonempty</i> array of {@code float} values",
+            "assertion": "assert (args[0].length == 0) == false;",
+            "description": "a nonempty array of float values"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value present in {@code array} that is greater than or equal to every other value in the array",
+            "assertion": "assert methodResultID == java.lang.Float.max(args[0], args[0]);",
+            "description": "the value present in array that is greater than or equal to every other value in the array"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code array} is empty",
+            "assertion": "assert args[0].length == 0;",
+            "description": "if array is empty"
+          }
+        ],
+        "code": "/**\n * Returns the greatest value present in {@code array}, using the same rules\n * of comparison as {@link Math#max(float, float)}.\n *\n * @param array a <i>nonempty</i> array of {@code float} values\n * @return the value present in {@code array} that is greater than or equal to\n *     every other value in the array\n * @throws IllegalArgumentException if {@code array} is empty\n */\npublic static float max(float... array) {\n    checkArgument(array.length > 0);\n    float max = array[0];\n    for (int i = 1; i < array.length; i++) {\n        max = Math.max(max, array[i]);\n    }\n    return max;\n}"
+      },
+      {
+        "type": "method",
+        "name": "concat",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "arrays"
+          }
+        ],
+        "javadoc": "/**\n * Returns the values from each provided array combined into a single array.\n * For example, {@code concat(new float[] {a, b}, new float[] {}, new\n * float[] {c}} returns the array {@code {a, b, c}}.\n *\n * @param arrays zero or more {@code float} arrays\n * @return a single array containing all the values from the source arrays, in\n *     order\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "arrays",
+            "content": "zero or more {@code float} arrays",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "zero or more float arrays"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "single array containing all the values from the source arrays, in order",
+            "assertion": "assert methodResultID == args[0].concat();",
+            "description": "a single array containing all the values from the source arrays, in order"
+          }
+        ],
+        "code": "/**\n * Returns the values from each provided array combined into a single array.\n * For example, {@code concat(new float[] {a, b}, new float[] {}, new\n * float[] {c}} returns the array {@code {a, b, c}}.\n *\n * @param arrays zero or more {@code float} arrays\n * @return a single array containing all the values from the source arrays, in\n *     order\n */\npublic static float[] concat(float[]... arrays) {\n    int length = 0;\n    for (float[] array : arrays) {\n        length += array.length;\n    }\n    float[] result = new float[length];\n    int pos = 0;\n    for (float[] array : arrays) {\n        System.arraycopy(array, 0, result, pos, array.length);\n        pos += array.length;\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "stringConverter",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a serializable converter object that converts between strings and\n * floats using {@link Float#valueOf} and {@link Float#toString()}.\n *\n * @since 16.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "16.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a serializable converter object that converts between strings and\n * floats using {@link Float#valueOf} and {@link Float#toString()}.\n *\n * @since 16.0\n */\n@Beta\npublic static Converter<String, Float> stringConverter() {\n    return FloatConverter.INSTANCE;\n}"
+      },
+      {
+        "type": "method",
+        "name": "ensureCapacity",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "minLength"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "padding"
+          }
+        ],
+        "javadoc": "/**\n * Returns an array containing the same values as {@code array}, but\n * guaranteed to be of a specified minimum length. If {@code array} already\n * has a length of at least {@code minLength}, it is returned directly.\n * Otherwise, a new array of size {@code minLength + padding} is returned,\n * containing the values of {@code array}, and zeroes in the remaining places.\n *\n * @param array the source array\n * @param minLength the minimum length the returned array must guarantee\n * @param padding an extra amount to \"grow\" the array by if growth is\n *     necessary\n * @throws IllegalArgumentException if {@code minLength} or {@code padding} is\n *     negative\n * @return an array containing the values of {@code array}, with guaranteed\n *     minimum length {@code minLength}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "the source array",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the source array"
+          },
+          {
+            "tag": "param",
+            "name": "minLength",
+            "content": "the minimum length the returned array must guarantee",
+            "assertion": "assert args[1] >= 0;",
+            "description": "the minimum length the returned array must guarantee, not negative"
+          },
+          {
+            "tag": "param",
+            "name": "padding",
+            "content": "an extra amount to \"grow\" the array by if growth is necessary",
+            "assertion": "assert args[2] >= 0;",
+            "description": "an extra amount to 'grow' the array by if growth is necessary, not negative"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code minLength} or {@code padding} is negative",
+            "assertion": "assert !args[1] < 0 && !args[2] < 0;",
+            "description": "if minLength or padding is negative"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "array containing the values of {@code array}, with guaranteed minimum length {@code minLength}",
+            "assertion": "assert methodResultID.length >= args[1] && (methodResultID.length == args[0].length || methodResultID.length == args[1] + args[2]);",
+            "description": "Returns an array containing the same values as array, but guaranteed to be of a specified minimum length."
+          }
+        ],
+        "code": "/**\n * Returns an array containing the same values as {@code array}, but\n * guaranteed to be of a specified minimum length. If {@code array} already\n * has a length of at least {@code minLength}, it is returned directly.\n * Otherwise, a new array of size {@code minLength + padding} is returned,\n * containing the values of {@code array}, and zeroes in the remaining places.\n *\n * @param array the source array\n * @param minLength the minimum length the returned array must guarantee\n * @param padding an extra amount to \"grow\" the array by if growth is\n *     necessary\n * @throws IllegalArgumentException if {@code minLength} or {@code padding} is\n *     negative\n * @return an array containing the values of {@code array}, with guaranteed\n *     minimum length {@code minLength}\n */\npublic static float[] ensureCapacity(float[] array, int minLength, int padding) {\n    checkArgument(minLength >= 0, \"Invalid minLength: %s\", minLength);\n    checkArgument(padding >= 0, \"Invalid padding: %s\", padding);\n    return (array.length < minLength) ? copyOf(array, minLength + padding) : array;\n}"
+      },
+      {
+        "type": "method",
+        "name": "join",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separator"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "array"
+          }
+        ],
+        "javadoc": "/**\n * Returns a string containing the supplied {@code float} values, converted\n * to strings as specified by {@link Float#toString(float)}, and separated by\n * {@code separator}. For example, {@code join(\"-\", 1.0f, 2.0f, 3.0f)}\n * returns the string {@code \"1.0-2.0-3.0\"}.\n *\n * <p>Note that {@link Float#toString(float)} formats {@code float}\n * differently in GWT.  In the previous example, it returns the string {@code\n * \"1-2-3\"}.\n *\n * @param separator the text that should appear between consecutive values in\n *     the resulting string (but not at the start or end)\n * @param array an array of {@code float} values, possibly empty\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "separator",
+            "content": "the text that should appear between consecutive values in the resulting string (but not at the start or end)",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the text that should appear between consecutive values in the resulting string (but not at the start or end)"
+          },
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "an array of {@code float} values, possibly empty",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "an array of float values, possibly empty"
+          }
+        ],
+        "code": "/**\n * Returns a string containing the supplied {@code float} values, converted\n * to strings as specified by {@link Float#toString(float)}, and separated by\n * {@code separator}. For example, {@code join(\"-\", 1.0f, 2.0f, 3.0f)}\n * returns the string {@code \"1.0-2.0-3.0\"}.\n *\n * <p>Note that {@link Float#toString(float)} formats {@code float}\n * differently in GWT.  In the previous example, it returns the string {@code\n * \"1-2-3\"}.\n *\n * @param separator the text that should appear between consecutive values in\n *     the resulting string (but not at the start or end)\n * @param array an array of {@code float} values, possibly empty\n */\npublic static String join(String separator, float... array) {\n    checkNotNull(separator);\n    if (array.length == 0) {\n        return \"\";\n    }\n    // For pre-sizing a builder, just get the right order of magnitude\n    StringBuilder builder = new StringBuilder(array.length * 12);\n    builder.append(array[0]);\n    for (int i = 1; i < array.length; i++) {\n        builder.append(separator).append(array[i]);\n    }\n    return builder.toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "lexicographicalComparator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a comparator that compares two {@code float} arrays\n * lexicographically. That is, it compares, using {@link\n * #compare(float, float)}), the first pair of values that follow any\n * common prefix, or when one array is a prefix of the other, treats the\n * shorter array as the lesser. For example, {@code [] < [1.0f] < [1.0f, 2.0f]\n * < [2.0f]}.\n *\n * <p>The returned comparator is inconsistent with {@link\n * Object#equals(Object)} (since arrays support only identity equality), but\n * it is consistent with {@link Arrays#equals(float[], float[])}.\n *\n * @see <a href=\"http://en.wikipedia.org/wiki/Lexicographical_order\">\n *     Lexicographical order article at Wikipedia</a>\n * @since 2.0\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": "<a",
+            "content": "href=\"http://en.wikipedia.org/wiki/Lexicographical_order\"> Lexicographical order article at Wikipedia</a>"
+          },
+          {
+            "tag": "since",
+            "name": "2.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a comparator that compares two {@code float} arrays\n * lexicographically. That is, it compares, using {@link\n * #compare(float, float)}), the first pair of values that follow any\n * common prefix, or when one array is a prefix of the other, treats the\n * shorter array as the lesser. For example, {@code [] < [1.0f] < [1.0f, 2.0f]\n * < [2.0f]}.\n *\n * <p>The returned comparator is inconsistent with {@link\n * Object#equals(Object)} (since arrays support only identity equality), but\n * it is consistent with {@link Arrays#equals(float[], float[])}.\n *\n * @see <a href=\"http://en.wikipedia.org/wiki/Lexicographical_order\">\n *     Lexicographical order article at Wikipedia</a>\n * @since 2.0\n */\npublic static Comparator<float[]> lexicographicalComparator() {\n    return LexicographicalComparator.INSTANCE;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "collection"
+          }
+        ],
+        "javadoc": "/**\n * Returns an array containing each value of {@code collection}, converted to\n * a {@code float} value in the manner of {@link Number#floatValue}.\n *\n * <p>Elements are copied from the argument collection as if by {@code\n * collection.toArray()}.  Calling this method is as thread-safe as calling\n * that method.\n *\n * @param collection a collection of {@code Number} instances\n * @return an array containing the same values as {@code collection}, in the\n *     same order, converted to primitives\n * @throws NullPointerException if {@code collection} or any of its elements\n *     is null\n * @since 1.0 (parameter was {@code Collection<Float>} before 12.0)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "collection",
+            "content": "a collection of {@code Number} instances",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "a collection of Number instances"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "array containing the same values as {@code collection}, in the same order, converted to primitives",
+            "assertion": "assert methodResultID == Float.valueOf(args[0]).toArray();",
+            "description": "an array containing each value of the input collection, converted to a float value"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if {@code collection} or any of its elements is null",
+            "assertion": "assert !args[0].contains(null) && !receiverObjectID.contains(null);",
+            "description": "if collection or any of its elements is null."
+          },
+          {
+            "tag": "since",
+            "name": "1.0",
+            "content": "(parameter was {@code Collection<Float>} before 12.0)"
+          }
+        ],
+        "code": "/**\n * Returns an array containing each value of {@code collection}, converted to\n * a {@code float} value in the manner of {@link Number#floatValue}.\n *\n * <p>Elements are copied from the argument collection as if by {@code\n * collection.toArray()}.  Calling this method is as thread-safe as calling\n * that method.\n *\n * @param collection a collection of {@code Number} instances\n * @return an array containing the same values as {@code collection}, in the\n *     same order, converted to primitives\n * @throws NullPointerException if {@code collection} or any of its elements\n *     is null\n * @since 1.0 (parameter was {@code Collection<Float>} before 12.0)\n */\npublic static float[] toArray(Collection<? extends Number> collection) {\n    if (collection instanceof FloatArrayAsList) {\n        return ((FloatArrayAsList) collection).toFloatArray();\n    }\n    Object[] boxedArray = collection.toArray();\n    int len = boxedArray.length;\n    float[] array = new float[len];\n    for (int i = 0; i < len; i++) {\n        // checkNotNull for GWT (do not optimize)\n        array[i] = ((Number) checkNotNull(boxedArray[i])).floatValue();\n    }\n    return array;\n}"
+      },
+      {
+        "type": "method",
+        "name": "asList",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "backingArray"
+          }
+        ],
+        "javadoc": "/**\n * Returns a fixed-size list backed by the specified array, similar to {@link\n * Arrays#asList(Object[])}. The list supports {@link List#set(int, Object)},\n * but any attempt to set a value to {@code null} will result in a {@link\n * NullPointerException}.\n *\n * <p>The returned list maintains the values, but not the identities, of\n * {@code Float} objects written to or read from it.  For example, whether\n * {@code list.get(0) == list.get(0)} is true for the returned list is\n * unspecified.\n *\n * <p>The returned list may have unexpected behavior if it contains {@code\n * NaN}, or if {@code NaN} is used as a parameter to any of its methods.\n *\n * @param backingArray the array to back the list\n * @return a list view of the array\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "backingArray",
+            "content": "the array to back the list",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the array to back the list"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list view of the array",
+            "assertion": "assert methodResultID == !Arrays.asList(args[0]).isEmpty();",
+            "description": "a list view of the array"
+          }
+        ],
+        "code": "/**\n * Returns a fixed-size list backed by the specified array, similar to {@link\n * Arrays#asList(Object[])}. The list supports {@link List#set(int, Object)},\n * but any attempt to set a value to {@code null} will result in a {@link\n * NullPointerException}.\n *\n * <p>The returned list maintains the values, but not the identities, of\n * {@code Float} objects written to or read from it.  For example, whether\n * {@code list.get(0) == list.get(0)} is true for the returned list is\n * unspecified.\n *\n * <p>The returned list may have unexpected behavior if it contains {@code\n * NaN}, or if {@code NaN} is used as a parameter to any of its methods.\n *\n * @param backingArray the array to back the list\n * @return a list view of the array\n */\npublic static List<Float> asList(float... backingArray) {\n    if (backingArray.length == 0) {\n        return Collections.emptyList();\n    }\n    return new FloatArrayAsList(backingArray);\n}"
+      },
+      {
+        "type": "method",
+        "name": "tryParse",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          }
+        ],
+        "javadoc": "/**\n * Parses the specified string as a single-precision floating point value.\n * The ASCII character {@code '-'} (<code>'&#92;u002D'</code>) is recognized\n * as the minus sign.\n *\n * <p>Unlike {@link Float#parseFloat(String)}, this method returns\n * {@code null} instead of throwing an exception if parsing fails.\n * Valid inputs are exactly those accepted by {@link Float#valueOf(String)},\n * except that leading and trailing whitespace is not permitted.\n *\n * <p>This implementation is likely to be faster than {@code\n * Float.parseFloat} if many failures are expected.\n *\n * @param string the string representation of a {@code float} value\n * @return the floating point value represented by {@code string}, or\n *     {@code null} if {@code string} has a length of zero or cannot be\n *     parsed as a {@code float} value\n * @since 14.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "the string representation of a {@code float} value",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the string representation of a float value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "floating point value represented by {@code string}, or {@code null} if {@code string} has a length of zero or cannot be parsed as a {@code float} value",
+            "assertion": "assert methodResultID == null || (methodResultID != 0.0f && !java.lang.Float.toString(methodResultID).isEmpty());",
+            "description": "the floating point value represented by string, or null if string has a length of zero or cannot be parsed as a float value"
+          },
+          {
+            "tag": "since",
+            "name": "14.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Parses the specified string as a single-precision floating point value.\n * The ASCII character {@code '-'} (<code>'&#92;u002D'</code>) is recognized\n * as the minus sign.\n *\n * <p>Unlike {@link Float#parseFloat(String)}, this method returns\n * {@code null} instead of throwing an exception if parsing fails.\n * Valid inputs are exactly those accepted by {@link Float#valueOf(String)},\n * except that leading and trailing whitespace is not permitted.\n *\n * <p>This implementation is likely to be faster than {@code\n * Float.parseFloat} if many failures are expected.\n *\n * @param string the string representation of a {@code float} value\n * @return the floating point value represented by {@code string}, or\n *     {@code null} if {@code string} has a length of zero or cannot be\n *     parsed as a {@code float} value\n * @since 14.0\n */\n@Beta\n@Nullable\n@CheckForNull\n@GwtIncompatible(\"regular expressions\")\npublic static Float tryParse(String string) {\n    if (Doubles.FLOATING_POINT_PATTERN.matcher(string).matches()) {\n        // TODO(lowasser): could be potentially optimized, but only with\n        // extensive testing\n        try {\n            return Float.parseFloat(string);\n        } catch (NumberFormatException e) {\n            // Float.parseFloat has changed specs several times, so fall through\n            // gracefully\n        }\n    }\n    return null;\n}"
+      }
+    ]
+  },
+  {
+    "name": "FloatConverter",
+    "package": "com.google.common.primitives",
+    "qualified_name": "com.google.common.primitives.FloatConverter",
+    "javadoc": null,
+    "code": "private static final class FloatConverter extends Converter<String, Float> implements Serializable {\n\n    static final FloatConverter INSTANCE = new FloatConverter();\n\n    @Override\n    protected Float doForward(String value) {\n        return Float.valueOf(value);\n    }\n\n    @Override\n    protected String doBackward(Float value) {\n        return value.toString();\n    }\n\n    @Override\n    public String toString() {\n        return \"Floats.stringConverter()\";\n    }\n\n    private Object readResolve() {\n        return INSTANCE;\n    }\n\n    private static final long serialVersionUID = 1;\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "doForward",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected Float doForward(String value) {\n    return Float.valueOf(value);\n}"
+      },
+      {
+        "type": "method",
+        "name": "doBackward",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected String doBackward(Float value) {\n    return value.toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic String toString() {\n    return \"Floats.stringConverter()\";\n}"
+      }
+    ]
+  },
+  {
+    "name": "FloatArrayAsList",
+    "package": "com.google.common.primitives",
+    "qualified_name": "com.google.common.primitives.FloatArrayAsList",
+    "javadoc": null,
+    "code": "@GwtCompatible\nprivate static class FloatArrayAsList extends AbstractList<Float> implements RandomAccess, Serializable {\n\n    final float[] array;\n\n    final int start;\n\n    final int end;\n\n    FloatArrayAsList(float[] array) {\n        this(array, 0, array.length);\n    }\n\n    FloatArrayAsList(float[] array, int start, int end) {\n        this.array = array;\n        this.start = start;\n        this.end = end;\n    }\n\n    @Override\n    public int size() {\n        return end - start;\n    }\n\n    @Override\n    public boolean isEmpty() {\n        return false;\n    }\n\n    @Override\n    public Float get(int index) {\n        checkElementIndex(index, size());\n        return array[start + index];\n    }\n\n    @Override\n    public boolean contains(Object target) {\n        // Overridden to prevent a ton of boxing\n        return (target instanceof Float) && Floats.indexOf(array, (Float) target, start, end) != -1;\n    }\n\n    @Override\n    public int indexOf(Object target) {\n        // Overridden to prevent a ton of boxing\n        if (target instanceof Float) {\n            int i = Floats.indexOf(array, (Float) target, start, end);\n            if (i >= 0) {\n                return i - start;\n            }\n        }\n        return -1;\n    }\n\n    @Override\n    public int lastIndexOf(Object target) {\n        // Overridden to prevent a ton of boxing\n        if (target instanceof Float) {\n            int i = Floats.lastIndexOf(array, (Float) target, start, end);\n            if (i >= 0) {\n                return i - start;\n            }\n        }\n        return -1;\n    }\n\n    @Override\n    public Float set(int index, Float element) {\n        checkElementIndex(index, size());\n        float oldValue = array[start + index];\n        // checkNotNull for GWT (do not optimize)\n        array[start + index] = checkNotNull(element);\n        return oldValue;\n    }\n\n    @Override\n    public List<Float> subList(int fromIndex, int toIndex) {\n        int size = size();\n        checkPositionIndexes(fromIndex, toIndex, size);\n        if (fromIndex == toIndex) {\n            return Collections.emptyList();\n        }\n        return new FloatArrayAsList(array, start + fromIndex, start + toIndex);\n    }\n\n    @Override\n    public boolean equals(@Nullable Object object) {\n        if (object == this) {\n            return true;\n        }\n        if (object instanceof FloatArrayAsList) {\n            FloatArrayAsList that = (FloatArrayAsList) object;\n            int size = size();\n            if (that.size() != size) {\n                return false;\n            }\n            for (int i = 0; i < size; i++) {\n                if (array[start + i] != that.array[that.start + i]) {\n                    return false;\n                }\n            }\n            return true;\n        }\n        return super.equals(object);\n    }\n\n    @Override\n    public int hashCode() {\n        int result = 1;\n        for (int i = start; i < end; i++) {\n            result = 31 * result + Floats.hashCode(array[i]);\n        }\n        return result;\n    }\n\n    @Override\n    public String toString() {\n        StringBuilder builder = new StringBuilder(size() * 12);\n        builder.append('[').append(array[start]);\n        for (int i = start + 1; i < end; i++) {\n            builder.append(\", \").append(array[i]);\n        }\n        return builder.append(']').toString();\n    }\n\n    float[] toFloatArray() {\n        // Arrays.copyOfRange() is not available under GWT\n        int size = size();\n        float[] result = new float[size];\n        System.arraycopy(array, start, result, 0, size);\n        return result;\n    }\n\n    private static final long serialVersionUID = 0;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "FloatArrayAsList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "FloatArrayAsList(float[] array) {\n    this(array, 0, array.length);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "FloatArrayAsList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "start"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "end"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "FloatArrayAsList(float[] array, int start, int end) {\n    this.array = array;\n    this.start = start;\n    this.end = end;\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int size() {\n    return end - start;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isEmpty",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean isEmpty() {\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Float get(int index) {\n    checkElementIndex(index, size());\n    return array[start + index];\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean contains(Object target) {\n    // Overridden to prevent a ton of boxing\n    return (target instanceof Float) && Floats.indexOf(array, (Float) target, start, end) != -1;\n}"
+      },
+      {
+        "type": "method",
+        "name": "indexOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int indexOf(Object target) {\n    // Overridden to prevent a ton of boxing\n    if (target instanceof Float) {\n        int i = Floats.indexOf(array, (Float) target, start, end);\n        if (i >= 0) {\n            return i - start;\n        }\n    }\n    return -1;\n}"
+      },
+      {
+        "type": "method",
+        "name": "lastIndexOf",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int lastIndexOf(Object target) {\n    // Overridden to prevent a ton of boxing\n    if (target instanceof Float) {\n        int i = Floats.lastIndexOf(array, (Float) target, start, end);\n        if (i >= 0) {\n            return i - start;\n        }\n    }\n    return -1;\n}"
+      },
+      {
+        "type": "method",
+        "name": "set",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Float set(int index, Float element) {\n    checkElementIndex(index, size());\n    float oldValue = array[start + index];\n    // checkNotNull for GWT (do not optimize)\n    array[start + index] = checkNotNull(element);\n    return oldValue;\n}"
+      },
+      {
+        "type": "method",
+        "name": "subList",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromIndex"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toIndex"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic List<Float> subList(int fromIndex, int toIndex) {\n    int size = size();\n    checkPositionIndexes(fromIndex, toIndex, size);\n    if (fromIndex == toIndex) {\n        return Collections.emptyList();\n    }\n    return new FloatArrayAsList(array, start + fromIndex, start + toIndex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean equals(@Nullable Object object) {\n    if (object == this) {\n        return true;\n    }\n    if (object instanceof FloatArrayAsList) {\n        FloatArrayAsList that = (FloatArrayAsList) object;\n        int size = size();\n        if (that.size() != size) {\n            return false;\n        }\n        for (int i = 0; i < size; i++) {\n            if (array[start + i] != that.array[that.start + i]) {\n                return false;\n            }\n        }\n        return true;\n    }\n    return super.equals(object);\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int hashCode() {\n    int result = 1;\n    for (int i = start; i < end; i++) {\n        result = 31 * result + Floats.hashCode(array[i]);\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic String toString() {\n    StringBuilder builder = new StringBuilder(size() * 12);\n    builder.append('[').append(array[start]);\n    for (int i = start + 1; i < end; i++) {\n        builder.append(\", \").append(array[i]);\n    }\n    return builder.append(']').toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toFloatArray",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "float[] toFloatArray() {\n    // Arrays.copyOfRange() is not available under GWT\n    int size = size();\n    float[] result = new float[size];\n    System.arraycopy(array, start, result, 0, size);\n    return result;\n}"
+      }
+    ]
+  }
+]

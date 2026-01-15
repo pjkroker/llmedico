@@ -1,0 +1,960 @@
+[
+  {
+    "method": "exceptionClosure",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the closure",
+          "assertion": "assert receiverObjectID == null;",
+          "name": "return value",
+          "content": "the closure"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Gets a Closure that always throws an exception.",
+          "assertion": "assert methodResultID instanceof org.apache.commons.collections4.functors.ExceptionClosure;",
+          "name": null,
+          "content": "Gets a Closure that always throws an exception."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nopClosure",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "<E>  the type that the closure acts on",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "<E>",
+          "content": "<E>  the type that the closure acts on"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Gets a Closure that will do nothing.",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "Gets a Closure that will do nothing."
+        }
+      ]
+    }
+  },
+  {
+    "method": "asClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "transformer",
+          "content": "the transformer to run each time in the closure, null means nop",
+          "assertion": "",
+          "description": "the transformer to run each time in the closure, null means nop"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure",
+          "assertion": "assert methodResultID == !args[0].equals(null);",
+          "name": null,
+          "content": "the closure"
+        }
+      ]
+    }
+  },
+  {
+    "method": "forClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "count"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "count",
+          "content": "the number of times to loop",
+          "assertion": "",
+          "description": "the number of times to loop"
+        },
+        {
+          "tag": "param",
+          "name": "closure",
+          "content": "the closure to call repeatedly",
+          "assertion": "",
+          "description": "the closure to call repeatedly"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "A null closure or zero count returns the NOPClosure.",
+          "assertion": "assert methodResultID == (args[0] <= 0 || args[1] == null);",
+          "name": null,
+          "content": "A null closure or zero count returns the NOPClosure."
+        }
+      ]
+    }
+  },
+  {
+    "method": "whileClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "predicate",
+          "content": "the predicate to use as an end of loop test, not null",
+          "assertion": "",
+          "description": "the predicate to use as an end of loop test, not null"
+        },
+        {
+          "tag": "param",
+          "name": "closure",
+          "content": "the closure to call repeatedly, not null",
+          "assertion": "",
+          "description": "the closure to call repeatedly, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure that will call the closure repeatedly until the predicate returns false.",
+          "assertion": "assert !methodResultID.isNull() && methodResultID instanceof org.apache.commons.collections4.functors.WhileClosure;",
+          "name": null,
+          "content": "the closure that will call the closure repeatedly until the predicate returns false."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either argument is null.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if either argument is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "doWhileClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "closure",
+          "content": "the closure to call repeatedly, not null",
+          "assertion": "",
+          "description": "the closure to call repeatedly, not null"
+        },
+        {
+          "tag": "param",
+          "name": "predicate",
+          "content": "the predicate to use as an end of loop test, not null",
+          "assertion": "",
+          "description": "the predicate to use as an end of loop test, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure that will call the closure once and then repeatedly until the predicate returns false.",
+          "assertion": "assert !methodResultID.equals(null) && methodResultID instanceof org.apache.commons.collections4.functors.DoWhileClosure;",
+          "name": null,
+          "content": "the closure that will call the closure once and then repeatedly until the predicate returns false."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either argument is null.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if either argument is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "invokerClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "methodName"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "methodName",
+          "content": "the name of the method",
+          "assertion": "",
+          "description": "the name of the method"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the name of the method",
+          "assertion": "assert methodResultID == !methodName.equals(null);",
+          "name": null,
+          "content": "the name of the method"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the method name is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the method name is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "invokerClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "methodName"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "paramTypes"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "args"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "methodName",
+          "content": "the name of the method",
+          "assertion": "",
+          "description": "the name of the method"
+        },
+        {
+          "tag": "param",
+          "name": "paramTypes",
+          "content": "the parameter types",
+          "assertion": "",
+          "description": "the parameter types"
+        },
+        {
+          "tag": "param",
+          "name": "args",
+          "content": "the arguments",
+          "assertion": "",
+          "description": "the arguments"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the Closure that will invoke a specific method on the closure's input object by reflection.",
+          "assertion": "assert !methodResultID; // No condition expressed using args[i] alone",
+          "name": null,
+          "content": "the Closure that will invoke a specific method on the closure's input object by reflection."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the method name is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the method name is null"
+        },
+        {
+          "description": "if the paramTypes and args don't match",
+          "assertion": "assert !Arrays.deepEquals(args[1], args[2]);",
+          "name": "IllegalArgumentException",
+          "content": "if the paramTypes and args don't match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "chainedClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closures"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of closures to chain, not null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "closures",
+          "content": "an array of closures to chain, not null"
+        },
+        {
+          "description": "the input is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "closures",
+          "content": "not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure that calls each closure in turn, passing the result into the next closure.",
+          "assertion": "assert methodResultID == !ArrayUtils.isEmpty(args[0]);",
+          "name": null,
+          "content": "the closure that calls each closure in turn, passing the result into the next closure."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the closures array is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the closures array is null"
+        },
+        {
+          "description": "if any closure in the array is null",
+          "assertion": "assert !args[0].equals(null);",
+          "name": "NullPointerException",
+          "content": "if any closure in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "chainedClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closures"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a collection of closures to chain, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "closures",
+          "content": "a collection of closures to chain"
+        },
+        {
+          "description": "the collection is not empty",
+          "assertion": "assert !((Collection<?>) args[0]).isEmpty();",
+          "name": "closures",
+          "content": "not empty"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the new Closure that calls each closure in turn, passing the result into the next closure.",
+          "assertion": "assert methodResultID == !args[0].isEmpty();",
+          "name": null,
+          "content": "the new Closure that calls each closure in turn, passing the result into the next closure."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the closures collection is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the closures collection is null"
+        },
+        {
+          "description": "if any closure in the collection is null",
+          "assertion": "assert !args[0].isEmpty() || !args[0].stream().anyMatch(c -> c == null);",
+          "name": "NullPointerException",
+          "content": "if any closure in the collection is null"
+        },
+        {
+          "description": "if the closures collection is empty",
+          "assertion": "assert !args[0].isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if the closures collection is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "ifClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "trueClosure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "predicate",
+          "content": "the validating predicate",
+          "assertion": "",
+          "description": "the validating predicate"
+        },
+        {
+          "tag": "param",
+          "name": "trueClosure",
+          "content": "the closure called if the predicate is true",
+          "assertion": "",
+          "description": "the closure called if the predicate is true"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure called if the predicate is true",
+          "assertion": "assert methodResultID == !args[0];",
+          "name": null,
+          "content": "the closure called if the predicate is true"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicate or closure is null.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if the predicate or closure is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "ifClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "trueClosure"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "falseClosure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "predicate",
+          "content": "the predicate to switch on",
+          "assertion": "",
+          "description": "the predicate to switch on"
+        },
+        {
+          "tag": "param",
+          "name": "trueClosure",
+          "content": "the closure called if the predicate is true",
+          "assertion": "",
+          "description": "the closure called if the predicate is true"
+        },
+        {
+          "tag": "param",
+          "name": "falseClosure",
+          "content": "the closure called if the predicate is false",
+          "assertion": "",
+          "description": "the closure called if the predicate is false"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure called if the predicate is false.",
+          "assertion": "assert methodResultID == !args[0];",
+          "name": null,
+          "content": "the closure called if the predicate is false."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicate or either closure is null.",
+          "assertion": "assert args[0]==null || args[1]==null || args[2]==null;",
+          "name": "NullPointerException",
+          "content": "if the predicate or either closure is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "switchClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "predicates"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "closures"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<E>",
+          "content": "the type that the closure acts on",
+          "assertion": "",
+          "description": "the type that the closure acts on"
+        },
+        {
+          "tag": "param",
+          "name": "predicates",
+          "content": "an array of predicates to check, not null",
+          "assertion": "",
+          "description": "an array of predicates to check, not null"
+        },
+        {
+          "tag": "param",
+          "name": "closures",
+          "content": "an array of closures to call, not null",
+          "assertion": "",
+          "description": "an array of closures to call, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure at array location 0 is called if the predicate at array location 0 returned true. Each predicate is evaluated until one returns true.",
+          "assertion": "assert !methodResultID || receiverObjectID.asClosure(args[0][0]).evaluate();",
+          "name": null,
+          "content": "the closure at array location 0 is called if the predicate at array location 0 returned true. Each predicate is evaluated until one returns true."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the either array is null",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if the either array is null"
+        },
+        {
+          "description": "if any element in the arrays is null",
+          "assertion": "assert !args[0].contains(null) && !args[1].contains(null);",
+          "name": "NullPointerException",
+          "content": "if any element in the arrays is null"
+        },
+        {
+          "description": "if the arrays have different sizes",
+          "assertion": "assert args[0].length == args[1].length;",
+          "name": "IllegalArgumentException",
+          "content": "if the arrays have different sizes"
+        }
+      ]
+    }
+  },
+  {
+    "method": "switchClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "predicates"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "closures"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "defaultClosure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of predicates to check, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "not null"
+        },
+        {
+          "description": "an array of closures to call, not null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "closures",
+          "content": "not null"
+        },
+        {
+          "description": "the default closure to call if no predicate matches, not null",
+          "assertion": "assert (args[2] == null) == false;",
+          "name": "defaultClosure",
+          "content": "not null"
+        },
+        {
+          "description": "predicates and closures arrays are of the same size",
+          "assertion": "assert args[0].length == args[1].length;",
+          "name": "predicatesAndClosures",
+          "content": ""
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure at array location 0 is called if the predicate at array location 0 returned true. Each predicate is evaluated until one returns true. If no predicates evaluate to true, the default closure is called.",
+          "assertion": "assert methodResultID == !Arrays.stream(args[0]).anyMatch(p -> receiverObjectID.asClosure(p)) && (methodResultID || receiverObjectID.defaultClosure());",
+          "name": null,
+          "content": "the closure at array location 0 is called if the predicate at array location 0 returned true. Each predicate is evaluated until one returns true. If no predicates evaluate to true, the default closure is called."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the arrays are different sizes",
+          "assertion": "assert predicates.length == closures.length;",
+          "name": "IllegalArgumentException",
+          "content": "if the arrays are different sizes"
+        },
+        {
+          "description": "if any element in the arrays is null",
+          "assertion": "assert !receiverObjectID.isAnyNull(predicates) && !receiverObjectID.isAnyNull(closures) && defaultClosure == null;",
+          "name": "NullPointerException",
+          "content": "if any element in the arrays is null"
+        },
+        {
+          "description": "if either array is null",
+          "assertion": "assert predicates != null && closures != null;",
+          "name": "NullPointerException",
+          "content": "if either array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "switchClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Map",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicatesAndClosures"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a map of predicates to closures, not null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "predicatesAndClosures",
+          "content": "a map of predicates to closures"
+        },
+        {
+          "description": "the map is not empty",
+          "assertion": "assert !receiverObjectID.isEmpty();",
+          "name": "predicatesAndClosures",
+          "content": "a map of predicates to closures"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the switch closure",
+          "assertion": "assert methodResultID == !receiverObjectID.isEmpty();",
+          "name": null,
+          "content": "the switch closure"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the map is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the map is null."
+        },
+        {
+          "description": "if any closure in the map is null.",
+          "assertion": "assert !receiverObjectID.containsKey(null) || receiverObjectID.values().stream().anyMatch(c -> c==null);",
+          "name": "NullPointerException",
+          "content": "if any closure in the map is null."
+        },
+        {
+          "description": "if the map is empty.",
+          "assertion": "assert !receiverObjectID.isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if the map is empty"
+        },
+        {
+          "description": "if the map elements are of the wrong type.",
+          "assertion": "assert receiverObjectID.values().stream().allMatch(c -> c instanceof org.apache.commons.collections4.functors.Closure);",
+          "name": "ClassCastException",
+          "content": "if the map elements are of the wrong type"
+        }
+      ]
+    }
+  },
+  {
+    "method": "switchMapClosure",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Map",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "objectsAndClosures"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a map of objects to closures, not null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "objectsAndClosures",
+          "content": "a map of objects to closures"
+        },
+        {
+          "description": "the closure returned by the method, not null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "return value",
+          "content": "the closure"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure",
+          "assertion": "assert methodResultID == !Objects.isNull(receiverObjectID.switchMapClosure(args[0]));",
+          "name": null,
+          "content": "the closure"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the map is null",
+          "assertion": "assert objectsAndClosures == null;",
+          "name": "NullPointerException",
+          "content": "if the map is null"
+        },
+        {
+          "description": "if any closure in the map is null",
+          "assertion": "assert !receiverObjectID.containsKey(null);",
+          "name": "NullPointerException",
+          "content": "if any closure in the map is null"
+        },
+        {
+          "description": "if the map is empty",
+          "assertion": "assert !receiverObjectID.isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if the map is empty"
+        }
+      ]
+    }
+  }
+]

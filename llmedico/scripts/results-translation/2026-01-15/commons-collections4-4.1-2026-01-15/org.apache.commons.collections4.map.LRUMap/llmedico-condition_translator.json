@@ -1,0 +1,1125 @@
+[
+  {
+    "name": "LRUMap",
+    "package": "org.apache.commons.collections4.map",
+    "qualified_name": "org.apache.commons.collections4.map.LRUMap",
+    "javadoc": "/**\n * A <code>Map</code> implementation with a fixed maximum size which removes\n * the least recently used entry if an entry is added when full.\n * <p>\n * The least recently used algorithm works on the get and put operations only.\n * Iteration of any kind, including setting the value by iteration, does not\n * change the order. Queries such as containsKey and containsValue or access\n * via views also do not change the order.\n * <p>\n * A somewhat subtle ramification of the least recently used\n * algorithm is that calls to {@link #get(Object)} stand a very good chance\n * of modifying the map's iteration order and thus invalidating any\n * iterators currently in use.  It is therefore suggested that iterations\n * over an {@link LRUMap} instance access entry values only through a\n * {@link org.apache.commons.collections4.MapIterator MapIterator} or {@link #entrySet()} iterator.\n * <p>\n * The map implements <code>OrderedMap</code> and entries may be queried using\n * the bidirectional <code>OrderedMapIterator</code>. The order returned is\n * least recently used to most recently used. Iterators from map views can\n * also be cast to <code>OrderedIterator</code> if required.\n * <p>\n * All the available iterators can be reset back to the start by casting to\n * <code>ResettableIterator</code> and calling <code>reset()</code>.\n * <p>\n * <strong>Note that LRUMap is not synchronized and is not thread-safe.</strong>\n * If you wish to use this map from multiple threads concurrently, you must use\n * appropriate synchronization. The simplest approach is to wrap this map\n * using {@link java.util.Collections#synchronizedMap(Map)}. This class may throw\n * <code>NullPointerException</code>'s when accessed by concurrent threads.\n *\n * @since 3.0 (previously in main package v1.0)\n * @version $Id: LRUMap.java 1683016 2015-06-01 22:40:56Z tn $\n */\n",
+    "code": "/**\n * A <code>Map</code> implementation with a fixed maximum size which removes\n * the least recently used entry if an entry is added when full.\n * <p>\n * The least recently used algorithm works on the get and put operations only.\n * Iteration of any kind, including setting the value by iteration, does not\n * change the order. Queries such as containsKey and containsValue or access\n * via views also do not change the order.\n * <p>\n * A somewhat subtle ramification of the least recently used\n * algorithm is that calls to {@link #get(Object)} stand a very good chance\n * of modifying the map's iteration order and thus invalidating any\n * iterators currently in use.  It is therefore suggested that iterations\n * over an {@link LRUMap} instance access entry values only through a\n * {@link org.apache.commons.collections4.MapIterator MapIterator} or {@link #entrySet()} iterator.\n * <p>\n * The map implements <code>OrderedMap</code> and entries may be queried using\n * the bidirectional <code>OrderedMapIterator</code>. The order returned is\n * least recently used to most recently used. Iterators from map views can\n * also be cast to <code>OrderedIterator</code> if required.\n * <p>\n * All the available iterators can be reset back to the start by casting to\n * <code>ResettableIterator</code> and calling <code>reset()</code>.\n * <p>\n * <strong>Note that LRUMap is not synchronized and is not thread-safe.</strong>\n * If you wish to use this map from multiple threads concurrently, you must use\n * appropriate synchronization. The simplest approach is to wrap this map\n * using {@link java.util.Collections#synchronizedMap(Map)}. This class may throw\n * <code>NullPointerException</code>'s when accessed by concurrent threads.\n *\n * @since 3.0 (previously in main package v1.0)\n * @version $Id: LRUMap.java 1683016 2015-06-01 22:40:56Z tn $\n */\npublic class LRUMap<K, V> extends AbstractLinkedMap<K, V> implements BoundedMap<K, V>, Serializable, Cloneable {\n\n    /**\n     * Serialisation version\n     */\n    private static final long serialVersionUID = -612114643488955218L;\n\n    /**\n     * Default maximum size\n     */\n    protected static final int DEFAULT_MAX_SIZE = 100;\n\n    /**\n     * Maximum size\n     */\n    private transient int maxSize;\n\n    /**\n     * Scan behaviour\n     */\n    private boolean scanUntilRemovable;\n\n    /**\n     * Constructs a new empty map with a maximum size of 100.\n     */\n    public LRUMap() {\n        this(DEFAULT_MAX_SIZE, DEFAULT_LOAD_FACTOR, false);\n    }\n\n    /**\n     * Constructs a new, empty map with the specified maximum size.\n     *\n     * @param maxSize  the maximum size of the map\n     * @throws IllegalArgumentException if the maximum size is less than one\n     */\n    public LRUMap(final int maxSize) {\n        this(maxSize, DEFAULT_LOAD_FACTOR);\n    }\n\n    /**\n     * Constructs a new, empty map with the specified maximum size.\n     *\n     * @param maxSize  the maximum size of the map\n     * @param initialSize  the initial size of the map\n     * @throws IllegalArgumentException if the maximum size is less than one\n     * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n     * @since 4.1\n     */\n    public LRUMap(final int maxSize, final int initialSize) {\n        this(maxSize, initialSize, DEFAULT_LOAD_FACTOR);\n    }\n\n    /**\n     * Constructs a new, empty map with the specified maximum size.\n     *\n     * @param maxSize  the maximum size of the map\n     * @param scanUntilRemovable  scan until a removeable entry is found, default false\n     * @throws IllegalArgumentException if the maximum size is less than one\n     * @since 3.1\n     */\n    public LRUMap(final int maxSize, final boolean scanUntilRemovable) {\n        this(maxSize, DEFAULT_LOAD_FACTOR, scanUntilRemovable);\n    }\n\n    /**\n     * Constructs a new, empty map with the specified max capacity and\n     * load factor.\n     *\n     * @param maxSize  the maximum size of the map\n     * @param loadFactor  the load factor\n     * @throws IllegalArgumentException if the maximum size is less than one\n     * @throws IllegalArgumentException if the load factor is less than zero\n     */\n    public LRUMap(final int maxSize, final float loadFactor) {\n        this(maxSize, loadFactor, false);\n    }\n\n    /**\n     * Constructs a new, empty map with the specified max / initial capacity and\n     * load factor.\n     *\n     * @param maxSize  the maximum size of the map\n     * @param initialSize  the initial size of the map\n     * @param loadFactor  the load factor\n     * @throws IllegalArgumentException if the maximum size is less than one\n     * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n     * @throws IllegalArgumentException if the load factor is less than zero\n     * @since 4.1\n     */\n    public LRUMap(final int maxSize, final int initialSize, final float loadFactor) {\n        this(maxSize, initialSize, loadFactor, false);\n    }\n\n    /**\n     * Constructs a new, empty map with the specified max capacity and load factor.\n     *\n     * @param maxSize  the maximum size of the map\n     * @param loadFactor  the load factor\n     * @param scanUntilRemovable  scan until a removeable entry is found, default false\n     * @throws IllegalArgumentException if the maximum size is less than one\n     * @throws IllegalArgumentException if the load factor is less than zero\n     * @since 3.1\n     */\n    public LRUMap(final int maxSize, final float loadFactor, final boolean scanUntilRemovable) {\n        this(maxSize, maxSize, loadFactor, scanUntilRemovable);\n    }\n\n    /**\n     * Constructs a new, empty map with the specified max / initial capacity and load factor.\n     *\n     * @param maxSize  the maximum size of the map\n     * @param initialSize  the initial size of the map\n     * @param loadFactor  the load factor\n     * @param scanUntilRemovable  scan until a removeable entry is found, default false\n     * @throws IllegalArgumentException if the maximum size is less than one\n     * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n     * @throws IllegalArgumentException if the load factor is less than zero\n     * @since 4.1\n     */\n    public LRUMap(final int maxSize, final int initialSize, final float loadFactor, final boolean scanUntilRemovable) {\n        super(initialSize, loadFactor);\n        if (maxSize < 1) {\n            throw new IllegalArgumentException(\"LRUMap max size must be greater than 0\");\n        }\n        if (initialSize > maxSize) {\n            throw new IllegalArgumentException(\"LRUMap initial size must not be greather than max size\");\n        }\n        this.maxSize = maxSize;\n        this.scanUntilRemovable = scanUntilRemovable;\n    }\n\n    /**\n     * Constructor copying elements from another map.\n     * <p>\n     * The maximum size is set from the map's size.\n     *\n     * @param map  the map to copy\n     * @throws NullPointerException if the map is null\n     * @throws IllegalArgumentException if the map is empty\n     */\n    public LRUMap(final Map<? extends K, ? extends V> map) {\n        this(map, false);\n    }\n\n    /**\n     * Constructor copying elements from another map.\n     * <p/>\n     * The maximum size is set from the map's size.\n     *\n     * @param map  the map to copy\n     * @param scanUntilRemovable  scan until a removeable entry is found, default false\n     * @throws NullPointerException if the map is null\n     * @throws IllegalArgumentException if the map is empty\n     * @since 3.1\n     */\n    public LRUMap(final Map<? extends K, ? extends V> map, final boolean scanUntilRemovable) {\n        this(map.size(), DEFAULT_LOAD_FACTOR, scanUntilRemovable);\n        putAll(map);\n    }\n\n    //-----------------------------------------------------------------------\n    /**\n     * Gets the value mapped to the key specified.\n     * <p>\n     * This operation changes the position of the key in the map to the\n     * most recently used position (last).\n     *\n     * @param key  the key\n     * @return the mapped value, null if no match\n     */\n    @Override\n    public V get(final Object key) {\n        return get(key, true);\n    }\n\n    /**\n     * Gets the value mapped to the key specified.\n     * <p>\n     * If {@code updateToMRU} is {@code true}, the position of the key in the map\n     * is changed to the most recently used position (last), otherwise the iteration\n     * order is not changed by this operation.\n     *\n     * @param key  the key\n     * @param updateToMRU  whether the key shall be updated to the\n     *   most recently used position\n     * @return the mapped value, null if no match\n     * @since 4.1\n     */\n    public V get(final Object key, final boolean updateToMRU) {\n        final LinkEntry<K, V> entry = getEntry(key);\n        if (entry == null) {\n            return null;\n        }\n        if (updateToMRU) {\n            moveToMRU(entry);\n        }\n        return entry.getValue();\n    }\n\n    //-----------------------------------------------------------------------\n    /**\n     * Moves an entry to the MRU position at the end of the list.\n     * <p>\n     * This implementation moves the updated entry to the end of the list.\n     *\n     * @param entry  the entry to update\n     */\n    protected void moveToMRU(final LinkEntry<K, V> entry) {\n        if (entry.after != header) {\n            modCount++;\n            // remove\n            if (entry.before == null) {\n                throw new IllegalStateException(\"Entry.before is null.\" + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n            }\n            entry.before.after = entry.after;\n            entry.after.before = entry.before;\n            // add first\n            entry.after = header;\n            entry.before = header.before;\n            header.before.after = entry;\n            header.before = entry;\n        } else if (entry == header) {\n            throw new IllegalStateException(\"Can't move header to MRU\" + \" (please report this to dev@commons.apache.org)\");\n        }\n    }\n\n    /**\n     * Updates an existing key-value mapping.\n     * <p>\n     * This implementation moves the updated entry to the end of the list\n     * using {@link #moveToMRU(AbstractLinkedMap.LinkEntry)}.\n     *\n     * @param entry  the entry to update\n     * @param newValue  the new value to store\n     */\n    @Override\n    protected void updateEntry(final HashEntry<K, V> entry, final V newValue) {\n        // handles modCount\n        moveToMRU((LinkEntry<K, V>) entry);\n        entry.setValue(newValue);\n    }\n\n    /**\n     * Adds a new key-value mapping into this map.\n     * <p>\n     * This implementation checks the LRU size and determines whether to\n     * discard an entry or not using {@link #removeLRU(AbstractLinkedMap.LinkEntry)}.\n     * <p>\n     * From Commons Collections 3.1 this method uses {@link #isFull()} rather\n     * than accessing <code>size</code> and <code>maxSize</code> directly.\n     * It also handles the scanUntilRemovable functionality.\n     *\n     * @param hashIndex  the index into the data array to store at\n     * @param hashCode  the hash code of the key to add\n     * @param key  the key to add\n     * @param value  the value to add\n     */\n    @Override\n    protected void addMapping(final int hashIndex, final int hashCode, final K key, final V value) {\n        if (isFull()) {\n            LinkEntry<K, V> reuse = header.after;\n            boolean removeLRUEntry = false;\n            if (scanUntilRemovable) {\n                while (reuse != header && reuse != null) {\n                    if (removeLRU(reuse)) {\n                        removeLRUEntry = true;\n                        break;\n                    }\n                    reuse = reuse.after;\n                }\n                if (reuse == null) {\n                    throw new IllegalStateException(\"Entry.after=null, header.after\" + header.after + \" header.before\" + header.before + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n                }\n            } else {\n                removeLRUEntry = removeLRU(reuse);\n            }\n            if (removeLRUEntry) {\n                if (reuse == null) {\n                    throw new IllegalStateException(\"reuse=null, header.after=\" + header.after + \" header.before\" + header.before + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n                }\n                reuseMapping(reuse, hashIndex, hashCode, key, value);\n            } else {\n                super.addMapping(hashIndex, hashCode, key, value);\n            }\n        } else {\n            super.addMapping(hashIndex, hashCode, key, value);\n        }\n    }\n\n    /**\n     * Reuses an entry by removing it and moving it to a new place in the map.\n     * <p>\n     * This method uses {@link #removeEntry}, {@link #reuseEntry} and {@link #addEntry}.\n     *\n     * @param entry  the entry to reuse\n     * @param hashIndex  the index into the data array to store at\n     * @param hashCode  the hash code of the key to add\n     * @param key  the key to add\n     * @param value  the value to add\n     */\n    protected void reuseMapping(final LinkEntry<K, V> entry, final int hashIndex, final int hashCode, final K key, final V value) {\n        // find the entry before the entry specified in the hash table\n        // remember that the parameters (except the first) refer to the new entry,\n        // not the old one\n        try {\n            final int removeIndex = hashIndex(entry.hashCode, data.length);\n            // may protect against some sync issues\n            final HashEntry<K, V>[] tmp = data;\n            HashEntry<K, V> loop = tmp[removeIndex];\n            HashEntry<K, V> previous = null;\n            while (loop != entry && loop != null) {\n                previous = loop;\n                loop = loop.next;\n            }\n            if (loop == null) {\n                throw new IllegalStateException(\"Entry.next=null, data[removeIndex]=\" + data[removeIndex] + \" previous=\" + previous + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n            }\n            // reuse the entry\n            modCount++;\n            removeEntry(entry, removeIndex, previous);\n            reuseEntry(entry, hashIndex, hashCode, key, value);\n            addEntry(entry, hashIndex);\n        } catch (final NullPointerException ex) {\n            throw new IllegalStateException(\"NPE, entry=\" + entry + \" entryIsHeader=\" + (entry == header) + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n        }\n    }\n\n    /**\n     * Subclass method to control removal of the least recently used entry from the map.\n     * <p>\n     * This method exists for subclasses to override. A subclass may wish to\n     * provide cleanup of resources when an entry is removed. For example:\n     * <pre>\n     * protected boolean removeLRU(LinkEntry entry) {\n     *   releaseResources(entry.getValue());  // release resources held by entry\n     *   return true;  // actually delete entry\n     * }\n     * </pre>\n     * <p>\n     * Alternatively, a subclass may choose to not remove the entry or selectively\n     * keep certain LRU entries. For example:\n     * <pre>\n     * protected boolean removeLRU(LinkEntry entry) {\n     *   if (entry.getKey().toString().startsWith(\"System.\")) {\n     *     return false;  // entry not removed from LRUMap\n     *   } else {\n     *     return true;  // actually delete entry\n     *   }\n     * }\n     * </pre>\n     * The effect of returning false is dependent on the scanUntilRemovable flag.\n     * If the flag is true, the next LRU entry will be passed to this method and so on\n     * until one returns false and is removed, or every entry in the map has been passed.\n     * If the scanUntilRemovable flag is false, the map will exceed the maximum size.\n     * <p>\n     * NOTE: Commons Collections 3.0 passed the wrong entry to this method.\n     * This is fixed in version 3.1 onwards.\n     *\n     * @param entry  the entry to be removed\n     * @return {@code true}\n     */\n    protected boolean removeLRU(final LinkEntry<K, V> entry) {\n        return true;\n    }\n\n    //-----------------------------------------------------------------------\n    /**\n     * Returns true if this map is full and no new mappings can be added.\n     *\n     * @return <code>true</code> if the map is full\n     */\n    public boolean isFull() {\n        return size >= maxSize;\n    }\n\n    /**\n     * Gets the maximum size of the map (the bound).\n     *\n     * @return the maximum number of elements the map can hold\n     */\n    public int maxSize() {\n        return maxSize;\n    }\n\n    /**\n     * Whether this LRUMap will scan until a removable entry is found when the\n     * map is full.\n     *\n     * @return true if this map scans\n     * @since 3.1\n     */\n    public boolean isScanUntilRemovable() {\n        return scanUntilRemovable;\n    }\n\n    //-----------------------------------------------------------------------\n    /**\n     * Clones the map without cloning the keys or values.\n     *\n     * @return a shallow clone\n     */\n    @Override\n    public LRUMap<K, V> clone() {\n        return (LRUMap<K, V>) super.clone();\n    }\n\n    /**\n     * Write the map out using a custom routine.\n     */\n    private void writeObject(final ObjectOutputStream out) throws IOException {\n        out.defaultWriteObject();\n        doWriteObject(out);\n    }\n\n    /**\n     * Read the map in using a custom routine.\n     */\n    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {\n        in.defaultReadObject();\n        doReadObject(in);\n    }\n\n    /**\n     * Writes the data necessary for <code>put()</code> to work in deserialization.\n     *\n     * @param out  the output stream\n     * @throws IOException if an error occurs while writing to the stream\n     */\n    @Override\n    protected void doWriteObject(final ObjectOutputStream out) throws IOException {\n        out.writeInt(maxSize);\n        super.doWriteObject(out);\n    }\n\n    /**\n     * Reads the data necessary for <code>put()</code> to work in the superclass.\n     *\n     * @param in  the input stream\n     * @throws IOException if an error occurs while reading from the stream\n     * @throws ClassNotFoundException if an object read from the stream can not be loaded\n     */\n    @Override\n    protected void doReadObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {\n        maxSize = in.readInt();\n        super.doReadObject(in);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [],
+        "javadoc": "/**\n * Constructs a new empty map with a maximum size of 100.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructs a new empty map with a maximum size of 100.\n */\npublic LRUMap() {\n    this(DEFAULT_MAX_SIZE, DEFAULT_LOAD_FACTOR, false);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty map with the specified maximum size.\n *\n * @param maxSize  the maximum size of the map\n * @throws IllegalArgumentException if the maximum size is less than one\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum size of the map",
+            "assertion": "assert (args[0] < 1) == false;",
+            "description": "the maximum size of the map"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the maximum size is less than one",
+            "assertion": "assert args[0] < 1;",
+            "description": "if the maximum size is less than one"
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty map with the specified maximum size.\n *\n * @param maxSize  the maximum size of the map\n * @throws IllegalArgumentException if the maximum size is less than one\n */\npublic LRUMap(final int maxSize) {\n    this(maxSize, DEFAULT_LOAD_FACTOR);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialSize"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty map with the specified maximum size.\n *\n * @param maxSize  the maximum size of the map\n * @param initialSize  the initial size of the map\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n * @since 4.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum size of the map",
+            "assertion": "assert (args[0] < 1) == false;",
+            "description": "the maximum size of the map"
+          },
+          {
+            "tag": "param",
+            "name": "initialSize",
+            "content": "the initial size of the map",
+            "assertion": "assert (args[1] >= 0) && (args[1] <= args[0]);",
+            "description": "the initial size of the map, not negative and not larger than the maximum size"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the maximum size is less than one",
+            "assertion": "assert args[0] < 1;",
+            "description": "if the maximum size is less than one"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the initial size is negative or larger than the maximum size",
+            "assertion": "assert args[1] < 0 || args[1] > args[0];",
+            "description": "if the initial size is negative or larger than the maximum size"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "4.1"
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty map with the specified maximum size.\n *\n * @param maxSize  the maximum size of the map\n * @param initialSize  the initial size of the map\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n * @since 4.1\n */\npublic LRUMap(final int maxSize, final int initialSize) {\n    this(maxSize, initialSize, DEFAULT_LOAD_FACTOR);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "scanUntilRemovable"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty map with the specified maximum size.\n *\n * @param maxSize  the maximum size of the map\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws IllegalArgumentException if the maximum size is less than one\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum size of the map",
+            "assertion": "assert (args[0] < 1) == false;",
+            "description": "the maximum size of the map"
+          },
+          {
+            "tag": "param",
+            "name": "scanUntilRemovable",
+            "content": "scan until a removeable entry is found, default false",
+            "assertion": "assert (args[1]) == false;",
+            "description": "scan until a removable entry is found, default false"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the maximum size is less than one",
+            "assertion": "assert args[0] < 1;",
+            "description": "if the maximum size is less than one"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.1"
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty map with the specified maximum size.\n *\n * @param maxSize  the maximum size of the map\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws IllegalArgumentException if the maximum size is less than one\n * @since 3.1\n */\npublic LRUMap(final int maxSize, final boolean scanUntilRemovable) {\n    this(maxSize, DEFAULT_LOAD_FACTOR, scanUntilRemovable);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "loadFactor"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty map with the specified max capacity and\n * load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param loadFactor  the load factor\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the load factor is less than zero\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum size of the map",
+            "assertion": "assert (args[0] < 1) == false;",
+            "description": "the maximum size of the map"
+          },
+          {
+            "tag": "param",
+            "name": "loadFactor",
+            "content": "the load factor",
+            "assertion": "assert (args[1] >= 0.0f) == false;",
+            "description": "the load factor"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the maximum size is less than one",
+            "assertion": "assert args[0] < 1;",
+            "description": "if the maximum size is less than one"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the load factor is less than zero",
+            "assertion": "assert !args[1].floatValue() >= 0;",
+            "description": "if the load factor is less than zero"
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty map with the specified max capacity and\n * load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param loadFactor  the load factor\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the load factor is less than zero\n */\npublic LRUMap(final int maxSize, final float loadFactor) {\n    this(maxSize, loadFactor, false);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialSize"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "loadFactor"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty map with the specified max / initial capacity and\n * load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param initialSize  the initial size of the map\n * @param loadFactor  the load factor\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n * @throws IllegalArgumentException if the load factor is less than zero\n * @since 4.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum size of the map",
+            "assertion": "assert (args[0] < 1) == false;",
+            "description": "the maximum size of the map"
+          },
+          {
+            "tag": "param",
+            "name": "initialSize",
+            "content": "the initial size of the map",
+            "assertion": "assert (args[1] >= args[0]) || (args[1] < 0) == false;",
+            "description": "the initial size is negative or larger than the maximum size"
+          },
+          {
+            "tag": "param",
+            "name": "loadFactor",
+            "content": "the load factor",
+            "assertion": "assert (args[2] >= 0) == true;",
+            "description": "the load factor is less than zero"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the maximum size is less than one",
+            "assertion": "assert args[0] < 1;",
+            "description": "if the maximum size is less than one"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the initial size is negative or larger than the maximum size",
+            "assertion": "assert args[1] < 0 || args[1] > args[0];",
+            "description": "if the initial size is negative or larger than the maximum size"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the load factor is less than zero",
+            "assertion": "assert !args[2].floatValue() < 0;",
+            "description": "if the load factor is less than zero"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "4.1"
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty map with the specified max / initial capacity and\n * load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param initialSize  the initial size of the map\n * @param loadFactor  the load factor\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n * @throws IllegalArgumentException if the load factor is less than zero\n * @since 4.1\n */\npublic LRUMap(final int maxSize, final int initialSize, final float loadFactor) {\n    this(maxSize, initialSize, loadFactor, false);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "loadFactor"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "scanUntilRemovable"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty map with the specified max capacity and load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param loadFactor  the load factor\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the load factor is less than zero\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum size of the map",
+            "assertion": "assert (args[0] < 1) == false;",
+            "description": "the maximum size of the map"
+          },
+          {
+            "tag": "param",
+            "name": "loadFactor",
+            "content": "the load factor",
+            "assertion": "assert (args[1] >= 0.0f) == false;",
+            "description": "the load factor"
+          },
+          {
+            "tag": "param",
+            "name": "scanUntilRemovable",
+            "content": "scan until a removeable entry is found, default false",
+            "assertion": "assert receiverObjectID.isScanUntilRemovable();",
+            "description": "scan until a removable entry is found, default false"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the maximum size is less than one",
+            "assertion": "assert args[0] < 1;",
+            "description": "if the maximum size is less than one"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the load factor is less than zero",
+            "assertion": "assert !args[1].floatValue() >= 0;",
+            "description": "if the load factor is less than zero"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.1"
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty map with the specified max capacity and load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param loadFactor  the load factor\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the load factor is less than zero\n * @since 3.1\n */\npublic LRUMap(final int maxSize, final float loadFactor, final boolean scanUntilRemovable) {\n    this(maxSize, maxSize, loadFactor, scanUntilRemovable);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialSize"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "loadFactor"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "scanUntilRemovable"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty map with the specified max / initial capacity and load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param initialSize  the initial size of the map\n * @param loadFactor  the load factor\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n * @throws IllegalArgumentException if the load factor is less than zero\n * @since 4.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum size of the map",
+            "assertion": "assert (args[0] < 1) == false;",
+            "description": "the maximum size of the map"
+          },
+          {
+            "tag": "param",
+            "name": "initialSize",
+            "content": "the initial size of the map",
+            "assertion": "assert (args[1] < 0 || args[1] > args[0]) == false;",
+            "description": "the initial size of the map, not negative and not larger than the maximum size"
+          },
+          {
+            "tag": "param",
+            "name": "loadFactor",
+            "content": "the load factor",
+            "assertion": "assert (args[2] < 0) == false;",
+            "description": "the load factor, not less than zero"
+          },
+          {
+            "tag": "param",
+            "name": "scanUntilRemovable",
+            "content": "scan until a removeable entry is found, default false",
+            "assertion": "assert receiverObjectID.isScanUntilRemovable();",
+            "description": "scan until a removable entry is found, default false"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the maximum size is less than one",
+            "assertion": "assert args[0] < 1;",
+            "description": "if the maximum size is less than one"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the initial size is negative or larger than the maximum size",
+            "assertion": "assert args[1] <= 0 || args[1] > args[0];",
+            "description": "if the initial size is negative or larger than the maximum size"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the load factor is less than zero",
+            "assertion": "assert !args[2].floatValue() < 0;",
+            "description": "if the load factor is less than zero"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "4.1"
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty map with the specified max / initial capacity and load factor.\n *\n * @param maxSize  the maximum size of the map\n * @param initialSize  the initial size of the map\n * @param loadFactor  the load factor\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws IllegalArgumentException if the maximum size is less than one\n * @throws IllegalArgumentException if the initial size is negative or larger than the maximum size\n * @throws IllegalArgumentException if the load factor is less than zero\n * @since 4.1\n */\npublic LRUMap(final int maxSize, final int initialSize, final float loadFactor, final boolean scanUntilRemovable) {\n    super(initialSize, loadFactor);\n    if (maxSize < 1) {\n        throw new IllegalArgumentException(\"LRUMap max size must be greater than 0\");\n    }\n    if (initialSize > maxSize) {\n        throw new IllegalArgumentException(\"LRUMap initial size must not be greather than max size\");\n    }\n    this.maxSize = maxSize;\n    this.scanUntilRemovable = scanUntilRemovable;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "map"
+          }
+        ],
+        "javadoc": "/**\n * Constructor copying elements from another map.\n * <p>\n * The maximum size is set from the map's size.\n *\n * @param map  the map to copy\n * @throws NullPointerException if the map is null\n * @throws IllegalArgumentException if the map is empty\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "map",
+            "content": "the map to copy",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the map to copy, not null"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the map is null",
+            "assertion": "assert args[0]==null;",
+            "description": "if the map is null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the map is empty",
+            "assertion": "assert !args[0].isEmpty();",
+            "description": "if the map is empty."
+          }
+        ],
+        "code": "/**\n * Constructor copying elements from another map.\n * <p>\n * The maximum size is set from the map's size.\n *\n * @param map  the map to copy\n * @throws NullPointerException if the map is null\n * @throws IllegalArgumentException if the map is empty\n */\npublic LRUMap(final Map<? extends K, ? extends V> map) {\n    this(map, false);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LRUMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "map"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "scanUntilRemovable"
+          }
+        ],
+        "javadoc": "/**\n * Constructor copying elements from another map.\n * <p/>\n * The maximum size is set from the map's size.\n *\n * @param map  the map to copy\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws NullPointerException if the map is null\n * @throws IllegalArgumentException if the map is empty\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "map",
+            "content": "the map to copy",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the map to copy, not null"
+          },
+          {
+            "tag": "param",
+            "name": "scanUntilRemovable",
+            "content": "scan until a removeable entry is found, default false",
+            "assertion": "assert args[1];",
+            "description": "scan until a removable entry is found, default false"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the map is null",
+            "assertion": "assert args[0]==null;",
+            "description": "if the map is null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the map is empty",
+            "assertion": "assert !receiverObjectID.isFull();",
+            "description": "if the map is empty."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.1"
+          }
+        ],
+        "code": "/**\n * Constructor copying elements from another map.\n * <p/>\n * The maximum size is set from the map's size.\n *\n * @param map  the map to copy\n * @param scanUntilRemovable  scan until a removeable entry is found, default false\n * @throws NullPointerException if the map is null\n * @throws IllegalArgumentException if the map is empty\n * @since 3.1\n */\npublic LRUMap(final Map<? extends K, ? extends V> map, final boolean scanUntilRemovable) {\n    this(map.size(), DEFAULT_LOAD_FACTOR, scanUntilRemovable);\n    putAll(map);\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n * Gets the value mapped to the key specified.\n * <p>\n * This operation changes the position of the key in the map to the\n * most recently used position (last).\n *\n * @param key  the key\n * @return the mapped value, null if no match\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the key"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "mapped value, null if no match",
+            "assertion": "assert methodResultID == receiverObjectID.get(args[0]);",
+            "description": "the mapped value, null if no match"
+          }
+        ],
+        "code": "//-----------------------------------------------------------------------\n/**\n * Gets the value mapped to the key specified.\n * <p>\n * This operation changes the position of the key in the map to the\n * most recently used position (last).\n *\n * @param key  the key\n * @return the mapped value, null if no match\n */\n@Override\npublic V get(final Object key) {\n    return get(key, true);\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "updateToMRU"
+          }
+        ],
+        "javadoc": "/**\n * Gets the value mapped to the key specified.\n * <p>\n * If {@code updateToMRU} is {@code true}, the position of the key in the map\n * is changed to the most recently used position (last), otherwise the iteration\n * order is not changed by this operation.\n *\n * @param key  the key\n * @param updateToMRU  whether the key shall be updated to the\n *   most recently used position\n * @return the mapped value, null if no match\n * @since 4.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the key"
+          },
+          {
+            "tag": "param",
+            "name": "updateToMRU",
+            "content": "whether the key shall be updated to the most recently used position",
+            "assertion": "assert receiverObjectID; // receiver-defining parameter, no assertion needed",
+            "description": "whether the key shall be updated to the most recently used position"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "mapped value, null if no match",
+            "assertion": "",
+            "description": "mapped value, null if no match"
+          },
+          {
+            "tag": "since",
+            "name": "4.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Gets the value mapped to the key specified.\n * <p>\n * If {@code updateToMRU} is {@code true}, the position of the key in the map\n * is changed to the most recently used position (last), otherwise the iteration\n * order is not changed by this operation.\n *\n * @param key  the key\n * @param updateToMRU  whether the key shall be updated to the\n *   most recently used position\n * @return the mapped value, null if no match\n * @since 4.1\n */\npublic V get(final Object key, final boolean updateToMRU) {\n    final LinkEntry<K, V> entry = getEntry(key);\n    if (entry == null) {\n        return null;\n    }\n    if (updateToMRU) {\n        moveToMRU(entry);\n    }\n    return entry.getValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "moveToMRU",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "LinkEntry",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry"
+          }
+        ],
+        "javadoc": "/**\n * Moves an entry to the MRU position at the end of the list.\n * <p>\n * This implementation moves the updated entry to the end of the list.\n *\n * @param entry  the entry to update\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "entry",
+            "content": "the entry to update",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the entry to update"
+          }
+        ],
+        "code": "//-----------------------------------------------------------------------\n/**\n * Moves an entry to the MRU position at the end of the list.\n * <p>\n * This implementation moves the updated entry to the end of the list.\n *\n * @param entry  the entry to update\n */\nprotected void moveToMRU(final LinkEntry<K, V> entry) {\n    if (entry.after != header) {\n        modCount++;\n        // remove\n        if (entry.before == null) {\n            throw new IllegalStateException(\"Entry.before is null.\" + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n        }\n        entry.before.after = entry.after;\n        entry.after.before = entry.before;\n        // add first\n        entry.after = header;\n        entry.before = header.before;\n        header.before.after = entry;\n        header.before = entry;\n    } else if (entry == header) {\n        throw new IllegalStateException(\"Can't move header to MRU\" + \" (please report this to dev@commons.apache.org)\");\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "updateEntry",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "HashEntry",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newValue"
+          }
+        ],
+        "javadoc": "/**\n * Updates an existing key-value mapping.\n * <p>\n * This implementation moves the updated entry to the end of the list\n * using {@link #moveToMRU(AbstractLinkedMap.LinkEntry)}.\n *\n * @param entry  the entry to update\n * @param newValue  the new value to store\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "entry",
+            "content": "the entry to update",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the entry to update"
+          },
+          {
+            "tag": "param",
+            "name": "newValue",
+            "content": "the new value to store",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the new value to store"
+          }
+        ],
+        "code": "/**\n * Updates an existing key-value mapping.\n * <p>\n * This implementation moves the updated entry to the end of the list\n * using {@link #moveToMRU(AbstractLinkedMap.LinkEntry)}.\n *\n * @param entry  the entry to update\n * @param newValue  the new value to store\n */\n@Override\nprotected void updateEntry(final HashEntry<K, V> entry, final V newValue) {\n    // handles modCount\n    moveToMRU((LinkEntry<K, V>) entry);\n    entry.setValue(newValue);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addMapping",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "hashIndex"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "hashCode"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Adds a new key-value mapping into this map.\n * <p>\n * This implementation checks the LRU size and determines whether to\n * discard an entry or not using {@link #removeLRU(AbstractLinkedMap.LinkEntry)}.\n * <p>\n * From Commons Collections 3.1 this method uses {@link #isFull()} rather\n * than accessing <code>size</code> and <code>maxSize</code> directly.\n * It also handles the scanUntilRemovable functionality.\n *\n * @param hashIndex  the index into the data array to store at\n * @param hashCode  the hash code of the key to add\n * @param key  the key to add\n * @param value  the value to add\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "hashIndex",
+            "content": "the index into the data array to store at",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the index into the data array to store at"
+          },
+          {
+            "tag": "param",
+            "name": "hashCode",
+            "content": "the hash code of the key to add",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the hash code of the key to add"
+          },
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key to add",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "the key to add"
+          },
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "the value to add",
+            "assertion": "assert (args[3] == null) == false;",
+            "description": "the value to add"
+          }
+        ],
+        "code": "/**\n * Adds a new key-value mapping into this map.\n * <p>\n * This implementation checks the LRU size and determines whether to\n * discard an entry or not using {@link #removeLRU(AbstractLinkedMap.LinkEntry)}.\n * <p>\n * From Commons Collections 3.1 this method uses {@link #isFull()} rather\n * than accessing <code>size</code> and <code>maxSize</code> directly.\n * It also handles the scanUntilRemovable functionality.\n *\n * @param hashIndex  the index into the data array to store at\n * @param hashCode  the hash code of the key to add\n * @param key  the key to add\n * @param value  the value to add\n */\n@Override\nprotected void addMapping(final int hashIndex, final int hashCode, final K key, final V value) {\n    if (isFull()) {\n        LinkEntry<K, V> reuse = header.after;\n        boolean removeLRUEntry = false;\n        if (scanUntilRemovable) {\n            while (reuse != header && reuse != null) {\n                if (removeLRU(reuse)) {\n                    removeLRUEntry = true;\n                    break;\n                }\n                reuse = reuse.after;\n            }\n            if (reuse == null) {\n                throw new IllegalStateException(\"Entry.after=null, header.after\" + header.after + \" header.before\" + header.before + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n            }\n        } else {\n            removeLRUEntry = removeLRU(reuse);\n        }\n        if (removeLRUEntry) {\n            if (reuse == null) {\n                throw new IllegalStateException(\"reuse=null, header.after=\" + header.after + \" header.before\" + header.before + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n            }\n            reuseMapping(reuse, hashIndex, hashCode, key, value);\n        } else {\n            super.addMapping(hashIndex, hashCode, key, value);\n        }\n    } else {\n        super.addMapping(hashIndex, hashCode, key, value);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "reuseMapping",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "LinkEntry",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "hashIndex"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "hashCode"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Reuses an entry by removing it and moving it to a new place in the map.\n * <p>\n * This method uses {@link #removeEntry}, {@link #reuseEntry} and {@link #addEntry}.\n *\n * @param entry  the entry to reuse\n * @param hashIndex  the index into the data array to store at\n * @param hashCode  the hash code of the key to add\n * @param key  the key to add\n * @param value  the value to add\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "entry",
+            "content": "the entry to reuse",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the entry to reuse"
+          },
+          {
+            "tag": "param",
+            "name": "hashIndex",
+            "content": "the index into the data array to store at",
+            "assertion": "assert (args[1] < 0) == false;",
+            "description": "the index into the data array to store at"
+          },
+          {
+            "tag": "param",
+            "name": "hashCode",
+            "content": "the hash code of the key to add",
+            "assertion": "assert (args[2] < 0) == false;",
+            "description": "the hash code of the key to add"
+          },
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key to add",
+            "assertion": "assert (args[3] == null) == false;",
+            "description": "the key to add"
+          },
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "the value to add",
+            "assertion": "assert (args[4] == null) == false;",
+            "description": "the value to add"
+          }
+        ],
+        "code": "/**\n * Reuses an entry by removing it and moving it to a new place in the map.\n * <p>\n * This method uses {@link #removeEntry}, {@link #reuseEntry} and {@link #addEntry}.\n *\n * @param entry  the entry to reuse\n * @param hashIndex  the index into the data array to store at\n * @param hashCode  the hash code of the key to add\n * @param key  the key to add\n * @param value  the value to add\n */\nprotected void reuseMapping(final LinkEntry<K, V> entry, final int hashIndex, final int hashCode, final K key, final V value) {\n    // find the entry before the entry specified in the hash table\n    // remember that the parameters (except the first) refer to the new entry,\n    // not the old one\n    try {\n        final int removeIndex = hashIndex(entry.hashCode, data.length);\n        // may protect against some sync issues\n        final HashEntry<K, V>[] tmp = data;\n        HashEntry<K, V> loop = tmp[removeIndex];\n        HashEntry<K, V> previous = null;\n        while (loop != entry && loop != null) {\n            previous = loop;\n            loop = loop.next;\n        }\n        if (loop == null) {\n            throw new IllegalStateException(\"Entry.next=null, data[removeIndex]=\" + data[removeIndex] + \" previous=\" + previous + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n        }\n        // reuse the entry\n        modCount++;\n        removeEntry(entry, removeIndex, previous);\n        reuseEntry(entry, hashIndex, hashCode, key, value);\n        addEntry(entry, hashIndex);\n    } catch (final NullPointerException ex) {\n        throw new IllegalStateException(\"NPE, entry=\" + entry + \" entryIsHeader=\" + (entry == header) + \" key=\" + key + \" value=\" + value + \" size=\" + size + \" maxSize=\" + maxSize + \" Please check that your keys are immutable, and that you have used synchronization properly.\" + \" If so, then please report this to dev@commons.apache.org as a bug.\");\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeLRU",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "LinkEntry",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry"
+          }
+        ],
+        "javadoc": "/**\n * Subclass method to control removal of the least recently used entry from the map.\n * <p>\n * This method exists for subclasses to override. A subclass may wish to\n * provide cleanup of resources when an entry is removed. For example:\n * <pre>\n * protected boolean removeLRU(LinkEntry entry) {\n *   releaseResources(entry.getValue());  // release resources held by entry\n *   return true;  // actually delete entry\n * }\n * </pre>\n * <p>\n * Alternatively, a subclass may choose to not remove the entry or selectively\n * keep certain LRU entries. For example:\n * <pre>\n * protected boolean removeLRU(LinkEntry entry) {\n *   if (entry.getKey().toString().startsWith(\"System.\")) {\n *     return false;  // entry not removed from LRUMap\n *   } else {\n *     return true;  // actually delete entry\n *   }\n * }\n * </pre>\n * The effect of returning false is dependent on the scanUntilRemovable flag.\n * If the flag is true, the next LRU entry will be passed to this method and so on\n * until one returns false and is removed, or every entry in the map has been passed.\n * If the scanUntilRemovable flag is false, the map will exceed the maximum size.\n * <p>\n * NOTE: Commons Collections 3.0 passed the wrong entry to this method.\n * This is fixed in version 3.1 onwards.\n *\n * @param entry  the entry to be removed\n * @return {@code true}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "entry",
+            "content": "the entry to be removed",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the entry to be removed"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true}",
+            "assertion": "assert !args[0].getEntry().isPresent();",
+            "description": "true if this graph did not already contain the specified edge."
+          }
+        ],
+        "code": "/**\n * Subclass method to control removal of the least recently used entry from the map.\n * <p>\n * This method exists for subclasses to override. A subclass may wish to\n * provide cleanup of resources when an entry is removed. For example:\n * <pre>\n * protected boolean removeLRU(LinkEntry entry) {\n *   releaseResources(entry.getValue());  // release resources held by entry\n *   return true;  // actually delete entry\n * }\n * </pre>\n * <p>\n * Alternatively, a subclass may choose to not remove the entry or selectively\n * keep certain LRU entries. For example:\n * <pre>\n * protected boolean removeLRU(LinkEntry entry) {\n *   if (entry.getKey().toString().startsWith(\"System.\")) {\n *     return false;  // entry not removed from LRUMap\n *   } else {\n *     return true;  // actually delete entry\n *   }\n * }\n * </pre>\n * The effect of returning false is dependent on the scanUntilRemovable flag.\n * If the flag is true, the next LRU entry will be passed to this method and so on\n * until one returns false and is removed, or every entry in the map has been passed.\n * If the scanUntilRemovable flag is false, the map will exceed the maximum size.\n * <p>\n * NOTE: Commons Collections 3.0 passed the wrong entry to this method.\n * This is fixed in version 3.1 onwards.\n *\n * @param entry  the entry to be removed\n * @return {@code true}\n */\nprotected boolean removeLRU(final LinkEntry<K, V> entry) {\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isFull",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns true if this map is full and no new mappings can be added.\n *\n * @return <code>true</code> if the map is full\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if the map is full",
+            "assertion": "assert methodResultID == receiverObjectID.isFull();",
+            "description": "Returns true if this map is full and no new mappings can be added."
+          }
+        ],
+        "code": "//-----------------------------------------------------------------------\n/**\n * Returns true if this map is full and no new mappings can be added.\n *\n * @return <code>true</code> if the map is full\n */\npublic boolean isFull() {\n    return size >= maxSize;\n}"
+      },
+      {
+        "type": "method",
+        "name": "maxSize",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the maximum size of the map (the bound).\n *\n * @return the maximum number of elements the map can hold\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "maximum number of elements the map can hold",
+            "assertion": "assert methodResultID == 0;",
+            "description": "the maximum number of elements the map can hold"
+          }
+        ],
+        "code": "/**\n * Gets the maximum size of the map (the bound).\n *\n * @return the maximum number of elements the map can hold\n */\npublic int maxSize() {\n    return maxSize;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isScanUntilRemovable",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Whether this LRUMap will scan until a removable entry is found when the\n * map is full.\n *\n * @return true if this map scans\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if this map scans",
+            "assertion": "assert methodResultID;",
+            "description": "Whether this LRUMap will scan until a removable entry is found when the map is full."
+          },
+          {
+            "tag": "since",
+            "name": "3.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Whether this LRUMap will scan until a removable entry is found when the\n * map is full.\n *\n * @return true if this map scans\n * @since 3.1\n */\npublic boolean isScanUntilRemovable() {\n    return scanUntilRemovable;\n}"
+      },
+      {
+        "type": "method",
+        "name": "clone",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "LRUMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Clones the map without cloning the keys or values.\n *\n * @return a shallow clone\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "shallow clone",
+            "assertion": "assert methodResultID instanceof LRUMap;",
+            "description": "a shallow clone"
+          }
+        ],
+        "code": "//-----------------------------------------------------------------------\n/**\n * Clones the map without cloning the keys or values.\n *\n * @return a shallow clone\n */\n@Override\npublic LRUMap<K, V> clone() {\n    return (LRUMap<K, V>) super.clone();\n}"
+      },
+      {
+        "type": "method",
+        "name": "doWriteObject",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ObjectOutputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "out"
+          }
+        ],
+        "javadoc": "/**\n * Writes the data necessary for <code>put()</code> to work in deserialization.\n *\n * @param out  the output stream\n * @throws IOException if an error occurs while writing to the stream\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "out",
+            "content": "the output stream",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the output stream"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if an error occurs while writing to the stream",
+            "assertion": "assert args[0].IOException;",
+            "description": "if an error occurs while writing to the stream."
+          }
+        ],
+        "code": "/**\n * Writes the data necessary for <code>put()</code> to work in deserialization.\n *\n * @param out  the output stream\n * @throws IOException if an error occurs while writing to the stream\n */\n@Override\nprotected void doWriteObject(final ObjectOutputStream out) throws IOException {\n    out.writeInt(maxSize);\n    super.doWriteObject(out);\n}"
+      },
+      {
+        "type": "method",
+        "name": "doReadObject",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ObjectInputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "in"
+          }
+        ],
+        "javadoc": "/**\n * Reads the data necessary for <code>put()</code> to work in the superclass.\n *\n * @param in  the input stream\n * @throws IOException if an error occurs while reading from the stream\n * @throws ClassNotFoundException if an object read from the stream can not be loaded\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "in",
+            "content": "the input stream",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the input stream"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if an error occurs while reading from the stream",
+            "assertion": "assert in==null || !receiverObjectID.isReadingSuccessful();",
+            "description": "if an error occurs while reading from the stream"
+          },
+          {
+            "tag": "throws",
+            "name": "ClassNotFoundException",
+            "content": "if an object read from the stream can not be loaded"
+          }
+        ],
+        "code": "/**\n * Reads the data necessary for <code>put()</code> to work in the superclass.\n *\n * @param in  the input stream\n * @throws IOException if an error occurs while reading from the stream\n * @throws ClassNotFoundException if an object read from the stream can not be loaded\n */\n@Override\nprotected void doReadObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {\n    maxSize = in.readInt();\n    super.doReadObject(in);\n}"
+      }
+    ]
+  }
+]
