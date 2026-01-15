@@ -1,0 +1,363 @@
+[
+  {
+    "method": "nullToEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the string must not be null",
+          "assertion": "assert receiverObjectID.string != null;",
+          "name": "string",
+          "content": "&lt;string&gt;.must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "string if it is non-null; empty string otherwise.",
+          "assertion": "assert methodResultID.equals((!receiverObjectID.IsNullOrEmpty(args[0])) ? receiverObjectID.getEmptyString() : args[0]);",
+          "name": null,
+          "content": "string if it is non-null; empty string otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "emptyToNull",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be nonempty",
+          "assertion": "assert receiverObjectID.string != null && !receiverObjectID.string.isEmpty();",
+          "name": "string",
+          "content": "&lt;?xml version=&quot;1.0&quot;?&gt;&lt;void&gt;&lt;/?xml&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "string is nonempty; null otherwise.",
+          "assertion": "assert receiverObjectID.string != null && !receiverObjectID.string.isEmpty();",
+          "name": null,
+          "content": "string is nonempty; null otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isNullOrEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the given string must be null or empty",
+          "assertion": "assert ((args[0] == null) || (args[0].isEmpty() && !(args[0] instanceof String)));",
+          "name": "string",
+          "content": "<p>Consider normalizing your string references with {@link #nullToEmpty}.</p><p>If you do, you can use {@link String#isEmpty()} instead of this method, and you won't need special null-safe forms of methods like {@link <a href=\"java:String#toUpperCase\">String#toUpperCase}</a> either. Or, if you'd like to normalize “in the other direction, </p><p>converting empty strings to {@code null}, you can use {@link #emptyToNull}.</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "{@code",
+          "content": "true} if the string is null or is the empty string",
+          "assertion": "",
+          "description": "true} if the string is null or is the empty string"
+        }
+      ]
+    }
+  },
+  {
+    "method": "padStart",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minLength"
+      },
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "padChar"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input string must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "string",
+          "content": "the input string must not be null"
+        },
+        {
+          "description": "minLength must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "minLength",
+          "content": "minLength must be non-negative"
+        },
+        {
+          "description": "padChar must not be null",
+          "assertion": "assert args[2] != null;",
+          "name": "padChar",
+          "content": "padChar must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "padded string",
+          "assertion": "",
+          "description": "padded string"
+        }
+      ]
+    }
+  },
+  {
+    "method": "padEnd",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minLength"
+      },
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "padChar"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "string",
+          "content": "the string which should appear at the beginning of the result",
+          "assertion": "",
+          "description": "the string which should appear at the beginning of the result"
+        },
+        {
+          "tag": "param",
+          "name": "minLength",
+          "content": "the minimum length the resulting string must have. Can be zero or negative, in which case the input string is always returned.",
+          "assertion": "",
+          "description": "the minimum length the resulting string must have. Can be zero or negative, in which case the input string is always returned."
+        },
+        {
+          "tag": "param",
+          "name": "padChar",
+          "content": "the character to append to the end of the result until the minimum length is reached",
+          "assertion": "",
+          "description": "the character to append to the end of the result until the minimum length is reached"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the padded string",
+          "assertion": "assert methodResultID.equals(receiverObjectID.repeat(string, minLength));",
+          "name": null,
+          "content": "the padded string. For example, padEnd(&quot;4.&quot;, 5, &#39;0&#39;) returns &quot;4.000&quot;. See Formatter for a richer set of formatting capabilities."
+        }
+      ]
+    }
+  },
+  {
+    "method": "repeat",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "count"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "any non-null string",
+          "assertion": "assert args[0] != null && !args[0].isEmpty();",
+          "name": "string",
+          "content": "&lt;strong&gt;any non-null string&lt;/strong&gt;"
+        },
+        {
+          "description": "the number of times to repeat it; a nonnegative integer",
+          "assertion": "assert args[1] >= 0;",
+          "name": "count",
+          "content": "&lt;strong&gt;a nonnegative integer&lt;/strong&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a string consisting of a specific number of concatenated copies of an input string.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.repeat(args[1], args[0]));",
+          "name": null,
+          "content": "a string consisting of a specific number of concatenated copies of an input string."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if count is negative",
+          "assertion": "assert args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if count is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "commonPrefix",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "commonSuffix",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "validSurrogatePairAt",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {}
+  }
+]

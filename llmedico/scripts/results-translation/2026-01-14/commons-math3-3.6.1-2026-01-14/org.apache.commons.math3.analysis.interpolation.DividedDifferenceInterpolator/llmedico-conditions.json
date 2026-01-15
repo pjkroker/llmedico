@@ -1,0 +1,139 @@
+[
+  {
+    "method": "interpolate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "x",
+          "content": "&lt;x&gt; must be positive"
+        },
+        {
+          "description": "y must be positive",
+          "assertion": "assert args[1] > 0;",
+          "name": "y",
+          "content": "&lt;y&gt; must be positive"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a function which interpolates the dataset.",
+          "assertion": "assert methodResultID == receiverObjectID.computeDividedDifference(args[0], args[1]);",
+          "name": null,
+          "content": "a function which interpolates the dataset."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the array lengths are different",
+          "assertion": "assert args[0].length != args[1].length;",
+          "name": "DimensionMismatchException",
+          "content": "if the array lengths are different."
+        },
+        {
+          "description": "if the number of points is less than 2",
+          "assertion": "assert args[0].length >= 2;",
+          "name": "NumberIsTooSmallException",
+          "content": "if the number of points is less than 2."
+        },
+        {
+          "description": "if x is not sorted in strictly increasing order",
+          "assertion": "assert !args[0].isSorted();",
+          "name": "NonMonotonicSequenceException",
+          "content": "if x is not sorted in strictly increasing order."
+        }
+      ]
+    }
+  },
+  {
+    "method": "computeDividedDifference",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "x must be an array of doubles and not empty",
+          "assertion": "assert (args[0] instanceof double[]) && args[0].length > 0;",
+          "name": "x",
+          "content": "Interpolating points array."
+        },
+        {
+          "description": "y must be an array of doubles and not empty",
+          "assertion": "assert (args[1] instanceof double[]) && args[1].length > 0;",
+          "name": "y",
+          "content": "Interpolating values array."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "fresh copy of the divided difference array.",
+          "assertion": "",
+          "description": "fresh copy of the divided difference array."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "x and y have different lengths.",
+          "assertion": "assert receiverObjectID.getArrayDimensions(args[0]) != 1 || receiverObjectID.getArrayDimensions(args[1]) != 1;",
+          "name": "DimensionMismatchException",
+          "content": "if array lengths are different"
+        },
+        {
+          "description": "the number of points is less than 2.",
+          "assertion": "assert args[0] < 2 && args[1] < 2;",
+          "name": "NumberIsTooSmallException",
+          "content": "if the number of points is less than 2"
+        },
+        {
+          "description": "x and y are not sorted in strictly increasing order.",
+          "assertion": "assert !receiverObjectID.isSorted() || receiverObjectID.getArrayDimensions(args[0]) == receiverObjectID.getArrayDimensions(args[1]);",
+          "name": "NonMonotonicSequenceException",
+          "content": "if x is not sorted in strictly increasing order"
+        }
+      ]
+    }
+  }
+]

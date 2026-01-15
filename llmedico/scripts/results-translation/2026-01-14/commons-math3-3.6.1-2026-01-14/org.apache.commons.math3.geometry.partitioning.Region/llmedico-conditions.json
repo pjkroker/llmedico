@@ -1,0 +1,393 @@
+[
+  {
+    "method": "buildNew",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BSPTree",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "newTree"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the tree must be a BSP tree",
+          "assertion": "assert receiverObjectID instanceof org.openjena.arq.model.BSPTree && args[0] != null;",
+          "name": "newTree",
+          "content": "<p>This method allow to create new instances without knowing</p><p>exactly the type of the region. It is an application of the</p><p>prototype design pattern.</p><p>The leaf nodes of the BSP tree <em>must</em> have a</p><p>{@code Boolean} attribute representing the inside status of</p><p>the corresponding cell (true for inside cells, false for outside cells).</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the built region",
+          "assertion": "assert receiverObjectID.buildNew(args[0]) == null;",
+          "name": null,
+          "content": "the built region"
+        }
+      ]
+    }
+  },
+  {
+    "method": "copySelf",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "A new region, copy of the instance.",
+          "assertion": "assert receiverObjectID.copySelf() == null;",
+          "name": null,
+          "content": "A new region, copy of the instance."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEmpty",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if the instance is empty.",
+          "assertion": "assert methodResultID == receiverObjectID.isEmpty();",
+          "name": null,
+          "content": "true if the instance is empty."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BSPTree",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "node"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the given node must have Region tree semantics",
+          "assertion": "assert args[0].getClass().equals(BSPTree) && (args[0]).getRegion() != null;",
+          "name": "node",
+          "content": "<em>must</em> have <code>Boolean</code> attributes representing an inside/outside property"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the sub-tree starting at the given node is empty",
+          "assertion": "assert receiverObjectID.isEmpty();",
+          "name": null,
+          "content": "true if the sub-tree starting at the given node is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isFull",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if the instance covers the full space.",
+          "assertion": "assert methodResultID == receiverObjectID.isEmpty();",
+          "name": null,
+          "content": "true if the instance covers the full space."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isFull",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BSPTree",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "node"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the root node must have Region tree semantics",
+          "assertion": "assert receiverObjectID.buildNew(args[0]) != null;",
+          "name": "node",
+          "content": "&lt;em&gt;must&lt;/em&gt; have {@link Region Region} tree semantics, i.e. the leaf nodes must have {@code Boolean} attributes representing an inside/outside property"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "true",
+          "content": "if the sub-tree starting at the given node covers the full space",
+          "assertion": "",
+          "description": "if the sub-tree starting at the given node covers the full space"
+        }
+      ]
+    }
+  },
+  {
+    "method": "contains",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Region",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "region"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "region",
+          "content": "region to check against the instance",
+          "assertion": "",
+          "description": "region to check against the instance"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the instance contains the specified region.",
+          "assertion": "assert methodResultID == receiverObjectID.contains(region);",
+          "name": null,
+          "content": "true if the instance contains the specified region."
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkPoint",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "point"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the point must be valid",
+          "assertion": "assert receiverObjectID != null && receiverObjectID instanceof Location;",
+          "name": "point",
+          "content": "<p>The point to check must be valid.</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "code representing the point status: either {@link Location#INSIDE}, {@link Location#OUTSIDE} or {@link Location#BOUNDARY}",
+          "assertion": "",
+          "description": "code representing the point status: either {@link Location#INSIDE}, {@link Location#OUTSIDE} or {@link Location#BOUNDARY}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "projectToBoundary",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "point"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the point must be of type Point",
+          "assertion": "assert receiverObjectID instanceof Point;",
+          "name": "point",
+          "content": "the point must be of type Point"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "projection of the point on the boundary",
+          "assertion": "assert receiverObjectID.getBoundaryProjection() == null;",
+          "name": null,
+          "content": "projection of the point on the boundary"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTree",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "includeBoundaryAttributes"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "includeBoundaryAttributes must be of type boolean",
+          "assertion": "assert (Boolean) args[0] != null && ((Boolean) args[0]) == true;",
+          "name": "includeBoundaryAttributes",
+          "content": "&lt;boolean&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "underlying",
+          "content": "BSP tree",
+          "assertion": "",
+          "description": "BSP tree"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getBoundarySize",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the size of the boundary (this is 0 in 1D, a length in 2D, an area in 3D ...).",
+          "assertion": "assert methodResultID == receiverObjectID.getSize();",
+          "name": null,
+          "content": "the size of the boundary (this is 0 in 1D, a length in 2D, an area in 3D ...)."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSize",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the size of the instance (this is a length in 1D, an area in 2D, a volume in 3D ...).",
+          "assertion": "assert methodResultID == receiverObjectID.getSize();",
+          "name": null,
+          "content": "the size of the instance (this is a length in 1D, an area in 2D, a volume in 3D ...)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getBarycenter",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "an object representing the barycenter",
+          "assertion": "assert methodResultID == receiverObjectID.buildNew();",
+          "name": null,
+          "content": "an object representing the barycenter"
+        }
+      ]
+    }
+  },
+  {
+    "method": "side",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Hyperplane",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hyperplane"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "hyperplane must be a Hyperplane",
+          "assertion": "assert receiverObjectID.getHyperplane() instanceof Hyperplane;",
+          "name": "hyperplane",
+          "content": "<code>Hyperplane</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "&lt;code&gt;Compute the relative position of the instance with respect to an hyperplane.&lt;/code&gt;",
+          "assertion": "assert methodResultID == (args[0] != null && args[0].equals(Side.HYPER) ? Side.HYPER : (receiverObjectID.getTree().contains(args[0]) || receiverObjectID.getTree().isEmpty() || receiverObjectID.isFull()) ? Side.BOTH : (receiverObjectID.getTree().isEmpty() || receiverObjectID.isFull()) ? Side.PLUS : Side.MINUS);",
+          "name": null,
+          "content": "&lt;code&gt;Compute the relative position of the instance with respect to an hyperplane.&lt;/code&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "intersection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "SubHyperplane",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sub"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "<em>The parts of the sub-hyperplane that belong to the boundary</em> <em>are not included in the resulting parts.</em>",
+          "assertion": "assert !receiverObjectID.contains(null);",
+          "name": "sub",
+          "content": "<em>The parts of the sub-hyperplane that belong to the boundary are not included in the resulting parts.</em>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Get the parts of a sub-hyperplane that are contained in the region.",
+          "assertion": "assert methodResultID == receiverObjectID.intersection(args[0]);",
+          "name": null,
+          "content": "Get the parts of a sub-hyperplane that are contained in the region. The parts of the sub-hyperplane that belong to the boundary are not included in the resulting parts."
+        }
+      ]
+    }
+  }
+]

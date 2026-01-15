@@ -1,0 +1,1628 @@
+[
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "num"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be a BigInteger",
+          "assertion": "assert args[0] instanceof java.math.BigInteger;",
+          "name": "num",
+          "content": "<p>num must be a BigInteger</p>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "num"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "den"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "num must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "num",
+          "content": "the numerator, must not be null"
+        },
+        {
+          "description": "den must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "den",
+          "content": "the denominator, must not be null"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either of the arguments is null.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullArgumentException",
+          "content": "<code>if either of the arguments is null</code>"
+        },
+        {
+          "description": "if the denominator is zero.",
+          "assertion": "assert args[1] == 0;",
+          "name": "ZeroException",
+          "content": "<code>if the denominator is zero</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "value must be NaN or infinite",
+          "assertion": "assert args[0] instanceof java.lang.MathException;",
+          "name": "value",
+          "content": "&lt;math:exception&gt; value must be NaN or infinite&lt;/math:exception&gt;"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if value is NaN or infinite",
+          "assertion": "assert receiverObjectID.doubleValue() == Double.NaN || receiverObjectID.doubleValue() == Double.POSITIVE_INFINITY || receiverObjectID.doubleValue() == Double.NEGATIVE_INFINITY;",
+          "name": "MathIllegalArgumentException",
+          "content": "if value is NaN or infinite"
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "epsilon"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxIterations"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "value",
+          "content": "the double value to convert to a fraction.",
+          "assertion": "",
+          "description": "the double value to convert to a fraction."
+        },
+        {
+          "tag": "param",
+          "name": "epsilon",
+          "content": "maximum error allowed. The resulting fraction is within\n           <code>epsilon</code> of <code>value</code>, in absolute terms.",
+          "assertion": "",
+          "description": "maximum error allowed. The resulting fraction is within\n           <code>epsilon</code> of <code>value</code>, in absolute terms."
+        },
+        {
+          "tag": "param",
+          "name": "maxIterations",
+          "content": "maximum number of convergents.",
+          "assertion": "",
+          "description": "maximum number of convergents."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "FractionConversionException",
+          "content": "if the continued fraction failed to converge.",
+          "assertion": "",
+          "description": "if the continued fraction failed to converge."
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxDenominator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the double value must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "value",
+          "content": "the double value to convert to a fraction."
+        },
+        {
+          "description": "The maximum allowed value for denominator must be positive",
+          "assertion": "assert args[1] > 0;",
+          "name": "maxDenominator",
+          "content": "The maximum allowed value for denominator."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "FractionConversionException",
+          "content": "if the continued fraction failed to converge.",
+          "assertion": "",
+          "description": "if the continued fraction failed to converge."
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "num"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "num must be equivalent to an int",
+          "assertion": "assert args[0].equals(1) && args[0] >= 0;",
+          "name": "num",
+          "content": "<p>num must be equivalent to an int, ie &quot;num / 1&quot;.\\n</p>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "num"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "den"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "num must be simple int",
+          "assertion": "assert args[0].type.simple_name.equals(\"int\") && args[0].type.array_dimensions == 0;",
+          "name": "num",
+          "content": "the numerator; must be simple int"
+        },
+        {
+          "description": "den must be simple int",
+          "assertion": "assert args[1].type.simple_name.equals(\"int\") && args[1].type.array_dimensions == 0;",
+          "name": "den",
+          "content": "the denominator; must be simple int"
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "num"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the numerator must be a non-negative integer",
+          "assertion": "assert args[0] >= 0 && args[0] % 1 == 0;",
+          "name": "num",
+          "content": "&lt;strong&gt;the numerator must be a non-negative integer&lt;/strong&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "BigFraction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "num"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "den"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "num must be a simple long",
+          "assertion": "assert (long) args[0] >= 0;",
+          "name": "num",
+          "content": "the numerator; must be a simple long"
+        },
+        {
+          "description": "den must be a positive integer greater than zero",
+          "assertion": "assert args[1] > 0 && (int)args[1] != 0;",
+          "name": "den",
+          "content": "the denominator; must be a positive integer greater than zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getReducedFraction",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "numerator"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "denominator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the numerator must be an integer",
+          "assertion": "assert (args[0] instanceof Integer);",
+          "name": "numerator",
+          "content": "the numerator, for example the three in 'three sevenths'"
+        },
+        {
+          "description": "the denominator must be a positive integer",
+          "assertion": "assert (args[1] > 0 && args[1] instanceof Integer);",
+          "name": "denominator",
+          "content": "the denominator, for example the seven in 'three sevenths'"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "new fraction instance, with the numerator and denominator reduced.",
+          "assertion": "",
+          "description": "new fraction instance, with the numerator and denominator reduced."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if denominator is zero.",
+          "assertion": "assert receiverObjectID.getDenominatorAsLong() == 0;",
+          "name": "ArithmeticException",
+          "content": "if denominator is <code>zero</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "abs",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the absolute value as a BigFraction.",
+          "assertion": "assert methodResultID == receiverObjectID.abs();",
+          "name": null,
+          "content": "the absolute value as a BigFraction."
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "bg"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "bg mustn't be null",
+          "assertion": "assert args[0] != null;",
+          "name": "bg",
+          "content": "<code>the BigInteger to add, must&#39;nt be <code>null</code>.</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "<code>BigFraction</code> instance with the resulting values.",
+          "assertion": "",
+          "description": "<code>BigFraction</code> instance with the resulting values."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if bg is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullArgumentException",
+          "content": "<code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the i must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "i",
+          "content": "&lt;i&gt; the {@code integer} to add. must be positive"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values.",
+          "assertion": "assert new receiverObjectID.add(args[0]) == receiverObjectID;",
+          "name": null,
+          "content": "a BigFraction instance with the resulting values."
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "l"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "l must be a positive number",
+          "assertion": "assert (args[0] > 0) && (receiverObjectID != null);",
+          "name": "l",
+          "content": "&lt;code&gt;l&lt;/code&gt; must be a positive number&lt;/p&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values.",
+          "assertion": "assert receiverObjectID.add(args[0]).equals(receiverObjectID);",
+          "name": null,
+          "content": "a BigFraction instance with the resulting values."
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the fraction must not be null",
+          "assertion": "assert receiverObjectID == null;",
+          "name": "fraction",
+          "content": "&lt;code&gt;null&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values.",
+          "assertion": "assert receiverObjectID.add(args[0]) == receiverObjectID;",
+          "name": null,
+          "content": "a BigFraction instance with the resulting values."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if fraction is null.",
+          "assertion": "assert receiverObjectID == null;",
+          "name": "NullArgumentException",
+          "content": "<code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "bigDecimalValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the fraction as a BigDecimal",
+          "assertion": "assert methodResultID.equals((BigDecimal) receiverObjectID.bigDecimalValue());",
+          "name": null,
+          "content": "the fraction as a BigDecimal"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if exact quotient does not have a terminating decimal expansion.",
+          "assertion": "assert !receiverObjectID.divide(args[0], args[1]).abs().equals(BigDecimal.ZERO);",
+          "name": "ArithmeticException",
+          "content": "<code>if the exact quotient does not have a terminating decimal expansion.</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "bigDecimalValue",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "roundingMode"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "roundingMode",
+          "content": " rounding mode to apply. see {@link BigDecimal} constants.",
+          "assertion": "",
+          "description": " rounding mode to apply. see {@link BigDecimal} constants."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "fraction as a <code>BigDecimal</code>.",
+          "assertion": "",
+          "description": "fraction as a <code>BigDecimal</code>."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": " if {@code roundingMode} does not represent a valid rounding mode.",
+          "assertion": "",
+          "description": " if {@code roundingMode} does not represent a valid rounding mode."
+        }
+      ]
+    }
+  },
+  {
+    "method": "bigDecimalValue",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "scale"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "roundingMode"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "scale",
+          "content": " scale of the <code>BigDecimal</code> quotient to be returned. see {@link BigDecimal} for more information.",
+          "assertion": "",
+          "description": " scale of the <code>BigDecimal</code> quotient to be returned. see {@link BigDecimal} for more information."
+        },
+        {
+          "tag": "param",
+          "name": "roundingMode",
+          "content": " rounding mode to apply. see {@link BigDecimal} constants.",
+          "assertion": "",
+          "description": " rounding mode to apply. see {@link BigDecimal} constants."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "fraction as a <code>BigDecimal</code>.",
+          "assertion": "",
+          "description": "fraction as a <code>BigDecimal</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "compareTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object must not be <code>null</code>",
+          "assertion": "assert receiverObjectID == null;",
+          "name": "object",
+          "content": "<code>null</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "&lt;strong&gt;Comparing two BigFraction objects based on size.&lt;/strong&gt;",
+          "assertion": "assert receiverObjectID.compareTo(args[0]) == (receiverObjectID.getNumeratorAsInt() - args[0].getNumeratorAsInt()) * (receiverObjectID.getDenominatorAsLong() - args[0].getDenominatorAsLong());",
+          "name": null,
+          "content": "&lt;strong&gt;Comparing two BigFraction objects based on size.&lt;/strong&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "bg"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "bg must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "bg",
+          "content": "<p>the BigInteger to divide by, must not be &lt;code&gt;null&lt;/code&gt;</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Divide the value of this fraction by the passed BigInteger, ie this * 1 / bg, returning the result in reduced form.",
+          "assertion": "assert receiverObjectID.divide(args[0]) == (receiverObjectID.getNumerator() / args[0].getDenominator());",
+          "name": null,
+          "content": "Divide the value of this fraction by the passed BigInteger, ie this * 1 / bg, returning the result in reduced form."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if (bg == null)",
+          "assertion": "assert receiverObjectID == null;",
+          "name": "NullArgumentException",
+          "content": "if (bg == null)"
+        },
+        {
+          "description": "receiverObjectID / bg == 0",
+          "assertion": "assert receiverObjectID.multiply(bg).bigDecimalValue() == 0;",
+          "name": "MathArithmeticException",
+          "content": "if (this * 1 / bg), returning the result in reduced form."
+        }
+      ]
+    }
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "i",
+          "content": "the {@code int} to divide by",
+          "assertion": "",
+          "description": "the {@code int} to divide by"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "{@link BigFraction} instance with the resulting values",
+          "assertion": "",
+          "description": "{@link BigFraction} instance with the resulting values"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the fraction to divide by is zero.",
+          "assertion": "assert args[0]==0;",
+          "name": "MathArithmeticException",
+          "content": "if the fraction to divide by is zero."
+        }
+      ]
+    }
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "l"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "l must be a positive long",
+          "assertion": "assert args[0] > 0 && (args[0] instanceof java.lang.Long && ((java.lang.Long)args[0]).longValue() > 0);",
+          "name": "l",
+          "content": "must be a positive long"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values",
+          "assertion": "assert methodResultID.equals(receiverObjectID.divide(args[0]));",
+          "name": null,
+          "content": "a BigFraction instance with the resulting values"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the fraction to divide by is zero",
+          "assertion": "assert receiverObjectID.getDenominatorAsLong() == 0;",
+          "name": "MathArithmeticException",
+          "content": "if the fraction to divide by is zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "fraction",
+          "content": "Fraction to divide by, must not be {@code null}.",
+          "assertion": "",
+          "description": "Fraction to divide by, must not be {@code null}."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values.",
+          "assertion": "assert methodResultID == receiverObjectID.divide(args[0]);",
+          "name": null,
+          "content": "a BigFraction instance with the resulting values."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if fraction is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullArgumentException",
+          "content": "if fraction is <code>null</code>."
+        },
+        {
+          "description": "if the fraction to divide by is zero.",
+          "assertion": "assert !receiverObjectID.divide(args[0]).getDenominatorAsInt()==0;",
+          "name": "MathArithmeticException",
+          "content": "if the fraction to divide by is zero."
+        }
+      ]
+    }
+  },
+  {
+    "method": "doubleValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the fraction as a double",
+          "assertion": "assert methodResultID == receiverObjectID.doubleValue();",
+          "name": null,
+          "content": "the fraction as a double"
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "other",
+          "content": " fraction to test for equality to this fraction, can be <code>null</code>.",
+          "assertion": "",
+          "description": " fraction to test for equality to this fraction, can be <code>null</code>."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this fraction is equal to another fraction, or if they are both null.",
+          "assertion": "assert receiverObjectID.equals(args[0]) && methodResultID || receiverObjectID == null || (methodResultID == false && args[0] != null);",
+          "name": null,
+          "content": "true if this fraction is equal to another fraction, or if they are both null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "floatValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "&lt;code&gt;float&lt;/code&gt; calculated from numerator / denominator, where both are integers.",
+          "assertion": "assert methodResultID == receiverObjectID.floatValue();",
+          "name": null,
+          "content": "&lt;p&gt;This calculates the fraction as the numerator divided by denominator.&lt;/p&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDenominator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Access the denominator as a <code>BigInteger</code>.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getDenominator());",
+          "name": null,
+          "content": "Access the denominator as a <code>BigInteger</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDenominatorAsInt",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the denominator as a int.",
+          "assertion": "assert methodResultID == (receiverObjectID.getDenominatorAsInt() != 0);",
+          "name": null,
+          "content": "the denominator as a int."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDenominatorAsLong",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "<p>Access the denominator as a {@code long}.</p>",
+          "assertion": "assert methodResultID == receiverObjectID.getDenominatorAsLong();",
+          "name": null,
+          "content": "<p>Access the denominator as a {@code long}.</p>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNumerator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the numerator as a BigInteger.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getNumerator());",
+          "name": null,
+          "content": "&lt;code&gt;BigInteger&lt;/code&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNumeratorAsInt",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "&lt;em&gt;Access the numerator as a &lt;code&gt;int&lt;/code&gt;.&lt;/em&gt;",
+          "assertion": "assert methodResultID == receiverObjectID.getNumeratorAsInt();",
+          "name": null,
+          "content": "&lt;em&gt;Access the numerator as a &lt;code&gt;int&lt;/code&gt;.&lt;/em&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNumeratorAsLong",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "<p>Access the numerator as a {@code long}.</p>",
+          "assertion": "assert methodResultID == receiverObjectID.getNumeratorAsLong();",
+          "name": null,
+          "content": "<p>Access the numerator as a {@code long}.</p>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a hash code value for this object.",
+          "assertion": "assert methodResultID == receiverObjectID.hashCode();",
+          "name": null,
+          "content": "a hash code value for this object."
+        }
+      ]
+    }
+  },
+  {
+    "method": "intValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "&quot;the whole number fraction part.&quot;",
+          "assertion": "assert methodResultID == receiverObjectID.intValue();",
+          "name": null,
+          "content": "&quot;the whole number fraction part.&quot;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "longValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the whole number fraction part.",
+          "assertion": "assert receiverObjectID.longValue() == args[0];",
+          "name": null,
+          "content": "the whole number fraction part."
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "bg"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "bg must be non-null",
+          "assertion": "assert args[0] != null;",
+          "name": "bg",
+          "content": "&lt;code&gt;BigInteger&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.multiply(args[0]));",
+          "name": null,
+          "content": "a BigFraction instance with the resulting values."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if bg is null.",
+          "assertion": "assert receiverObjectID==null;",
+          "name": "NullArgumentException",
+          "content": "if bg is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "i must be an integer",
+          "assertion": "assert args[0] instanceof Integer;",
+          "name": "i",
+          "content": "the &lt;int&gt;¢ to multiply by."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "{@link BigFraction} instance with the resulting values.",
+          "assertion": "",
+          "description": "{@link BigFraction} instance with the resulting values."
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "l"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "l must be a long",
+          "assertion": "assert args[0] instanceof java.lang.Long;",
+          "name": "l",
+          "content": "l must be a long"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "{@link BigFraction} instance with the resulting values.",
+          "assertion": "",
+          "description": "{@link BigFraction} instance with the resulting values."
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "fraction must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "fraction",
+          "content": "Fraction to multiply by, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "{@link BigFraction} instance with the resulting values.",
+          "assertion": "",
+          "description": "{@link BigFraction} instance with the resulting values."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if fraction is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullArgumentException",
+          "content": "if fraction is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "negate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the negation of this fraction.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getReducedFraction(0,1));",
+          "name": null,
+          "content": "the negation of this fraction."
+        }
+      ]
+    }
+  },
+  {
+    "method": "percentageValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the fraction percentage as a double.",
+          "assertion": "assert methodResultID == (100 * receiverObjectID.getNumerator() / receiverObjectID.getDenominator());",
+          "name": null,
+          "content": "the fraction percentage as a double."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "exponent"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "<p>the code must be positive</p>",
+          "assertion": "assert args[0] > 0;",
+          "name": "exponent",
+          "content": "<p>exponent to which this <code>BigFraction</code> is to be raised.</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "<tt>this<sup>exponent</sup></tt>.",
+          "content": "",
+          "assertion": "",
+          "description": ""
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "exponent"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "exponent must be a long",
+          "assertion": "assert args[0] instanceof java.lang.Long && (java.lang.Long)args[0] >= 0;",
+          "name": "exponent",
+          "content": "&lt;code&gt;long exponent&lt;/code&gt; must be a long&lt;/p&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a BigFraction whose value is (this<sup>exponent</sup>)",
+          "assertion": "assert methodResultID.equals(receiverObjectID.pow(args[0]));",
+          "name": null,
+          "content": "Returns a BigFraction whose value is (this<sup>exponent</sup>)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "exponent"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "exponent must be a BigInteger",
+          "assertion": "assert args[0] instanceof java.math.BigInteger;",
+          "name": "exponent",
+          "content": "<code>exponent</code> must be a <code>BigInteger</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a <code>BigFraction</code> whose value is <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.",
+          "assertion": "assert receiverObjectID.pow(args[0]) == receiverObjectID;",
+          "name": null,
+          "content": "&lt;code&gt;BigFraction&lt;/code&gt; whose value is &lt;tt&gt;(this<sup>exponent</sup>)&lt;/tt&gt;, returning the result in reduced form.&lt;/p&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "exponent"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be a double",
+          "assertion": "assert args[0] instanceof java.lang.Double;",
+          "name": "exponent",
+          "content": "<code>double</code> whose value is <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "<tt>this<sup>exponent</sup></tt>.",
+          "content": "",
+          "assertion": "",
+          "description": ""
+        }
+      ]
+    }
+  },
+  {
+    "method": "reciprocal",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "<p>Return the multiplicative inverse of this fraction.</p>",
+          "assertion": "assert receiverObjectID.getReducedFraction(receiverObjectID.getNumerator(), receiverObjectID.getDenominator()) == null;",
+          "name": null,
+          "content": "<p>Return the multiplicative inverse of this fraction.</p>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reduce",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the reduced BigFraction. It doesn't change anything if the fraction can be reduced.",
+          "assertion": "assert receiverObjectID.getReducedFraction((int)args[0], (int)args[1]) == receiverObjectID;",
+          "name": null,
+          "content": "the reduced BigFraction. It doesn't change anything if the fraction can be reduced."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "bg"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "bg must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "bg",
+          "content": "cannot be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values.",
+          "assertion": "assert receiverObjectID.subtract(args[0]) == receiverObjectID.getReducedFraction(receiverObjectID.getNumeratorAsInt(), receiverObjectID.getDenominatorAsInt());",
+          "name": null,
+          "content": "a BigFraction instance with the resulting values."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if bg is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullArgumentException",
+          "content": "<code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "i",
+          "content": "the {@code integer} to subtract.",
+          "assertion": "",
+          "description": "the {@code integer} to subtract."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "{@code BigFraction} instance with the resulting values.",
+          "assertion": "",
+          "description": "{@code BigFraction} instance with the resulting values."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "l"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "l",
+          "content": "the {@code long} to subtract.",
+          "assertion": "",
+          "description": "the {@code long} to subtract."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "{@code BigFraction} instance with the resulting values.",
+          "assertion": "",
+          "description": "{@code BigFraction} instance with the resulting values."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "fraction must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "fraction",
+          "content": "&lt;strong&gt;The fraction parameter cannot be null.&lt;/strong&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a BigFraction instance with the resulting values",
+          "assertion": "assert methodResultID.equals(receiverObjectID.subtract(args[0]));",
+          "name": null,
+          "content": "Subtracts the value of another fraction from the value of this one, returning the result in reduced form."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if fraction is null.",
+          "assertion": "assert receiverObjectID == null;",
+          "name": "NullArgumentException",
+          "content": "if fraction is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns the String representing this fraction, ie \"num / dem\" or just \"num\" if the denominator is one.",
+          "assertion": "assert receiverObjectID.toString().equals(\"null\") || (receiverObjectID.getDenominatorAsInt() == 1 && receiverObjectID.getNumeratorAsLong() != 0);",
+          "name": null,
+          "content": "Returns the String representing this fraction, ie \"num / dem\" or just \"num\" if the denominator is one."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getField",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  }
+]

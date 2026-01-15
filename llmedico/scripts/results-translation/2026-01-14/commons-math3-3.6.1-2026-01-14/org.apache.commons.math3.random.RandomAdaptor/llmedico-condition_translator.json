@@ -1,0 +1,328 @@
+[
+  {
+    "name": "RandomAdaptor",
+    "package": "org.apache.commons.math3.random",
+    "qualified_name": "org.apache.commons.math3.random.RandomAdaptor",
+    "javadoc": "/**\n * Extension of <code>java.util.Random</code> wrapping a\n * {@link RandomGenerator}.\n *\n * @since 1.1\n */\n",
+    "code": "/**\n * Extension of <code>java.util.Random</code> wrapping a\n * {@link RandomGenerator}.\n *\n * @since 1.1\n */\npublic class RandomAdaptor extends Random implements RandomGenerator {\n\n    /**\n     * Serializable version identifier.\n     */\n    private static final long serialVersionUID = 2306581345647615033L;\n\n    /**\n     * Wrapped randomGenerator instance\n     */\n    private final RandomGenerator randomGenerator;\n\n    /**\n     * Prevent instantiation without a generator argument\n     */\n    @SuppressWarnings(\"unused\")\n    private RandomAdaptor() {\n        randomGenerator = null;\n    }\n\n    /**\n     * Construct a RandomAdaptor wrapping the supplied RandomGenerator.\n     *\n     * @param randomGenerator  the wrapped generator\n     */\n    public RandomAdaptor(RandomGenerator randomGenerator) {\n        this.randomGenerator = randomGenerator;\n    }\n\n    /**\n     * Factory method to create a <code>Random</code> using the supplied\n     * <code>RandomGenerator</code>.\n     *\n     * @param randomGenerator  wrapped RandomGenerator instance\n     * @return a Random instance wrapping the RandomGenerator\n     */\n    public static Random createAdaptor(RandomGenerator randomGenerator) {\n        return new RandomAdaptor(randomGenerator);\n    }\n\n    /**\n     * Returns the next pseudorandom, uniformly distributed\n     * <code>boolean</code> value from this random number generator's\n     * sequence.\n     *\n     * @return  the next pseudorandom, uniformly distributed\n     * <code>boolean</code> value from this random number generator's\n     * sequence\n     */\n    @Override\n    public boolean nextBoolean() {\n        return randomGenerator.nextBoolean();\n    }\n\n    /**\n     * Generates random bytes and places them into a user-supplied\n     * byte array.  The number of random bytes produced is equal to\n     * the length of the byte array.\n     *\n     * @param bytes the non-null byte array in which to put the\n     * random bytes\n     */\n    @Override\n    public void nextBytes(byte[] bytes) {\n        randomGenerator.nextBytes(bytes);\n    }\n\n    /**\n     * Returns the next pseudorandom, uniformly distributed\n     * <code>double</code> value between <code>0.0</code> and\n     * <code>1.0</code> from this random number generator's sequence.\n     *\n     * @return  the next pseudorandom, uniformly distributed\n     *  <code>double</code> value between <code>0.0</code> and\n     *  <code>1.0</code> from this random number generator's sequence\n     */\n    @Override\n    public double nextDouble() {\n        return randomGenerator.nextDouble();\n    }\n\n    /**\n     * Returns the next pseudorandom, uniformly distributed <code>float</code>\n     * value between <code>0.0</code> and <code>1.0</code> from this random\n     * number generator's sequence.\n     *\n     * @return  the next pseudorandom, uniformly distributed <code>float</code>\n     * value between <code>0.0</code> and <code>1.0</code> from this\n     * random number generator's sequence\n     */\n    @Override\n    public float nextFloat() {\n        return randomGenerator.nextFloat();\n    }\n\n    /**\n     * Returns the next pseudorandom, Gaussian (\"normally\") distributed\n     * <code>double</code> value with mean <code>0.0</code> and standard\n     * deviation <code>1.0</code> from this random number generator's sequence.\n     *\n     * @return  the next pseudorandom, Gaussian (\"normally\") distributed\n     * <code>double</code> value with mean <code>0.0</code> and\n     * standard deviation <code>1.0</code> from this random number\n     *  generator's sequence\n     */\n    @Override\n    public double nextGaussian() {\n        return randomGenerator.nextGaussian();\n    }\n\n    /**\n     * Returns the next pseudorandom, uniformly distributed <code>int</code>\n     * value from this random number generator's sequence.\n     * All 2<font size=\"-1\"><sup>32</sup></font> possible {@code int} values\n     * should be produced with  (approximately) equal probability.\n     *\n     * @return the next pseudorandom, uniformly distributed <code>int</code>\n     *  value from this random number generator's sequence\n     */\n    @Override\n    public int nextInt() {\n        return randomGenerator.nextInt();\n    }\n\n    /**\n     * Returns a pseudorandom, uniformly distributed {@code int} value\n     * between 0 (inclusive) and the specified value (exclusive), drawn from\n     * this random number generator's sequence.\n     *\n     * @param n the bound on the random number to be returned.  Must be\n     * positive.\n     * @return  a pseudorandom, uniformly distributed {@code int}\n     * value between 0 (inclusive) and n (exclusive).\n     * @throws IllegalArgumentException  if n is not positive.\n     */\n    @Override\n    public int nextInt(int n) {\n        return randomGenerator.nextInt(n);\n    }\n\n    /**\n     *  Returns the next pseudorandom, uniformly distributed <code>long</code>\n     *  value from this random number generator's sequence.  All\n     *  2<font size=\"-1\"><sup>64</sup></font> possible {@code long} values\n     *  should be produced with (approximately) equal probability.\n     *\n     *  @return  the next pseudorandom, uniformly distributed <code>long</code>\n     * value from this random number generator's sequence\n     */\n    @Override\n    public long nextLong() {\n        return randomGenerator.nextLong();\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public void setSeed(int seed) {\n        if (randomGenerator != null) {\n            // required to avoid NPE in constructor\n            randomGenerator.setSeed(seed);\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public void setSeed(int[] seed) {\n        if (randomGenerator != null) {\n            // required to avoid NPE in constructor\n            randomGenerator.setSeed(seed);\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public void setSeed(long seed) {\n        if (randomGenerator != null) {\n            // required to avoid NPE in constructor\n            randomGenerator.setSeed(seed);\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "RandomAdaptor",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "RandomGenerator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "randomGenerator"
+          }
+        ],
+        "javadoc": "/**\n * Construct a RandomAdaptor wrapping the supplied RandomGenerator.\n *\n * @param randomGenerator  the wrapped generator\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "randomGenerator",
+            "content": "the wrapped generator",
+            "assertion": "assert receiverObjectID != null;",
+            "description": "the supplied RandomGenerator must not be null"
+          }
+        ],
+        "code": "/**\n * Construct a RandomAdaptor wrapping the supplied RandomGenerator.\n *\n * @param randomGenerator  the wrapped generator\n */\npublic RandomAdaptor(RandomGenerator randomGenerator) {\n    this.randomGenerator = randomGenerator;\n}"
+      },
+      {
+        "type": "method",
+        "name": "createAdaptor",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Random",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "RandomGenerator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "randomGenerator"
+          }
+        ],
+        "javadoc": "/**\n * Factory method to create a <code>Random</code> using the supplied\n * <code>RandomGenerator</code>.\n *\n * @param randomGenerator  wrapped RandomGenerator instance\n * @return a Random instance wrapping the RandomGenerator\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "randomGenerator",
+            "content": "wrapped RandomGenerator instance",
+            "assertion": "assert (RandomGenerator)receiverObjectID != null;",
+            "description": "the supplied RandomGenerator must be an instance of RandomGenerator"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "Random instance wrapping the RandomGenerator"
+          }
+        ],
+        "code": "/**\n * Factory method to create a <code>Random</code> using the supplied\n * <code>RandomGenerator</code>.\n *\n * @param randomGenerator  wrapped RandomGenerator instance\n * @return a Random instance wrapping the RandomGenerator\n */\npublic static Random createAdaptor(RandomGenerator randomGenerator) {\n    return new RandomAdaptor(randomGenerator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextBoolean",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the next pseudorandom, uniformly distributed\n * <code>boolean</code> value from this random number generator's\n * sequence.\n *\n * @return  the next pseudorandom, uniformly distributed\n * <code>boolean</code> value from this random number generator's\n * sequence\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "next pseudorandom, uniformly distributed <code>boolean</code> value from this random number generator's sequence"
+          }
+        ],
+        "code": "/**\n * Returns the next pseudorandom, uniformly distributed\n * <code>boolean</code> value from this random number generator's\n * sequence.\n *\n * @return  the next pseudorandom, uniformly distributed\n * <code>boolean</code> value from this random number generator's\n * sequence\n */\n@Override\npublic boolean nextBoolean() {\n    return randomGenerator.nextBoolean();\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextBytes",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "byte",
+              "simple_name": "byte",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "bytes"
+          }
+        ],
+        "javadoc": "/**\n * Generates random bytes and places them into a user-supplied\n * byte array.  The number of random bytes produced is equal to\n * the length of the byte array.\n *\n * @param bytes the non-null byte array in which to put the\n * random bytes\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "bytes",
+            "content": "the non-null byte array in which to put the random bytes",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "the byte array must not be null"
+          }
+        ],
+        "code": "/**\n * Generates random bytes and places them into a user-supplied\n * byte array.  The number of random bytes produced is equal to\n * the length of the byte array.\n *\n * @param bytes the non-null byte array in which to put the\n * random bytes\n */\n@Override\npublic void nextBytes(byte[] bytes) {\n    randomGenerator.nextBytes(bytes);\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextDouble",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the next pseudorandom, uniformly distributed\n * <code>double</code> value between <code>0.0</code> and\n * <code>1.0</code> from this random number generator's sequence.\n *\n * @return  the next pseudorandom, uniformly distributed\n *  <code>double</code> value between <code>0.0</code> and\n *  <code>1.0</code> from this random number generator's sequence\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "next pseudorandom, uniformly distributed <code>double</code> value between <code>0.0</code> and <code>1.0</code> from this random number generator's sequence",
+            "assertion": "",
+            "description": "next pseudorandom, uniformly distributed <code>double</code> value between <code>0.0</code> and <code>1.0</code> from this random number generator's sequence"
+          }
+        ],
+        "code": "/**\n * Returns the next pseudorandom, uniformly distributed\n * <code>double</code> value between <code>0.0</code> and\n * <code>1.0</code> from this random number generator's sequence.\n *\n * @return  the next pseudorandom, uniformly distributed\n *  <code>double</code> value between <code>0.0</code> and\n *  <code>1.0</code> from this random number generator's sequence\n */\n@Override\npublic double nextDouble() {\n    return randomGenerator.nextDouble();\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextFloat",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the next pseudorandom, uniformly distributed <code>float</code>\n * value between <code>0.0</code> and <code>1.0</code> from this random\n * number generator's sequence.\n *\n * @return  the next pseudorandom, uniformly distributed <code>float</code>\n * value between <code>0.0</code> and <code>1.0</code> from this\n * random number generator's sequence\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "next pseudorandom, uniformly distributed <code>float</code> value between <code>0.0</code> and <code>1.0</code> from this random number generator's sequence"
+          }
+        ],
+        "code": "/**\n * Returns the next pseudorandom, uniformly distributed <code>float</code>\n * value between <code>0.0</code> and <code>1.0</code> from this random\n * number generator's sequence.\n *\n * @return  the next pseudorandom, uniformly distributed <code>float</code>\n * value between <code>0.0</code> and <code>1.0</code> from this\n * random number generator's sequence\n */\n@Override\npublic float nextFloat() {\n    return randomGenerator.nextFloat();\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextGaussian",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the next pseudorandom, Gaussian (\"normally\") distributed\n * <code>double</code> value with mean <code>0.0</code> and standard\n * deviation <code>1.0</code> from this random number generator's sequence.\n *\n * @return  the next pseudorandom, Gaussian (\"normally\") distributed\n * <code>double</code> value with mean <code>0.0</code> and\n * standard deviation <code>1.0</code> from this random number\n *  generator's sequence\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "next pseudorandom, Gaussian (\"normally\") distributed <code>double</code> value with mean <code>0.0</code> and standard deviation <code>1.0</code> from this random number generator's sequence"
+          }
+        ],
+        "code": "/**\n * Returns the next pseudorandom, Gaussian (\"normally\") distributed\n * <code>double</code> value with mean <code>0.0</code> and standard\n * deviation <code>1.0</code> from this random number generator's sequence.\n *\n * @return  the next pseudorandom, Gaussian (\"normally\") distributed\n * <code>double</code> value with mean <code>0.0</code> and\n * standard deviation <code>1.0</code> from this random number\n *  generator's sequence\n */\n@Override\npublic double nextGaussian() {\n    return randomGenerator.nextGaussian();\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextInt",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the next pseudorandom, uniformly distributed <code>int</code>\n * value from this random number generator's sequence.\n * All 2<font size=\"-1\"><sup>32</sup></font> possible {@code int} values\n * should be produced with  (approximately) equal probability.\n *\n * @return the next pseudorandom, uniformly distributed <code>int</code>\n *  value from this random number generator's sequence\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "next pseudorandom, uniformly distributed <code>int</code> value from this random number generator's sequence",
+            "assertion": "",
+            "description": "next pseudorandom, uniformly distributed <code>int</code> value from this random number generator's sequence"
+          }
+        ],
+        "code": "/**\n * Returns the next pseudorandom, uniformly distributed <code>int</code>\n * value from this random number generator's sequence.\n * All 2<font size=\"-1\"><sup>32</sup></font> possible {@code int} values\n * should be produced with  (approximately) equal probability.\n *\n * @return the next pseudorandom, uniformly distributed <code>int</code>\n *  value from this random number generator's sequence\n */\n@Override\npublic int nextInt() {\n    return randomGenerator.nextInt();\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextInt",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * Returns a pseudorandom, uniformly distributed {@code int} value\n * between 0 (inclusive) and the specified value (exclusive), drawn from\n * this random number generator's sequence.\n *\n * @param n the bound on the random number to be returned.  Must be\n * positive.\n * @return  a pseudorandom, uniformly distributed {@code int}\n * value between 0 (inclusive) and n (exclusive).\n * @throws IllegalArgumentException  if n is not positive.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "n",
+            "content": "the bound on the random number to be returned.  Must be positive.",
+            "assertion": "assert args[0] > 0;",
+            "description": "n must be positive"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "pseudorandom, uniformly distributed {@code int} value between 0 (inclusive) and n (exclusive).",
+            "assertion": "",
+            "description": "pseudorandom, uniformly distributed {@code int} value between 0 (inclusive) and n (exclusive)."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if n is not positive.",
+            "assertion": "assert args[0] <= 0;",
+            "description": "if n is not positive."
+          }
+        ],
+        "code": "/**\n * Returns a pseudorandom, uniformly distributed {@code int} value\n * between 0 (inclusive) and the specified value (exclusive), drawn from\n * this random number generator's sequence.\n *\n * @param n the bound on the random number to be returned.  Must be\n * positive.\n * @return  a pseudorandom, uniformly distributed {@code int}\n * value between 0 (inclusive) and n (exclusive).\n * @throws IllegalArgumentException  if n is not positive.\n */\n@Override\npublic int nextInt(int n) {\n    return randomGenerator.nextInt(n);\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextLong",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n *  Returns the next pseudorandom, uniformly distributed <code>long</code>\n *  value from this random number generator's sequence.  All\n *  2<font size=\"-1\"><sup>64</sup></font> possible {@code long} values\n *  should be produced with (approximately) equal probability.\n *\n *  @return  the next pseudorandom, uniformly distributed <code>long</code>\n * value from this random number generator's sequence\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "next pseudorandom, uniformly distributed <code>long</code> value from this random number generator's sequence"
+          }
+        ],
+        "code": "/**\n *  Returns the next pseudorandom, uniformly distributed <code>long</code>\n *  value from this random number generator's sequence.  All\n *  2<font size=\"-1\"><sup>64</sup></font> possible {@code long} values\n *  should be produced with (approximately) equal probability.\n *\n *  @return  the next pseudorandom, uniformly distributed <code>long</code>\n * value from this random number generator's sequence\n */\n@Override\npublic long nextLong() {\n    return randomGenerator.nextLong();\n}"
+      },
+      {
+        "type": "method",
+        "name": "setSeed",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "seed"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic void setSeed(int seed) {\n    if (randomGenerator != null) {\n        // required to avoid NPE in constructor\n        randomGenerator.setSeed(seed);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "setSeed",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "seed"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic void setSeed(int[] seed) {\n    if (randomGenerator != null) {\n        // required to avoid NPE in constructor\n        randomGenerator.setSeed(seed);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "setSeed",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "seed"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic void setSeed(long seed) {\n    if (randomGenerator != null) {\n        // required to avoid NPE in constructor\n        randomGenerator.setSeed(seed);\n    }\n}"
+      }
+    ]
+  }
+]

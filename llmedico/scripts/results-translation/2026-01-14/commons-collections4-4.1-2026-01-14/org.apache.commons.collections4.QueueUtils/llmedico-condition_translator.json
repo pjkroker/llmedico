@@ -1,0 +1,215 @@
+[
+  {
+    "name": "QueueUtils",
+    "package": "org.apache.commons.collections4",
+    "qualified_name": "org.apache.commons.collections4.QueueUtils",
+    "javadoc": "/**\n * Provides utility methods and decorators for {@link Queue} instances.\n *\n * @since 4.0\n * @version $Id: QueueUtils.java 1686855 2015-06-22 13:00:27Z tn $\n */\n",
+    "code": "/**\n * Provides utility methods and decorators for {@link Queue} instances.\n *\n * @since 4.0\n * @version $Id: QueueUtils.java 1686855 2015-06-22 13:00:27Z tn $\n */\npublic class QueueUtils {\n\n    /**\n     * An empty unmodifiable queue.\n     */\n    // OK, empty queue is compatible with any type\n    @SuppressWarnings(\"rawtypes\")\n    public static final Queue EMPTY_QUEUE = UnmodifiableQueue.unmodifiableQueue(new LinkedList<Object>());\n\n    /**\n     * <code>QueueUtils</code> should not normally be instantiated.\n     */\n    private QueueUtils() {\n    }\n\n    //-----------------------------------------------------------------------\n    /**\n     * Returns an unmodifiable queue backed by the given queue.\n     *\n     * @param <E> the type of the elements in the queue\n     * @param queue  the queue to make unmodifiable, must not be null\n     * @return an unmodifiable queue backed by that queue\n     * @throws NullPointerException if the queue is null\n     */\n    public static <E> Queue<E> unmodifiableQueue(final Queue<? extends E> queue) {\n        return UnmodifiableQueue.unmodifiableQueue(queue);\n    }\n\n    /**\n     * Returns a predicated (validating) queue backed by the given queue.\n     * <p>\n     * Only objects that pass the test in the given predicate can be added to the queue.\n     * Trying to add an invalid object results in an IllegalArgumentException.\n     * It is important not to use the original queue after invoking this method,\n     * as it is a backdoor for adding invalid objects.\n     *\n     * @param <E> the type of the elements in the queue\n     * @param queue  the queue to predicate, must not be null\n     * @param predicate  the predicate used to evaluate new elements, must not be null\n     * @return a predicated queue\n     * @throws NullPointerException if the queue or predicate is null\n     */\n    public static <E> Queue<E> predicatedQueue(final Queue<E> queue, final Predicate<? super E> predicate) {\n        return PredicatedQueue.predicatedQueue(queue, predicate);\n    }\n\n    /**\n     * Returns a transformed queue backed by the given queue.\n     * <p>\n     * Each object is passed through the transformer as it is added to the\n     * Queue. It is important not to use the original queue after invoking this\n     * method, as it is a backdoor for adding untransformed objects.\n     * <p>\n     * Existing entries in the specified queue will not be transformed.\n     * If you want that behaviour, see {@link TransformedQueue#transformedQueue}.\n     *\n     * @param <E> the type of the elements in the queue\n     * @param queue  the queue to predicate, must not be null\n     * @param transformer  the transformer for the queue, must not be null\n     * @return a transformed queue backed by the given queue\n     * @throws NullPointerException if the queue or transformer is null\n     */\n    public static <E> Queue<E> transformingQueue(final Queue<E> queue, final Transformer<? super E, ? extends E> transformer) {\n        return TransformedQueue.transformingQueue(queue, transformer);\n    }\n\n    /**\n     * Get an empty <code>Queue</code>.\n     *\n     * @param <E> the type of the elements in the queue\n     * @return an empty {@link Queue}\n     */\n    // OK, empty queue is compatible with any type\n    @SuppressWarnings(\"unchecked\")\n    public static <E> Queue<E> emptyQueue() {\n        return (Queue<E>) EMPTY_QUEUE;\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "unmodifiableQueue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Queue",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Queue",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "queue"
+          }
+        ],
+        "javadoc": "/**\n * Returns an unmodifiable queue backed by the given queue.\n *\n * @param <E> the type of the elements in the queue\n * @param queue  the queue to make unmodifiable, must not be null\n * @return an unmodifiable queue backed by that queue\n * @throws NullPointerException if the queue is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "the type of the elements in the queue"
+          },
+          {
+            "tag": "param",
+            "name": "queue",
+            "content": "the queue to make unmodifiable, must not be null",
+            "assertion": "assert receiverObjectID.queue != null;",
+            "description": "the queue must not be null"
+          },
+          {
+            "tag": "return",
+            "name": "an",
+            "content": "unmodifiable queue backed by that queue"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the queue is null",
+            "assertion": "assert args[0]==null;",
+            "description": "if the queue is null."
+          }
+        ],
+        "code": "//-----------------------------------------------------------------------\n/**\n * Returns an unmodifiable queue backed by the given queue.\n *\n * @param <E> the type of the elements in the queue\n * @param queue  the queue to make unmodifiable, must not be null\n * @return an unmodifiable queue backed by that queue\n * @throws NullPointerException if the queue is null\n */\npublic static <E> Queue<E> unmodifiableQueue(final Queue<? extends E> queue) {\n    return UnmodifiableQueue.unmodifiableQueue(queue);\n}"
+      },
+      {
+        "type": "method",
+        "name": "predicatedQueue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Queue",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Queue",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "queue"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate"
+          }
+        ],
+        "javadoc": "/**\n * Returns a predicated (validating) queue backed by the given queue.\n * <p>\n * Only objects that pass the test in the given predicate can be added to the queue.\n * Trying to add an invalid object results in an IllegalArgumentException.\n * It is important not to use the original queue after invoking this method,\n * as it is a backdoor for adding invalid objects.\n *\n * @param <E> the type of the elements in the queue\n * @param queue  the queue to predicate, must not be null\n * @param predicate  the predicate used to evaluate new elements, must not be null\n * @return a predicated queue\n * @throws NullPointerException if the queue or predicate is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "the type of the elements in the queue"
+          },
+          {
+            "tag": "param",
+            "name": "queue",
+            "content": "the queue to predicate, must not be null",
+            "assertion": "assert receiverObjectID.unmodifiableQueue(receiverObjectID) == null;",
+            "description": "the queue must not be modified after invocation"
+          },
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "the predicate used to evaluate new elements, must not be null",
+            "assertion": "assert args[1] != null;",
+            "description": "the predicate must not be null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "predicated queue"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the queue or predicate is null",
+            "assertion": "assert queue == null || predicate == null;",
+            "description": "if queue or predicate is null."
+          }
+        ],
+        "code": "/**\n * Returns a predicated (validating) queue backed by the given queue.\n * <p>\n * Only objects that pass the test in the given predicate can be added to the queue.\n * Trying to add an invalid object results in an IllegalArgumentException.\n * It is important not to use the original queue after invoking this method,\n * as it is a backdoor for adding invalid objects.\n *\n * @param <E> the type of the elements in the queue\n * @param queue  the queue to predicate, must not be null\n * @param predicate  the predicate used to evaluate new elements, must not be null\n * @return a predicated queue\n * @throws NullPointerException if the queue or predicate is null\n */\npublic static <E> Queue<E> predicatedQueue(final Queue<E> queue, final Predicate<? super E> predicate) {\n    return PredicatedQueue.predicatedQueue(queue, predicate);\n}"
+      },
+      {
+        "type": "method",
+        "name": "transformingQueue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Queue",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Queue",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "queue"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Transformer",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "transformer"
+          }
+        ],
+        "javadoc": "/**\n * Returns a transformed queue backed by the given queue.\n * <p>\n * Each object is passed through the transformer as it is added to the\n * Queue. It is important not to use the original queue after invoking this\n * method, as it is a backdoor for adding untransformed objects.\n * <p>\n * Existing entries in the specified queue will not be transformed.\n * If you want that behaviour, see {@link TransformedQueue#transformedQueue}.\n *\n * @param <E> the type of the elements in the queue\n * @param queue  the queue to predicate, must not be null\n * @param transformer  the transformer for the queue, must not be null\n * @return a transformed queue backed by the given queue\n * @throws NullPointerException if the queue or transformer is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "the type of the elements in the queue"
+          },
+          {
+            "tag": "param",
+            "name": "queue",
+            "content": "the queue to predicate, must not be null",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "the queue must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "transformer",
+            "content": "the transformer for the queue, must not be null",
+            "assertion": "assert receiverObjectID instanceof java.util.function.Predicate;",
+            "description": "the transformer must implement a predicate function"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "transformed queue backed by the given queue"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the queue or transformer is null",
+            "assertion": "assert receiverObjectID == null || receiverObjectID.transformingQueue == null;",
+            "description": "the queue or transformer is null."
+          }
+        ],
+        "code": "/**\n * Returns a transformed queue backed by the given queue.\n * <p>\n * Each object is passed through the transformer as it is added to the\n * Queue. It is important not to use the original queue after invoking this\n * method, as it is a backdoor for adding untransformed objects.\n * <p>\n * Existing entries in the specified queue will not be transformed.\n * If you want that behaviour, see {@link TransformedQueue#transformedQueue}.\n *\n * @param <E> the type of the elements in the queue\n * @param queue  the queue to predicate, must not be null\n * @param transformer  the transformer for the queue, must not be null\n * @return a transformed queue backed by the given queue\n * @throws NullPointerException if the queue or transformer is null\n */\npublic static <E> Queue<E> transformingQueue(final Queue<E> queue, final Transformer<? super E, ? extends E> transformer) {\n    return TransformedQueue.transformingQueue(queue, transformer);\n}"
+      },
+      {
+        "type": "method",
+        "name": "emptyQueue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Queue",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get an empty <code>Queue</code>.\n *\n * @param <E> the type of the elements in the queue\n * @return an empty {@link Queue}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "the type of the elements in the queue"
+          },
+          {
+            "tag": "return",
+            "name": "an",
+            "content": "empty {@link Queue}"
+          }
+        ],
+        "code": "/**\n * Get an empty <code>Queue</code>.\n *\n * @param <E> the type of the elements in the queue\n * @return an empty {@link Queue}\n */\n// OK, empty queue is compatible with any type\n@SuppressWarnings(\"unchecked\")\npublic static <E> Queue<E> emptyQueue() {\n    return (Queue<E>) EMPTY_QUEUE;\n}"
+      }
+    ]
+  }
+]

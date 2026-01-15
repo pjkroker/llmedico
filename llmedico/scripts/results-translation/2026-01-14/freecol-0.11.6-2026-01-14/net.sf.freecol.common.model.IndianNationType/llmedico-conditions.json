@@ -1,0 +1,252 @@
+[
+  {
+    "method": "IndianNationType",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "id"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Specification",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "specification"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The object identifier must be a String",
+          "assertion": "assert receiverObjectID == null || receiverObjectID instanceof java.lang.String;",
+          "name": "id",
+          "content": "<code>The object identifier.</code>"
+        },
+        {
+          "description": "The <code>Specification</code> to refer to must be an instance of Specification",
+          "assertion": "assert receiverObjectID == null || receiverObjectID instanceof com.example.Specification;",
+          "name": "specification",
+          "content": "<code>The &lt;code&gt;Specification&lt;/code&gt; to refer to.</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEuropean",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "False.",
+          "assertion": "assert methodResultID == false;",
+          "name": null,
+          "content": "False."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isIndian",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "True.",
+          "assertion": "assert receiverObjectID.isIndian();",
+          "name": null,
+          "content": "True."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isREF",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "False.",
+          "assertion": "assert methodResultID == false;",
+          "name": null,
+          "content": "False."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSettlementTypeKey",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "plural"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "plural must be true",
+          "assertion": "assert args[0] == true;",
+          "name": "plural",
+          "content": "Choose the plural form or not."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "A suitable message id.",
+          "assertion": "assert methodResultID == receiverObjectID.getSettlementTypeKey(args[0]) && !(args[0] || false);",
+          "name": null,
+          "content": "A suitable message id. (If plural is true, a plural form is returned; otherwise, a singular form)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getRegionNames",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "A list of regions identifiers.",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "A list of regions identifiers."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSkills",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "A list of national skills.",
+          "assertion": "assert methodResultID == receiverObjectID.getSkills();",
+          "name": null,
+          "content": "A list of national skills."
+        }
+      ]
+    }
+  },
+  {
+    "method": "generateSkillsForTile",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Tile",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "tile"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "tile must be a Tile",
+          "assertion": "assert receiverObjectID.isInstance(args[0]) && args[0].getClass().equals(Tile.class);",
+          "name": "tile",
+          "content": "<code>Tile</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "A random choice set of skills.",
+          "assertion": "assert methodResultID == (receiverObjectID.getSkills().stream().anyMatch(skill -> skill.equals(\"European\")).equals(false) || receiverObjectID.getSkills().stream().anyMatch(skill -> skill.equals(\"Indian\") || skill.equals(\"REF\")));",
+          "name": null,
+          "content": "A random choice set of skills."
+        }
+      ]
+    }
+  },
+  {
+    "method": "writeChildren",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FreeColXMLWriter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "xw"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "readChildren",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FreeColXMLReader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "xr"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "readChild",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FreeColXMLReader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "xr"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "getXMLTagName",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "getXMLElementTagName",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if the tag name of the root element is 'indian-nation-type'.",
+          "assertion": "assert methodResultID.equals(\"indian-nation-type\");",
+          "name": null,
+          "content": "true if the tag name of the root element is &quot;indian-nation-type&quot;."
+        }
+      ]
+    }
+  }
+]

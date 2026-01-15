@@ -1,0 +1,121 @@
+[
+  {
+    "method": "DBSCANClusterer",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "eps"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minPts"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "eps must be positive",
+          "assertion": "assert args[0] > 0.0;",
+          "name": "eps",
+          "content": "maximum radius of the neighborhood to be considered"
+        },
+        {
+          "description": "minPts must be positive",
+          "assertion": "assert args[1] >= 0.0;",
+          "name": "minPts",
+          "content": "minimum number of points needed for a cluster"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if eps < 0.0 or minPts < 0",
+          "assertion": "assert args[0] < 0.0 || args[1] < 0;",
+          "name": "NotPositiveException",
+          "content": "if {@code eps < 0.0} or {@code minPts < 0}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEps",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "maximum radius of the neighborhood",
+          "assertion": "assert methodResultID == (receiverObjectID.getEps() > 0);",
+          "name": null,
+          "content": "maximum radius of the neighborhood"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMinPts",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "minimum number of points needed for a cluster",
+          "assertion": "assert methodResultID >= receiverObjectID.getMinPts();",
+          "name": null,
+          "content": "minimum number of points needed for a cluster"
+        }
+      ]
+    }
+  },
+  {
+    "method": "cluster",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "points"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the data points cannot be null",
+          "assertion": "assert receiverObjectID == null;",
+          "name": "points",
+          "content": "null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the list of clusters",
+          "assertion": "assert receiverObjectID.getCluster().equals(methodResultID);",
+          "name": null,
+          "content": "the list of clusters"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if data points are null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullArgumentException",
+          "content": "<b>Note:</b> as DBSCAN is not a centroid-based clustering algorithm, the resulting"
+        }
+      ]
+    }
+  }
+]

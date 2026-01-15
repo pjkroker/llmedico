@@ -1,0 +1,349 @@
+[
+  {
+    "name": "RandomKey",
+    "package": "org.apache.commons.math3.genetics",
+    "qualified_name": "org.apache.commons.math3.genetics.RandomKey",
+    "javadoc": "/**\n * Random Key chromosome is used for permutation representation. It is a vector\n * of a fixed length of real numbers in [0,1] interval. The index of the i-th\n * smallest value in the vector represents an i-th member of the permutation.\n * <p>\n * For example, the random key [0.2, 0.3, 0.8, 0.1] corresponds to the\n * permutation of indices (3,0,1,2). If the original (unpermuted) sequence would\n * be (a,b,c,d), this would mean the sequence (d,a,b,c).\n * <p>\n * With this representation, common operators like n-point crossover can be\n * used, because any such chromosome represents a valid permutation.\n * <p>\n * Since the chromosome (and thus its arrayRepresentation) is immutable, the\n * array representation is sorted only once in the constructor.\n * <p>\n * For details, see:\n * <ul>\n *   <li>Bean, J.C.: Genetic algorithms and random keys for sequencing and\n *       optimization. ORSA Journal on Computing 6 (1994) 154-160</li>\n *   <li>Rothlauf, F.: Representations for Genetic and Evolutionary Algorithms.\n *       Volume 104 of Studies in Fuzziness and Soft Computing. Physica-Verlag,\n *       Heidelberg (2002)</li>\n * </ul>\n *\n * @param <T> type of the permuted objects\n * @since 2.0\n */\n",
+    "code": "/**\n * Random Key chromosome is used for permutation representation. It is a vector\n * of a fixed length of real numbers in [0,1] interval. The index of the i-th\n * smallest value in the vector represents an i-th member of the permutation.\n * <p>\n * For example, the random key [0.2, 0.3, 0.8, 0.1] corresponds to the\n * permutation of indices (3,0,1,2). If the original (unpermuted) sequence would\n * be (a,b,c,d), this would mean the sequence (d,a,b,c).\n * <p>\n * With this representation, common operators like n-point crossover can be\n * used, because any such chromosome represents a valid permutation.\n * <p>\n * Since the chromosome (and thus its arrayRepresentation) is immutable, the\n * array representation is sorted only once in the constructor.\n * <p>\n * For details, see:\n * <ul>\n *   <li>Bean, J.C.: Genetic algorithms and random keys for sequencing and\n *       optimization. ORSA Journal on Computing 6 (1994) 154-160</li>\n *   <li>Rothlauf, F.: Representations for Genetic and Evolutionary Algorithms.\n *       Volume 104 of Studies in Fuzziness and Soft Computing. Physica-Verlag,\n *       Heidelberg (2002)</li>\n * </ul>\n *\n * @param <T> type of the permuted objects\n * @since 2.0\n */\npublic abstract class RandomKey<T> extends AbstractListChromosome<Double> implements PermutationChromosome<T> {\n\n    /**\n     * Cache of sorted representation (unmodifiable).\n     */\n    private final List<Double> sortedRepresentation;\n\n    /**\n     * Base sequence [0,1,...,n-1], permuted according to the representation (unmodifiable).\n     */\n    private final List<Integer> baseSeqPermutation;\n\n    /**\n     * Constructor.\n     *\n     * @param representation list of [0,1] values representing the permutation\n     * @throws InvalidRepresentationException iff the <code>representation</code> can not represent a valid chromosome\n     */\n    public RandomKey(final List<Double> representation) throws InvalidRepresentationException {\n        super(representation);\n        // store the sorted representation\n        List<Double> sortedRepr = new ArrayList<Double>(getRepresentation());\n        Collections.sort(sortedRepr);\n        sortedRepresentation = Collections.unmodifiableList(sortedRepr);\n        // store the permutation of [0,1,...,n-1] list for toString() and isSame() methods\n        baseSeqPermutation = Collections.unmodifiableList(decodeGeneric(baseSequence(getLength()), getRepresentation(), sortedRepresentation));\n    }\n\n    /**\n     * Constructor.\n     *\n     * @param representation array of [0,1] values representing the permutation\n     * @throws InvalidRepresentationException iff the <code>representation</code> can not represent a valid chromosome\n     */\n    public RandomKey(final Double[] representation) throws InvalidRepresentationException {\n        this(Arrays.asList(representation));\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public List<T> decode(final List<T> sequence) {\n        return decodeGeneric(sequence, getRepresentation(), sortedRepresentation);\n    }\n\n    /**\n     * Decodes a permutation represented by <code>representation</code> and\n     * returns a (generic) list with the permuted values.\n     *\n     * @param <S> generic type of the sequence values\n     * @param sequence the unpermuted sequence\n     * @param representation representation of the permutation ([0,1] vector)\n     * @param sortedRepr sorted <code>representation</code>\n     * @return list with the sequence values permuted according to the representation\n     * @throws DimensionMismatchException iff the length of the <code>sequence</code>,\n     *   <code>representation</code> or <code>sortedRepr</code> lists are not equal\n     */\n    private static <S> List<S> decodeGeneric(final List<S> sequence, List<Double> representation, final List<Double> sortedRepr) throws DimensionMismatchException {\n        int l = sequence.size();\n        // the size of the three lists must be equal\n        if (representation.size() != l) {\n            throw new DimensionMismatchException(representation.size(), l);\n        }\n        if (sortedRepr.size() != l) {\n            throw new DimensionMismatchException(sortedRepr.size(), l);\n        }\n        // do not modify the original representation\n        List<Double> reprCopy = new ArrayList<Double>(representation);\n        // now find the indices in the original repr and use them for permuting\n        List<S> res = new ArrayList<S>(l);\n        for (int i = 0; i < l; i++) {\n            int index = reprCopy.indexOf(sortedRepr.get(i));\n            res.add(sequence.get(index));\n            reprCopy.set(index, null);\n        }\n        return res;\n    }\n\n    /**\n     * Returns <code>true</code> iff <code>another</code> is a RandomKey and\n     * encodes the same permutation.\n     *\n     * @param another chromosome to compare\n     * @return true iff chromosomes encode the same permutation\n     */\n    @Override\n    protected boolean isSame(final Chromosome another) {\n        // type check\n        if (!(another instanceof RandomKey<?>)) {\n            return false;\n        }\n        RandomKey<?> anotherRk = (RandomKey<?>) another;\n        // size check\n        if (getLength() != anotherRk.getLength()) {\n            return false;\n        }\n        // two different representations can still encode the same permutation\n        // the ordering is what counts\n        List<Integer> thisPerm = this.baseSeqPermutation;\n        List<Integer> anotherPerm = anotherRk.baseSeqPermutation;\n        for (int i = 0; i < getLength(); i++) {\n            if (thisPerm.get(i) != anotherPerm.get(i)) {\n                return false;\n            }\n        }\n        // the permutations are the same\n        return true;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void checkValidity(final List<Double> chromosomeRepresentation) throws InvalidRepresentationException {\n        for (double val : chromosomeRepresentation) {\n            if (val < 0 || val > 1) {\n                throw new InvalidRepresentationException(LocalizedFormats.OUT_OF_RANGE_SIMPLE, val, 0, 1);\n            }\n        }\n    }\n\n    /**\n     * Generates a representation corresponding to a random permutation of\n     * length l which can be passed to the RandomKey constructor.\n     *\n     * @param l length of the permutation\n     * @return representation of a random permutation\n     */\n    public static final List<Double> randomPermutation(final int l) {\n        List<Double> repr = new ArrayList<Double>(l);\n        for (int i = 0; i < l; i++) {\n            repr.add(GeneticAlgorithm.getRandomGenerator().nextDouble());\n        }\n        return repr;\n    }\n\n    /**\n     * Generates a representation corresponding to an identity permutation of\n     * length l which can be passed to the RandomKey constructor.\n     *\n     * @param l length of the permutation\n     * @return representation of an identity permutation\n     */\n    public static final List<Double> identityPermutation(final int l) {\n        List<Double> repr = new ArrayList<Double>(l);\n        for (int i = 0; i < l; i++) {\n            repr.add((double) i / l);\n        }\n        return repr;\n    }\n\n    /**\n     * Generates a representation of a permutation corresponding to the\n     * <code>data</code> sorted by <code>comparator</code>. The\n     * <code>data</code> is not modified during the process.\n     *\n     * This is useful if you want to inject some permutations to the initial\n     * population.\n     *\n     * @param <S> type of the data\n     * @param data list of data determining the order\n     * @param comparator how the data will be compared\n     * @return list representation of the permutation corresponding to the parameters\n     */\n    public static <S> List<Double> comparatorPermutation(final List<S> data, final Comparator<S> comparator) {\n        List<S> sortedData = new ArrayList<S>(data);\n        Collections.sort(sortedData, comparator);\n        return inducedPermutation(data, sortedData);\n    }\n\n    /**\n     * Generates a representation of a permutation corresponding to a\n     * permutation which yields <code>permutedData</code> when applied to\n     * <code>originalData</code>.\n     *\n     * This method can be viewed as an inverse to {@link #decode(List)}.\n     *\n     * @param <S> type of the data\n     * @param originalData the original, unpermuted data\n     * @param permutedData the data, somehow permuted\n     * @return representation of a permutation corresponding to the permutation\n     *   <code>originalData -> permutedData</code>\n     * @throws DimensionMismatchException iff the length of <code>originalData</code>\n     *   and <code>permutedData</code> lists are not equal\n     * @throws MathIllegalArgumentException iff the <code>permutedData</code> and\n     *   <code>originalData</code> lists contain different data\n     */\n    public static <S> List<Double> inducedPermutation(final List<S> originalData, final List<S> permutedData) throws DimensionMismatchException, MathIllegalArgumentException {\n        if (originalData.size() != permutedData.size()) {\n            throw new DimensionMismatchException(permutedData.size(), originalData.size());\n        }\n        int l = originalData.size();\n        List<S> origDataCopy = new ArrayList<S>(originalData);\n        Double[] res = new Double[l];\n        for (int i = 0; i < l; i++) {\n            int index = origDataCopy.indexOf(permutedData.get(i));\n            if (index == -1) {\n                throw new MathIllegalArgumentException(LocalizedFormats.DIFFERENT_ORIG_AND_PERMUTED_DATA);\n            }\n            res[index] = (double) i / l;\n            origDataCopy.set(index, null);\n        }\n        return Arrays.asList(res);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public String toString() {\n        return String.format(\"(f=%s pi=(%s))\", getFitness(), baseSeqPermutation);\n    }\n\n    /**\n     * Helper for constructor. Generates a list of natural numbers (0,1,...,l-1).\n     *\n     * @param l length of list to generate\n     * @return list of integers from 0 to l-1\n     */\n    private static List<Integer> baseSequence(final int l) {\n        List<Integer> baseSequence = new ArrayList<Integer>(l);\n        for (int i = 0; i < l; i++) {\n            baseSequence.add(i);\n        }\n        return baseSequence;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "RandomKey",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "List",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "representation"
+          }
+        ],
+        "javadoc": "/**\n * Constructor.\n *\n * @param representation list of [0,1] values representing the permutation\n * @throws InvalidRepresentationException iff the <code>representation</code> can not represent a valid chromosome\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "representation",
+            "content": "list of [0,1] values representing the permutation"
+          },
+          {
+            "tag": "throws",
+            "name": "InvalidRepresentationException",
+            "content": "iff the <code>representation</code> can not represent a valid chromosome"
+          }
+        ],
+        "code": "/**\n * Constructor.\n *\n * @param representation list of [0,1] values representing the permutation\n * @throws InvalidRepresentationException iff the <code>representation</code> can not represent a valid chromosome\n */\npublic RandomKey(final List<Double> representation) throws InvalidRepresentationException {\n    super(representation);\n    // store the sorted representation\n    List<Double> sortedRepr = new ArrayList<Double>(getRepresentation());\n    Collections.sort(sortedRepr);\n    sortedRepresentation = Collections.unmodifiableList(sortedRepr);\n    // store the permutation of [0,1,...,n-1] list for toString() and isSame() methods\n    baseSeqPermutation = Collections.unmodifiableList(decodeGeneric(baseSequence(getLength()), getRepresentation(), sortedRepresentation));\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "RandomKey",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "representation"
+          }
+        ],
+        "javadoc": "/**\n * Constructor.\n *\n * @param representation array of [0,1] values representing the permutation\n * @throws InvalidRepresentationException iff the <code>representation</code> can not represent a valid chromosome\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "representation",
+            "content": "array of [0,1] values representing the permutation"
+          },
+          {
+            "tag": "throws",
+            "name": "InvalidRepresentationException",
+            "content": "iff the <code>representation</code> can not represent a valid chromosome"
+          }
+        ],
+        "code": "/**\n * Constructor.\n *\n * @param representation array of [0,1] values representing the permutation\n * @throws InvalidRepresentationException iff the <code>representation</code> can not represent a valid chromosome\n */\npublic RandomKey(final Double[] representation) throws InvalidRepresentationException {\n    this(Arrays.asList(representation));\n}"
+      },
+      {
+        "type": "method",
+        "name": "decode",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "List",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sequence"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic List<T> decode(final List<T> sequence) {\n    return decodeGeneric(sequence, getRepresentation(), sortedRepresentation);\n}"
+      },
+      {
+        "type": "method",
+        "name": "isSame",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Chromosome",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "another"
+          }
+        ],
+        "javadoc": "/**\n * Returns <code>true</code> iff <code>another</code> is a RandomKey and\n * encodes the same permutation.\n *\n * @param another chromosome to compare\n * @return true iff chromosomes encode the same permutation\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "another",
+            "content": "chromosome to compare"
+          },
+          {
+            "tag": "return",
+            "name": "true",
+            "content": "iff chromosomes encode the same permutation"
+          }
+        ],
+        "code": "/**\n * Returns <code>true</code> iff <code>another</code> is a RandomKey and\n * encodes the same permutation.\n *\n * @param another chromosome to compare\n * @return true iff chromosomes encode the same permutation\n */\n@Override\nprotected boolean isSame(final Chromosome another) {\n    // type check\n    if (!(another instanceof RandomKey<?>)) {\n        return false;\n    }\n    RandomKey<?> anotherRk = (RandomKey<?>) another;\n    // size check\n    if (getLength() != anotherRk.getLength()) {\n        return false;\n    }\n    // two different representations can still encode the same permutation\n    // the ordering is what counts\n    List<Integer> thisPerm = this.baseSeqPermutation;\n    List<Integer> anotherPerm = anotherRk.baseSeqPermutation;\n    for (int i = 0; i < getLength(); i++) {\n        if (thisPerm.get(i) != anotherPerm.get(i)) {\n            return false;\n        }\n    }\n    // the permutations are the same\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "checkValidity",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "List",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "chromosomeRepresentation"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void checkValidity(final List<Double> chromosomeRepresentation) throws InvalidRepresentationException {\n    for (double val : chromosomeRepresentation) {\n        if (val < 0 || val > 1) {\n            throw new InvalidRepresentationException(LocalizedFormats.OUT_OF_RANGE_SIMPLE, val, 0, 1);\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "randomPermutation",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "l"
+          }
+        ],
+        "javadoc": "/**\n * Generates a representation corresponding to a random permutation of\n * length l which can be passed to the RandomKey constructor.\n *\n * @param l length of the permutation\n * @return representation of a random permutation\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "l",
+            "content": "length of the permutation"
+          },
+          {
+            "tag": "return",
+            "name": "representation",
+            "content": "of a random permutation"
+          }
+        ],
+        "code": "/**\n * Generates a representation corresponding to a random permutation of\n * length l which can be passed to the RandomKey constructor.\n *\n * @param l length of the permutation\n * @return representation of a random permutation\n */\npublic static final List<Double> randomPermutation(final int l) {\n    List<Double> repr = new ArrayList<Double>(l);\n    for (int i = 0; i < l; i++) {\n        repr.add(GeneticAlgorithm.getRandomGenerator().nextDouble());\n    }\n    return repr;\n}"
+      },
+      {
+        "type": "method",
+        "name": "identityPermutation",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "l"
+          }
+        ],
+        "javadoc": "/**\n * Generates a representation corresponding to an identity permutation of\n * length l which can be passed to the RandomKey constructor.\n *\n * @param l length of the permutation\n * @return representation of an identity permutation\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "l",
+            "content": "length of the permutation"
+          },
+          {
+            "tag": "return",
+            "name": "representation",
+            "content": "of an identity permutation"
+          }
+        ],
+        "code": "/**\n * Generates a representation corresponding to an identity permutation of\n * length l which can be passed to the RandomKey constructor.\n *\n * @param l length of the permutation\n * @return representation of an identity permutation\n */\npublic static final List<Double> identityPermutation(final int l) {\n    List<Double> repr = new ArrayList<Double>(l);\n    for (int i = 0; i < l; i++) {\n        repr.add((double) i / l);\n    }\n    return repr;\n}"
+      },
+      {
+        "type": "method",
+        "name": "comparatorPermutation",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "List",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "data"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comparator"
+          }
+        ],
+        "javadoc": "/**\n * Generates a representation of a permutation corresponding to the\n * <code>data</code> sorted by <code>comparator</code>. The\n * <code>data</code> is not modified during the process.\n *\n * This is useful if you want to inject some permutations to the initial\n * population.\n *\n * @param <S> type of the data\n * @param data list of data determining the order\n * @param comparator how the data will be compared\n * @return list representation of the permutation corresponding to the parameters\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<S>",
+            "content": "type of the data"
+          },
+          {
+            "tag": "param",
+            "name": "data",
+            "content": "list of data determining the order"
+          },
+          {
+            "tag": "param",
+            "name": "comparator",
+            "content": "how the data will be compared"
+          },
+          {
+            "tag": "return",
+            "name": "list",
+            "content": "representation of the permutation corresponding to the parameters"
+          }
+        ],
+        "code": "/**\n * Generates a representation of a permutation corresponding to the\n * <code>data</code> sorted by <code>comparator</code>. The\n * <code>data</code> is not modified during the process.\n *\n * This is useful if you want to inject some permutations to the initial\n * population.\n *\n * @param <S> type of the data\n * @param data list of data determining the order\n * @param comparator how the data will be compared\n * @return list representation of the permutation corresponding to the parameters\n */\npublic static <S> List<Double> comparatorPermutation(final List<S> data, final Comparator<S> comparator) {\n    List<S> sortedData = new ArrayList<S>(data);\n    Collections.sort(sortedData, comparator);\n    return inducedPermutation(data, sortedData);\n}"
+      },
+      {
+        "type": "method",
+        "name": "inducedPermutation",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "List",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "originalData"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "List",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "permutedData"
+          }
+        ],
+        "javadoc": "/**\n * Generates a representation of a permutation corresponding to a\n * permutation which yields <code>permutedData</code> when applied to\n * <code>originalData</code>.\n *\n * This method can be viewed as an inverse to {@link #decode(List)}.\n *\n * @param <S> type of the data\n * @param originalData the original, unpermuted data\n * @param permutedData the data, somehow permuted\n * @return representation of a permutation corresponding to the permutation\n *   <code>originalData -> permutedData</code>\n * @throws DimensionMismatchException iff the length of <code>originalData</code>\n *   and <code>permutedData</code> lists are not equal\n * @throws MathIllegalArgumentException iff the <code>permutedData</code> and\n *   <code>originalData</code> lists contain different data\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<S>",
+            "content": "type of the data"
+          },
+          {
+            "tag": "param",
+            "name": "originalData",
+            "content": "the original, unpermuted data"
+          },
+          {
+            "tag": "param",
+            "name": "permutedData",
+            "content": "the data, somehow permuted"
+          },
+          {
+            "tag": "return",
+            "name": "representation",
+            "content": "of a permutation corresponding to the permutation <code>originalData -> permutedData</code>"
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "iff the length of <code>originalData</code> and <code>permutedData</code> lists are not equal"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "iff the <code>permutedData</code> and <code>originalData</code> lists contain different data"
+          }
+        ],
+        "code": "/**\n * Generates a representation of a permutation corresponding to a\n * permutation which yields <code>permutedData</code> when applied to\n * <code>originalData</code>.\n *\n * This method can be viewed as an inverse to {@link #decode(List)}.\n *\n * @param <S> type of the data\n * @param originalData the original, unpermuted data\n * @param permutedData the data, somehow permuted\n * @return representation of a permutation corresponding to the permutation\n *   <code>originalData -> permutedData</code>\n * @throws DimensionMismatchException iff the length of <code>originalData</code>\n *   and <code>permutedData</code> lists are not equal\n * @throws MathIllegalArgumentException iff the <code>permutedData</code> and\n *   <code>originalData</code> lists contain different data\n */\npublic static <S> List<Double> inducedPermutation(final List<S> originalData, final List<S> permutedData) throws DimensionMismatchException, MathIllegalArgumentException {\n    if (originalData.size() != permutedData.size()) {\n        throw new DimensionMismatchException(permutedData.size(), originalData.size());\n    }\n    int l = originalData.size();\n    List<S> origDataCopy = new ArrayList<S>(originalData);\n    Double[] res = new Double[l];\n    for (int i = 0; i < l; i++) {\n        int index = origDataCopy.indexOf(permutedData.get(i));\n        if (index == -1) {\n            throw new MathIllegalArgumentException(LocalizedFormats.DIFFERENT_ORIG_AND_PERMUTED_DATA);\n        }\n        res[index] = (double) i / l;\n        origDataCopy.set(index, null);\n    }\n    return Arrays.asList(res);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic String toString() {\n    return String.format(\"(f=%s pi=(%s))\", getFitness(), baseSeqPermutation);\n}"
+      }
+    ]
+  }
+]

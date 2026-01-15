@@ -1,0 +1,444 @@
+[
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the separator must be a single character",
+          "assertion": "assert args[0].size() == 1;",
+          "name": "separator",
+          "content": "&lt;char&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that uses the given single-character separator.",
+          "assertion": "assert methodResultID == receiverObjectID.on(args[0]).split(null);",
+          "name": null,
+          "content": "a splitter, with default settings, that recognizes that separator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separatorMatcher"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "separatorMatcher must be of type CharMatcher",
+          "assertion": "assert receiverObjectID.separatorMatcher instanceof org.apache.commons.collections4.CharMatcher;",
+          "name": "separatorMatcher",
+          "content": "&lt;code&gt;CharMatcher&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "splitter, with default settings, that uses this matcher",
+          "assertion": "",
+          "description": "splitter, with default settings, that uses this matcher"
+        }
+      ]
+    }
+  },
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the literal, nonempty string to recognize as a separator",
+          "assertion": "assert receiverObjectID.args[0].equals(\"\\u0009, \\u000A, \\u000D\\u000B\\u2028\\u2029\\u00B7\");",
+          "name": "separator",
+          "content": "the literal, nonempty string to recognize as a separator"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter, with default settings, that recognizes that separator",
+          "assertion": "assert receiverObjectID instanceof com.google.common.base.Splitter && methodResultID == receiverObjectID.on(args[0]);",
+          "name": null,
+          "content": "a splitter, with default settings, that recognizes that separator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Pattern",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separatorPattern"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be a Pattern",
+          "assertion": "assert args[0] instanceof java.util.Pattern;",
+          "name": "separatorPattern",
+          "content": "<code>a pattern</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "splitter, with default settings, that uses this pattern",
+          "assertion": "",
+          "description": "splitter, with default settings, that uses this pattern"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if separatorPattern matches the empty string",
+          "assertion": "assert receiverObjectID.containsVertex(args[0]) || !receiverObjectID.containsVertex(java.util.Pattern.emptyPattern());",
+          "name": "IllegalArgumentException",
+          "content": "if separatorPattern matches the empty string"
+        }
+      ]
+    }
+  },
+  {
+    "method": "onPattern",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separatorPattern"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "separatorPattern",
+          "content": "the pattern that determines whether a subsequence is a separator. This pattern may not match the empty string.",
+          "assertion": "",
+          "description": "the pattern that determines whether a subsequence is a separator. This pattern may not match the empty string."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that considers any subsequence matching a given pattern to be a separator.",
+          "assertion": "assert methodResultID == Splitter.onPattern(args[0]).split(entireFile);",
+          "name": null,
+          "content": "a splitter that considers any subsequence matching a given pattern to be a separator."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if {@code separatorPattern} matches the empty string",
+          "assertion": "assert !args[0].isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if {@code separatorPattern} matches the empty string"
+        },
+        {
+          "description": "if {@code separatorPattern} is a malformed expression",
+          "assertion": "assert false;",
+          "name": "java.util.regex.PatternSyntaxException",
+          "content": "if {@code separatorPattern} is a malformed expression"
+        }
+      ]
+    }
+  },
+  {
+    "method": "fixedLength",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "length"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "length must be a positive integer",
+          "assertion": "assert args[0] > 0 && args[0] % 1 == 0;",
+          "name": "length",
+          "content": "length must be a positive integer"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that divides strings into pieces of the given length.",
+          "assertion": "assert receiverObjectID instanceof com.google.common.base.Splitter && methodResultID == (int)receiverObjectID.fixedLength(args[0]);",
+          "name": null,
+          "content": "a splitter that divides strings into pieces of the given length."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if length is zero or negative",
+          "assertion": "assert args[0] <= 0;",
+          "name": "IllegalArgumentException",
+          "content": "if length is zero or negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "omitEmptyStrings",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "splitter with the desired configuration",
+          "assertion": "",
+          "description": "splitter with the desired configuration"
+        }
+      ]
+    }
+  },
+  {
+    "method": "limit",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "limit"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum number of items returned must be a positive integer",
+          "assertion": "assert args[0] > 0;",
+          "name": "limit",
+          "content": "the maximum number of items returned; must be a positive integer"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that behaves equivalently to this splitter but stops splitting after it reaches the limit.",
+          "assertion": "assert methodResultID == receiverObjectID.limit(args[0]);",
+          "name": null,
+          "content": "a splitter that behaves equivalently to this splitter but stops splitting after it reaches the limit."
+        }
+      ]
+    }
+  },
+  {
+    "method": "trimResults",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a splitter with the desired configuration",
+          "assertion": "assert methodResultID == receiverObjectID.trimResults();",
+          "name": null,
+          "content": "a splitter with the desired configuration"
+        }
+      ]
+    }
+  },
+  {
+    "method": "trimResults",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "trimmer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a CharMatcher that determines whether a character should be removed from the beginning/end of a subsequence",
+          "assertion": "assert receiverObjectID.trimmer != null && receiverObjectID.trimmer instanceof java.util.CharMatcher;",
+          "name": "trimmer",
+          "content": "a CharMatcher that determines whether a character should be removed from the beginning/end of a subsequence"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter with the desired configuration",
+          "assertion": "assert receiverObjectID.trimResults(args[0]) == receiverObjectID.split(String::valueOf, args[0]).trimResults(args[0]);",
+          "name": null,
+          "content": "a splitter with the desired configuration"
+        }
+      ]
+    }
+  },
+  {
+    "method": "split",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sequence"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the parameter \"sequence\" must be of type CharSequence and not null",
+          "assertion": "assert receiverObjectID.sequence != null && receiverObjectID.sequence instanceof CharSequence;",
+          "name": "sequence",
+          "content": "CharSequence"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "",
+          "assertion": "assert methodResultID instanceof java.util.Iterator && ((java.util.Iterator)methodResultID).hasNext() || receiverObjectID.split(sequence).iterator().hasNext();",
+          "name": null,
+          "content": ""
+        }
+      ]
+    }
+  },
+  {
+    "method": "splitToList",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sequence"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input must be a CharSequence",
+          "assertion": "assert receiverObjectID instanceof java.lang.CharSequence;",
+          "name": "sequence",
+          "content": "&lt;code&gt;java.util.Sequence&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an immutable list of the segments split from the parameter",
+          "assertion": "assert methodResultID == receiverObjectID.split(args[0]).toList();",
+          "name": null,
+          "content": "&lt;code&gt;String str = &quot;Hello, world!&quot;;\nString[] words = str.split(&quot;&amp;quot);\\nfor (String word : words) {\\n\\tSystem.out.println(word);\\n}\\n&quot;&lt;/code&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "withKeyValueSeparator",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "withKeyValueSeparator",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "withKeyValueSeparator",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "keyValueSplitter"
+      }
+    ],
+    "conditions": {}
+  }
+]

@@ -1,0 +1,628 @@
+[
+  {
+    "method": "Line",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p2"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "tolerance"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "p1 can be any point",
+          "assertion": "assert receiverObjectID.getTolerance() == null;",
+          "name": "tolerance",
+          "content": "the tolerance"
+        },
+        {
+          "description": "p2 must be different from p1",
+          "assertion": "assert receiverObjectID.getAbscissa(receiverObjectID.p1()) != receiverObjectID.getAbscissa(receiverObjectID.p2());",
+          "name": "tolerance",
+          "content": "the tolerance"
+        },
+        {
+          "description": "p2 must be different from p1",
+          "assertion": "assert receiverObjectID.p2() != receiverObjectID.p1();",
+          "name": "p2",
+          "content": "the second point belonging to the line (this can be any point, different from p1)"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathIllegalArgumentException",
+          "content": "if the points are equal",
+          "assertion": "",
+          "description": "if the points are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "Line",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Line",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "line"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The created instance is completely independent from the original instance, it is a deep copy",
+          "assertion": "assert receiverObjectID.getTolerance() == null;",
+          "name": "line",
+          "content": "the line to copy"
+        }
+      ]
+    }
+  },
+  {
+    "method": "Line",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "p1 can be any point",
+          "assertion": "assert receiverObjectID.getTolerance() > 0;",
+          "name": "p1",
+          "content": "this can be any point"
+        },
+        {
+          "description": "p2 can be any point, different from p1",
+          "assertion": "assert args[1] != receiverObjectID && receiverObjectID.getTolerance() > 0;",
+          "name": "p2",
+          "content": "this can be any point, different from p1"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the points are equal",
+          "assertion": "assert args[0] == args[1];",
+          "name": "MathIllegalArgumentException",
+          "content": "if the points are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reset",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "p1",
+          "content": "first point belonging to the line (this can be any point)",
+          "assertion": "",
+          "description": "first point belonging to the line (this can be any point)"
+        },
+        {
+          "tag": "param",
+          "name": "p2",
+          "content": "second point belonging to the line (this can be any point, different from p1)",
+          "assertion": "",
+          "description": "second point belonging to the line (this can be any point, different from p1)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if points are equal",
+          "assertion": "assert args[0] != args[1];",
+          "name": "MathIllegalArgumentException",
+          "content": "if points are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTolerance",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "tolerance below which points are considered identical",
+          "assertion": "assert methodResultID == receiverObjectID.getTolerance();",
+          "name": null,
+          "content": "&lt;double&gt; tolerance = &lt;receiverObjectID&gt;.getTolerance;&lt;/double&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "revert",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new instance, with reversed direction",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "a new instance, with reversed direction"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDirection",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "normalized direction vector",
+          "assertion": "assert methodResultID == receiverObjectID.getDirection();",
+          "name": null,
+          "content": "normalized direction vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getOrigin",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "line point closest to the origin.",
+          "assertion": "assert methodResultID == receiverObjectID.getOrigin().closestPoint(receiverObjectID);",
+          "name": null,
+          "content": "line point closest to the origin."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAbscissa",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "point"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the projection of the point and the frame origin on the line are the same point",
+          "assertion": "assert receiverObjectID.getAbscissa(args[0]) == 0;",
+          "name": "point",
+          "content": "<p>The abscissa is 0 if the projection of the point and the</p> <p>projection of the frame origin on the line are the same point.</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "abscissa",
+          "content": "of the point",
+          "assertion": "",
+          "description": "of the point"
+        }
+      ]
+    }
+  },
+  {
+    "method": "pointAt",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "abscissa"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the abscissa must be a double",
+          "assertion": "assert args[0] instanceof java.lang.Double;",
+          "name": "abscissa",
+          "content": "the abscissa must be a double"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "one point belonging to the line, at specified abscissa",
+          "assertion": "assert receiverObjectID.pointAt(args[0]) == receiverObjectID.getOrigin();",
+          "name": null,
+          "content": "one point belonging to the line, at specified abscissa."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toSubSpace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "vector"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the space point must be a n-dimension Vector",
+          "assertion": "assert receiverObjectID.getAbscissa(args[0]) != null;",
+          "name": "vector",
+          "content": "&lt;vector&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Transform a space point into a sub-space point.",
+          "assertion": "assert receiverObjectID.toSubSpace(args[0]).getAbscissa(null) == null;",
+          "name": null,
+          "content": "Transform a space point into a sub-space point."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toSpace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "vector"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the vector must be (n-1)-dimension",
+          "assertion": "assert args[0] > -1 && args[0] < receiverObjectID.getTolerance();",
+          "name": "vector",
+          "content": "(n-1)-dimension point of the sub-space"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Transform a sub-space point into a space point.",
+          "assertion": "assert receiverObjectID.toSpace(args[0]) == (receiverObjectID.getTolerance() > 0.00001 ? new Vector3D(receiverObjectID.toAbscissa(0)) : null);",
+          "name": null,
+          "content": "Transform a sub-space point into a space point."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toSubSpace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "point"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "toSpace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "point"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "isSimilarTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Line",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "line"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "lines are considered similar if they contain the same points",
+          "assertion": "assert receiverObjectID.getAbscissa(args[0].getTolerance()) != null && receiverObjectID.getDirection() == null;",
+          "name": "line",
+          "content": "&lt;div&gt;Lines are considered similar if they contain the same points. This does not mean they are equal since they can have opposite directions.&lt;/div&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Check if this line is similar to another line.",
+          "assertion": "assert receiverObjectID.isSimilarTo(args[0]);",
+          "name": null,
+          "content": "Check if this line is similar to another line."
+        }
+      ]
+    }
+  },
+  {
+    "method": "contains",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the instance must contain a point",
+          "assertion": "assert receiverObjectID.contains(p);",
+          "name": "p",
+          "content": "point to check"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if p belongs to the line",
+          "assertion": "assert receiverObjectID.contains(p);",
+          "name": null,
+          "content": "true if p belongs to the line"
+        }
+      ]
+    }
+  },
+  {
+    "method": "distance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the point must not be null",
+          "assertion": "assert receiverObjectID.getAbscissa(args[0]) != null;",
+          "name": "p",
+          "content": "to check"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "distance between the instance and the point.",
+          "assertion": "assert methodResultID == receiverObjectID.distance(args[0]);",
+          "name": null,
+          "content": "distance between the instance and the point."
+        }
+      ]
+    }
+  },
+  {
+    "method": "distance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Line",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "line"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "line",
+          "content": "line to check against the instance",
+          "assertion": "",
+          "description": "line to check against the instance"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "shortest distance between the instance and the line",
+          "assertion": "assert methodResultID == receiverObjectID.distance(line);",
+          "name": null,
+          "content": "shortest distance between the instance and the line"
+        }
+      ]
+    }
+  },
+  {
+    "method": "closestPoint",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Line",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "line"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "line must be a Line",
+          "assertion": "assert receiverObjectID.getTolerance() == null && receiverObjectID.isSimilarTo(args[0]) && args[0] != null;",
+          "name": "line",
+          "content": "&lt;Line&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the point of the instance closest to another line",
+          "assertion": "assert receiverObjectID.closestPoint(args[0]) == receiverObjectID.distance(args[0]) && receiverObjectID.distance(args[0]) < 1e-6 ? receiverObjectID.toSpace(receiverObjectID.getOrigin()) : null;",
+          "name": null,
+          "content": "the point of the instance closest to another line"
+        }
+      ]
+    }
+  },
+  {
+    "method": "intersection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Line",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "line"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "line must be a Line",
+          "assertion": "assert receiverObjectID instanceof Line && args[0] != null;",
+          "name": "line",
+          "content": "<code>other line</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "&quot;Get the intersection point of the instance and another line.&quot;\\n\\n@param line \\u00A0other\\u00A0 line\\n\\n@return \\u00A0intersection point of the instance and the other line\\u00A0\\u00A0or null if there are no intersection points\\n",
+          "assertion": "assert methodResultID == (receiverObjectID.intersection(line) != null);",
+          "name": null,
+          "content": "&quot;Get the intersection point of the instance and another line.&quot;\\n\\n@param line \\u00A0other\\u00A0 line\\n\\n@return \\u00A0intersection point of the instance and the other line\\u00A0\\u00A0or null if there are no intersection points\\n"
+        }
+      ]
+    }
+  },
+  {
+    "method": "wholeLine",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a sub-line covering the whole line",
+          "assertion": "assert methodResultID == receiverObjectID.toSpace(receiverObjectID.getOrigin());",
+          "name": null,
+          "content": "a sub-line covering the whole line"
+        }
+      ]
+    }
+  }
+]

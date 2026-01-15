@@ -1,0 +1,284 @@
+[
+  {
+    "name": "UnicodeEscaper",
+    "package": "com.google.common.escape",
+    "qualified_name": "com.google.common.escape.UnicodeEscaper",
+    "javadoc": "/**\n * An {@link Escaper} that converts literal text into a format safe for\n * inclusion in a particular context (such as an XML document). Typically (but\n * not always), the inverse process of \"unescaping\" the text is performed\n * automatically by the relevant parser.\n *\n * <p>For example, an XML escaper would convert the literal string {@code\n * \"Foo<Bar>\"} into {@code \"Foo&lt;Bar&gt;\"} to prevent {@code \"<Bar>\"} from\n * being confused with an XML tag. When the resulting XML document is parsed,\n * the parser API will return this text as the original literal string {@code\n * \"Foo<Bar>\"}.\n *\n * <p><b>Note:</b> This class is similar to {@link CharEscaper} but with one\n * very important difference. A CharEscaper can only process Java\n * <a href=\"http://en.wikipedia.org/wiki/UTF-16\">UTF16</a> characters in\n * isolation and may not cope when it encounters surrogate pairs. This class\n * facilitates the correct escaping of all Unicode characters.\n *\n * <p>As there are important reasons, including potential security issues, to\n * handle Unicode correctly if you are considering implementing a new escaper\n * you should favor using UnicodeEscaper wherever possible.\n *\n * <p>A {@code UnicodeEscaper} instance is required to be stateless, and safe\n * when used concurrently by multiple threads.\n *\n * <p>Popular escapers are defined as constants in classes like {@link\n * com.google.common.html.HtmlEscapers} and {@link com.google.common.xml.XmlEscapers}.\n * To create your own escapers extend this class and implement the {@link #escape(int)}\n * method.\n *\n * @author David Beaumont\n * @since 15.0\n */\n",
+    "code": "/**\n * An {@link Escaper} that converts literal text into a format safe for\n * inclusion in a particular context (such as an XML document). Typically (but\n * not always), the inverse process of \"unescaping\" the text is performed\n * automatically by the relevant parser.\n *\n * <p>For example, an XML escaper would convert the literal string {@code\n * \"Foo<Bar>\"} into {@code \"Foo&lt;Bar&gt;\"} to prevent {@code \"<Bar>\"} from\n * being confused with an XML tag. When the resulting XML document is parsed,\n * the parser API will return this text as the original literal string {@code\n * \"Foo<Bar>\"}.\n *\n * <p><b>Note:</b> This class is similar to {@link CharEscaper} but with one\n * very important difference. A CharEscaper can only process Java\n * <a href=\"http://en.wikipedia.org/wiki/UTF-16\">UTF16</a> characters in\n * isolation and may not cope when it encounters surrogate pairs. This class\n * facilitates the correct escaping of all Unicode characters.\n *\n * <p>As there are important reasons, including potential security issues, to\n * handle Unicode correctly if you are considering implementing a new escaper\n * you should favor using UnicodeEscaper wherever possible.\n *\n * <p>A {@code UnicodeEscaper} instance is required to be stateless, and safe\n * when used concurrently by multiple threads.\n *\n * <p>Popular escapers are defined as constants in classes like {@link\n * com.google.common.html.HtmlEscapers} and {@link com.google.common.xml.XmlEscapers}.\n * To create your own escapers extend this class and implement the {@link #escape(int)}\n * method.\n *\n * @author David Beaumont\n * @since 15.0\n */\n@Beta\n@GwtCompatible\npublic abstract class UnicodeEscaper extends Escaper {\n\n    /**\n     * The amount of padding (chars) to use when growing the escape buffer.\n     */\n    private static final int DEST_PAD = 32;\n\n    /**\n     * Constructor for use by subclasses.\n     */\n    protected UnicodeEscaper() {\n    }\n\n    /**\n     * Returns the escaped form of the given Unicode code point, or {@code null}\n     * if this code point does not need to be escaped. When called as part of an\n     * escaping operation, the given code point is guaranteed to be in the range\n     * {@code 0 <= cp <= Character#MAX_CODE_POINT}.\n     *\n     * <p>If an empty array is returned, this effectively strips the input\n     * character from the resulting text.\n     *\n     * <p>If the character does not need to be escaped, this method should return\n     * {@code null}, rather than an array containing the character representation\n     * of the code point. This enables the escaping algorithm to perform more\n     * efficiently.\n     *\n     * <p>If the implementation of this method cannot correctly handle a\n     * particular code point then it should either throw an appropriate runtime\n     * exception or return a suitable replacement character. It must never\n     * silently discard invalid input as this may constitute a security risk.\n     *\n     * @param cp the Unicode code point to escape if necessary\n     * @return the replacement characters, or {@code null} if no escaping was\n     *     needed\n     */\n    protected abstract char[] escape(int cp);\n\n    /**\n     * Scans a sub-sequence of characters from a given {@link CharSequence},\n     * returning the index of the next character that requires escaping.\n     *\n     * <p><b>Note:</b> When implementing an escaper, it is a good idea to override\n     * this method for efficiency. The base class implementation determines\n     * successive Unicode code points and invokes {@link #escape(int)} for each of\n     * them. If the semantics of your escaper are such that code points in the\n     * supplementary range are either all escaped or all unescaped, this method\n     * can be implemented more efficiently using {@link CharSequence#charAt(int)}.\n     *\n     * <p>Note however that if your escaper does not escape characters in the\n     * supplementary range, you should either continue to validate the correctness\n     * of any surrogate characters encountered or provide a clear warning to users\n     * that your escaper does not validate its input.\n     *\n     * <p>See {@link com.google.common.net.PercentEscaper} for an example.\n     *\n     * @param csq a sequence of characters\n     * @param start the index of the first character to be scanned\n     * @param end the index immediately after the last character to be scanned\n     * @throws IllegalArgumentException if the scanned sub-sequence of {@code csq}\n     *     contains invalid surrogate pairs\n     */\n    protected int nextEscapeIndex(CharSequence csq, int start, int end) {\n        int index = start;\n        while (index < end) {\n            int cp = codePointAt(csq, index, end);\n            if (cp < 0 || escape(cp) != null) {\n                break;\n            }\n            index += Character.isSupplementaryCodePoint(cp) ? 2 : 1;\n        }\n        return index;\n    }\n\n    /**\n     * Returns the escaped form of a given literal string.\n     *\n     * <p>If you are escaping input in arbitrary successive chunks, then it is not\n     * generally safe to use this method. If an input string ends with an\n     * unmatched high surrogate character, then this method will throw\n     * {@link IllegalArgumentException}. You should ensure your input is valid <a\n     * href=\"http://en.wikipedia.org/wiki/UTF-16\">UTF-16</a> before calling this\n     * method.\n     *\n     * <p><b>Note:</b> When implementing an escaper it is a good idea to override\n     * this method for efficiency by inlining the implementation of\n     * {@link #nextEscapeIndex(CharSequence, int, int)} directly. Doing this for\n     * {@link com.google.common.net.PercentEscaper} more than doubled the\n     * performance for unescaped strings (as measured by {@link\n     * CharEscapersBenchmark}).\n     *\n     * @param string the literal string to be escaped\n     * @return the escaped form of {@code string}\n     * @throws NullPointerException if {@code string} is null\n     * @throws IllegalArgumentException if invalid surrogate characters are\n     *         encountered\n     */\n    @Override\n    public String escape(String string) {\n        checkNotNull(string);\n        int end = string.length();\n        int index = nextEscapeIndex(string, 0, end);\n        return index == end ? string : escapeSlow(string, index);\n    }\n\n    /**\n     * Returns the escaped form of a given literal string, starting at the given\n     * index.  This method is called by the {@link #escape(String)} method when it\n     * discovers that escaping is required.  It is protected to allow subclasses\n     * to override the fastpath escaping function to inline their escaping test.\n     * See {@link CharEscaperBuilder} for an example usage.\n     *\n     * <p>This method is not reentrant and may only be invoked by the top level\n     * {@link #escape(String)} method.\n     *\n     * @param s the literal string to be escaped\n     * @param index the index to start escaping from\n     * @return the escaped form of {@code string}\n     * @throws NullPointerException if {@code string} is null\n     * @throws IllegalArgumentException if invalid surrogate characters are\n     *         encountered\n     */\n    protected final String escapeSlow(String s, int index) {\n        int end = s.length();\n        // Get a destination buffer and setup some loop variables.\n        char[] dest = Platform.charBufferFromThreadLocal();\n        int destIndex = 0;\n        int unescapedChunkStart = 0;\n        while (index < end) {\n            int cp = codePointAt(s, index, end);\n            if (cp < 0) {\n                throw new IllegalArgumentException(\"Trailing high surrogate at end of input\");\n            }\n            // It is possible for this to return null because nextEscapeIndex() may\n            // (for performance reasons) yield some false positives but it must never\n            // give false negatives.\n            char[] escaped = escape(cp);\n            int nextIndex = index + (Character.isSupplementaryCodePoint(cp) ? 2 : 1);\n            if (escaped != null) {\n                int charsSkipped = index - unescapedChunkStart;\n                // This is the size needed to add the replacement, not the full\n                // size needed by the string.  We only regrow when we absolutely must.\n                int sizeNeeded = destIndex + charsSkipped + escaped.length;\n                if (dest.length < sizeNeeded) {\n                    int destLength = sizeNeeded + (end - index) + DEST_PAD;\n                    dest = growBuffer(dest, destIndex, destLength);\n                }\n                // If we have skipped any characters, we need to copy them now.\n                if (charsSkipped > 0) {\n                    s.getChars(unescapedChunkStart, index, dest, destIndex);\n                    destIndex += charsSkipped;\n                }\n                if (escaped.length > 0) {\n                    System.arraycopy(escaped, 0, dest, destIndex, escaped.length);\n                    destIndex += escaped.length;\n                }\n                // If we dealt with an escaped character, reset the unescaped range.\n                unescapedChunkStart = nextIndex;\n            }\n            index = nextEscapeIndex(s, nextIndex, end);\n        }\n        // Process trailing unescaped characters - no need to account for escaped\n        // length or padding the allocation.\n        int charsSkipped = end - unescapedChunkStart;\n        if (charsSkipped > 0) {\n            int endIndex = destIndex + charsSkipped;\n            if (dest.length < endIndex) {\n                dest = growBuffer(dest, destIndex, endIndex);\n            }\n            s.getChars(unescapedChunkStart, end, dest, destIndex);\n            destIndex = endIndex;\n        }\n        return new String(dest, 0, destIndex);\n    }\n\n    /**\n     * Returns the Unicode code point of the character at the given index.\n     *\n     * <p>Unlike {@link Character#codePointAt(CharSequence, int)} or\n     * {@link String#codePointAt(int)} this method will never fail silently when\n     * encountering an invalid surrogate pair.\n     *\n     * <p>The behaviour of this method is as follows:\n     * <ol>\n     * <li>If {@code index >= end}, {@link IndexOutOfBoundsException} is thrown.\n     * <li><b>If the character at the specified index is not a surrogate, it is\n     *     returned.</b>\n     * <li>If the first character was a high surrogate value, then an attempt is\n     *     made to read the next character.\n     *     <ol>\n     *     <li><b>If the end of the sequence was reached, the negated value of\n     *         the trailing high surrogate is returned.</b>\n     *     <li><b>If the next character was a valid low surrogate, the code point\n     *         value of the high/low surrogate pair is returned.</b>\n     *     <li>If the next character was not a low surrogate value, then\n     *         {@link IllegalArgumentException} is thrown.\n     *     </ol>\n     * <li>If the first character was a low surrogate value,\n     *     {@link IllegalArgumentException} is thrown.\n     * </ol>\n     *\n     * @param seq the sequence of characters from which to decode the code point\n     * @param index the index of the first character to decode\n     * @param end the index beyond the last valid character to decode\n     * @return the Unicode code point for the given index or the negated value of\n     *         the trailing high surrogate character at the end of the sequence\n     */\n    protected static int codePointAt(CharSequence seq, int index, int end) {\n        checkNotNull(seq);\n        if (index < end) {\n            char c1 = seq.charAt(index++);\n            if (c1 < Character.MIN_HIGH_SURROGATE || c1 > Character.MAX_LOW_SURROGATE) {\n                // Fast path (first test is probably all we need to do)\n                return c1;\n            } else if (c1 <= Character.MAX_HIGH_SURROGATE) {\n                // If the high surrogate was the last character, return its inverse\n                if (index == end) {\n                    return -c1;\n                }\n                // Otherwise look for the low surrogate following it\n                char c2 = seq.charAt(index);\n                if (Character.isLowSurrogate(c2)) {\n                    return Character.toCodePoint(c1, c2);\n                }\n                throw new IllegalArgumentException(\"Expected low surrogate but got char '\" + c2 + \"' with value \" + (int) c2 + \" at index \" + index + \" in '\" + seq + \"'\");\n            } else {\n                throw new IllegalArgumentException(\"Unexpected low surrogate character '\" + c1 + \"' with value \" + (int) c1 + \" at index \" + (index - 1) + \" in '\" + seq + \"'\");\n            }\n        }\n        throw new IndexOutOfBoundsException(\"Index exceeds specified range\");\n    }\n\n    /**\n     * Helper method to grow the character buffer as needed, this only happens\n     * once in a while so it's ok if it's in a method call.  If the index passed\n     * in is 0 then no copying will be done.\n     */\n    private static char[] growBuffer(char[] dest, int index, int size) {\n        char[] copy = new char[size];\n        if (index > 0) {\n            System.arraycopy(dest, 0, copy, 0, index);\n        }\n        return copy;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "UnicodeEscaper",
+        "parameters": [],
+        "javadoc": "/**\n * Constructor for use by subclasses.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructor for use by subclasses.\n */\nprotected UnicodeEscaper() {\n}"
+      },
+      {
+        "type": "method",
+        "name": "escape",
+        "return_type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "cp"
+          }
+        ],
+        "javadoc": "/**\n * Returns the escaped form of the given Unicode code point, or {@code null}\n * if this code point does not need to be escaped. When called as part of an\n * escaping operation, the given code point is guaranteed to be in the range\n * {@code 0 <= cp <= Character#MAX_CODE_POINT}.\n *\n * <p>If an empty array is returned, this effectively strips the input\n * character from the resulting text.\n *\n * <p>If the character does not need to be escaped, this method should return\n * {@code null}, rather than an array containing the character representation\n * of the code point. This enables the escaping algorithm to perform more\n * efficiently.\n *\n * <p>If the implementation of this method cannot correctly handle a\n * particular code point then it should either throw an appropriate runtime\n * exception or return a suitable replacement character. It must never\n * silently discard invalid input as this may constitute a security risk.\n *\n * @param cp the Unicode code point to escape if necessary\n * @return the replacement characters, or {@code null} if no escaping was\n *     needed\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "cp",
+            "content": "the Unicode code point to escape if necessary"
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "replacement characters, or {@code null} if no escaping was needed"
+          }
+        ],
+        "code": "/**\n * Returns the escaped form of the given Unicode code point, or {@code null}\n * if this code point does not need to be escaped. When called as part of an\n * escaping operation, the given code point is guaranteed to be in the range\n * {@code 0 <= cp <= Character#MAX_CODE_POINT}.\n *\n * <p>If an empty array is returned, this effectively strips the input\n * character from the resulting text.\n *\n * <p>If the character does not need to be escaped, this method should return\n * {@code null}, rather than an array containing the character representation\n * of the code point. This enables the escaping algorithm to perform more\n * efficiently.\n *\n * <p>If the implementation of this method cannot correctly handle a\n * particular code point then it should either throw an appropriate runtime\n * exception or return a suitable replacement character. It must never\n * silently discard invalid input as this may constitute a security risk.\n *\n * @param cp the Unicode code point to escape if necessary\n * @return the replacement characters, or {@code null} if no escaping was\n *     needed\n */\nprotected abstract char[] escape(int cp);"
+      },
+      {
+        "type": "method",
+        "name": "nextEscapeIndex",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "csq"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "start"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "end"
+          }
+        ],
+        "javadoc": "/**\n * Scans a sub-sequence of characters from a given {@link CharSequence},\n * returning the index of the next character that requires escaping.\n *\n * <p><b>Note:</b> When implementing an escaper, it is a good idea to override\n * this method for efficiency. The base class implementation determines\n * successive Unicode code points and invokes {@link #escape(int)} for each of\n * them. If the semantics of your escaper are such that code points in the\n * supplementary range are either all escaped or all unescaped, this method\n * can be implemented more efficiently using {@link CharSequence#charAt(int)}.\n *\n * <p>Note however that if your escaper does not escape characters in the\n * supplementary range, you should either continue to validate the correctness\n * of any surrogate characters encountered or provide a clear warning to users\n * that your escaper does not validate its input.\n *\n * <p>See {@link com.google.common.net.PercentEscaper} for an example.\n *\n * @param csq a sequence of characters\n * @param start the index of the first character to be scanned\n * @param end the index immediately after the last character to be scanned\n * @throws IllegalArgumentException if the scanned sub-sequence of {@code csq}\n *     contains invalid surrogate pairs\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "csq",
+            "content": "a sequence of characters"
+          },
+          {
+            "tag": "param",
+            "name": "start",
+            "content": "the index of the first character to be scanned"
+          },
+          {
+            "tag": "param",
+            "name": "end",
+            "content": "the index immediately after the last character to be scanned"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the scanned sub-sequence of {@code csq} contains invalid surrogate pairs"
+          }
+        ],
+        "code": "/**\n * Scans a sub-sequence of characters from a given {@link CharSequence},\n * returning the index of the next character that requires escaping.\n *\n * <p><b>Note:</b> When implementing an escaper, it is a good idea to override\n * this method for efficiency. The base class implementation determines\n * successive Unicode code points and invokes {@link #escape(int)} for each of\n * them. If the semantics of your escaper are such that code points in the\n * supplementary range are either all escaped or all unescaped, this method\n * can be implemented more efficiently using {@link CharSequence#charAt(int)}.\n *\n * <p>Note however that if your escaper does not escape characters in the\n * supplementary range, you should either continue to validate the correctness\n * of any surrogate characters encountered or provide a clear warning to users\n * that your escaper does not validate its input.\n *\n * <p>See {@link com.google.common.net.PercentEscaper} for an example.\n *\n * @param csq a sequence of characters\n * @param start the index of the first character to be scanned\n * @param end the index immediately after the last character to be scanned\n * @throws IllegalArgumentException if the scanned sub-sequence of {@code csq}\n *     contains invalid surrogate pairs\n */\nprotected int nextEscapeIndex(CharSequence csq, int start, int end) {\n    int index = start;\n    while (index < end) {\n        int cp = codePointAt(csq, index, end);\n        if (cp < 0 || escape(cp) != null) {\n            break;\n        }\n        index += Character.isSupplementaryCodePoint(cp) ? 2 : 1;\n    }\n    return index;\n}"
+      },
+      {
+        "type": "method",
+        "name": "escape",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          }
+        ],
+        "javadoc": "/**\n * Returns the escaped form of a given literal string.\n *\n * <p>If you are escaping input in arbitrary successive chunks, then it is not\n * generally safe to use this method. If an input string ends with an\n * unmatched high surrogate character, then this method will throw\n * {@link IllegalArgumentException}. You should ensure your input is valid <a\n * href=\"http://en.wikipedia.org/wiki/UTF-16\">UTF-16</a> before calling this\n * method.\n *\n * <p><b>Note:</b> When implementing an escaper it is a good idea to override\n * this method for efficiency by inlining the implementation of\n * {@link #nextEscapeIndex(CharSequence, int, int)} directly. Doing this for\n * {@link com.google.common.net.PercentEscaper} more than doubled the\n * performance for unescaped strings (as measured by {@link\n * CharEscapersBenchmark}).\n *\n * @param string the literal string to be escaped\n * @return the escaped form of {@code string}\n * @throws NullPointerException if {@code string} is null\n * @throws IllegalArgumentException if invalid surrogate characters are\n *         encountered\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "the literal string to be escaped"
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "escaped form of {@code string}"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if {@code string} is null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if invalid surrogate characters are encountered"
+          }
+        ],
+        "code": "/**\n * Returns the escaped form of a given literal string.\n *\n * <p>If you are escaping input in arbitrary successive chunks, then it is not\n * generally safe to use this method. If an input string ends with an\n * unmatched high surrogate character, then this method will throw\n * {@link IllegalArgumentException}. You should ensure your input is valid <a\n * href=\"http://en.wikipedia.org/wiki/UTF-16\">UTF-16</a> before calling this\n * method.\n *\n * <p><b>Note:</b> When implementing an escaper it is a good idea to override\n * this method for efficiency by inlining the implementation of\n * {@link #nextEscapeIndex(CharSequence, int, int)} directly. Doing this for\n * {@link com.google.common.net.PercentEscaper} more than doubled the\n * performance for unescaped strings (as measured by {@link\n * CharEscapersBenchmark}).\n *\n * @param string the literal string to be escaped\n * @return the escaped form of {@code string}\n * @throws NullPointerException if {@code string} is null\n * @throws IllegalArgumentException if invalid surrogate characters are\n *         encountered\n */\n@Override\npublic String escape(String string) {\n    checkNotNull(string);\n    int end = string.length();\n    int index = nextEscapeIndex(string, 0, end);\n    return index == end ? string : escapeSlow(string, index);\n}"
+      },
+      {
+        "type": "method",
+        "name": "escapeSlow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "s"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          }
+        ],
+        "javadoc": "/**\n * Returns the escaped form of a given literal string, starting at the given\n * index.  This method is called by the {@link #escape(String)} method when it\n * discovers that escaping is required.  It is protected to allow subclasses\n * to override the fastpath escaping function to inline their escaping test.\n * See {@link CharEscaperBuilder} for an example usage.\n *\n * <p>This method is not reentrant and may only be invoked by the top level\n * {@link #escape(String)} method.\n *\n * @param s the literal string to be escaped\n * @param index the index to start escaping from\n * @return the escaped form of {@code string}\n * @throws NullPointerException if {@code string} is null\n * @throws IllegalArgumentException if invalid surrogate characters are\n *         encountered\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "s",
+            "content": "the literal string to be escaped"
+          },
+          {
+            "tag": "param",
+            "name": "index",
+            "content": "the index to start escaping from"
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "escaped form of {@code string}"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if {@code string} is null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if invalid surrogate characters are encountered"
+          }
+        ],
+        "code": "/**\n * Returns the escaped form of a given literal string, starting at the given\n * index.  This method is called by the {@link #escape(String)} method when it\n * discovers that escaping is required.  It is protected to allow subclasses\n * to override the fastpath escaping function to inline their escaping test.\n * See {@link CharEscaperBuilder} for an example usage.\n *\n * <p>This method is not reentrant and may only be invoked by the top level\n * {@link #escape(String)} method.\n *\n * @param s the literal string to be escaped\n * @param index the index to start escaping from\n * @return the escaped form of {@code string}\n * @throws NullPointerException if {@code string} is null\n * @throws IllegalArgumentException if invalid surrogate characters are\n *         encountered\n */\nprotected final String escapeSlow(String s, int index) {\n    int end = s.length();\n    // Get a destination buffer and setup some loop variables.\n    char[] dest = Platform.charBufferFromThreadLocal();\n    int destIndex = 0;\n    int unescapedChunkStart = 0;\n    while (index < end) {\n        int cp = codePointAt(s, index, end);\n        if (cp < 0) {\n            throw new IllegalArgumentException(\"Trailing high surrogate at end of input\");\n        }\n        // It is possible for this to return null because nextEscapeIndex() may\n        // (for performance reasons) yield some false positives but it must never\n        // give false negatives.\n        char[] escaped = escape(cp);\n        int nextIndex = index + (Character.isSupplementaryCodePoint(cp) ? 2 : 1);\n        if (escaped != null) {\n            int charsSkipped = index - unescapedChunkStart;\n            // This is the size needed to add the replacement, not the full\n            // size needed by the string.  We only regrow when we absolutely must.\n            int sizeNeeded = destIndex + charsSkipped + escaped.length;\n            if (dest.length < sizeNeeded) {\n                int destLength = sizeNeeded + (end - index) + DEST_PAD;\n                dest = growBuffer(dest, destIndex, destLength);\n            }\n            // If we have skipped any characters, we need to copy them now.\n            if (charsSkipped > 0) {\n                s.getChars(unescapedChunkStart, index, dest, destIndex);\n                destIndex += charsSkipped;\n            }\n            if (escaped.length > 0) {\n                System.arraycopy(escaped, 0, dest, destIndex, escaped.length);\n                destIndex += escaped.length;\n            }\n            // If we dealt with an escaped character, reset the unescaped range.\n            unescapedChunkStart = nextIndex;\n        }\n        index = nextEscapeIndex(s, nextIndex, end);\n    }\n    // Process trailing unescaped characters - no need to account for escaped\n    // length or padding the allocation.\n    int charsSkipped = end - unescapedChunkStart;\n    if (charsSkipped > 0) {\n        int endIndex = destIndex + charsSkipped;\n        if (dest.length < endIndex) {\n            dest = growBuffer(dest, destIndex, endIndex);\n        }\n        s.getChars(unescapedChunkStart, end, dest, destIndex);\n        destIndex = endIndex;\n    }\n    return new String(dest, 0, destIndex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "codePointAt",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "seq"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "end"
+          }
+        ],
+        "javadoc": "/**\n * Returns the Unicode code point of the character at the given index.\n *\n * <p>Unlike {@link Character#codePointAt(CharSequence, int)} or\n * {@link String#codePointAt(int)} this method will never fail silently when\n * encountering an invalid surrogate pair.\n *\n * <p>The behaviour of this method is as follows:\n * <ol>\n * <li>If {@code index >= end}, {@link IndexOutOfBoundsException} is thrown.\n * <li><b>If the character at the specified index is not a surrogate, it is\n *     returned.</b>\n * <li>If the first character was a high surrogate value, then an attempt is\n *     made to read the next character.\n *     <ol>\n *     <li><b>If the end of the sequence was reached, the negated value of\n *         the trailing high surrogate is returned.</b>\n *     <li><b>If the next character was a valid low surrogate, the code point\n *         value of the high/low surrogate pair is returned.</b>\n *     <li>If the next character was not a low surrogate value, then\n *         {@link IllegalArgumentException} is thrown.\n *     </ol>\n * <li>If the first character was a low surrogate value,\n *     {@link IllegalArgumentException} is thrown.\n * </ol>\n *\n * @param seq the sequence of characters from which to decode the code point\n * @param index the index of the first character to decode\n * @param end the index beyond the last valid character to decode\n * @return the Unicode code point for the given index or the negated value of\n *         the trailing high surrogate character at the end of the sequence\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "seq",
+            "content": "the sequence of characters from which to decode the code point"
+          },
+          {
+            "tag": "param",
+            "name": "index",
+            "content": "the index of the first character to decode"
+          },
+          {
+            "tag": "param",
+            "name": "end",
+            "content": "the index beyond the last valid character to decode"
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "Unicode code point for the given index or the negated value of the trailing high surrogate character at the end of the sequence"
+          }
+        ],
+        "code": "/**\n * Returns the Unicode code point of the character at the given index.\n *\n * <p>Unlike {@link Character#codePointAt(CharSequence, int)} or\n * {@link String#codePointAt(int)} this method will never fail silently when\n * encountering an invalid surrogate pair.\n *\n * <p>The behaviour of this method is as follows:\n * <ol>\n * <li>If {@code index >= end}, {@link IndexOutOfBoundsException} is thrown.\n * <li><b>If the character at the specified index is not a surrogate, it is\n *     returned.</b>\n * <li>If the first character was a high surrogate value, then an attempt is\n *     made to read the next character.\n *     <ol>\n *     <li><b>If the end of the sequence was reached, the negated value of\n *         the trailing high surrogate is returned.</b>\n *     <li><b>If the next character was a valid low surrogate, the code point\n *         value of the high/low surrogate pair is returned.</b>\n *     <li>If the next character was not a low surrogate value, then\n *         {@link IllegalArgumentException} is thrown.\n *     </ol>\n * <li>If the first character was a low surrogate value,\n *     {@link IllegalArgumentException} is thrown.\n * </ol>\n *\n * @param seq the sequence of characters from which to decode the code point\n * @param index the index of the first character to decode\n * @param end the index beyond the last valid character to decode\n * @return the Unicode code point for the given index or the negated value of\n *         the trailing high surrogate character at the end of the sequence\n */\nprotected static int codePointAt(CharSequence seq, int index, int end) {\n    checkNotNull(seq);\n    if (index < end) {\n        char c1 = seq.charAt(index++);\n        if (c1 < Character.MIN_HIGH_SURROGATE || c1 > Character.MAX_LOW_SURROGATE) {\n            // Fast path (first test is probably all we need to do)\n            return c1;\n        } else if (c1 <= Character.MAX_HIGH_SURROGATE) {\n            // If the high surrogate was the last character, return its inverse\n            if (index == end) {\n                return -c1;\n            }\n            // Otherwise look for the low surrogate following it\n            char c2 = seq.charAt(index);\n            if (Character.isLowSurrogate(c2)) {\n                return Character.toCodePoint(c1, c2);\n            }\n            throw new IllegalArgumentException(\"Expected low surrogate but got char '\" + c2 + \"' with value \" + (int) c2 + \" at index \" + index + \" in '\" + seq + \"'\");\n        } else {\n            throw new IllegalArgumentException(\"Unexpected low surrogate character '\" + c1 + \"' with value \" + (int) c1 + \" at index \" + (index - 1) + \" in '\" + seq + \"'\");\n        }\n    }\n    throw new IndexOutOfBoundsException(\"Index exceeds specified range\");\n}"
+      }
+    ]
+  }
+]

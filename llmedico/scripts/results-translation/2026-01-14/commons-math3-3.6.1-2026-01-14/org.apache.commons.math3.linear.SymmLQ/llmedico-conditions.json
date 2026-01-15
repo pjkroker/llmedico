@@ -1,0 +1,919 @@
+[
+  {
+    "method": "SymmLQ",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxIterations"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "delta"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "check"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "maxIterations must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "maxIterations",
+          "content": "the maximum number of iterations"
+        },
+        {
+          "description": "delta must be positive",
+          "assertion": "assert args[1] > 0;",
+          "name": "delta",
+          "content": "the &delta; parameter for the default stopping criterion"
+        },
+        {
+          "description": "check must be boolean",
+          "assertion": "assert isinstance(args[2], bool);",
+          "name": "check",
+          "content": "{@code true} if self-adjointedness of both matrix and preconditioner should be checked"
+        }
+      ]
+    }
+  },
+  {
+    "method": "SymmLQ",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "IterationManager",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "manager"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "delta"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "check"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "",
+          "assertion": "assert args[0] != null && !args[0].getCheck();",
+          "name": "manager",
+          "content": "&lt;the custom iteration manager&gt;"
+        },
+        {
+          "description": "",
+          "assertion": "assert args[1] != null && (Boolean) args[1];",
+          "name": "delta",
+          "content": "&lt;the &amp;delta; parameter for the default stopping criterion&gt;"
+        },
+        {
+          "description": "",
+          "assertion": "assert !(Boolean) args[2];",
+          "name": "check",
+          "content": "&lt;self-adjointedness of both matrix and preconditioner should be checked&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getCheck",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if the tests are to be performed",
+          "assertion": "assert methodResultID == receiverObjectID.getCheck();",
+          "name": null,
+          "content": "true if the tests are to be performed"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if getCheck() is true, and a or m is not self-adjoint",
+          "assertion": "assert receiverObjectID.getCheck()==true && (receiverObjectID.geta()==null || receiverObjectID.getm()==null || receiverObjectID.geta().getSelfAdjoint()==false) && (receiverObjectID.getM()==null || receiverObjectID.getm().getSelfAdjoint()==false);",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if getCheck() is true, and a or m is not self-adjoint"
+        },
+        {
+          "description": "if m is not positive definite",
+          "assertion": "assert receiverObjectID.getM().getPositiveDefinite()==false;",
+          "name": "NonPositiveDefiniteOperatorException",
+          "content": "if m is not positive definite"
+        },
+        {
+          "description": "if a is ill-conditioned",
+          "assertion": "assert receiverObjectID.geta().getIllConditioned()==true;",
+          "name": "IllConditionedOperatorException",
+          "content": "if a is ill-conditioned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "goodb"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "shift"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "the linear operator A of the system",
+          "assertion": "",
+          "description": "the linear operator A of the system"
+        },
+        {
+          "tag": "param",
+          "name": "m",
+          "content": "the preconditioner, M (can be {@code null})",
+          "assertion": "",
+          "description": "the preconditioner, M (can be {@code null})"
+        },
+        {
+          "tag": "param",
+          "name": "b",
+          "content": "the right-hand side vector",
+          "assertion": "",
+          "description": "the right-hand side vector"
+        },
+        {
+          "tag": "param",
+          "name": "goodb",
+          "content": "usually {@code false}, except if {@code x} is expected to contain a large multiple of {@code b}",
+          "assertion": "",
+          "description": "usually {@code false}, except if {@code x} is expected to contain a large multiple of {@code b}"
+        },
+        {
+          "tag": "param",
+          "name": "shift",
+          "content": "the amount to be subtracted to all diagonal elements of A",
+          "assertion": "",
+          "description": "the amount to be subtracted to all diagonal elements of A"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "reference to {@code x} (shallow copy)",
+          "assertion": "",
+          "description": "reference to {@code x} (shallow copy)"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullArgumentException",
+          "content": "if one of the parameters is {@code null}",
+          "assertion": "",
+          "description": "if one of the parameters is {@code null}"
+        },
+        {
+          "tag": "throws",
+          "name": "NonSquareOperatorException",
+          "content": "if {@code a} or {@code m} is not square",
+          "assertion": "",
+          "description": "if {@code a} or {@code m} is not square"
+        },
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code m} or {@code b} have dimensions inconsistent with {@code a}",
+          "assertion": "",
+          "description": "if {@code m} or {@code b} have dimensions inconsistent with {@code a}"
+        },
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}",
+          "assertion": "",
+          "description": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}"
+        },
+        {
+          "tag": "throws",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if {@link #getCheck()} is {@code true}, and {@code a} or {@code m} is not self-adjoint",
+          "assertion": "",
+          "description": "if {@link #getCheck()} is {@code true}, and {@code a} or {@code m} is not self-adjoint"
+        },
+        {
+          "tag": "throws",
+          "name": "NonPositiveDefiniteOperatorException",
+          "content": "if {@code m} is not positive definite",
+          "assertion": "",
+          "description": "if {@code m} is not positive definite"
+        },
+        {
+          "tag": "throws",
+          "name": "IllConditionedOperatorException",
+          "content": "if {@code a} is ill-conditioned",
+          "assertion": "",
+          "description": "if {@code a} is ill-conditioned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "x",
+          "content": "not meaningful in this implementation; should not be considered as an initial guess (<a href=\"#initguess\">more</a>)",
+          "assertion": "",
+          "description": "not meaningful in this implementation; should not be considered as an initial guess (<a href=\"#initguess\">more</a>)"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if {@link #getCheck()} is {@code true}, and {@code a} or {@code m} is not self-adjoint",
+          "assertion": "",
+          "description": "if {@link #getCheck()} is {@code true}, and {@code a} or {@code m} is not self-adjoint"
+        },
+        {
+          "tag": "throws",
+          "name": "NonPositiveDefiniteOperatorException",
+          "content": "if {@code m} is not positive definite",
+          "assertion": "",
+          "description": "if {@code m} is not positive definite"
+        },
+        {
+          "tag": "throws",
+          "name": "IllConditionedOperatorException",
+          "content": "if {@code a} is ill-conditioned",
+          "assertion": "",
+          "description": "if {@code a} is ill-conditioned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if getCheck() is true and a is not self-adjoint",
+          "assertion": "assert receiverObjectID.getCheck()==true && receiverObjectID.getSelfAdjacency(a)==false;",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if getCheck() is true and a is not self-adjoint"
+        },
+        {
+          "description": "if a is ill-conditioned",
+          "assertion": "assert receiverObjectID.getIllConditioned(a)==true;",
+          "name": "IllConditionedOperatorException",
+          "content": "if a is ill-conditioned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "goodb"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "shift"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "A must be positive",
+          "assertion": "assert a.getCheck() == true;",
+          "name": "a",
+          "content": "A must be positive"
+        },
+        {
+          "description": "b must be positive",
+          "assertion": "assert b.getLength() > 0;",
+          "name": "b",
+          "content": "b must be positive"
+        },
+        {
+          "description": "goodb usually false, except if x is expected to contain a large multiple of b",
+          "assertion": "assert goodb == false;",
+          "name": "goodb",
+          "content": "goodb usually false, except if x is expected to contain a large multiple of b"
+        },
+        {
+          "description": "shift the amount to be subtracted to all diagonal elements of A must be zero",
+          "assertion": "assert shift == 0;",
+          "name": "shift",
+          "content": "shift the amount to be subtracted to all diagonal elements of A must be zero"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "reference to {@code x}",
+          "assertion": "",
+          "description": "reference to {@code x}"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "&quot;if one of the parameters is null.&quot;",
+          "assertion": "assert receiverObjectID.getCheck() == false || (args[0] != null && args[1] != null);",
+          "name": "NullArgumentException",
+          "content": "&quot;if one of the parameters is null.&quot;"
+        },
+        {
+          "description": "&quot;if a is not square.&quot;",
+          "assertion": "assert receiverObjectID.getCheck() == false || (args[0].getArrayDimensions() == 0 && args[1].getArrayDimensions() == 0);",
+          "name": "NonSquareOperatorException",
+          "content": "&quot;if a is not square.&quot;"
+        },
+        {
+          "description": "&quot;if b has dimensions inconsistent with a.&quot;",
+          "assertion": "assert receiverObjectID.getCheck() == false || (args[0].getArrayDimensions() == args[1].getArrayDimensions());",
+          "name": "DimensionMismatchException",
+          "content": "&quot;if b has dimensions inconsistent with a.&quot;"
+        },
+        {
+          "description": "&quot;at exhaustion of the iteration count, unless a custom callback has been set at construction of the IterationManager.&quot;",
+          "assertion": "assert receiverObjectID.getCheck() == false || ((args[0].getArrayDimensions() > 0 && args[1].getArrayDimensions() > 0) || (receiverObjectID.hasMaxCountExceededCallback()));",
+          "name": "MaxCountExceededException",
+          "content": "&quot;at exhaustion of the iteration count, unless a custom callback has been set at construction of the IterationManager.&quot;"
+        },
+        {
+          "description": "&quot;if a is not self-adjoint and getCheck() is true, then throw NonSelfAdjointOperatorException.&quot;",
+          "assertion": "assert receiverObjectID.getCheck() == false || (args[0].isSelfAdjoint() && args[1].isSelfAdjoint());",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "&quot;if a is not self-adjoint and getCheck() is true, then throw NonSelfAdjointOperatorException.&quot;"
+        },
+        {
+          "description": "&quot;if a is ill-conditioned, then throw IllConditionedOperatorException.&quot;",
+          "assertion": "assert receiverObjectID.getCheck() == false || (args[0].isIllConditioned());",
+          "name": "IllConditionedOperatorException",
+          "content": "&quot;if a is ill-conditioned, then throw IllConditionedOperatorException.&quot;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "x",
+          "content": "not meaningful in this implementation; should not be considered as an initial guess (<a href=\"#initguess\">more</a>)",
+          "assertion": "",
+          "description": "not meaningful in this implementation; should not be considered as an initial guess (<a href=\"#initguess\">more</a>)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if a is not self-adjoint",
+          "assertion": "assert !receiverObjectID.getCheck();",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if {@code a} is not self-adjoint"
+        },
+        {
+          "description": "if a is ill-conditioned",
+          "assertion": "assert receiverObjectID.a.isIllConditioned();",
+          "name": "IllConditionedOperatorException",
+          "content": "if {@code a} is ill-conditioned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solveInPlace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "x",
+          "content": "the vector to be updated with the solution; {@code x} should not be considered as an initial guess (<a href=\"#initguess\">more</a>)",
+          "assertion": "",
+          "description": "the vector to be updated with the solution; {@code x} should not be considered as an initial guess (<a href=\"#initguess\">more</a>)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if a or m is not self-adjoint and getCheck() is true.",
+          "assertion": "assert receiverObjectID.getCheck()==false && (receiverObjectID.a.isSelfAdjoint()==false || receiverObjectID.m.isSelfAdjoint()==false);",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if a or m is not self-adjoint and getCheck() is true."
+        },
+        {
+          "description": "if m is not positive definite.",
+          "assertion": "assert receiverObjectID.m.isPositiveDefinite()==false;",
+          "name": "NonPositiveDefiniteOperatorException",
+          "content": "if m is not positive definite."
+        },
+        {
+          "description": "if a is ill-conditioned.",
+          "assertion": "assert receiverObjectID.a.isIllConditioned()==true;",
+          "name": "IllConditionedOperatorException",
+          "content": "if a is ill-conditioned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solveInPlace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "goodb"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "shift"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "the linear operator A of the system",
+          "assertion": "",
+          "description": "the linear operator A of the system"
+        },
+        {
+          "tag": "param",
+          "name": "m",
+          "content": "the preconditioner, M (can be {@code null})",
+          "assertion": "",
+          "description": "the preconditioner, M (can be {@code null})"
+        },
+        {
+          "tag": "param",
+          "name": "b",
+          "content": "the right-hand side vector",
+          "assertion": "",
+          "description": "the right-hand side vector"
+        },
+        {
+          "tag": "param",
+          "name": "x",
+          "content": "the vector to be updated with the solution; {@code x} should not be considered as an initial guess (<a href=\"#initguess\">more</a>)",
+          "assertion": "",
+          "description": "the vector to be updated with the solution; {@code x} should not be considered as an initial guess (<a href=\"#initguess\">more</a>)"
+        },
+        {
+          "tag": "param",
+          "name": "goodb",
+          "content": "usually {@code false}, except if {@code x} is expected to contain a large multiple of {@code b}",
+          "assertion": "",
+          "description": "usually {@code false}, except if {@code x} is expected to contain a large multiple of {@code b}"
+        },
+        {
+          "tag": "param",
+          "name": "shift",
+          "content": "the amount to be subtracted to all diagonal elements of A",
+          "assertion": "",
+          "description": "the amount to be subtracted to all diagonal elements of A"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "reference to {@code x} (shallow copy).",
+          "assertion": "",
+          "description": "reference to {@code x} (shallow copy)."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullArgumentException",
+          "content": "if one of the parameters is {@code null}",
+          "assertion": "",
+          "description": "if one of the parameters is {@code null}"
+        },
+        {
+          "tag": "throws",
+          "name": "NonSquareOperatorException",
+          "content": "if {@code a} or {@code m} is not square",
+          "assertion": "",
+          "description": "if {@code a} or {@code m} is not square"
+        },
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code m}, {@code b} or {@code x} have dimensions inconsistent with {@code a}.",
+          "assertion": "",
+          "description": "if {@code m}, {@code b} or {@code x} have dimensions inconsistent with {@code a}."
+        },
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}",
+          "assertion": "",
+          "description": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}"
+        },
+        {
+          "tag": "throws",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if {@link #getCheck()} is {@code true}, and {@code a} or {@code m} is not self-adjoint",
+          "assertion": "",
+          "description": "if {@link #getCheck()} is {@code true}, and {@code a} or {@code m} is not self-adjoint"
+        },
+        {
+          "tag": "throws",
+          "name": "NonPositiveDefiniteOperatorException",
+          "content": "if {@code m} is not positive definite",
+          "assertion": "",
+          "description": "if {@code m} is not positive definite"
+        },
+        {
+          "tag": "throws",
+          "name": "IllConditionedOperatorException",
+          "content": "if {@code a} is ill-conditioned",
+          "assertion": "",
+          "description": "if {@code a} is ill-conditioned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solveInPlace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "<a href=\"#selfadjoint\">{@link #getCheck()} is {@code true}, and {#a} is not self-adjoint</a>",
+          "assertion": "assert receiverObjectID.getCheck() == false && args[3] != receiverObjectID.a;",
+          "name": "x",
+          "content": "and "
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if a is not self-adjoint and getCheck() is true",
+          "assertion": "assert receiverObjectID.getCheck() && receiverObjectID.getAdj() == receiverObjectID;",
+          "name": "NonSelfAdjointOperatorException",
+          "content": "if ${a} is not self-adjoint and ${getCheck()} is true"
+        },
+        {
+          "description": "if a is ill-conditioned",
+          "assertion": "assert receiverObjectID.isIllConditioned();",
+          "name": "IllConditionedOperatorException",
+          "content": "if ${a} is ill-conditioned"
+        }
+      ]
+    }
+  }
+]

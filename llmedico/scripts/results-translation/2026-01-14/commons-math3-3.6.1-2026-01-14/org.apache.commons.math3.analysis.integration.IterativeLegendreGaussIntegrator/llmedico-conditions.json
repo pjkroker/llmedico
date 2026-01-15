@@ -1,0 +1,245 @@
+[
+  {
+    "method": "IterativeLegendreGaussIntegrator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "relativeAccuracy"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "absoluteAccuracy"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minimalIterationCount"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maximalIterationCount"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n must be strictly positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "n",
+          "content": "Number of integration points; must be strictly positive"
+        },
+        {
+          "description": "relativeAccuracy must be greater than zero and less than or equal to one",
+          "assertion": "assert (args[1] >= 0.0 && args[1] <= 1.0) && args[1] > 0.0;",
+          "name": "relativeAccuracy",
+          "content": "Relative accuracy of the result; must be greater than zero and less than or equal to one"
+        },
+        {
+          "description": "absoluteAccuracy must be greater than zero and less than or equal to one",
+          "assertion": "assert (args[2] >= 0.0 && args[2] <= 1.0) && args[2] > 0.0;",
+          "name": "absoluteAccuracy",
+          "content": "Absolute accuracy of the result; must be greater than zero and less than or equal to one"
+        },
+        {
+          "description": "minimalIterationCount must be strictly positive",
+          "assertion": "assert args[3] > 0;",
+          "name": "minimalIterationCount",
+          "content": "Minimum number of iterations; must be strictly positive"
+        },
+        {
+          "description": "maximalIterationCount must be greater than zero",
+          "assertion": "assert args[4] > 0;",
+          "name": "maximalIterationCount",
+          "content": "Maximum number of iterations; must be greater than zero"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if minimal number of iterations or number of points are not strictly positive.",
+          "assertion": "assert (receiverObjectID.getMinimalIterationCount() <= 0 || receiverObjectID.getNumberOfPoints() <= 0);",
+          "name": "NotStrictlyPositiveException",
+          "content": "if minimal number of iterations or number of points are not strictly positive."
+        },
+        {
+          "description": "if maximal number of iterations is smaller than or equal to the minimal number of iterations.",
+          "assertion": "assert receiverObjectID.getMaximalIterationCount() <= receiverObjectID.getMinimalIterationCount();",
+          "name": "NumberIsTooSmallException",
+          "content": "if maximal number of iterations is smaller than or equal to the minimal number of iterations."
+        }
+      ]
+    }
+  },
+  {
+    "method": "IterativeLegendreGaussIntegrator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "relativeAccuracy"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "absoluteAccuracy"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n must be strictly positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "n",
+          "content": "Number of integration points."
+        },
+        {
+          "description": "relativeAccuracy must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "relativeAccuracy",
+          "content": "Relative accuracy of the result."
+        },
+        {
+          "description": "absoluteAccuracy must be non-negative",
+          "assertion": "assert args[2] >= 0;",
+          "name": "absoluteAccuracy",
+          "content": "Absolute accuracy of the result."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n < 1",
+          "assertion": "assert args[0] < 1;",
+          "name": "NotStrictlyPositiveException",
+          "content": "if n < 1"
+        }
+      ]
+    }
+  },
+  {
+    "method": "IterativeLegendreGaussIntegrator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minimalIterationCount"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maximalIterationCount"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "n",
+          "content": "Number of integration points."
+        },
+        {
+          "description": "minimalIterationCount must be strictly positive",
+          "assertion": "assert args[1] > 0;",
+          "name": "minimalIterationCount",
+          "content": "Minimum number of iterations."
+        },
+        {
+          "description": "maximalIterationCount must be greater than minimalIterationCount and positive",
+          "assertion": "assert args[2] > args[1] && args[2] > 0;",
+          "name": "maximalIterationCount",
+          "content": "Maximum number of iterations."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if minimal number of iterations is not strictly positive.",
+          "assertion": "assert minimalIterationCount <= 0;",
+          "name": "NotStrictlyPositiveException",
+          "content": "if minimal number of iterations is not strictly positive."
+        },
+        {
+          "description": "if maximal number of iterations is smaller than or equal to the minimal number of iterations.",
+          "assertion": "assert maximalIterationCount <= minimalIterationCount;",
+          "name": "NumberIsTooSmallException",
+          "content": "if maximal number of iterations is smaller than or equal to the minimal number of iterations."
+        },
+        {
+          "description": "if n is less than 1.",
+          "assertion": "assert n < 1;",
+          "name": "NotStrictlyPositiveException",
+          "content": "if n is less than 1."
+        }
+      ]
+    }
+  },
+  {
+    "method": "doIntegrate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  }
+]
