@@ -8,8 +8,8 @@ from pyjdoctor.pyjdoctor import PyJDoctor
 
 input_ = Path(__file__).parent.parent.parent / "pyjdoctor" / "data" / "input"
 
-LLMEDICO = False
-JDOCTOR = True
+LLMEDICO = True
+JDOCTOR = False
 
 projects = {"commons-collections4-4.1":
                 {"data_dir": input_ / "commons-collections4-4.1-src" / "src" / "main" / "java",
@@ -57,7 +57,7 @@ projects = {"commons-collections4-4.1":
             }
             }
 
-done = []
+done = ["commons-collections4-4.1", "commons-math3-3.6.1", "freecol-0.11.6", "gs-core-1.3", "guava-19.0", "jgrapht-core-0.9.2",]
 done_method = {"commons-math3-3.6.1": [], "freecol-0.11.6": []}
 date = datetime.date.today()
 
@@ -87,9 +87,7 @@ for project in projects:
                         os.makedirs(path_out_dir)
                     main(fq_class_name=class_,
                          target_method="dummy",
-                         path_data_dir=None,
                          path_source_dir=projects[project]["data_dir"],
-                         path_class_dir=None,
                          path_output_dir=path_out_dir,
                          path_jar=projects[project]["jar_dir"])
             if JDOCTOR:
