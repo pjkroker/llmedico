@@ -68,7 +68,7 @@ def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, pa
 
 
     logger.debug("---Starting LLMedico---")
-    cnfg = Config(Path(__file__).parent.parent.parent / "config.toml")
+    cnfg = Config(Path(__file__).resolve().parent.parent.parent / "config.toml")
     llm_config = cnfg.section("llm")
     trans_config = cnfg.section("translation")
 
