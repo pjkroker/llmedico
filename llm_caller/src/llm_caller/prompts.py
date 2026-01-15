@@ -157,9 +157,17 @@ CONDITION_BASE_STRING = """You are a Java expert.
     - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
     - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
     
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
     General Requirements:
     A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
     B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    BAD Example: assert !args[0].length == 0 && !args[1].length == 0;
+    GOOD Example: assert args[0].length != 0 && args[1].length != 0;
     C. Only output JSON, no additional explanations or commentary.
     D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
     E. Provide a short description for the generated assertion as shown in the example.
@@ -186,7 +194,8 @@ CONDITION_BASE_STRING = """You are a Java expert.
 FINAL_INSTRUCTION = """
 Before outputting the assertion, verify:
 “Could this condition be expressed using args[i] alone?”
-If yes, do not use receiverObjectID"""
+If yes, do not use receiverObjectID
+Finally, ONLY return the List of JSON Elements like shown in the example. DO NOT return actual Java or Phyton Code!"""
 PRE_CONDITION_PROMPT_JSON_STRING = """
     Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
     Requirements:
