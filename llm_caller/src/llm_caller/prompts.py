@@ -179,13 +179,13 @@ CONDITION_BASE_STRING = """You are a Java expert.
         -iterator usage
         -size-based conditions
         -Preserve the original abstraction level of the condition.
-    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
-    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
-    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
-    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
-    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
-    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
-    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+    J. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    K. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    L. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    M. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    N. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    O. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    P: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
         -Fewer method calls
         -Fewer operators
         -No receiver references
