@@ -8,17 +8,17 @@ from pyjdoctor.pyjdoctor import PyJDoctor
 
 input_ = Path(__file__).parent.parent.parent / "pyjdoctor" / "data" / "input"
 
-LLMEDICO = True
-JDOCTOR = False
+LLMEDICO = False
+JDOCTOR = True
 
 projects = {"commons-collections4-4.1":
-                {"data_dir": input_ / "commons-collections4-4.1-src" / "src",
+                {"data_dir": input_ / "commons-collections4-4.1-src" / "src" / "main" / "java",
                  "jar_dir": input_ / "commons-collections4-4.1-src" / "target" / "commons-collections4-4.1.jar",
                  "jdoc_data_dir_a": input_ / "commons-collections4-4.1-src",
                  "jdoc_source_dir_r": "/input/src/main/java",
                  "jdoc_class_dir_r": "/input/target/classes"},
             "commons-math3-3.6.1":{
-                "data_dir": input_ / "commons-math3-3.6.1-src" / "src",
+                "data_dir": input_ / "commons-math3-3.6.1-src" / "src" / "main" / "java",
                 "jar_dir": input_ / "commons-math3-3.6.1-src" / "target" / "commons-math3-3.6.1.jar",
                 "jdoc_data_dir_a": input_ / "commons-math3-3.6.1-src",
                 "jdoc_source_dir_r": "/input/src/main/java",
@@ -42,7 +42,7 @@ projects = {"commons-collections4-4.1":
                 "jdoc_source_dir_r": "/input/guava/src",
                 "jdoc_class_dir_r": "/input/guava/target/classes"},
             "jgrapht-core-0.9.2": {
-                "data_dir": input_ / "jgrapht-0.9.2" / "jgrapht-core" / "src",
+                "data_dir": input_ / "jgrapht-0.9.2" / "jgrapht-core" / "src" / "main" / "java",
                 "jdoc_data_dir_a": input_ / "jgrapht-0.9.2" / "jgrapht-core",
                 "jdoc_source_dir_r": "/input/src/main/java",
                 "jdoc_class_dir_r" : "/input/target/classes",
@@ -58,7 +58,7 @@ projects = {"commons-collections4-4.1":
             }
 
 done = []
-
+done_method = {"commons-math3-3.6.1": [], "freecol-0.11.6": []}
 date = datetime.date.today()
 
 for project in projects:
