@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
+from z3 import is_bool
+
 
 class Expr:
     pass
@@ -116,12 +118,26 @@ INT_RETURN_METHODS = {
         "size",
         "length",
         "count",
+        "index",
+        "max",
+        "min",
+        "minimal",
+        "maximum",
+        "average",
+        "numberOf",
+        "iteration",
+        "norm",
+        "int",
+        "long"
     }
 
 BOOL_RETURN_METHODS = {
     "isEmpty",
     "equals",
     "contains",
+    "is",
+    "has",
+    "exists",
     "containsEdge",
     "containsVertex",
     "containsNode",
@@ -132,6 +148,18 @@ BOOL_RETURN_METHODS = {
 }
 
 MATCH_METHODS = {"anyMatch", "allMatch", "noneMatch"} # for lambda ->
+
+def is_int(expr_name: str) -> bool:
+    for name in BOOL_RETURN_METHODS:
+        if name in expr_name:
+            return True
+    return False
+
+def is_int(expr_name: str) -> bool:
+    for name in INT_RETURN_METHODS:
+        if name in expr_name:
+            return True
+    return False
 
 def typeof(expr: Expr) -> Type:
     if isinstance(expr, IntConst):
@@ -166,10 +194,10 @@ def typeof(expr: Expr) -> Type:
         if expr.name in MATCH_METHODS:
             return Type.BOOL
 
-        if expr.name in INT_RETURN_METHODS:
+        if is_int(expr.name):
             return Type.INT
         # predicates
-        if expr.name in BOOL_RETURN_METHODS or \
+        if is_bool(expr.name) or \
                 expr.name.startswith("is") or \
                 expr.name.startswith("has"):
             return Type.BOOL

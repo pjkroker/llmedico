@@ -20,7 +20,7 @@ METRIC_DEFINITIONS = {
     MetricMode.JDOCTOR: {
         "correct": {
             AssertionRelation.IDENTICAL,
-            AssertionRelation.EMPTY,
+            #AssertionRelation.EMPTY,
         },
         "wrong2": {
             AssertionRelation.EQUIVALENT,
@@ -34,7 +34,7 @@ METRIC_DEFINITIONS = {
     MetricMode.LLMEDICO: {
         "correct": {
             AssertionRelation.IDENTICAL,
-            AssertionRelation.EMPTY,
+            #AssertionRelation.EMPTY,
             AssertionRelation.EQUIVALENT,
         },
         "wrong2": {
@@ -49,7 +49,7 @@ METRIC_DEFINITIONS = {
     MetricMode.RELAXED: {
         "correct": {
             AssertionRelation.IDENTICAL,
-            AssertionRelation.EMPTY,
+            #AssertionRelation.EMPTY,
             AssertionRelation.EQUIVALENT,
             AssertionRelation.DUAL,
             AssertionRelation.STRONGER,

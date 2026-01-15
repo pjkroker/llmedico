@@ -1,5 +1,7 @@
 from collections import Counter, defaultdict
 from typing import List
+import logging
+logger = logging.getLogger(__name__)
 
 from llmedico.conditions.model import Condition, ClassModel, ConditionKind
 from llmedico.evaluation.evaluation_csv_writer import EvaluationCSVWriter
@@ -51,67 +53,55 @@ def _evaluate_assertions(expected: str, generated:str) -> EvaluationResult:
 def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[EvaluationRow]:
     evaluation_rows = []
     class_name = expected.name
+    if class_name != generated.name:
+        raise ValueError(f"Class name mismatch: {class_name} != {generated.name}")
+    if len(expected.methods) != len(generated.methods):
+        logger.critical(f"len expected:{len(expected.methods)} generated:{len(generated.methods)}")
+        raise ValueError("Number of Methods does not match!")
     for i, method_exp in enumerate(expected.methods):
         method_signature = method_exp.signature.name + "(" +  " ".join(p.name for p in method_exp.signature.parameters) + ")"
 
+        if method_exp.signature.name.split(".")[-1] != generated.methods[i].signature.name.split(".")[-1]:
+            raise ValueError(f"Method signature mismatch method expected {method_exp.signature.name} but got {generated.methods[i].signature.name}")
+
         for j, condition_exp in enumerate(method_exp.conditions):
-            expected_condition = condition_exp.expression
-            # print(f"class name is {class_name}")
-            # print("method expected is:")
-            # print(method_exp.signature.name)
-            # print("method expected conditions")
-            # print(method_exp.conditions)
-            # print("method gen is:")
-            # print(generated.methods[i].signature.name)
-            # print("generated conditins")
-            # print(generated.methods[i].conditions)
+            if len(method_exp.conditions) != len(generated.methods[i].conditions):
+                if len(generated.methods[i].conditions) == 0:
+                    logger.critical(f"Cannot compare {method_exp.signature.name} condition, generated methods has none!")
+                    break
+                logger.critical(f"Conditions don't match expected {len(method_exp.conditions)} but got {len(generated.methods[i].conditions)}\n trying to match them to one of expected conditions, but could be wrong!")
+                #raise ValueError(f"Conditions don't match expected {len(method_exp.conditions)} but got {len(generated.methods[i].conditions)}")
 
-            generated_condition = generated.methods[i].conditions[j].expression
-            result = _evaluate_assertions(expected_condition, generated_condition )
-            evaluation_rows.append(EvaluationRow(class_name, method_signature,
-                                                 kind_exp=condition_exp.kind,
-                                                 name_exp=condition_exp.name,
-                                                 kind_gen=generated.methods[i].conditions[j].kind,
-                                                 name_gen=generated.methods[i].conditions[j].name,
-                                                 expected=expected_condition,
-                                                 generated=generated_condition,
-                                                 relation=result.relation,
-                                                 reason=result.reason))
+                for gen in generated.methods[i].conditions:
+                    if gen.name == condition_exp.name:
+                        logger.critical(f"matching condition {condition_exp} and {gen}")
+                        result = _evaluate_assertions(condition_exp.expression, gen.expression)
+                        evaluation_rows.append(EvaluationRow(class_name, method_signature,
+                                                kind_exp=condition_exp.kind,
+                                                name_exp=condition_exp.name,
+                                                kind_gen=gen.kind,
+                                                name_gen=gen.name,
+                                                expected=condition_exp.expression,
+                                                generated=gen.expression,
+                                                relation=result.relation,
+                                                reason=result.reason))
+                        break
+                logger.critical("could not match generated conditions!")
+            else:
+                expected_condition = condition_exp.expression
+                generated_condition = generated.methods[i].conditions[j].expression
 
+                result = _evaluate_assertions(expected_condition, generated_condition )
 
-
-
-
-
-
-        # params_exp = method_exp.param_conditions
-        # params_gen = generated.methods[i].param_conditions
-        # for j, condition_exp in enumerate(params_exp):
-        #     result = _evaluate_assertions(condition_exp.expression, params_gen[j].expression)
-        #     evaluation_rows.append(EvaluationRow(class_name,method_signature, expected=condition_exp.expression,
-        #                                  generated=params_gen[j].expression,
-        #                                  relation=result.relation,
-        #                                  reason=result.reason))
-        #
-        # throws_exp = method_exp.throws_conditions
-        # throws_gen = generated.methods[i].throws_conditions
-        # for j, condition_exp in enumerate(throws_exp):
-        #     result = _evaluate_assertions(condition_exp.expression, throws_gen[j].expression)
-        #     evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=condition_exp.expression,
-        #                                  generated=throws_gen[j].expression,
-        #                                  relation=result.relation,
-        #                                  reason=result.reason))
-        #
-        # return_exp = method_exp.return_conditions
-        # return_gen = generated.methods[i].return_conditions
-        # if not return_exp and not return_gen: #contains no return
-        #     pass
-        # else:
-        #     result = _evaluate_assertions(return_exp[0].expression, return_gen[0].expression)
-        #     evaluation_rows.append(EvaluationRow(class_name, method_signature, expected=return_exp[0].expression,
-        #                                  generated=return_gen[0].expression,
-        #                                  relation=result.relation,
-        #                                  reason=result.reason))
+                evaluation_rows.append(EvaluationRow(class_name, method_signature,
+                                                     kind_exp=condition_exp.kind,
+                                                     name_exp=condition_exp.name,
+                                                     kind_gen=generated.methods[i].conditions[j].kind,
+                                                     name_gen=generated.methods[i].conditions[j].name,
+                                                     expected=expected_condition,
+                                                     generated=generated_condition,
+                                                     relation=result.relation,
+                                                     reason=result.reason))
 
     return evaluation_rows
 

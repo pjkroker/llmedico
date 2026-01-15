@@ -196,7 +196,7 @@ class Z3Translator:
             # return type handling
             # numeric-returning methods (e.g. size(x))
 
-            if expr.name in INT_RETURN_METHODS:
+            if model_ast.is_int(expr.name):
                 # arguments must be references
                 for arg in expr.parameters:
                     if isinstance(arg, Var):
@@ -216,7 +216,7 @@ class Z3Translator:
                 )
                 return f(all_args[0])
 
-            elif expr.name in BOOL_RETURN_METHODS or \
+            elif model_ast.is_bool(expr.name) or \
                     expr.name.startswith("is") or \
                     expr.name.startswith("has"):
                 ret_sort = BoolSort()
