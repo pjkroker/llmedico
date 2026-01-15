@@ -212,6 +212,7 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
 
     Incorrect (receiver misuse):
     assert !receiverObjectID.isEmpty();
+    
     9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
     10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
     In that case, express the assertion using receiverObjectID.
@@ -293,12 +294,12 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
     Output Java assertions:
     ```json
     [
-        {
+        {{
         "description": "the environment is locked",
         "assertion": "assert receiverObjectID.isLocked();",
         "name": "on",
         "content": "true"
-        }
+        }}
     ]
     ```
 
