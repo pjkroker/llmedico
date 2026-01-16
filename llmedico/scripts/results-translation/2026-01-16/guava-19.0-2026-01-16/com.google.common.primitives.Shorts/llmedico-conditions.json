@@ -1,0 +1,723 @@
+[
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a primitive short value",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "value",
+          "content": "a primitive short value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a hash code for value; equal to the result of invoking ((Short) value).hashCode().",
+          "assertion": "assert methodResultID == ((short) args[0]).hashCode();",
+          "name": null,
+          "content": "Returns a hash code for value; equal to the result of invoking ((Short) value).hashCode()."
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkedCast",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "any value in the range of the short type",
+          "assertion": "assert (args[0] < Short.MAX_VALUE) && (args[0] > Short.MIN_VALUE);",
+          "name": "value",
+          "content": "any value in the range of the short type"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the short value that equals value",
+          "assertion": "assert methodResultID >= Short.MIN_VALUE && methodResultID <= Short.MAX_VALUE;",
+          "name": null,
+          "content": "the short value that equals value"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if {@code value} is greater than {@link Short#MAX_VALUE} or less than {@link Short#MIN_VALUE}",
+          "assertion": "",
+          "description": "if {@code value} is greater than {@link Short#MAX_VALUE} or less than {@link Short#MIN_VALUE}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "saturatedCast",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "any long value",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "value",
+          "content": "any long value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the same value cast to short if it is in the range of the short type, Short.MAX_VALUE if it is too large, or Short.MIN_VALUE if it is too small",
+          "assertion": "assert methodResultID == (args[0] >= Short.MIN_VALUE && args[0] <= Short.MAX_VALUE) ? (short) args[0] : ((args[0] > Short.MAX_VALUE) ? Short.MAX_VALUE : Short.MIN_VALUE);",
+          "name": null,
+          "content": "the same value cast to short if it is in the range of the short type, Short.MAX_VALUE if it is too large, or Short.MIN_VALUE if it is too small"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first short to compare",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "the first short to compare"
+        },
+        {
+          "description": "the second short to compare",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "the second short to compare"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a negative value if a is less than b; a positive value if a is greater than b; or zero if they are equal",
+          "assertion": "assert methodResultID == (args[0] - args[1]) >= 0 ? 1 : (args[0] - args[1]) <= 0 ? -1 : 0;",
+          "name": null,
+          "content": "a negative value if a is less than b; a positive value if a is greater than b; or zero if they are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "contains",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of short values, possibly empty",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "array",
+          "content": "an array of short values, possibly empty"
+        },
+        {
+          "description": "a primitive short value",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "target",
+          "content": "a primitive short value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if target is present as an element anywhere in array.",
+          "assertion": "assert methodResultID == Arrays.binarySearch(args[0], args[1]) >= 0;",
+          "name": null,
+          "content": "true if target is present as an element anywhere in array."
+        }
+      ]
+    }
+  },
+  {
+    "method": "indexOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of short values, possibly empty",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "array",
+          "content": "an array of short values, possibly empty"
+        },
+        {
+          "description": "a primitive short value",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "target",
+          "content": "a primitive short value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns the index of the first appearance of the value target in array.",
+          "assertion": "assert methodResultID == (receiverObjectID.contains(args[1], args[0]) ? args[0] : -1);",
+          "name": null,
+          "content": "Returns the index of the first appearance of the value target in array."
+        }
+      ]
+    }
+  },
+  {
+    "method": "indexOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the array to search for as a sub-sequence of the array",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "array",
+          "content": "the array to search for as a sub-sequence of the array"
+        },
+        {
+          "description": "the array to search for as a sub-sequence of the array",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "target",
+          "content": "the array to search for as a sub-sequence of the array"
+        }
+      ]
+    }
+  },
+  {
+    "method": "lastIndexOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of short values, possibly empty",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "array",
+          "content": "an array of short values, possibly empty"
+        },
+        {
+          "description": "a primitive short value",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "target",
+          "content": "a primitive short value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns the index of the last appearance of the value target in array.",
+          "assertion": "assert methodResultID == -1 || receiverObjectID.contains(args[0], args[1]);",
+          "name": null,
+          "content": "Returns the index of the last appearance of the value target in array."
+        }
+      ]
+    }
+  },
+  {
+    "method": "min",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a nonempty array of short values",
+          "assertion": "assert (args[0].length == 0) == false;",
+          "name": "array",
+          "content": "a <i>nonempty</i> array of {@code short} values"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the value present in array that is less than or equal to every other value in the array",
+          "assertion": "assert methodResultID <= Arrays.stream(args[0]).min();",
+          "name": null,
+          "content": "the value present in array that is less than or equal to every other value in the array"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if array is empty",
+          "assertion": "assert args[0].length == 0;",
+          "name": "IllegalArgumentException",
+          "content": "if array is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "max",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a nonempty array of short values",
+          "assertion": "assert (args[0].length == 0) == false;",
+          "name": "array",
+          "content": "a <i>nonempty</i> array of {@code short} values"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the value present in array that is greater than or equal to every other value in the array",
+          "assertion": "assert methodResultID >= args[0].min(args[0]);",
+          "name": null,
+          "content": "the value present in array that is greater than or equal to every other value in the array"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if array is empty",
+          "assertion": "assert args[0].length == 0;",
+          "name": "IllegalArgumentException",
+          "content": "if array is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "concat",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "arrays"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "zero or more short arrays",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "arrays",
+          "content": "zero or more short arrays"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns the values from each provided array combined into a single array.",
+          "assertion": "assert methodResultID == !Arrays.stream(args).mapToLong(array -> Arrays.stream((short[])array).sum()).findFirst().getAsLong() == 0;",
+          "name": null,
+          "content": "Returns the values from each provided array combined into a single array."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toByteArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "fromByteArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "bytes"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if {@code bytes} has fewer than 2 elements",
+          "assertion": "",
+          "description": "if {@code bytes} has fewer than 2 elements"
+        }
+      ]
+    }
+  },
+  {
+    "method": "fromBytes",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b1"
+      },
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b2"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "stringConverter",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "ensureCapacity",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minLength"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "padding"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the source array",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "array",
+          "content": "the source array"
+        },
+        {
+          "description": "the minimum length the returned array must guarantee",
+          "assertion": "assert (args[1] < 0) == false;",
+          "name": "minLength",
+          "content": "the minimum length the returned array must guarantee"
+        },
+        {
+          "description": "an extra amount to 'grow' the array by if growth is necessary",
+          "assertion": "assert (args[2] < 0) == false;",
+          "name": "padding",
+          "content": "an extra amount to 'grow' the array by if growth is necessary"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if {@code minLength} or {@code padding} is negative",
+          "assertion": "",
+          "description": "if {@code minLength} or {@code padding} is negative"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an array containing the same values as array, but guaranteed to be of a specified minimum length.",
+          "assertion": "assert methodResultID == (args[0].length >= args[1] ? args[0] : new short[args[1] + args[2]].concat(args[0], new short[args[1] - args[0].length][0]));",
+          "name": null,
+          "content": "an array containing the same values as array, but guaranteed to be of a specified minimum length."
+        }
+      ]
+    }
+  },
+  {
+    "method": "join",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the text that should appear between consecutive values in the resulting string (but not at the start or end)",
+          "assertion": "assert args[0] == null || !args[0].isEmpty();",
+          "name": "separator",
+          "content": "the text that should appear between consecutive values in the resulting string (but not at the start or end)"
+        },
+        {
+          "description": "an array of short values, possibly empty",
+          "assertion": "assert args[1] == null || !java.util.Arrays.stream(args[1]).allMatch(value -> value != 0);",
+          "name": "array",
+          "content": "an array of short values, possibly empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "lexicographicalComparator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "toArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a collection of Number instances",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "a collection of Number instances"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns an array containing each value of collection, converted to a short value.",
+          "assertion": "assert methodResultID == receiverObjectID.toArray(args[0]).mapToShort(i -> i).toArray();",
+          "name": null,
+          "content": "Returns an array containing each value of collection, converted to a short value."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if {@code collection} or any of its elements is null",
+          "assertion": "",
+          "description": "if {@code collection} or any of its elements is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "asList",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "backingArray"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the array to back the list",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "backingArray",
+          "content": "the array to back the list"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a fixed-size list backed by the specified array.",
+          "assertion": "assert !methodResultID.contains(null);",
+          "name": null,
+          "content": "Returns a fixed-size list backed by the specified array."
+        }
+      ]
+    }
+  }
+]
