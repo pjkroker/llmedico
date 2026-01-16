@@ -7,12 +7,12 @@ from jpype.types import *
 
 
 class JavaPy:
-    def __init__(self, classpath: Path | None = None):
+    def __init__(self, classpath: list[Path] | None = None):
         self.classpath = classpath
 
         if not jpype.isJVMStarted():
             if classpath:
-                jpype.startJVM(classpath=[str(classpath)])
+                jpype.startJVM(classpath=[p.as_posix() for p in classpath])
             else:
                 jpype.startJVM()
 
@@ -28,10 +28,17 @@ class JavaPy:
 
 
 class JavaParser(JavaPy):
-    DEFAULT_CLASSPATH = Path(__file__).parent.parent.parent.parent / "data" / "jars" / "*"
+    JAR_DIR = Path(__file__).parent.parent.parent.parent / "data" / "jars"
 
     def __init__(self):
-        super().__init__(self.DEFAULT_CLASSPATH)
+        jars = list(self.JAR_DIR.glob("*.jar"))
+
+        if not jars:
+            raise FileNotFoundError(
+                f"No JARs found in {self.JAR_DIR}"
+            )
+
+        super().__init__(jars)
 
     def is_valid_java_assert(self, code: str) -> bool:
         """

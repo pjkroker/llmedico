@@ -7,5 +7,5 @@ from llmedico.java_utils.javapy import JavaPy
 """
 
 def test_pyjava_classpath():
-    java_parser = JavaPy(Path("../data/jars/javaparser-core-3.27.1.jar"))
+    java_parser = JavaPy([Path("../data/jars/javaparser-core-3.27.1.jar")])
     assert "javaparser-core-3.27.1.jar" in java_parser.__repr__()

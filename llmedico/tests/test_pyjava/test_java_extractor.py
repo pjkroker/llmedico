@@ -3,7 +3,7 @@ import pathlib
 from pathlib import Path
 from pprint import pprint
 
-from llmedico.java_utils.javapy import JavaPy, JavaParser
+from llmedico.java_utils.javapy import JavaParser
 from se_helpers.files.files import save_json_to_file
 
 """
