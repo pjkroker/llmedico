@@ -8,6 +8,8 @@ class ClassModelBuilder:
         for selected_tag in tags_order:
             for tag in method_data["tags"]:
                 if tag["tag"] == selected_tag and ConditionKind.is_condition_kind(tag["tag"]):
+                    if tag["tag"] == "param" and  "<" in tag["name"] and ">" in tag["name"]:
+                        continue # we dont need tags like @param <S>,S is a generic type parameter, not a runtime value. TODO take care of this at extraction!
                     condition = Condition(kind=ConditionKind(tag["tag"].upper()),
                                           expression=tag.get("assertion", ""),
                                           content=tag["content"],
