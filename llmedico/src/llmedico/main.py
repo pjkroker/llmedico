@@ -116,12 +116,12 @@ def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, pa
         logger.debug(f"has the following javadoc: {javadoc}")
         parameters = java_extractions[0]["members"][i]["parameters"]
         return_type = java_extractions[0]["members"][i].get("return_type", None)
-        tags = java_extractions[0]["members"][i]["tags"]
+        tags = [tag for tag in java_extractions[0]["members"][i]["tags"] if tag["tag"] != "param" or  not (tag["name"].startswith("<") and tag["name"].endswith(">"))] #java_extractions[0]["members"][i]["tags"] # HOTFIX to ignore param <S> TODO check
         type = java_extractions[0]["members"][i]["type"]
 
         # get modes {PARAM, RETURN, THROWS} and their #tags in the docstring
         modes = {}
-        for tag in java_extractions[0]["members"][i]["tags"]:
+        for tag in tags: #java_extractions[0]["members"][i]["tags"]:
             if ConditionKind.is_condition_kind(tag["tag"]):
                 key = tag["tag"].upper()
                 modes[key] = modes.get(key, 0) + 1
@@ -180,11 +180,11 @@ def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, pa
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "net.sf.freecol.common.model.Player$ActivePredicate"  # --target-class java class to be analyzed
-    TARGET_METHOD = "isPrimee"  # --target-method#
-    PATH_SOURCE_DIR = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/src")
+    FQ_CLASS_NAME = "org.apache.commons.math3.genetics.RandomKey"  # --target-class java class to be analyzed
+    TARGET_METHOD = "dummy"  # --target-method#
+    PATH_SOURCE_DIR = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/src/main/java")
     PATH_JAR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/FreeCol.jar")
+        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/target/commons-math3-3.6.1.jar")
     PATH_OUTPUT_DIR = Path(__file__).parent.parent.parent / "data" / "output" # --out-dir
 
     os.environ["LLMEDICO_CONFIG"] = (Path(__file__).parent.parent.parent / "config.toml").as_posix()

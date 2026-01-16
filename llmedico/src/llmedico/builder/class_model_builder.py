@@ -8,7 +8,7 @@ class ClassModelBuilder:
         for selected_tag in tags_order:
             for tag in method_data["tags"]:
                 if tag["tag"] == selected_tag and ConditionKind.is_condition_kind(tag["tag"]):
-                    if tag["tag"] == "param" and  "<" in tag["name"] and ">" in tag["name"]:
+                    if tag["tag"] == "param" and tag["name"].startswith("<") and tag["name"].endswith(">"):
                         continue # we dont need tags like @param <S>,S is a generic type parameter, not a runtime value. TODO take care of this at extraction!
                     condition = Condition(kind=ConditionKind(tag["tag"].upper()),
                                           expression=tag.get("assertion", ""),
@@ -20,7 +20,6 @@ class ClassModelBuilder:
         return conditions
 
     def _build_type(self, parameter_data: dict) -> TypeModel:
-        print(parameter_data)
         type_model = TypeModel(qualified_name=parameter_data["type"]["qualified_name"],
                                simple_name=parameter_data["type"]["simple_name"],
                                is_array=parameter_data["type"]["is_array"])

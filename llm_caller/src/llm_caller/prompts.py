@@ -198,6 +198,8 @@ If yes, do not use receiverObjectID
 Finally, ONLY return the List of JSON Elements like shown in the example. DO NOT return actual Java or Phyton Code!"""
 PRE_CONDITION_PROMPT_JSON_STRING = """
     Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
+    These never produce assertions.
     Requirements:
     1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
     2. Ignore @return and @throws tags — output only pre-condition checks.
