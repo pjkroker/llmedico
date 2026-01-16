@@ -46,8 +46,8 @@ class ClassModelBuilderJdoctor(ClassModelBuilderBase):
         return type_model
 
     def _build_return_type(self, method_data: dict) -> TypeModel | None:
-        if "return_type" in method_data:
-            t = {"type": method_data["return_type"]}
+        if "returnType" in method_data:
+            t = {"type": method_data["returnType"]}
             return self._build_type(t)
         return None
 
