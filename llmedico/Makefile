@@ -12,3 +12,11 @@ clean:
 
 lint:
 	$(PYTHON) -m ruff .
+
+install-deps:
+	pip install -e ../llm_caller
+	pip install -e ../pyjdoctor
+	pip install -e ../se_helpers
+
+install: install-deps
+	pip install -e .
