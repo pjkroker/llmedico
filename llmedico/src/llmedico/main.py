@@ -144,7 +144,7 @@ def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, pa
 
     for i, member in enumerate(java_extractions[0]["members"]):
         for j, tag in enumerate(member["tags"]):
-            if ConditionKind.is_condition_kind(tag["tag"]): #skip unsuported ones like @see
+            if ConditionKind.is_condition_kind(tag["tag"]) and not (tag["name"].startswith("<") and tag["name"].endswith(">")): #skip unsuported ones like @see ,hotfix for @param <S> TODO make right
                 for condition in conditions[i]["conditions"][tag["tag"].upper()]:
                     if (tag["name"] == condition["name"]
                             and (not tag["tag"] == "throws" or len(conditions[i]["conditions"][tag["tag"].upper()]) == 1 #two @throws can have same name (exception)
