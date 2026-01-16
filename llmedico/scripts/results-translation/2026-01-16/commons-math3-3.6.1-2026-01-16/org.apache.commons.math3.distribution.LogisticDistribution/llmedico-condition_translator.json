@@ -1,0 +1,339 @@
+[
+  {
+    "name": "LogisticDistribution",
+    "package": "org.apache.commons.math3.distribution",
+    "qualified_name": "org.apache.commons.math3.distribution.LogisticDistribution",
+    "javadoc": "/**\n * This class implements the Logistic distribution.\n *\n * @see <a href=\"http://en.wikipedia.org/wiki/Logistic_distribution\">Logistic Distribution (Wikipedia)</a>\n * @see <a href=\"http://mathworld.wolfram.com/LogisticDistribution.html\">Logistic Distribution (Mathworld)</a>\n *\n * @since 3.4\n */\n",
+    "code": "/**\n * This class implements the Logistic distribution.\n *\n * @see <a href=\"http://en.wikipedia.org/wiki/Logistic_distribution\">Logistic Distribution (Wikipedia)</a>\n * @see <a href=\"http://mathworld.wolfram.com/LogisticDistribution.html\">Logistic Distribution (Mathworld)</a>\n *\n * @since 3.4\n */\npublic class LogisticDistribution extends AbstractRealDistribution {\n\n    /**\n     * Serializable version identifier.\n     */\n    private static final long serialVersionUID = 20141003;\n\n    /**\n     * The location parameter.\n     */\n    private final double mu;\n\n    /**\n     * The scale parameter.\n     */\n    private final double s;\n\n    /**\n     * Build a new instance.\n     * <p>\n     * <b>Note:</b> this constructor will implicitly create an instance of\n     * {@link Well19937c} as random generator to be used for sampling only (see\n     * {@link #sample()} and {@link #sample(int)}). In case no sampling is\n     * needed for the created distribution, it is advised to pass {@code null}\n     * as random generator via the appropriate constructors to avoid the\n     * additional initialisation overhead.\n     *\n     * @param mu location parameter\n     * @param s scale parameter (must be positive)\n     * @throws NotStrictlyPositiveException if {@code beta <= 0}\n     */\n    public LogisticDistribution(double mu, double s) {\n        this(new Well19937c(), mu, s);\n    }\n\n    /**\n     * Build a new instance.\n     *\n     * @param rng Random number generator\n     * @param mu location parameter\n     * @param s scale parameter (must be positive)\n     * @throws NotStrictlyPositiveException if {@code beta <= 0}\n     */\n    public LogisticDistribution(RandomGenerator rng, double mu, double s) {\n        super(rng);\n        if (s <= 0.0) {\n            throw new NotStrictlyPositiveException(LocalizedFormats.NOT_POSITIVE_SCALE, s);\n        }\n        this.mu = mu;\n        this.s = s;\n    }\n\n    /**\n     * Access the location parameter, {@code mu}.\n     *\n     * @return the location parameter.\n     */\n    public double getLocation() {\n        return mu;\n    }\n\n    /**\n     * Access the scale parameter, {@code s}.\n     *\n     * @return the scale parameter.\n     */\n    public double getScale() {\n        return s;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double density(double x) {\n        double z = (x - mu) / s;\n        double v = FastMath.exp(-z);\n        return 1 / s * v / ((1.0 + v) * (1.0 + v));\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double cumulativeProbability(double x) {\n        double z = 1 / s * (x - mu);\n        return 1.0 / (1.0 + FastMath.exp(-z));\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public double inverseCumulativeProbability(double p) throws OutOfRangeException {\n        if (p < 0.0 || p > 1.0) {\n            throw new OutOfRangeException(p, 0.0, 1.0);\n        } else if (p == 0) {\n            return 0.0;\n        } else if (p == 1) {\n            return Double.POSITIVE_INFINITY;\n        }\n        return s * Math.log(p / (1.0 - p)) + mu;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double getNumericalMean() {\n        return mu;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double getNumericalVariance() {\n        return (MathUtils.PI_SQUARED / 3.0) * (1.0 / (s * s));\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double getSupportLowerBound() {\n        return Double.NEGATIVE_INFINITY;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double getSupportUpperBound() {\n        return Double.POSITIVE_INFINITY;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public boolean isSupportLowerBoundInclusive() {\n        return false;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public boolean isSupportUpperBoundInclusive() {\n        return false;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public boolean isSupportConnected() {\n        return true;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "LogisticDistribution",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "mu"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "s"
+          }
+        ],
+        "javadoc": "/**\n * Build a new instance.\n * <p>\n * <b>Note:</b> this constructor will implicitly create an instance of\n * {@link Well19937c} as random generator to be used for sampling only (see\n * {@link #sample()} and {@link #sample(int)}). In case no sampling is\n * needed for the created distribution, it is advised to pass {@code null}\n * as random generator via the appropriate constructors to avoid the\n * additional initialisation overhead.\n *\n * @param mu location parameter\n * @param s scale parameter (must be positive)\n * @throws NotStrictlyPositiveException if {@code beta <= 0}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "mu",
+            "content": "location parameter",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "location parameter"
+          },
+          {
+            "tag": "param",
+            "name": "s",
+            "content": "scale parameter (must be positive)",
+            "assertion": "assert args[1] > 0;",
+            "description": "scale parameter, must be positive"
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code beta <= 0}",
+            "assertion": "",
+            "description": "if {@code beta <= 0}"
+          }
+        ],
+        "code": "/**\n * Build a new instance.\n * <p>\n * <b>Note:</b> this constructor will implicitly create an instance of\n * {@link Well19937c} as random generator to be used for sampling only (see\n * {@link #sample()} and {@link #sample(int)}). In case no sampling is\n * needed for the created distribution, it is advised to pass {@code null}\n * as random generator via the appropriate constructors to avoid the\n * additional initialisation overhead.\n *\n * @param mu location parameter\n * @param s scale parameter (must be positive)\n * @throws NotStrictlyPositiveException if {@code beta <= 0}\n */\npublic LogisticDistribution(double mu, double s) {\n    this(new Well19937c(), mu, s);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "LogisticDistribution",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "RandomGenerator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "rng"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "mu"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "s"
+          }
+        ],
+        "javadoc": "/**\n * Build a new instance.\n *\n * @param rng Random number generator\n * @param mu location parameter\n * @param s scale parameter (must be positive)\n * @throws NotStrictlyPositiveException if {@code beta <= 0}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "rng",
+            "content": "Random number generator",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "Random number generator"
+          },
+          {
+            "tag": "param",
+            "name": "mu",
+            "content": "location parameter",
+            "assertion": "assert (args[1] <= 0) == false;",
+            "description": "location parameter"
+          },
+          {
+            "tag": "param",
+            "name": "s",
+            "content": "scale parameter (must be positive)",
+            "assertion": "assert (args[2] > 0) != false;",
+            "description": "scale parameter (must be positive)"
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code beta <= 0}",
+            "assertion": "",
+            "description": "if {@code beta <= 0}"
+          }
+        ],
+        "code": "/**\n * Build a new instance.\n *\n * @param rng Random number generator\n * @param mu location parameter\n * @param s scale parameter (must be positive)\n * @throws NotStrictlyPositiveException if {@code beta <= 0}\n */\npublic LogisticDistribution(RandomGenerator rng, double mu, double s) {\n    super(rng);\n    if (s <= 0.0) {\n        throw new NotStrictlyPositiveException(LocalizedFormats.NOT_POSITIVE_SCALE, s);\n    }\n    this.mu = mu;\n    this.s = s;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getLocation",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Access the location parameter, {@code mu}.\n *\n * @return the location parameter.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "location parameter.",
+            "assertion": "assert methodResultID == receiverObjectID.getLocation();",
+            "description": "the location parameter."
+          }
+        ],
+        "code": "/**\n * Access the location parameter, {@code mu}.\n *\n * @return the location parameter.\n */\npublic double getLocation() {\n    return mu;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getScale",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Access the scale parameter, {@code s}.\n *\n * @return the scale parameter.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "scale parameter.",
+            "assertion": "assert methodResultID == receiverObjectID.getScale();",
+            "description": "the scale parameter."
+          }
+        ],
+        "code": "/**\n * Access the scale parameter, {@code s}.\n *\n * @return the scale parameter.\n */\npublic double getScale() {\n    return s;\n}"
+      },
+      {
+        "type": "method",
+        "name": "density",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double density(double x) {\n    double z = (x - mu) / s;\n    double v = FastMath.exp(-z);\n    return 1 / s * v / ((1.0 + v) * (1.0 + v));\n}"
+      },
+      {
+        "type": "method",
+        "name": "cumulativeProbability",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double cumulativeProbability(double x) {\n    double z = 1 / s * (x - mu);\n    return 1.0 / (1.0 + FastMath.exp(-z));\n}"
+      },
+      {
+        "type": "method",
+        "name": "inverseCumulativeProbability",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic double inverseCumulativeProbability(double p) throws OutOfRangeException {\n    if (p < 0.0 || p > 1.0) {\n        throw new OutOfRangeException(p, 0.0, 1.0);\n    } else if (p == 0) {\n        return 0.0;\n    } else if (p == 1) {\n        return Double.POSITIVE_INFINITY;\n    }\n    return s * Math.log(p / (1.0 - p)) + mu;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNumericalMean",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double getNumericalMean() {\n    return mu;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNumericalVariance",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double getNumericalVariance() {\n    return (MathUtils.PI_SQUARED / 3.0) * (1.0 / (s * s));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSupportLowerBound",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double getSupportLowerBound() {\n    return Double.NEGATIVE_INFINITY;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSupportUpperBound",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double getSupportUpperBound() {\n    return Double.POSITIVE_INFINITY;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isSupportLowerBoundInclusive",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic boolean isSupportLowerBoundInclusive() {\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isSupportUpperBoundInclusive",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic boolean isSupportUpperBoundInclusive() {\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isSupportConnected",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic boolean isSupportConnected() {\n    return true;\n}"
+      }
+    ]
+  }
+]

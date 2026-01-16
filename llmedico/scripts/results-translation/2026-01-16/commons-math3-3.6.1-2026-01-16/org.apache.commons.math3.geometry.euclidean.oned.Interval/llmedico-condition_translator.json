@@ -1,0 +1,329 @@
+[
+  {
+    "name": "Interval",
+    "package": "org.apache.commons.math3.geometry.euclidean.oned",
+    "qualified_name": "org.apache.commons.math3.geometry.euclidean.oned.Interval",
+    "javadoc": "/**\n * This class represents a 1D interval.\n * @see IntervalsSet\n * @since 3.0\n */\n",
+    "code": "/**\n * This class represents a 1D interval.\n * @see IntervalsSet\n * @since 3.0\n */\npublic class Interval {\n\n    /**\n     * The lower bound of the interval.\n     */\n    private final double lower;\n\n    /**\n     * The upper bound of the interval.\n     */\n    private final double upper;\n\n    /**\n     * Simple constructor.\n     * @param lower lower bound of the interval\n     * @param upper upper bound of the interval\n     */\n    public Interval(final double lower, final double upper) {\n        if (upper < lower) {\n            throw new NumberIsTooSmallException(LocalizedFormats.ENDPOINTS_NOT_AN_INTERVAL, upper, lower, true);\n        }\n        this.lower = lower;\n        this.upper = upper;\n    }\n\n    /**\n     * Get the lower bound of the interval.\n     * @return lower bound of the interval\n     * @since 3.1\n     */\n    public double getInf() {\n        return lower;\n    }\n\n    /**\n     * Get the lower bound of the interval.\n     * @return lower bound of the interval\n     * @deprecated as of 3.1, replaced by {@link #getInf()}\n     */\n    @Deprecated\n    public double getLower() {\n        return getInf();\n    }\n\n    /**\n     * Get the upper bound of the interval.\n     * @return upper bound of the interval\n     * @since 3.1\n     */\n    public double getSup() {\n        return upper;\n    }\n\n    /**\n     * Get the upper bound of the interval.\n     * @return upper bound of the interval\n     * @deprecated as of 3.1, replaced by {@link #getSup()}\n     */\n    @Deprecated\n    public double getUpper() {\n        return getSup();\n    }\n\n    /**\n     * Get the size of the interval.\n     * @return size of the interval\n     * @since 3.1\n     */\n    public double getSize() {\n        return upper - lower;\n    }\n\n    /**\n     * Get the length of the interval.\n     * @return length of the interval\n     * @deprecated as of 3.1, replaced by {@link #getSize()}\n     */\n    @Deprecated\n    public double getLength() {\n        return getSize();\n    }\n\n    /**\n     * Get the barycenter of the interval.\n     * @return barycenter of the interval\n     * @since 3.1\n     */\n    public double getBarycenter() {\n        return 0.5 * (lower + upper);\n    }\n\n    /**\n     * Get the midpoint of the interval.\n     * @return midpoint of the interval\n     * @deprecated as of 3.1, replaced by {@link #getBarycenter()}\n     */\n    @Deprecated\n    public double getMidPoint() {\n        return getBarycenter();\n    }\n\n    /**\n     * Check a point with respect to the interval.\n     * @param point point to check\n     * @param tolerance tolerance below which points are considered to\n     * belong to the boundary\n     * @return a code representing the point status: either {@link\n     * Location#INSIDE}, {@link Location#OUTSIDE} or {@link Location#BOUNDARY}\n     * @since 3.1\n     */\n    public Location checkPoint(final double point, final double tolerance) {\n        if (point < lower - tolerance || point > upper + tolerance) {\n            return Location.OUTSIDE;\n        } else if (point > lower + tolerance && point < upper - tolerance) {\n            return Location.INSIDE;\n        } else {\n            return Location.BOUNDARY;\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Interval",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lower"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upper"
+          }
+        ],
+        "javadoc": "/**\n * Simple constructor.\n * @param lower lower bound of the interval\n * @param upper upper bound of the interval\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "lower",
+            "content": "lower bound of the interval",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "lower bound of the interval"
+          },
+          {
+            "tag": "param",
+            "name": "upper",
+            "content": "upper bound of the interval",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "upper bound of the interval"
+          }
+        ],
+        "code": "/**\n * Simple constructor.\n * @param lower lower bound of the interval\n * @param upper upper bound of the interval\n */\npublic Interval(final double lower, final double upper) {\n    if (upper < lower) {\n        throw new NumberIsTooSmallException(LocalizedFormats.ENDPOINTS_NOT_AN_INTERVAL, upper, lower, true);\n    }\n    this.lower = lower;\n    this.upper = upper;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getInf",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the lower bound of the interval.\n * @return lower bound of the interval\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "bound of the interval",
+            "assertion": "assert methodResultID == receiverObjectID.getInf();",
+            "description": "lower bound of the interval"
+          },
+          {
+            "tag": "since",
+            "name": "3.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Get the lower bound of the interval.\n * @return lower bound of the interval\n * @since 3.1\n */\npublic double getInf() {\n    return lower;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getLower",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the lower bound of the interval.\n * @return lower bound of the interval\n * @deprecated as of 3.1, replaced by {@link #getInf()}\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "bound of the interval",
+            "assertion": "assert methodResultID == receiverObjectID.getLower();",
+            "description": "lower bound of the interval"
+          },
+          {
+            "tag": "deprecated",
+            "name": "as",
+            "content": "of 3.1, replaced by {@link #getInf()}"
+          }
+        ],
+        "code": "/**\n * Get the lower bound of the interval.\n * @return lower bound of the interval\n * @deprecated as of 3.1, replaced by {@link #getInf()}\n */\n@Deprecated\npublic double getLower() {\n    return getInf();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSup",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the upper bound of the interval.\n * @return upper bound of the interval\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "bound of the interval",
+            "assertion": "assert methodResultID >= receiverObjectID.getInf();",
+            "description": "upper bound of the interval"
+          },
+          {
+            "tag": "since",
+            "name": "3.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Get the upper bound of the interval.\n * @return upper bound of the interval\n * @since 3.1\n */\npublic double getSup() {\n    return upper;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getUpper",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the upper bound of the interval.\n * @return upper bound of the interval\n * @deprecated as of 3.1, replaced by {@link #getSup()}\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "bound of the interval",
+            "assertion": "assert methodResultID == receiverObjectID.getUpper();",
+            "description": "upper bound of the interval"
+          },
+          {
+            "tag": "deprecated",
+            "name": "as",
+            "content": "of 3.1, replaced by {@link #getSup()}"
+          }
+        ],
+        "code": "/**\n * Get the upper bound of the interval.\n * @return upper bound of the interval\n * @deprecated as of 3.1, replaced by {@link #getSup()}\n */\n@Deprecated\npublic double getUpper() {\n    return getSup();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSize",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the size of the interval.\n * @return size of the interval\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of the interval",
+            "assertion": "assert methodResultID == receiverObjectID.getSize();",
+            "description": "size of the interval"
+          },
+          {
+            "tag": "since",
+            "name": "3.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Get the size of the interval.\n * @return size of the interval\n * @since 3.1\n */\npublic double getSize() {\n    return upper - lower;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getLength",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the length of the interval.\n * @return length of the interval\n * @deprecated as of 3.1, replaced by {@link #getSize()}\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of the interval",
+            "assertion": "assert methodResultID == receiverObjectID.getInf() - receiverObjectID.getLower();",
+            "description": "length of the interval"
+          },
+          {
+            "tag": "deprecated",
+            "name": "as",
+            "content": "of 3.1, replaced by {@link #getSize()}"
+          }
+        ],
+        "code": "/**\n * Get the length of the interval.\n * @return length of the interval\n * @deprecated as of 3.1, replaced by {@link #getSize()}\n */\n@Deprecated\npublic double getLength() {\n    return getSize();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getBarycenter",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the barycenter of the interval.\n * @return barycenter of the interval\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of the interval",
+            "assertion": "assert methodResultID == receiverObjectID.getInf() + receiverObjectID.getLower() + receiverObjectID.getSup() + receiverObjectID.getUpper();",
+            "description": "barycenter of the interval"
+          },
+          {
+            "tag": "since",
+            "name": "3.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Get the barycenter of the interval.\n * @return barycenter of the interval\n * @since 3.1\n */\npublic double getBarycenter() {\n    return 0.5 * (lower + upper);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getMidPoint",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the midpoint of the interval.\n * @return midpoint of the interval\n * @deprecated as of 3.1, replaced by {@link #getBarycenter()}\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of the interval",
+            "assertion": "assert methodResultID == receiverObjectID.getMidPoint();",
+            "description": "midpoint of the interval"
+          },
+          {
+            "tag": "deprecated",
+            "name": "as",
+            "content": "of 3.1, replaced by {@link #getBarycenter()}"
+          }
+        ],
+        "code": "/**\n * Get the midpoint of the interval.\n * @return midpoint of the interval\n * @deprecated as of 3.1, replaced by {@link #getBarycenter()}\n */\n@Deprecated\npublic double getMidPoint() {\n    return getBarycenter();\n}"
+      },
+      {
+        "type": "method",
+        "name": "checkPoint",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Location",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "point"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tolerance"
+          }
+        ],
+        "javadoc": "/**\n * Check a point with respect to the interval.\n * @param point point to check\n * @param tolerance tolerance below which points are considered to\n * belong to the boundary\n * @return a code representing the point status: either {@link\n * Location#INSIDE}, {@link Location#OUTSIDE} or {@link Location#BOUNDARY}\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "point",
+            "content": "point to check",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "point to check"
+          },
+          {
+            "tag": "param",
+            "name": "tolerance",
+            "content": "tolerance below which points are considered to belong to the boundary",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "tolerance below which points are considered to belong to the boundary"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "code representing the point status: either {@link Location#INSIDE}, {@link Location#OUTSIDE} or {@link Location#BOUNDARY}",
+            "assertion": "assert methodResultID == (args[0] <= receiverObjectID.getInf() && args[0] >= receiverObjectID.getLower()) || methodResultID == Location.BOUNDARY;",
+            "description": "a code representing the point status: either Location#INSIDE, Location#OUTSIDE or Location#BOUNDARY"
+          },
+          {
+            "tag": "since",
+            "name": "3.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Check a point with respect to the interval.\n * @param point point to check\n * @param tolerance tolerance below which points are considered to\n * belong to the boundary\n * @return a code representing the point status: either {@link\n * Location#INSIDE}, {@link Location#OUTSIDE} or {@link Location#BOUNDARY}\n * @since 3.1\n */\npublic Location checkPoint(final double point, final double tolerance) {\n    if (point < lower - tolerance || point > upper + tolerance) {\n        return Location.OUTSIDE;\n    } else if (point > lower + tolerance && point < upper - tolerance) {\n        return Location.INSIDE;\n    } else {\n        return Location.BOUNDARY;\n    }\n}"
+      }
+    ]
+  }
+]
