@@ -1,5 +1,6 @@
 import html
 import json
+import os
 from pathlib import Path
 import logging
 import re
@@ -68,7 +69,11 @@ def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, pa
 
 
     logger.debug("---Starting LLMedico---")
-    cnfg = Config(Path(__file__).resolve().parent.parent.parent / "config.toml")
+    config_path = Path(
+        os.getenv("LLMEDICO_CONFIG", Path.cwd() / "config.toml") #TODO test environment variable
+    ).expanduser().resolve()
+
+    cnfg = Config(config_path)
     llm_config = cnfg.section("llm")
     trans_config = cnfg.section("translation")
 
@@ -182,6 +187,7 @@ if __name__ == '__main__':
         "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/FreeCol.jar")
     PATH_OUTPUT_DIR = Path(__file__).parent.parent.parent / "data" / "output" # --out-dir
 
+    os.environ["LLMEDICO_CONFIG"] = (Path(__file__).parent.parent.parent / "config.toml").as_posix()
 
     #PATH_DATA_DIR = Path(
     #    "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/freecol-0.11.6/src")  # --data-dir
