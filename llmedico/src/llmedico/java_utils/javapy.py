@@ -4,7 +4,7 @@ import jpype.imports  # Enable Java imports
 import json
 import re
 from jpype.types import *
-
+from importlib.resources import files
 
 class JavaPy:
     def __init__(self, classpath: list[Path] | None = None):
@@ -28,10 +28,12 @@ class JavaPy:
 
 
 class JavaParser(JavaPy):
-    JAR_DIR = Path(__file__).parent.parent.parent.parent / "data" / "jars"
+    #JAR_DIR = Path(__file__).parent.parent.parent.parent / "data" / "jars"
 
     def __init__(self):
-        jars = list(self.JAR_DIR.glob("*.jar"))
+        #jars = list(self.JAR_DIR.glob("*.jar"))
+        jar_dir = files("llmedico").joinpath("jars")
+        jars = [Path(p) for p in jar_dir.iterdir() if p.name.endswith(".jar")]
 
         if not jars:
             raise FileNotFoundError(
