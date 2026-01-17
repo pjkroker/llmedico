@@ -1,0 +1,1179 @@
+[
+  {
+    "method": "exceptionPredicate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Gets a Predicate that always throws an exception.",
+          "assertion": "assert methodResultID == !methodResultID.apply(null);",
+          "name": null,
+          "content": "Gets a Predicate that always throws an exception."
+        }
+      ]
+    }
+  },
+  {
+    "method": "truePredicate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the predicate",
+          "assertion": "assert methodResultID == true;",
+          "name": null,
+          "content": "the predicate"
+        }
+      ]
+    }
+  },
+  {
+    "method": "falsePredicate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the predicate",
+          "assertion": "assert methodResultID == false;",
+          "name": null,
+          "content": "the predicate"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nullPredicate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the predicate that checks if the input object passed in is null.",
+          "assertion": "assert methodResultID == receiverObjectID.nullPredicate().test(null);",
+          "name": null,
+          "content": "the predicate that checks if the input object passed in is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "notNullPredicate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the predicate",
+          "assertion": "assert methodResultID == !args[0] == null;",
+          "name": null,
+          "content": "the predicate"
+        }
+      ]
+    }
+  },
+  {
+    "method": "equalPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the value to compare against",
+          "assertion": "assert args[0] == null || !args[0].equals(null);",
+          "name": "value",
+          "content": "the value to compare against"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the predicate that checks if the input object is equal to the specified object using equals.",
+          "assertion": "assert methodResultID == !args[0].equals(null);",
+          "name": null,
+          "content": "the predicate that checks if the input object is equal to the specified object using equals."
+        }
+      ]
+    }
+  },
+  {
+    "method": "identityPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the value to compare against",
+          "assertion": "assert args[0] == null || args[0].equals(args[0]);",
+          "name": "value",
+          "content": "the value to compare against"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the predicate that checks if the input object is equal to the specified object by identity.",
+          "assertion": "assert methodResultID == receiverObjectID instanceof java.lang.Predicate;",
+          "name": null,
+          "content": "the predicate that checks if the input object is equal to the specified object by identity."
+        }
+      ]
+    }
+  },
+  {
+    "method": "instanceofPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "type"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the type to check for, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "type",
+          "content": "the type to check for, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the predicate",
+          "assertion": "assert methodResultID == !args[0].isInstance(args[0]);",
+          "name": null,
+          "content": "the predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the class is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the class is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "uniquePredicate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "predicate that returns true the first time an object is encountered, and false if the same object is received again.",
+          "assertion": "assert methodResultID == !receiverObjectID.contains(args[0]);",
+          "name": null,
+          "content": "predicate that returns true the first time an object is encountered, and false if the same object is received again."
+        }
+      ]
+    }
+  },
+  {
+    "method": "invokerPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "methodName"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the method name to call on the input object, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "methodName",
+          "content": "the method name to call on the input object, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the predicate",
+          "assertion": "assert methodResultID == !null != receiverObjectID.getMethod(methodResultID);",
+          "name": null,
+          "content": "the predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the methodName is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the methodName is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "invokerPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "methodName"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "paramTypes"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "args"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the method name to call on the input object, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "methodName",
+          "content": "the method name to call on the input object, may not be null"
+        },
+        {
+          "description": "the parameter types",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "paramTypes",
+          "content": "the parameter types"
+        },
+        {
+          "description": "the arguments",
+          "assertion": "assert receiverObjectID.length > 0;",
+          "name": "args",
+          "content": "the arguments"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "predicate",
+          "assertion": "",
+          "description": "predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the method name is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the method name is null."
+        },
+        {
+          "description": "if the paramTypes and args don't match.",
+          "assertion": "assert !java.util.Arrays.deepEquals(args[1], args[2]);",
+          "name": "IllegalArgumentException",
+          "content": "if the paramTypes and args don't match."
+        }
+      ]
+    }
+  },
+  {
+    "method": "andPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first predicate, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate1",
+          "content": "the first predicate, may not be null"
+        },
+        {
+          "description": "the second predicate, may not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "predicate2",
+          "content": "the second predicate, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>and</code> predicate",
+          "assertion": "assert methodResultID == !args[0].test(null) && !args[1].test(null);",
+          "name": null,
+          "content": "<code>and</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either predicate is null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if either predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "allPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "an array of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Create a new Predicate that returns true only if all of the specified predicates are true.",
+          "assertion": "assert methodResultID == !args[0].isEmpty();",
+          "name": null,
+          "content": "<code>all</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the predicates array is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicates array is null"
+        },
+        {
+          "description": "any predicate in the array is null",
+          "assertion": "assert !args[0].isEmpty() && !args[0].stream().anyMatch(p -> p == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "allPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a collection of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "a collection of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>all</code> predicate",
+          "assertion": "assert !methodResultID || receiverObjectID.allPredicate(args[0]).evaluate();",
+          "name": null,
+          "content": "<code>all</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicates collection is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicates collection is null"
+        },
+        {
+          "description": "if any predicate in the collection is null",
+          "assertion": "assert !args[0].isEmpty() && !args[0].stream().anyMatch(p -> p == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "orPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first predicate, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate1",
+          "content": "the first predicate, may not be null"
+        },
+        {
+          "description": "the second predicate, may not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "predicate2",
+          "content": "the second predicate, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>or</code> predicate",
+          "assertion": "assert methodResultID == !args[0].test(null) || !args[1].test(null);",
+          "name": null,
+          "content": "<code>or</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either predicate is null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if either predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "anyPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "an array of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>any</code> predicate",
+          "assertion": "assert !methodResultID.equals(args[0].isEmpty());",
+          "name": null,
+          "content": "<code>any</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicates array is null",
+          "assertion": "assert args[0] != null;",
+          "name": "NullPointerException",
+          "content": "if the predicates array is null"
+        },
+        {
+          "description": "if any predicate in the array is null",
+          "assertion": "assert !args[0].isEmpty() && !args[0].stream().anyMatch(p -> p == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "anyPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a collection of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "a collection of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>any</code> predicate",
+          "assertion": "assert !methodResultID.equals(receiverObjectID.isEmpty());",
+          "name": null,
+          "content": "<code>any</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicates collection is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicates collection is null"
+        },
+        {
+          "description": "if any predicate in the collection is null",
+          "assertion": "assert !args[0].isEmpty() && !args[0].stream().anyMatch(p -> p == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "eitherPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first predicate, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate1",
+          "content": "the first predicate, may not be null"
+        },
+        {
+          "description": "the second predicate, may not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "predicate2",
+          "content": "the second predicate, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>either</code> predicate",
+          "assertion": "assert !methodResultID.equals(receiverObjectID.eitherPredicate(args[0], args[1]).equals(args[0]) || receiverObjectID.eitherPredicate(args[0], args[1]).equals(args[1]));",
+          "name": null,
+          "content": "<code>either</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either predicate is null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if either predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "onePredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "an array of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Create a new Predicate that returns true if only one of the specified predicates are true.",
+          "assertion": "assert methodResultID == !Arrays.stream(args[0]).anyMatch(p -> receiverObjectID.anyPredicate(p));",
+          "name": null,
+          "content": "<code>one</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the predicates array is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicates array is null"
+        },
+        {
+          "description": "any predicate in the array is null",
+          "assertion": "assert !args[0].isEmpty() && !args[0].stream().allMatch(p -> p == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "onePredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a collection of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "a collection of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if only one of the specified predicates are true.",
+          "assertion": "assert methodResultID == !receiverObjectID.isEmpty() && receiverObjectID.stream().anyMatch(predicate -> !predicate);",
+          "name": null,
+          "content": "<code>one</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the predicates collection is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicates collection is null"
+        },
+        {
+          "description": "any predicate in the collection is null",
+          "assertion": "assert !args[0].isEmpty() && !args[0].stream().allMatch(p -> p == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "neitherPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first predicate, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate1",
+          "content": "the first predicate, may not be null"
+        },
+        {
+          "description": "the second predicate, may not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "predicate2",
+          "content": "the second predicate, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>neither</code> predicate",
+          "assertion": "assert !methodResultID || args[0].apply(null) && args[1].apply(null);",
+          "name": null,
+          "content": "<code>neither</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either predicate is null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if either predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nonePredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "an array of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>none</code> predicate",
+          "assertion": "assert !methodResultID || Arrays.stream(args).allMatch(p -> !p.test(null));",
+          "name": null,
+          "content": "<code>none</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicates array is null",
+          "assertion": "assert args[0] != null;",
+          "name": "NullPointerException",
+          "content": "if the predicates array is null"
+        },
+        {
+          "description": "if any predicate in the array is null",
+          "assertion": "assert !args[0].anyPredicate(null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nonePredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a collection of predicates to check, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicates",
+          "content": "a collection of predicates to check, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>none</code> predicate",
+          "assertion": "assert !methodResultID || receiverObjectID.isEmpty() || java.util.stream.Stream.of(args[0]).allMatch(p -> !receiverObjectID.evaluate(p));",
+          "name": null,
+          "content": "<code>none</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicates collection is null",
+          "assertion": "assert args[0] != null;",
+          "name": "NullPointerException",
+          "content": "if the predicates collection is null"
+        },
+        {
+          "description": "if any predicate in the collection is null",
+          "assertion": "assert !args[0].contains(null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "notPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the specified predicate",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate",
+          "content": "the predicate to not"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>not</code> predicate",
+          "assertion": "assert methodResultID == !((Predicate)args[0]).evaluate();",
+          "name": null,
+          "content": "<code>not</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicate is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "asPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the transformer to wrap, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "transformer",
+          "content": "the transformer to wrap, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the transformer wrapping predicate",
+          "assertion": "assert methodResultID == !args[0].apply(null) != null; ",
+          "name": null,
+          "content": "the transformer wrapping predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the transformer is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the transformer is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nullIsExceptionPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicate to wrap, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate",
+          "content": "the predicate to wrap, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the predicate",
+          "assertion": "assert methodResultID == !args[0] == null;",
+          "name": null,
+          "content": "the predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicate is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nullIsFalsePredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicate to wrap, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate",
+          "content": "the predicate to wrap, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Gets a Predicate that returns false if the input object is null, otherwise it calls the specified Predicate.",
+          "assertion": "assert methodResultID == !args[0].test(null);",
+          "name": null,
+          "content": "Gets a Predicate that returns false if the input object is null, otherwise it calls the specified Predicate."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicate is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nullIsTruePredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicate to wrap, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "predicate",
+          "content": "the predicate to wrap, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the input object is null, otherwise it calls the specified Predicate.",
+          "assertion": "assert methodResultID == (args[0] == null ? true : args[0].test(null));",
+          "name": null,
+          "content": "the input object is null, otherwise it calls the specified Predicate."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicate is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicate is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "transformedPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the transformer to call first",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "transformer",
+          "content": "the transformer to call first"
+        },
+        {
+          "description": "the predicate to call with the result of the transform",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "predicate",
+          "content": "the predicate to call with the result of the transform"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the predicate",
+          "assertion": "assert methodResultID == !null;",
+          "name": null,
+          "content": "the predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the transformer or the predicate is null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if the transformer or the predicate is null."
+        }
+      ]
+    }
+  }
+]
