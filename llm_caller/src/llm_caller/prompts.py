@@ -324,6 +324,11 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
     "{return_type}"
     And the following available instance methods:
     "{methods}"
+    
+    Use this template:
+    ```json
+    "{output_template}"
+    ```
     """
 PRE_CONDITION_PROMPT_JSON = PromptBuilder(PRE_CONDITION_PROMPT_JSON_STRING + FINAL_INSTRUCTION)
 PRE_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(PRE_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING + FINAL_INSTRUCTION)
@@ -453,6 +458,11 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """
     "{return_type}"
     And the following available instance methods:
     "{methods}"
+    
+    Use this template:
+    ```json
+    "{output_template}"
+    ```
     """
 RETURN_CONDITION_PROMPT_JSON = PromptBuilder(RETURN_CONDITION_PROMPT_JSON_STRING + FINAL_INSTRUCTION)
 RETURN_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(RETURN_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING + FINAL_INSTRUCTION)
@@ -560,6 +570,11 @@ THROWS_CONDITION_PROMPT_JSON_STRING = """
     "{return_type}"
     And the following available instance methods:
     "{methods}"
+    
+    Use this template:
+    ```json
+    "{output_template}"
+    ```
     """
 THROWS_CONDITION_PROMPT_JSON = PromptBuilder(THROWS_CONDITION_PROMPT_JSON_STRING + FINAL_INSTRUCTION)
 THROWS_CONDITION_PROMPT_JSON_FEEDBACK = PromptBuilder(THROWS_CONDITION_PROMPT_JSON_STRING + FEEDBACK_BASE_STRING + FINAL_INSTRUCTION)

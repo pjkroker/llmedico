@@ -31,14 +31,14 @@ class TranslationRepairLoop:
         logger.debug("Could not manually fix llm response!")
         return None
 
-    def translate_with_repair(self, javadoc: str, method_name: str, parameters: list[str], return_type:str, method_selection:str, mode: str, errors: list[str], expected_len: int, previous_output: str) -> str:
+    def translate_with_repair(self, javadoc: str, method_name: str, output_template: str, parameters: list[str], return_type:str, method_selection:str, mode: str, errors: list[str], expected_len: int, previous_output: str) -> str:
         logger.debug('Trying to fix initial solution with repair loop.')
         i = 0
         result = ""
         while errors and i < self.max_iters:
             i += 1
             logger.info("Repair loop iteration %d", i)
-            result = self.translator._translate_once(javadoc, method_name, parameters,return_type, method_selection, mode, errors, previous_output)
+            result = self.translator._translate_once(javadoc, method_name, output_template, parameters,return_type, method_selection, mode, errors, previous_output)
             errors = self.validator.validate(result, expected_len)
             previous_output = result
 
