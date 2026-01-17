@@ -1,0 +1,136 @@
+[
+  {
+    "signature": "interpolate(double xval,double yval,double fval)",
+    "name": "interpolate",
+    "containingClass": {
+      "qualifiedName": "org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator",
+      "name": "BivariateGridInterpolator",
+      "isArray": false
+    },
+    "targetClass": "org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator",
+    "isVarArgs": false,
+    "parameters": [
+      {
+        "type": {
+          "qualifiedName": "double",
+          "name": "double",
+          "isArray": true
+        },
+        "name": "xval"
+      },
+      {
+        "type": {
+          "qualifiedName": "double",
+          "name": "double",
+          "isArray": true
+        },
+        "name": "yval"
+      },
+      {
+        "type": {
+          "qualifiedName": "double",
+          "name": "double",
+          "isArray": true
+        },
+        "name": "fval"
+      }
+    ],
+    "returnType": {
+      "qualifiedName": null,
+      "name": "BivariateFunction",
+      "isArray": false
+    },
+    "paramTags": [
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "double",
+            "name": "double",
+            "isArray": true
+          },
+          "name": "xval"
+        },
+        "comment": "All the x-coordinates of the interpolation points, sorted in increasing order.",
+        "kind": "PARAM",
+        "condition": "(args[0] == null) == false"
+      },
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "double",
+            "name": "double",
+            "isArray": true
+          },
+          "name": "yval"
+        },
+        "comment": "All the y-coordinates of the interpolation points, sorted in increasing order.",
+        "kind": "PARAM",
+        "condition": "(args[1] == null) == false"
+      },
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "double",
+            "name": "double",
+            "isArray": true
+          },
+          "name": "fval"
+        },
+        "comment": "The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.",
+        "kind": "PARAM",
+        "condition": "(args[2] == null) == false"
+      }
+    ],
+    "returnTag": {
+      "comment": "a function which interpolates the dataset.",
+      "kind": "RETURN",
+      "condition": "methodResultID instanceof BivariateFunction"
+    },
+    "throwsTags": [
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.NoDataException",
+          "name": "NoDataException",
+          "isArray": false
+        },
+        "codeTags": [],
+        "comment": "any of the arrays has zero length",
+        "kind": "THROWS",
+        "condition": "args[0].length == 0 || args[1].length == 0 || args[2].length == 0"
+      },
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.DimensionMismatchException",
+          "name": "DimensionMismatchException",
+          "isArray": false
+        },
+        "codeTags": [],
+        "comment": "the array lengths are inconsistent",
+        "kind": "THROWS",
+        "condition": "args[0].length == args[1].length && args[1].length == args[2].length"
+      },
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.NonMonotonicSequenceException",
+          "name": "NonMonotonicSequenceException",
+          "isArray": false
+        },
+        "codeTags": [],
+        "comment": "the array is not sorted",
+        "kind": "THROWS",
+        "condition": "!java.lang.Double.isNaN(args[0][0]) && !java.lang.Double.isNaN(args[1][0]) && java.lang.Double.compare(args[0][0], args[0][args[0].length-1]) <= 0 && java.lang.Double.compare(args[1][0], args[1][args[1].length-1]) <= 0"
+      },
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.NumberIsTooSmallException",
+          "name": "NumberIsTooSmallException",
+          "isArray": false
+        },
+        "codeTags": [],
+        "comment": "the number of points is too small for the order of the interpolation",
+        "kind": "THROWS",
+        "condition": "args[2].length < 3"
+      }
+    ]
+  }
+]
