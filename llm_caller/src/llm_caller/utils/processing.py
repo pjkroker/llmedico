@@ -24,6 +24,14 @@ def extract_code_by_language(llm_response: str, language: str) -> List[str]:
     # Strip extra whitespace from each block
     return [block.strip() for block in code_blocks]
 
+def extract_list_raw(llm_response: str) -> Optional[str]:
+    """
+    Extracts the first [...] block from the response.
+    """
+    pattern = re.compile(r"\[\s*{.*?}\s*\]", re.DOTALL)
+    match = pattern.search(llm_response)
+    return match.group(0) if match else None
+
 def extract_java_assertions(llm_response: str) -> List[str]:
     """
         Extracts individual Java assertion statements from Java code blocks
