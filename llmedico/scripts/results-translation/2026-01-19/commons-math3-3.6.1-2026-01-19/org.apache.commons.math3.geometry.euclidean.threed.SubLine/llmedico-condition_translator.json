@@ -1,0 +1,287 @@
+[
+  {
+    "name": "SubLine",
+    "package": "org.apache.commons.math3.geometry.euclidean.threed",
+    "qualified_name": "org.apache.commons.math3.geometry.euclidean.threed.SubLine",
+    "javadoc": "/**\n * This class represents a subset of a {@link Line}.\n * @since 3.0\n */\n",
+    "code": "/**\n * This class represents a subset of a {@link Line}.\n * @since 3.0\n */\npublic class SubLine {\n\n    /**\n     * Default value for tolerance.\n     */\n    private static final double DEFAULT_TOLERANCE = 1.0e-10;\n\n    /**\n     * Underlying line.\n     */\n    private final Line line;\n\n    /**\n     * Remaining region of the hyperplane.\n     */\n    private final IntervalsSet remainingRegion;\n\n    /**\n     * Simple constructor.\n     * @param line underlying line\n     * @param remainingRegion remaining region of the line\n     */\n    public SubLine(final Line line, final IntervalsSet remainingRegion) {\n        this.line = line;\n        this.remainingRegion = remainingRegion;\n    }\n\n    /**\n     * Create a sub-line from two endpoints.\n     * @param start start point\n     * @param end end point\n     * @param tolerance tolerance below which points are considered identical\n     * @exception MathIllegalArgumentException if the points are equal\n     * @since 3.3\n     */\n    public SubLine(final Vector3D start, final Vector3D end, final double tolerance) throws MathIllegalArgumentException {\n        this(new Line(start, end, tolerance), buildIntervalSet(start, end, tolerance));\n    }\n\n    /**\n     * Create a sub-line from two endpoints.\n     * @param start start point\n     * @param end end point\n     * @exception MathIllegalArgumentException if the points are equal\n     * @deprecated as of 3.3, replaced with {@link #SubLine(Vector3D, Vector3D, double)}\n     */\n    public SubLine(final Vector3D start, final Vector3D end) throws MathIllegalArgumentException {\n        this(start, end, DEFAULT_TOLERANCE);\n    }\n\n    /**\n     * Create a sub-line from a segment.\n     * @param segment single segment forming the sub-line\n     * @exception MathIllegalArgumentException if the segment endpoints are equal\n     */\n    public SubLine(final Segment segment) throws MathIllegalArgumentException {\n        this(segment.getLine(), buildIntervalSet(segment.getStart(), segment.getEnd(), segment.getLine().getTolerance()));\n    }\n\n    /**\n     * Get the endpoints of the sub-line.\n     * <p>\n     * A subline may be any arbitrary number of disjoints segments, so the endpoints\n     * are provided as a list of endpoint pairs. Each element of the list represents\n     * one segment, and each segment contains a start point at index 0 and an end point\n     * at index 1. If the sub-line is unbounded in the negative infinity direction,\n     * the start point of the first segment will have infinite coordinates. If the\n     * sub-line is unbounded in the positive infinity direction, the end point of the\n     * last segment will have infinite coordinates. So a sub-line covering the whole\n     * line will contain just one row and both elements of this row will have infinite\n     * coordinates. If the sub-line is empty, the returned list will contain 0 segments.\n     * </p>\n     * @return list of segments endpoints\n     */\n    public List<Segment> getSegments() {\n        final List<Interval> list = remainingRegion.asList();\n        final List<Segment> segments = new ArrayList<Segment>(list.size());\n        for (final Interval interval : list) {\n            final Vector3D start = line.toSpace((Point<Euclidean1D>) new Vector1D(interval.getInf()));\n            final Vector3D end = line.toSpace((Point<Euclidean1D>) new Vector1D(interval.getSup()));\n            segments.add(new Segment(start, end, line));\n        }\n        return segments;\n    }\n\n    /**\n     * Get the intersection of the instance and another sub-line.\n     * <p>\n     * This method is related to the {@link Line#intersection(Line)\n     * intersection} method in the {@link Line Line} class, but in addition\n     * to compute the point along infinite lines, it also checks the point\n     * lies on both sub-line ranges.\n     * </p>\n     * @param subLine other sub-line which may intersect instance\n     * @param includeEndPoints if true, endpoints are considered to belong to\n     * instance (i.e. they are closed sets) and may be returned, otherwise endpoints\n     * are considered to not belong to instance (i.e. they are open sets) and intersection\n     * occurring on endpoints lead to null being returned\n     * @return the intersection point if there is one, null if the sub-lines don't intersect\n     */\n    public Vector3D intersection(final SubLine subLine, final boolean includeEndPoints) {\n        // compute the intersection on infinite line\n        Vector3D v1D = line.intersection(subLine.line);\n        if (v1D == null) {\n            return null;\n        }\n        // check location of point with respect to first sub-line\n        Location loc1 = remainingRegion.checkPoint((Point<Euclidean1D>) line.toSubSpace((Point<Euclidean3D>) v1D));\n        // check location of point with respect to second sub-line\n        Location loc2 = subLine.remainingRegion.checkPoint((Point<Euclidean1D>) subLine.line.toSubSpace((Point<Euclidean3D>) v1D));\n        if (includeEndPoints) {\n            return ((loc1 != Location.OUTSIDE) && (loc2 != Location.OUTSIDE)) ? v1D : null;\n        } else {\n            return ((loc1 == Location.INSIDE) && (loc2 == Location.INSIDE)) ? v1D : null;\n        }\n    }\n\n    /**\n     * Build an interval set from two points.\n     * @param start start point\n     * @param end end point\n     * @return an interval set\n     * @param tolerance tolerance below which points are considered identical\n     * @exception MathIllegalArgumentException if the points are equal\n     */\n    private static IntervalsSet buildIntervalSet(final Vector3D start, final Vector3D end, final double tolerance) throws MathIllegalArgumentException {\n        final Line line = new Line(start, end, tolerance);\n        return new IntervalsSet(line.toSubSpace((Point<Euclidean3D>) start).getX(), line.toSubSpace((Point<Euclidean3D>) end).getX(), tolerance);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "SubLine",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Line",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "IntervalsSet",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "remainingRegion"
+          }
+        ],
+        "javadoc": "/**\n * Simple constructor.\n * @param line underlying line\n * @param remainingRegion remaining region of the line\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "line",
+            "content": "underlying line",
+            "assertion": "assert args[0] != null;",
+            "description": "underlying line"
+          },
+          {
+            "tag": "param",
+            "name": "remainingRegion",
+            "content": "remaining region of the line",
+            "assertion": "assert args[1] != null;",
+            "description": "remaining region of the line"
+          }
+        ],
+        "code": "/**\n * Simple constructor.\n * @param line underlying line\n * @param remainingRegion remaining region of the line\n */\npublic SubLine(final Line line, final IntervalsSet remainingRegion) {\n    this.line = line;\n    this.remainingRegion = remainingRegion;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "SubLine",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "start"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "end"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tolerance"
+          }
+        ],
+        "javadoc": "/**\n * Create a sub-line from two endpoints.\n * @param start start point\n * @param end end point\n * @param tolerance tolerance below which points are considered identical\n * @exception MathIllegalArgumentException if the points are equal\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "start",
+            "content": "start point",
+            "assertion": "assert args[0] != null;",
+            "description": "start point"
+          },
+          {
+            "tag": "param",
+            "name": "end",
+            "content": "end point",
+            "assertion": "assert args[1] != null;",
+            "description": "end point"
+          },
+          {
+            "tag": "param",
+            "name": "tolerance",
+            "content": "tolerance below which points are considered identical",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "tolerance below which points are considered identical"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if the points are equal",
+            "assertion": "assert args[0].equals(args[1]);",
+            "description": "if the points are equal"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Create a sub-line from two endpoints.\n * @param start start point\n * @param end end point\n * @param tolerance tolerance below which points are considered identical\n * @exception MathIllegalArgumentException if the points are equal\n * @since 3.3\n */\npublic SubLine(final Vector3D start, final Vector3D end, final double tolerance) throws MathIllegalArgumentException {\n    this(new Line(start, end, tolerance), buildIntervalSet(start, end, tolerance));\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "SubLine",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "start"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "end"
+          }
+        ],
+        "javadoc": "/**\n * Create a sub-line from two endpoints.\n * @param start start point\n * @param end end point\n * @exception MathIllegalArgumentException if the points are equal\n * @deprecated as of 3.3, replaced with {@link #SubLine(Vector3D, Vector3D, double)}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "start",
+            "content": "start point",
+            "assertion": "assert args[0] != null;",
+            "description": "start point"
+          },
+          {
+            "tag": "param",
+            "name": "end",
+            "content": "end point",
+            "assertion": "assert args[1] != null;",
+            "description": "end point"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if the points are equal",
+            "assertion": "assert args[0] == args[1];",
+            "description": "if the points are equal"
+          },
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "as of 3.3, replaced with {@link #SubLine(Vector3D, Vector3D, double)}"
+          }
+        ],
+        "code": "/**\n * Create a sub-line from two endpoints.\n * @param start start point\n * @param end end point\n * @exception MathIllegalArgumentException if the points are equal\n * @deprecated as of 3.3, replaced with {@link #SubLine(Vector3D, Vector3D, double)}\n */\npublic SubLine(final Vector3D start, final Vector3D end) throws MathIllegalArgumentException {\n    this(start, end, DEFAULT_TOLERANCE);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "SubLine",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Segment",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "segment"
+          }
+        ],
+        "javadoc": "/**\n * Create a sub-line from a segment.\n * @param segment single segment forming the sub-line\n * @exception MathIllegalArgumentException if the segment endpoints are equal\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "segment",
+            "content": "single segment forming the sub-line",
+            "assertion": "assert args[0] != null;",
+            "description": "single segment forming the sub-line"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if the segment endpoints are equal",
+            "assertion": "assert args[0].getEndpoints().equals(args[0].getEndpoints());",
+            "description": "if the segment endpoints are equal"
+          }
+        ],
+        "code": "/**\n * Create a sub-line from a segment.\n * @param segment single segment forming the sub-line\n * @exception MathIllegalArgumentException if the segment endpoints are equal\n */\npublic SubLine(final Segment segment) throws MathIllegalArgumentException {\n    this(segment.getLine(), buildIntervalSet(segment.getStart(), segment.getEnd(), segment.getLine().getTolerance()));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSegments",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the endpoints of the sub-line.\n * <p>\n * A subline may be any arbitrary number of disjoints segments, so the endpoints\n * are provided as a list of endpoint pairs. Each element of the list represents\n * one segment, and each segment contains a start point at index 0 and an end point\n * at index 1. If the sub-line is unbounded in the negative infinity direction,\n * the start point of the first segment will have infinite coordinates. If the\n * sub-line is unbounded in the positive infinity direction, the end point of the\n * last segment will have infinite coordinates. So a sub-line covering the whole\n * line will contain just one row and both elements of this row will have infinite\n * coordinates. If the sub-line is empty, the returned list will contain 0 segments.\n * </p>\n * @return list of segments endpoints\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of segments endpoints",
+            "assertion": "assert methodResultID instanceof java.util.List && ((java.util.List)methodResultID).size() > 0;",
+            "description": "list of segments endpoints"
+          }
+        ],
+        "code": "/**\n * Get the endpoints of the sub-line.\n * <p>\n * A subline may be any arbitrary number of disjoints segments, so the endpoints\n * are provided as a list of endpoint pairs. Each element of the list represents\n * one segment, and each segment contains a start point at index 0 and an end point\n * at index 1. If the sub-line is unbounded in the negative infinity direction,\n * the start point of the first segment will have infinite coordinates. If the\n * sub-line is unbounded in the positive infinity direction, the end point of the\n * last segment will have infinite coordinates. So a sub-line covering the whole\n * line will contain just one row and both elements of this row will have infinite\n * coordinates. If the sub-line is empty, the returned list will contain 0 segments.\n * </p>\n * @return list of segments endpoints\n */\npublic List<Segment> getSegments() {\n    final List<Interval> list = remainingRegion.asList();\n    final List<Segment> segments = new ArrayList<Segment>(list.size());\n    for (final Interval interval : list) {\n        final Vector3D start = line.toSpace((Point<Euclidean1D>) new Vector1D(interval.getInf()));\n        final Vector3D end = line.toSpace((Point<Euclidean1D>) new Vector1D(interval.getSup()));\n        segments.add(new Segment(start, end, line));\n    }\n    return segments;\n}"
+      },
+      {
+        "type": "method",
+        "name": "intersection",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "SubLine",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "subLine"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "includeEndPoints"
+          }
+        ],
+        "javadoc": "/**\n * Get the intersection of the instance and another sub-line.\n * <p>\n * This method is related to the {@link Line#intersection(Line)\n * intersection} method in the {@link Line Line} class, but in addition\n * to compute the point along infinite lines, it also checks the point\n * lies on both sub-line ranges.\n * </p>\n * @param subLine other sub-line which may intersect instance\n * @param includeEndPoints if true, endpoints are considered to belong to\n * instance (i.e. they are closed sets) and may be returned, otherwise endpoints\n * are considered to not belong to instance (i.e. they are open sets) and intersection\n * occurring on endpoints lead to null being returned\n * @return the intersection point if there is one, null if the sub-lines don't intersect\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "subLine",
+            "content": "other sub-line which may intersect instance",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "other sub-line which may intersect instance"
+          },
+          {
+            "tag": "param",
+            "name": "includeEndPoints",
+            "content": "if true, endpoints are considered to belong to instance (i.e. they are closed sets) and may be returned, otherwise endpoints are considered to not belong to instance (i.e. they are open sets) and intersection occurring on endpoints lead to null being returned",
+            "assertion": "assert receiverObjectID;",
+            "description": "if true, endpoints are considered to belong to instance (i.e. they are closed sets) and may be returned, otherwise endpoints are considered to not belong to instance (i.e. they are open sets) and intersection occurring on endpoints lead to null being returned"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "intersection point if there is one, null if the sub-lines don't intersect",
+            "assertion": "assert methodResultID == receiverObjectID.intersection(args[0], args[1]) != null;",
+            "description": "intersection point if there is one, null if the sub-lines don't intersect"
+          }
+        ],
+        "code": "/**\n * Get the intersection of the instance and another sub-line.\n * <p>\n * This method is related to the {@link Line#intersection(Line)\n * intersection} method in the {@link Line Line} class, but in addition\n * to compute the point along infinite lines, it also checks the point\n * lies on both sub-line ranges.\n * </p>\n * @param subLine other sub-line which may intersect instance\n * @param includeEndPoints if true, endpoints are considered to belong to\n * instance (i.e. they are closed sets) and may be returned, otherwise endpoints\n * are considered to not belong to instance (i.e. they are open sets) and intersection\n * occurring on endpoints lead to null being returned\n * @return the intersection point if there is one, null if the sub-lines don't intersect\n */\npublic Vector3D intersection(final SubLine subLine, final boolean includeEndPoints) {\n    // compute the intersection on infinite line\n    Vector3D v1D = line.intersection(subLine.line);\n    if (v1D == null) {\n        return null;\n    }\n    // check location of point with respect to first sub-line\n    Location loc1 = remainingRegion.checkPoint((Point<Euclidean1D>) line.toSubSpace((Point<Euclidean3D>) v1D));\n    // check location of point with respect to second sub-line\n    Location loc2 = subLine.remainingRegion.checkPoint((Point<Euclidean1D>) subLine.line.toSubSpace((Point<Euclidean3D>) v1D));\n    if (includeEndPoints) {\n        return ((loc1 != Location.OUTSIDE) && (loc2 != Location.OUTSIDE)) ? v1D : null;\n    } else {\n        return ((loc1 == Location.INSIDE) && (loc2 == Location.INSIDE)) ? v1D : null;\n    }\n}"
+      }
+    ]
+  }
+]

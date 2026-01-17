@@ -1,0 +1,495 @@
+[
+  {
+    "name": "IntervalsSet",
+    "package": "org.apache.commons.math3.geometry.euclidean.oned",
+    "qualified_name": "org.apache.commons.math3.geometry.euclidean.oned.IntervalsSet",
+    "javadoc": "/**\n * This class represents a 1D region: a set of intervals.\n * @since 3.0\n */\n",
+    "code": "/**\n * This class represents a 1D region: a set of intervals.\n * @since 3.0\n */\npublic class IntervalsSet extends AbstractRegion<Euclidean1D, Euclidean1D> implements Iterable<double[]> {\n\n    /**\n     * Default value for tolerance.\n     */\n    private static final double DEFAULT_TOLERANCE = 1.0e-10;\n\n    /**\n     * Build an intervals set representing the whole real line.\n     * @param tolerance tolerance below which points are considered identical.\n     * @since 3.3\n     */\n    public IntervalsSet(final double tolerance) {\n        super(tolerance);\n    }\n\n    /**\n     * Build an intervals set corresponding to a single interval.\n     * @param lower lower bound of the interval, must be lesser or equal\n     * to {@code upper} (may be {@code Double.NEGATIVE_INFINITY})\n     * @param upper upper bound of the interval, must be greater or equal\n     * to {@code lower} (may be {@code Double.POSITIVE_INFINITY})\n     * @param tolerance tolerance below which points are considered identical.\n     * @since 3.3\n     */\n    public IntervalsSet(final double lower, final double upper, final double tolerance) {\n        super(buildTree(lower, upper, tolerance), tolerance);\n    }\n\n    /**\n     * Build an intervals set from an inside/outside BSP tree.\n     * <p>The leaf nodes of the BSP tree <em>must</em> have a\n     * {@code Boolean} attribute representing the inside status of\n     * the corresponding cell (true for inside cells, false for outside\n     * cells). In order to avoid building too many small objects, it is\n     * recommended to use the predefined constants\n     * {@code Boolean.TRUE} and {@code Boolean.FALSE}</p>\n     * @param tree inside/outside BSP tree representing the intervals set\n     * @param tolerance tolerance below which points are considered identical.\n     * @since 3.3\n     */\n    public IntervalsSet(final BSPTree<Euclidean1D> tree, final double tolerance) {\n        super(tree, tolerance);\n    }\n\n    /**\n     * Build an intervals set from a Boundary REPresentation (B-rep).\n     * <p>The boundary is provided as a collection of {@link\n     * SubHyperplane sub-hyperplanes}. Each sub-hyperplane has the\n     * interior part of the region on its minus side and the exterior on\n     * its plus side.</p>\n     * <p>The boundary elements can be in any order, and can form\n     * several non-connected sets (like for example polygons with holes\n     * or a set of disjoints polyhedrons considered as a whole). In\n     * fact, the elements do not even need to be connected together\n     * (their topological connections are not used here). However, if the\n     * boundary does not really separate an inside open from an outside\n     * open (open having here its topological meaning), then subsequent\n     * calls to the {@link\n     * org.apache.commons.math3.geometry.partitioning.Region#checkPoint(org.apache.commons.math3.geometry.Point)\n     * checkPoint} method will not be meaningful anymore.</p>\n     * <p>If the boundary is empty, the region will represent the whole\n     * space.</p>\n     * @param boundary collection of boundary elements\n     * @param tolerance tolerance below which points are considered identical.\n     * @since 3.3\n     */\n    public IntervalsSet(final Collection<SubHyperplane<Euclidean1D>> boundary, final double tolerance) {\n        super(boundary, tolerance);\n    }\n\n    /**\n     * Build an intervals set representing the whole real line.\n     * @deprecated as of 3.1 replaced with {@link #IntervalsSet(double)}\n     */\n    @Deprecated\n    public IntervalsSet() {\n        this(DEFAULT_TOLERANCE);\n    }\n\n    /**\n     * Build an intervals set corresponding to a single interval.\n     * @param lower lower bound of the interval, must be lesser or equal\n     * to {@code upper} (may be {@code Double.NEGATIVE_INFINITY})\n     * @param upper upper bound of the interval, must be greater or equal\n     * to {@code lower} (may be {@code Double.POSITIVE_INFINITY})\n     * @deprecated as of 3.3 replaced with {@link #IntervalsSet(double, double, double)}\n     */\n    @Deprecated\n    public IntervalsSet(final double lower, final double upper) {\n        this(lower, upper, DEFAULT_TOLERANCE);\n    }\n\n    /**\n     * Build an intervals set from an inside/outside BSP tree.\n     * <p>The leaf nodes of the BSP tree <em>must</em> have a\n     * {@code Boolean} attribute representing the inside status of\n     * the corresponding cell (true for inside cells, false for outside\n     * cells). In order to avoid building too many small objects, it is\n     * recommended to use the predefined constants\n     * {@code Boolean.TRUE} and {@code Boolean.FALSE}</p>\n     * @param tree inside/outside BSP tree representing the intervals set\n     * @deprecated as of 3.3, replaced with {@link #IntervalsSet(BSPTree, double)}\n     */\n    @Deprecated\n    public IntervalsSet(final BSPTree<Euclidean1D> tree) {\n        this(tree, DEFAULT_TOLERANCE);\n    }\n\n    /**\n     * Build an intervals set from a Boundary REPresentation (B-rep).\n     * <p>The boundary is provided as a collection of {@link\n     * SubHyperplane sub-hyperplanes}. Each sub-hyperplane has the\n     * interior part of the region on its minus side and the exterior on\n     * its plus side.</p>\n     * <p>The boundary elements can be in any order, and can form\n     * several non-connected sets (like for example polygons with holes\n     * or a set of disjoints polyhedrons considered as a whole). In\n     * fact, the elements do not even need to be connected together\n     * (their topological connections are not used here). However, if the\n     * boundary does not really separate an inside open from an outside\n     * open (open having here its topological meaning), then subsequent\n     * calls to the {@link\n     * org.apache.commons.math3.geometry.partitioning.Region#checkPoint(org.apache.commons.math3.geometry.Point)\n     * checkPoint} method will not be meaningful anymore.</p>\n     * <p>If the boundary is empty, the region will represent the whole\n     * space.</p>\n     * @param boundary collection of boundary elements\n     * @deprecated as of 3.3, replaced with {@link #IntervalsSet(Collection, double)}\n     */\n    @Deprecated\n    public IntervalsSet(final Collection<SubHyperplane<Euclidean1D>> boundary) {\n        this(boundary, DEFAULT_TOLERANCE);\n    }\n\n    /**\n     * Build an inside/outside tree representing a single interval.\n     * @param lower lower bound of the interval, must be lesser or equal\n     * to {@code upper} (may be {@code Double.NEGATIVE_INFINITY})\n     * @param upper upper bound of the interval, must be greater or equal\n     * to {@code lower} (may be {@code Double.POSITIVE_INFINITY})\n     * @param tolerance tolerance below which points are considered identical.\n     * @return the built tree\n     */\n    private static BSPTree<Euclidean1D> buildTree(final double lower, final double upper, final double tolerance) {\n        if (Double.isInfinite(lower) && (lower < 0)) {\n            if (Double.isInfinite(upper) && (upper > 0)) {\n                // the tree must cover the whole real line\n                return new BSPTree<Euclidean1D>(Boolean.TRUE);\n            }\n            // the tree must be open on the negative infinity side\n            final SubHyperplane<Euclidean1D> upperCut = new OrientedPoint(new Vector1D(upper), true, tolerance).wholeHyperplane();\n            return new BSPTree<Euclidean1D>(upperCut, new BSPTree<Euclidean1D>(Boolean.FALSE), new BSPTree<Euclidean1D>(Boolean.TRUE), null);\n        }\n        final SubHyperplane<Euclidean1D> lowerCut = new OrientedPoint(new Vector1D(lower), false, tolerance).wholeHyperplane();\n        if (Double.isInfinite(upper) && (upper > 0)) {\n            // the tree must be open on the positive infinity side\n            return new BSPTree<Euclidean1D>(lowerCut, new BSPTree<Euclidean1D>(Boolean.FALSE), new BSPTree<Euclidean1D>(Boolean.TRUE), null);\n        }\n        // the tree must be bounded on the two sides\n        final SubHyperplane<Euclidean1D> upperCut = new OrientedPoint(new Vector1D(upper), true, tolerance).wholeHyperplane();\n        return new BSPTree<Euclidean1D>(lowerCut, new BSPTree<Euclidean1D>(Boolean.FALSE), new BSPTree<Euclidean1D>(upperCut, new BSPTree<Euclidean1D>(Boolean.FALSE), new BSPTree<Euclidean1D>(Boolean.TRUE), null), null);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public IntervalsSet buildNew(final BSPTree<Euclidean1D> tree) {\n        return new IntervalsSet(tree, getTolerance());\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void computeGeometricalProperties() {\n        if (getTree(false).getCut() == null) {\n            setBarycenter((Point<Euclidean1D>) Vector1D.NaN);\n            setSize(((Boolean) getTree(false).getAttribute()) ? Double.POSITIVE_INFINITY : 0);\n        } else {\n            double size = 0.0;\n            double sum = 0.0;\n            for (final Interval interval : asList()) {\n                size += interval.getSize();\n                sum += interval.getSize() * interval.getBarycenter();\n            }\n            setSize(size);\n            if (Double.isInfinite(size)) {\n                setBarycenter((Point<Euclidean1D>) Vector1D.NaN);\n            } else if (size >= Precision.SAFE_MIN) {\n                setBarycenter((Point<Euclidean1D>) new Vector1D(sum / size));\n            } else {\n                setBarycenter((Point<Euclidean1D>) ((OrientedPoint) getTree(false).getCut().getHyperplane()).getLocation());\n            }\n        }\n    }\n\n    /**\n     * Get the lowest value belonging to the instance.\n     * @return lowest value belonging to the instance\n     * ({@code Double.NEGATIVE_INFINITY} if the instance doesn't\n     * have any low bound, {@code Double.POSITIVE_INFINITY} if the\n     * instance is empty)\n     */\n    public double getInf() {\n        BSPTree<Euclidean1D> node = getTree(false);\n        double inf = Double.POSITIVE_INFINITY;\n        while (node.getCut() != null) {\n            final OrientedPoint op = (OrientedPoint) node.getCut().getHyperplane();\n            inf = op.getLocation().getX();\n            node = op.isDirect() ? node.getMinus() : node.getPlus();\n        }\n        return ((Boolean) node.getAttribute()) ? Double.NEGATIVE_INFINITY : inf;\n    }\n\n    /**\n     * Get the highest value belonging to the instance.\n     * @return highest value belonging to the instance\n     * ({@code Double.POSITIVE_INFINITY} if the instance doesn't\n     * have any high bound, {@code Double.NEGATIVE_INFINITY} if the\n     * instance is empty)\n     */\n    public double getSup() {\n        BSPTree<Euclidean1D> node = getTree(false);\n        double sup = Double.NEGATIVE_INFINITY;\n        while (node.getCut() != null) {\n            final OrientedPoint op = (OrientedPoint) node.getCut().getHyperplane();\n            sup = op.getLocation().getX();\n            node = op.isDirect() ? node.getPlus() : node.getMinus();\n        }\n        return ((Boolean) node.getAttribute()) ? Double.POSITIVE_INFINITY : sup;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.3\n     */\n    @Override\n    public BoundaryProjection<Euclidean1D> projectToBoundary(final Point<Euclidean1D> point) {\n        // get position of test point\n        final double x = ((Vector1D) point).getX();\n        double previous = Double.NEGATIVE_INFINITY;\n        for (final double[] a : this) {\n            if (x < a[0]) {\n                // the test point lies between the previous and the current intervals\n                // offset will be positive\n                final double previousOffset = x - previous;\n                final double currentOffset = a[0] - x;\n                if (previousOffset < currentOffset) {\n                    return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(previous), previousOffset);\n                } else {\n                    return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(a[0]), currentOffset);\n                }\n            } else if (x <= a[1]) {\n                // the test point lies within the current interval\n                // offset will be negative\n                final double offset0 = a[0] - x;\n                final double offset1 = x - a[1];\n                if (offset0 < offset1) {\n                    return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(a[1]), offset1);\n                } else {\n                    return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(a[0]), offset0);\n                }\n            }\n            previous = a[1];\n        }\n        // the test point if past the last sub-interval\n        return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(previous), x - previous);\n    }\n\n    /**\n     * Build a finite point.\n     * @param x abscissa of the point\n     * @return a new point for finite abscissa, null otherwise\n     */\n    private Vector1D finiteOrNullPoint(final double x) {\n        return Double.isInfinite(x) ? null : new Vector1D(x);\n    }\n\n    /**\n     * Build an ordered list of intervals representing the instance.\n     * <p>This method builds this intervals set as an ordered list of\n     * {@link Interval Interval} elements. If the intervals set has no\n     * lower limit, the first interval will have its low bound equal to\n     * {@code Double.NEGATIVE_INFINITY}. If the intervals set has\n     * no upper limit, the last interval will have its upper bound equal\n     * to {@code Double.POSITIVE_INFINITY}. An empty tree will\n     * build an empty list while a tree representing the whole real line\n     * will build a one element list with both bounds being\n     * infinite.</p>\n     * @return a new ordered list containing {@link Interval Interval}\n     * elements\n     */\n    public List<Interval> asList() {\n        final List<Interval> list = new ArrayList<Interval>();\n        for (final double[] a : this) {\n            list.add(new Interval(a[0], a[1]));\n        }\n        return list;\n    }\n\n    /**\n     * Get the first leaf node of a tree.\n     * @param root tree root\n     * @return first leaf node\n     */\n    private BSPTree<Euclidean1D> getFirstLeaf(final BSPTree<Euclidean1D> root) {\n        if (root.getCut() == null) {\n            return root;\n        }\n        // find the smallest internal node\n        BSPTree<Euclidean1D> smallest = null;\n        for (BSPTree<Euclidean1D> n = root; n != null; n = previousInternalNode(n)) {\n            smallest = n;\n        }\n        return leafBefore(smallest);\n    }\n\n    /**\n     * Get the node corresponding to the first interval boundary.\n     * @return smallest internal node,\n     * or null if there are no internal nodes (i.e. the set is either empty or covers the real line)\n     */\n    private BSPTree<Euclidean1D> getFirstIntervalBoundary() {\n        // start search at the tree root\n        BSPTree<Euclidean1D> node = getTree(false);\n        if (node.getCut() == null) {\n            return null;\n        }\n        // walk tree until we find the smallest internal node\n        node = getFirstLeaf(node).getParent();\n        // walk tree until we find an interval boundary\n        while (node != null && !(isIntervalStart(node) || isIntervalEnd(node))) {\n            node = nextInternalNode(node);\n        }\n        return node;\n    }\n\n    /**\n     * Check if an internal node corresponds to the start abscissa of an interval.\n     * @param node internal node to check\n     * @return true if the node corresponds to the start abscissa of an interval\n     */\n    private boolean isIntervalStart(final BSPTree<Euclidean1D> node) {\n        if ((Boolean) leafBefore(node).getAttribute()) {\n            // it has an inside cell before it, it may end an interval but not start it\n            return false;\n        }\n        if (!(Boolean) leafAfter(node).getAttribute()) {\n            // it has an outside cell after it, it is a dummy cut away from real intervals\n            return false;\n        }\n        // the cell has an outside before and an inside after it\n        // it is the start of an interval\n        return true;\n    }\n\n    /**\n     * Check if an internal node corresponds to the end abscissa of an interval.\n     * @param node internal node to check\n     * @return true if the node corresponds to the end abscissa of an interval\n     */\n    private boolean isIntervalEnd(final BSPTree<Euclidean1D> node) {\n        if (!(Boolean) leafBefore(node).getAttribute()) {\n            // it has an outside cell before it, it may start an interval but not end it\n            return false;\n        }\n        if ((Boolean) leafAfter(node).getAttribute()) {\n            // it has an inside cell after it, it is a dummy cut in the middle of an interval\n            return false;\n        }\n        // the cell has an inside before and an outside after it\n        // it is the end of an interval\n        return true;\n    }\n\n    /**\n     * Get the next internal node.\n     * @param node current internal node\n     * @return next internal node in ascending order, or null\n     * if this is the last internal node\n     */\n    private BSPTree<Euclidean1D> nextInternalNode(BSPTree<Euclidean1D> node) {\n        if (childAfter(node).getCut() != null) {\n            // the next node is in the sub-tree\n            return leafAfter(node).getParent();\n        }\n        // there is nothing left deeper in the tree, we backtrack\n        while (isAfterParent(node)) {\n            node = node.getParent();\n        }\n        return node.getParent();\n    }\n\n    /**\n     * Get the previous internal node.\n     * @param node current internal node\n     * @return previous internal node in ascending order, or null\n     * if this is the first internal node\n     */\n    private BSPTree<Euclidean1D> previousInternalNode(BSPTree<Euclidean1D> node) {\n        if (childBefore(node).getCut() != null) {\n            // the next node is in the sub-tree\n            return leafBefore(node).getParent();\n        }\n        // there is nothing left deeper in the tree, we backtrack\n        while (isBeforeParent(node)) {\n            node = node.getParent();\n        }\n        return node.getParent();\n    }\n\n    /**\n     * Find the leaf node just before an internal node.\n     * @param node internal node at which the sub-tree starts\n     * @return leaf node just before the internal node\n     */\n    private BSPTree<Euclidean1D> leafBefore(BSPTree<Euclidean1D> node) {\n        node = childBefore(node);\n        while (node.getCut() != null) {\n            node = childAfter(node);\n        }\n        return node;\n    }\n\n    /**\n     * Find the leaf node just after an internal node.\n     * @param node internal node at which the sub-tree starts\n     * @return leaf node just after the internal node\n     */\n    private BSPTree<Euclidean1D> leafAfter(BSPTree<Euclidean1D> node) {\n        node = childAfter(node);\n        while (node.getCut() != null) {\n            node = childBefore(node);\n        }\n        return node;\n    }\n\n    /**\n     * Check if a node is the child before its parent in ascending order.\n     * @param node child node considered\n     * @return true is the node has a parent end is before it in ascending order\n     */\n    private boolean isBeforeParent(final BSPTree<Euclidean1D> node) {\n        final BSPTree<Euclidean1D> parent = node.getParent();\n        if (parent == null) {\n            return false;\n        } else {\n            return node == childBefore(parent);\n        }\n    }\n\n    /**\n     * Check if a node is the child after its parent in ascending order.\n     * @param node child node considered\n     * @return true is the node has a parent end is after it in ascending order\n     */\n    private boolean isAfterParent(final BSPTree<Euclidean1D> node) {\n        final BSPTree<Euclidean1D> parent = node.getParent();\n        if (parent == null) {\n            return false;\n        } else {\n            return node == childAfter(parent);\n        }\n    }\n\n    /**\n     * Find the child node just before an internal node.\n     * @param node internal node at which the sub-tree starts\n     * @return child node just before the internal node\n     */\n    private BSPTree<Euclidean1D> childBefore(BSPTree<Euclidean1D> node) {\n        if (isDirect(node)) {\n            // smaller abscissas are on minus side, larger abscissas are on plus side\n            return node.getMinus();\n        } else {\n            // smaller abscissas are on plus side, larger abscissas are on minus side\n            return node.getPlus();\n        }\n    }\n\n    /**\n     * Find the child node just after an internal node.\n     * @param node internal node at which the sub-tree starts\n     * @return child node just after the internal node\n     */\n    private BSPTree<Euclidean1D> childAfter(BSPTree<Euclidean1D> node) {\n        if (isDirect(node)) {\n            // smaller abscissas are on minus side, larger abscissas are on plus side\n            return node.getPlus();\n        } else {\n            // smaller abscissas are on plus side, larger abscissas are on minus side\n            return node.getMinus();\n        }\n    }\n\n    /**\n     * Check if an internal node has a direct oriented point.\n     * @param node internal node to check\n     * @return true if the oriented point is direct\n     */\n    private boolean isDirect(final BSPTree<Euclidean1D> node) {\n        return ((OrientedPoint) node.getCut().getHyperplane()).isDirect();\n    }\n\n    /**\n     * Get the abscissa of an internal node.\n     * @param node internal node to check\n     * @return abscissa\n     */\n    private double getAngle(final BSPTree<Euclidean1D> node) {\n        return ((OrientedPoint) node.getCut().getHyperplane()).getLocation().getX();\n    }\n\n    /**\n     * {@inheritDoc}\n     * <p>\n     * The iterator returns the limit values of sub-intervals in ascending order.\n     * </p>\n     * <p>\n     * The iterator does <em>not</em> support the optional {@code remove} operation.\n     * </p>\n     * @since 3.3\n     */\n    public Iterator<double[]> iterator() {\n        return new SubIntervalsIterator();\n    }\n\n    /**\n     * Local iterator for sub-intervals.\n     */\n    private class SubIntervalsIterator implements Iterator<double[]> {\n\n        /**\n         * Current node.\n         */\n        private BSPTree<Euclidean1D> current;\n\n        /**\n         * Sub-interval no yet returned.\n         */\n        private double[] pending;\n\n        /**\n         * Simple constructor.\n         */\n        SubIntervalsIterator() {\n            current = getFirstIntervalBoundary();\n            if (current == null) {\n                // all the leaf tree nodes share the same inside/outside status\n                if ((Boolean) getFirstLeaf(getTree(false)).getAttribute()) {\n                    // it is an inside node, it represents the full real line\n                    pending = new double[] { Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY };\n                } else {\n                    pending = null;\n                }\n            } else if (isIntervalEnd(current)) {\n                // the first boundary is an interval end,\n                // so the first interval starts at infinity\n                pending = new double[] { Double.NEGATIVE_INFINITY, getAngle(current) };\n            } else {\n                selectPending();\n            }\n        }\n\n        /**\n         * Walk the tree to select the pending sub-interval.\n         */\n        private void selectPending() {\n            // look for the start of the interval\n            BSPTree<Euclidean1D> start = current;\n            while (start != null && !isIntervalStart(start)) {\n                start = nextInternalNode(start);\n            }\n            if (start == null) {\n                // we have exhausted the iterator\n                current = null;\n                pending = null;\n                return;\n            }\n            // look for the end of the interval\n            BSPTree<Euclidean1D> end = start;\n            while (end != null && !isIntervalEnd(end)) {\n                end = nextInternalNode(end);\n            }\n            if (end != null) {\n                // we have identified the interval\n                pending = new double[] { getAngle(start), getAngle(end) };\n                // prepare search for next interval\n                current = end;\n            } else {\n                // the final interval is open toward infinity\n                pending = new double[] { getAngle(start), Double.POSITIVE_INFINITY };\n                // there won't be any other intervals\n                current = null;\n            }\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        public boolean hasNext() {\n            return pending != null;\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        public double[] next() {\n            if (pending == null) {\n                throw new NoSuchElementException();\n            }\n            final double[] next = pending;\n            selectPending();\n            return next;\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        public void remove() {\n            throw new UnsupportedOperationException();\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tolerance"
+          }
+        ],
+        "javadoc": "/**\n * Build an intervals set representing the whole real line.\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "tolerance",
+            "content": "tolerance below which points are considered identical."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Build an intervals set representing the whole real line.\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\npublic IntervalsSet(final double tolerance) {\n    super(tolerance);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lower"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upper"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tolerance"
+          }
+        ],
+        "javadoc": "/**\n * Build an intervals set corresponding to a single interval.\n * @param lower lower bound of the interval, must be lesser or equal\n * to {@code upper} (may be {@code Double.NEGATIVE_INFINITY})\n * @param upper upper bound of the interval, must be greater or equal\n * to {@code lower} (may be {@code Double.POSITIVE_INFINITY})\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "lower",
+            "content": "lower bound of the interval, must be lesser or equal\nto {@code upper} (may be {@code Double.NEGATIVE_INFINITY})"
+          },
+          {
+            "tag": "param",
+            "name": "upper",
+            "content": "upper bound of the interval, must be greater or equal\nto {@code lower} (may be {@code Double.POSITIVE_INFINITY})"
+          },
+          {
+            "tag": "param",
+            "name": "tolerance",
+            "content": "tolerance below which points are considered identical."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Build an intervals set corresponding to a single interval.\n * @param lower lower bound of the interval, must be lesser or equal\n * to {@code upper} (may be {@code Double.NEGATIVE_INFINITY})\n * @param upper upper bound of the interval, must be greater or equal\n * to {@code lower} (may be {@code Double.POSITIVE_INFINITY})\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\npublic IntervalsSet(final double lower, final double upper, final double tolerance) {\n    super(buildTree(lower, upper, tolerance), tolerance);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BSPTree",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tree"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tolerance"
+          }
+        ],
+        "javadoc": "/**\n * Build an intervals set from an inside/outside BSP tree.\n * <p>The leaf nodes of the BSP tree <em>must</em> have a\n * {@code Boolean} attribute representing the inside status of\n * the corresponding cell (true for inside cells, false for outside\n * cells). In order to avoid building too many small objects, it is\n * recommended to use the predefined constants\n * {@code Boolean.TRUE} and {@code Boolean.FALSE}</p>\n * @param tree inside/outside BSP tree representing the intervals set\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "tree",
+            "content": "inside/outside BSP tree representing the intervals set"
+          },
+          {
+            "tag": "param",
+            "name": "tolerance",
+            "content": "tolerance below which points are considered identical."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Build an intervals set from an inside/outside BSP tree.\n * <p>The leaf nodes of the BSP tree <em>must</em> have a\n * {@code Boolean} attribute representing the inside status of\n * the corresponding cell (true for inside cells, false for outside\n * cells). In order to avoid building too many small objects, it is\n * recommended to use the predefined constants\n * {@code Boolean.TRUE} and {@code Boolean.FALSE}</p>\n * @param tree inside/outside BSP tree representing the intervals set\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\npublic IntervalsSet(final BSPTree<Euclidean1D> tree, final double tolerance) {\n    super(tree, tolerance);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "boundary"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tolerance"
+          }
+        ],
+        "javadoc": "/**\n * Build an intervals set from a Boundary REPresentation (B-rep).\n * <p>The boundary is provided as a collection of {@link\n * SubHyperplane sub-hyperplanes}. Each sub-hyperplane has the\n * interior part of the region on its minus side and the exterior on\n * its plus side.</p>\n * <p>The boundary elements can be in any order, and can form\n * several non-connected sets (like for example polygons with holes\n * or a set of disjoints polyhedrons considered as a whole). In\n * fact, the elements do not even need to be connected together\n * (their topological connections are not used here). However, if the\n * boundary does not really separate an inside open from an outside\n * open (open having here its topological meaning), then subsequent\n * calls to the {@link\n * org.apache.commons.math3.geometry.partitioning.Region#checkPoint(org.apache.commons.math3.geometry.Point)\n * checkPoint} method will not be meaningful anymore.</p>\n * <p>If the boundary is empty, the region will represent the whole\n * space.</p>\n * @param boundary collection of boundary elements\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "boundary",
+            "content": "collection of boundary elements"
+          },
+          {
+            "tag": "param",
+            "name": "tolerance",
+            "content": "tolerance below which points are considered identical."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Build an intervals set from a Boundary REPresentation (B-rep).\n * <p>The boundary is provided as a collection of {@link\n * SubHyperplane sub-hyperplanes}. Each sub-hyperplane has the\n * interior part of the region on its minus side and the exterior on\n * its plus side.</p>\n * <p>The boundary elements can be in any order, and can form\n * several non-connected sets (like for example polygons with holes\n * or a set of disjoints polyhedrons considered as a whole). In\n * fact, the elements do not even need to be connected together\n * (their topological connections are not used here). However, if the\n * boundary does not really separate an inside open from an outside\n * open (open having here its topological meaning), then subsequent\n * calls to the {@link\n * org.apache.commons.math3.geometry.partitioning.Region#checkPoint(org.apache.commons.math3.geometry.Point)\n * checkPoint} method will not be meaningful anymore.</p>\n * <p>If the boundary is empty, the region will represent the whole\n * space.</p>\n * @param boundary collection of boundary elements\n * @param tolerance tolerance below which points are considered identical.\n * @since 3.3\n */\npublic IntervalsSet(final Collection<SubHyperplane<Euclidean1D>> boundary, final double tolerance) {\n    super(boundary, tolerance);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [],
+        "javadoc": "/**\n * Build an intervals set representing the whole real line.\n * @deprecated as of 3.1 replaced with {@link #IntervalsSet(double)}\n */\n",
+        "tags": [
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "as of 3.1 replaced with {@link #IntervalsSet(double)}"
+          }
+        ],
+        "code": "/**\n * Build an intervals set representing the whole real line.\n * @deprecated as of 3.1 replaced with {@link #IntervalsSet(double)}\n */\n@Deprecated\npublic IntervalsSet() {\n    this(DEFAULT_TOLERANCE);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lower"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upper"
+          }
+        ],
+        "javadoc": "/**\n * Build an intervals set corresponding to a single interval.\n * @param lower lower bound of the interval, must be lesser or equal\n * to {@code upper} (may be {@code Double.NEGATIVE_INFINITY})\n * @param upper upper bound of the interval, must be greater or equal\n * to {@code lower} (may be {@code Double.POSITIVE_INFINITY})\n * @deprecated as of 3.3 replaced with {@link #IntervalsSet(double, double, double)}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "lower",
+            "content": "lower bound of the interval, must be lesser or equal\nto {@code upper} (may be {@code Double.NEGATIVE_INFINITY})"
+          },
+          {
+            "tag": "param",
+            "name": "upper",
+            "content": "upper bound of the interval, must be greater or equal\nto {@code lower} (may be {@code Double.POSITIVE_INFINITY})"
+          },
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "as of 3.3 replaced with {@link #IntervalsSet(double, double, double)}"
+          }
+        ],
+        "code": "/**\n * Build an intervals set corresponding to a single interval.\n * @param lower lower bound of the interval, must be lesser or equal\n * to {@code upper} (may be {@code Double.NEGATIVE_INFINITY})\n * @param upper upper bound of the interval, must be greater or equal\n * to {@code lower} (may be {@code Double.POSITIVE_INFINITY})\n * @deprecated as of 3.3 replaced with {@link #IntervalsSet(double, double, double)}\n */\n@Deprecated\npublic IntervalsSet(final double lower, final double upper) {\n    this(lower, upper, DEFAULT_TOLERANCE);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BSPTree",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tree"
+          }
+        ],
+        "javadoc": "/**\n * Build an intervals set from an inside/outside BSP tree.\n * <p>The leaf nodes of the BSP tree <em>must</em> have a\n * {@code Boolean} attribute representing the inside status of\n * the corresponding cell (true for inside cells, false for outside\n * cells). In order to avoid building too many small objects, it is\n * recommended to use the predefined constants\n * {@code Boolean.TRUE} and {@code Boolean.FALSE}</p>\n * @param tree inside/outside BSP tree representing the intervals set\n * @deprecated as of 3.3, replaced with {@link #IntervalsSet(BSPTree, double)}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "tree",
+            "content": "inside/outside BSP tree representing the intervals set"
+          },
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "as of 3.3, replaced with {@link #IntervalsSet(BSPTree, double)}"
+          }
+        ],
+        "code": "/**\n * Build an intervals set from an inside/outside BSP tree.\n * <p>The leaf nodes of the BSP tree <em>must</em> have a\n * {@code Boolean} attribute representing the inside status of\n * the corresponding cell (true for inside cells, false for outside\n * cells). In order to avoid building too many small objects, it is\n * recommended to use the predefined constants\n * {@code Boolean.TRUE} and {@code Boolean.FALSE}</p>\n * @param tree inside/outside BSP tree representing the intervals set\n * @deprecated as of 3.3, replaced with {@link #IntervalsSet(BSPTree, double)}\n */\n@Deprecated\npublic IntervalsSet(final BSPTree<Euclidean1D> tree) {\n    this(tree, DEFAULT_TOLERANCE);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "IntervalsSet",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "boundary"
+          }
+        ],
+        "javadoc": "/**\n * Build an intervals set from a Boundary REPresentation (B-rep).\n * <p>The boundary is provided as a collection of {@link\n * SubHyperplane sub-hyperplanes}. Each sub-hyperplane has the\n * interior part of the region on its minus side and the exterior on\n * its plus side.</p>\n * <p>The boundary elements can be in any order, and can form\n * several non-connected sets (like for example polygons with holes\n * or a set of disjoints polyhedrons considered as a whole). In\n * fact, the elements do not even need to be connected together\n * (their topological connections are not used here). However, if the\n * boundary does not really separate an inside open from an outside\n * open (open having here its topological meaning), then subsequent\n * calls to the {@link\n * org.apache.commons.math3.geometry.partitioning.Region#checkPoint(org.apache.commons.math3.geometry.Point)\n * checkPoint} method will not be meaningful anymore.</p>\n * <p>If the boundary is empty, the region will represent the whole\n * space.</p>\n * @param boundary collection of boundary elements\n * @deprecated as of 3.3, replaced with {@link #IntervalsSet(Collection, double)}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "boundary",
+            "content": "collection of boundary elements"
+          },
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "as of 3.3, replaced with {@link #IntervalsSet(Collection, double)}"
+          }
+        ],
+        "code": "/**\n * Build an intervals set from a Boundary REPresentation (B-rep).\n * <p>The boundary is provided as a collection of {@link\n * SubHyperplane sub-hyperplanes}. Each sub-hyperplane has the\n * interior part of the region on its minus side and the exterior on\n * its plus side.</p>\n * <p>The boundary elements can be in any order, and can form\n * several non-connected sets (like for example polygons with holes\n * or a set of disjoints polyhedrons considered as a whole). In\n * fact, the elements do not even need to be connected together\n * (their topological connections are not used here). However, if the\n * boundary does not really separate an inside open from an outside\n * open (open having here its topological meaning), then subsequent\n * calls to the {@link\n * org.apache.commons.math3.geometry.partitioning.Region#checkPoint(org.apache.commons.math3.geometry.Point)\n * checkPoint} method will not be meaningful anymore.</p>\n * <p>If the boundary is empty, the region will represent the whole\n * space.</p>\n * @param boundary collection of boundary elements\n * @deprecated as of 3.3, replaced with {@link #IntervalsSet(Collection, double)}\n */\n@Deprecated\npublic IntervalsSet(final Collection<SubHyperplane<Euclidean1D>> boundary) {\n    this(boundary, DEFAULT_TOLERANCE);\n}"
+      },
+      {
+        "type": "method",
+        "name": "buildNew",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "IntervalsSet",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BSPTree",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tree"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic IntervalsSet buildNew(final BSPTree<Euclidean1D> tree) {\n    return new IntervalsSet(tree, getTolerance());\n}"
+      },
+      {
+        "type": "method",
+        "name": "computeGeometricalProperties",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void computeGeometricalProperties() {\n    if (getTree(false).getCut() == null) {\n        setBarycenter((Point<Euclidean1D>) Vector1D.NaN);\n        setSize(((Boolean) getTree(false).getAttribute()) ? Double.POSITIVE_INFINITY : 0);\n    } else {\n        double size = 0.0;\n        double sum = 0.0;\n        for (final Interval interval : asList()) {\n            size += interval.getSize();\n            sum += interval.getSize() * interval.getBarycenter();\n        }\n        setSize(size);\n        if (Double.isInfinite(size)) {\n            setBarycenter((Point<Euclidean1D>) Vector1D.NaN);\n        } else if (size >= Precision.SAFE_MIN) {\n            setBarycenter((Point<Euclidean1D>) new Vector1D(sum / size));\n        } else {\n            setBarycenter((Point<Euclidean1D>) ((OrientedPoint) getTree(false).getCut().getHyperplane()).getLocation());\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "getInf",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the lowest value belonging to the instance.\n * @return lowest value belonging to the instance\n * ({@code Double.NEGATIVE_INFINITY} if the instance doesn't\n * have any low bound, {@code Double.POSITIVE_INFINITY} if the\n * instance is empty)\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value belonging to the instance ({@code Double.NEGATIVE_INFINITY} if the instance doesn't have any low bound, {@code Double.POSITIVE_INFINITY} if the instance is empty)"
+          }
+        ],
+        "code": "/**\n * Get the lowest value belonging to the instance.\n * @return lowest value belonging to the instance\n * ({@code Double.NEGATIVE_INFINITY} if the instance doesn't\n * have any low bound, {@code Double.POSITIVE_INFINITY} if the\n * instance is empty)\n */\npublic double getInf() {\n    BSPTree<Euclidean1D> node = getTree(false);\n    double inf = Double.POSITIVE_INFINITY;\n    while (node.getCut() != null) {\n        final OrientedPoint op = (OrientedPoint) node.getCut().getHyperplane();\n        inf = op.getLocation().getX();\n        node = op.isDirect() ? node.getMinus() : node.getPlus();\n    }\n    return ((Boolean) node.getAttribute()) ? Double.NEGATIVE_INFINITY : inf;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSup",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the highest value belonging to the instance.\n * @return highest value belonging to the instance\n * ({@code Double.POSITIVE_INFINITY} if the instance doesn't\n * have any high bound, {@code Double.NEGATIVE_INFINITY} if the\n * instance is empty)\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value belonging to the instance ({@code Double.POSITIVE_INFINITY} if the instance doesn't have any high bound, {@code Double.NEGATIVE_INFINITY} if the instance is empty)"
+          }
+        ],
+        "code": "/**\n * Get the highest value belonging to the instance.\n * @return highest value belonging to the instance\n * ({@code Double.POSITIVE_INFINITY} if the instance doesn't\n * have any high bound, {@code Double.NEGATIVE_INFINITY} if the\n * instance is empty)\n */\npublic double getSup() {\n    BSPTree<Euclidean1D> node = getTree(false);\n    double sup = Double.NEGATIVE_INFINITY;\n    while (node.getCut() != null) {\n        final OrientedPoint op = (OrientedPoint) node.getCut().getHyperplane();\n        sup = op.getLocation().getX();\n        node = op.isDirect() ? node.getPlus() : node.getMinus();\n    }\n    return ((Boolean) node.getAttribute()) ? Double.POSITIVE_INFINITY : sup;\n}"
+      },
+      {
+        "type": "method",
+        "name": "projectToBoundary",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BoundaryProjection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Point",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "point"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.3",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.3\n */\n@Override\npublic BoundaryProjection<Euclidean1D> projectToBoundary(final Point<Euclidean1D> point) {\n    // get position of test point\n    final double x = ((Vector1D) point).getX();\n    double previous = Double.NEGATIVE_INFINITY;\n    for (final double[] a : this) {\n        if (x < a[0]) {\n            // the test point lies between the previous and the current intervals\n            // offset will be positive\n            final double previousOffset = x - previous;\n            final double currentOffset = a[0] - x;\n            if (previousOffset < currentOffset) {\n                return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(previous), previousOffset);\n            } else {\n                return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(a[0]), currentOffset);\n            }\n        } else if (x <= a[1]) {\n            // the test point lies within the current interval\n            // offset will be negative\n            final double offset0 = a[0] - x;\n            final double offset1 = x - a[1];\n            if (offset0 < offset1) {\n                return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(a[1]), offset1);\n            } else {\n                return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(a[0]), offset0);\n            }\n        }\n        previous = a[1];\n    }\n    // the test point if past the last sub-interval\n    return new BoundaryProjection<Euclidean1D>(point, finiteOrNullPoint(previous), x - previous);\n}"
+      },
+      {
+        "type": "method",
+        "name": "asList",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Build an ordered list of intervals representing the instance.\n * <p>This method builds this intervals set as an ordered list of\n * {@link Interval Interval} elements. If the intervals set has no\n * lower limit, the first interval will have its low bound equal to\n * {@code Double.NEGATIVE_INFINITY}. If the intervals set has\n * no upper limit, the last interval will have its upper bound equal\n * to {@code Double.POSITIVE_INFINITY}. An empty tree will\n * build an empty list while a tree representing the whole real line\n * will build a one element list with both bounds being\n * infinite.</p>\n * @return a new ordered list containing {@link Interval Interval}\n * elements\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new ordered list containing {@link Interval Interval} elements"
+          }
+        ],
+        "code": "/**\n * Build an ordered list of intervals representing the instance.\n * <p>This method builds this intervals set as an ordered list of\n * {@link Interval Interval} elements. If the intervals set has no\n * lower limit, the first interval will have its low bound equal to\n * {@code Double.NEGATIVE_INFINITY}. If the intervals set has\n * no upper limit, the last interval will have its upper bound equal\n * to {@code Double.POSITIVE_INFINITY}. An empty tree will\n * build an empty list while a tree representing the whole real line\n * will build a one element list with both bounds being\n * infinite.</p>\n * @return a new ordered list containing {@link Interval Interval}\n * elements\n */\npublic List<Interval> asList() {\n    final List<Interval> list = new ArrayList<Interval>();\n    for (final double[] a : this) {\n        list.add(new Interval(a[0], a[1]));\n    }\n    return list;\n}"
+      },
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * <p>\n * The iterator returns the limit values of sub-intervals in ascending order.\n * </p>\n * <p>\n * The iterator does <em>not</em> support the optional {@code remove} operation.\n * </p>\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.3",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * <p>\n * The iterator returns the limit values of sub-intervals in ascending order.\n * </p>\n * <p>\n * The iterator does <em>not</em> support the optional {@code remove} operation.\n * </p>\n * @since 3.3\n */\npublic Iterator<double[]> iterator() {\n    return new SubIntervalsIterator();\n}"
+      }
+    ]
+  },
+  {
+    "name": "SubIntervalsIterator",
+    "package": "org.apache.commons.math3.geometry.euclidean.oned",
+    "qualified_name": "org.apache.commons.math3.geometry.euclidean.oned.SubIntervalsIterator",
+    "javadoc": "/**\n * Local iterator for sub-intervals.\n */\n",
+    "code": "/**\n * Local iterator for sub-intervals.\n */\nprivate class SubIntervalsIterator implements Iterator<double[]> {\n\n    /**\n     * Current node.\n     */\n    private BSPTree<Euclidean1D> current;\n\n    /**\n     * Sub-interval no yet returned.\n     */\n    private double[] pending;\n\n    /**\n     * Simple constructor.\n     */\n    SubIntervalsIterator() {\n        current = getFirstIntervalBoundary();\n        if (current == null) {\n            // all the leaf tree nodes share the same inside/outside status\n            if ((Boolean) getFirstLeaf(getTree(false)).getAttribute()) {\n                // it is an inside node, it represents the full real line\n                pending = new double[] { Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY };\n            } else {\n                pending = null;\n            }\n        } else if (isIntervalEnd(current)) {\n            // the first boundary is an interval end,\n            // so the first interval starts at infinity\n            pending = new double[] { Double.NEGATIVE_INFINITY, getAngle(current) };\n        } else {\n            selectPending();\n        }\n    }\n\n    /**\n     * Walk the tree to select the pending sub-interval.\n     */\n    private void selectPending() {\n        // look for the start of the interval\n        BSPTree<Euclidean1D> start = current;\n        while (start != null && !isIntervalStart(start)) {\n            start = nextInternalNode(start);\n        }\n        if (start == null) {\n            // we have exhausted the iterator\n            current = null;\n            pending = null;\n            return;\n        }\n        // look for the end of the interval\n        BSPTree<Euclidean1D> end = start;\n        while (end != null && !isIntervalEnd(end)) {\n            end = nextInternalNode(end);\n        }\n        if (end != null) {\n            // we have identified the interval\n            pending = new double[] { getAngle(start), getAngle(end) };\n            // prepare search for next interval\n            current = end;\n        } else {\n            // the final interval is open toward infinity\n            pending = new double[] { getAngle(start), Double.POSITIVE_INFINITY };\n            // there won't be any other intervals\n            current = null;\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public boolean hasNext() {\n        return pending != null;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double[] next() {\n        if (pending == null) {\n            throw new NoSuchElementException();\n        }\n        final double[] next = pending;\n        selectPending();\n        return next;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public void remove() {\n        throw new UnsupportedOperationException();\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "SubIntervalsIterator",
+        "parameters": [],
+        "javadoc": "/**\n * Simple constructor.\n */\n",
+        "tags": [],
+        "code": "/**\n * Simple constructor.\n */\nSubIntervalsIterator() {\n    current = getFirstIntervalBoundary();\n    if (current == null) {\n        // all the leaf tree nodes share the same inside/outside status\n        if ((Boolean) getFirstLeaf(getTree(false)).getAttribute()) {\n            // it is an inside node, it represents the full real line\n            pending = new double[] { Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY };\n        } else {\n            pending = null;\n        }\n    } else if (isIntervalEnd(current)) {\n        // the first boundary is an interval end,\n        // so the first interval starts at infinity\n        pending = new double[] { Double.NEGATIVE_INFINITY, getAngle(current) };\n    } else {\n        selectPending();\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "hasNext",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic boolean hasNext() {\n    return pending != null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "next",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double[] next() {\n    if (pending == null) {\n        throw new NoSuchElementException();\n    }\n    final double[] next = pending;\n    selectPending();\n    return next;\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic void remove() {\n    throw new UnsupportedOperationException();\n}"
+      }
+    ]
+  }
+]
