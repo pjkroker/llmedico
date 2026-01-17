@@ -1,0 +1,1186 @@
+[
+  {
+    "name": "FluentIterable",
+    "package": "org.apache.commons.collections4",
+    "qualified_name": "org.apache.commons.collections4.FluentIterable",
+    "javadoc": "/**\n * A FluentIterable provides a powerful yet simple API for manipulating\n * Iterable instances in a fluent manner.\n * <p>\n * A FluentIterable can be created either from an Iterable or from a set\n * of elements. The following types of methods are provided:\n * <ul>\n *   <li>fluent methods which return a new {@code FluentIterable} instance,\n *       providing a view of the original iterable (e.g. filter(Predicate));\n *   <li>conversion methods which copy the FluentIterable's contents into a\n *       new collection or array (e.g. toList());\n *   <li>utility methods which answer questions about the FluentIterable's\n *       contents (e.g. size(), anyMatch(Predicate)).\n *   <li>\n * </ul>\n * <p>\n * The following example outputs the first 3 even numbers in the range [1, 10]\n * into a list:\n * <pre>\n * List&lt;String&gt; result =\n *   FluentIterable\n *       .of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)\n *       .filter(new Predicate<Integer>() {\n *                   public boolean evaluate(Integer number) {\n *                        return number % 2 == 0;\n *                   }\n *              )\n *       .transform(TransformerUtils.stringValueTransformer())\n *       .limit(3)\n *       .toList();\n * </pre>\n * The resulting list will contain the following elements:\n * <pre>[2, 4, 6]</pre>\n *\n * @param <E>  the element type\n * @since 4.1\n * @version $Id: FluentIterable.java 1684264 2015-06-08 20:06:29Z tn $\n */\n",
+    "code": "/**\n * A FluentIterable provides a powerful yet simple API for manipulating\n * Iterable instances in a fluent manner.\n * <p>\n * A FluentIterable can be created either from an Iterable or from a set\n * of elements. The following types of methods are provided:\n * <ul>\n *   <li>fluent methods which return a new {@code FluentIterable} instance,\n *       providing a view of the original iterable (e.g. filter(Predicate));\n *   <li>conversion methods which copy the FluentIterable's contents into a\n *       new collection or array (e.g. toList());\n *   <li>utility methods which answer questions about the FluentIterable's\n *       contents (e.g. size(), anyMatch(Predicate)).\n *   <li>\n * </ul>\n * <p>\n * The following example outputs the first 3 even numbers in the range [1, 10]\n * into a list:\n * <pre>\n * List&lt;String&gt; result =\n *   FluentIterable\n *       .of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)\n *       .filter(new Predicate<Integer>() {\n *                   public boolean evaluate(Integer number) {\n *                        return number % 2 == 0;\n *                   }\n *              )\n *       .transform(TransformerUtils.stringValueTransformer())\n *       .limit(3)\n *       .toList();\n * </pre>\n * The resulting list will contain the following elements:\n * <pre>[2, 4, 6]</pre>\n *\n * @param <E>  the element type\n * @since 4.1\n * @version $Id: FluentIterable.java 1684264 2015-06-08 20:06:29Z tn $\n */\npublic class FluentIterable<E> implements Iterable<E> {\n\n    /**\n     * A reference to the wrapped iterable.\n     */\n    private final Iterable<E> iterable;\n\n    // Static factory methods\n    // ----------------------------------------------------------------------\n    /**\n     * Creates a new empty FluentIterable.\n     *\n     * @param <T>  the element type\n     * @return a new empty FluentIterable\n     */\n    @SuppressWarnings(\"unchecked\")\n    public static <T> FluentIterable<T> empty() {\n        return IterableUtils.EMPTY_ITERABLE;\n    }\n\n    /**\n     * Creates a new FluentIterable of the single provided element.\n     * <p>\n     * The returned iterable's iterator does not support {@code remove()}.\n     *\n     * @param <T>  the element type\n     * @param singleton  the singleton element\n     * @return a new FluentIterable containing the singleton\n     */\n    public static <T> FluentIterable<T> of(final T singleton) {\n        return of(IteratorUtils.asIterable(new SingletonIterator<T>(singleton, false)));\n    }\n\n    /**\n     * Creates a new FluentIterable from the provided elements.\n     * <p>\n     * The returned iterable's iterator does not support {@code remove()}.\n     *\n     * @param <T>  the element type\n     * @param elements  the elements to be contained in the FluentIterable\n     * @return a new FluentIterable containing the provided elements\n     */\n    public static <T> FluentIterable<T> of(final T... elements) {\n        return of(Arrays.asList(elements));\n    }\n\n    /**\n     * Construct a new FluentIterable from the provided iterable. If the\n     * iterable is already an instance of FluentIterable, the instance\n     * will be returned instead.\n     * <p>\n     * The returned iterable's iterator supports {@code remove()} when the\n     * corresponding input iterator supports it.\n     *\n     * @param <T>  the element type\n     * @param iterable  the iterable to wrap into a FluentIterable, may not be null\n     * @return a new FluentIterable wrapping the provided iterable\n     * @throws NullPointerException if iterable is null\n     */\n    public static <T> FluentIterable<T> of(final Iterable<T> iterable) {\n        IterableUtils.checkNotNull(iterable);\n        if (iterable instanceof FluentIterable<?>) {\n            return (FluentIterable<T>) iterable;\n        } else {\n            return new FluentIterable<T>(iterable);\n        }\n    }\n\n    // Constructor\n    // ----------------------------------------------------------------------\n    /**\n     * Package-private constructor, used by IterableUtils.\n     */\n    FluentIterable() {\n        this.iterable = this;\n    }\n\n    /**\n     * Create a new FluentIterable by wrapping the provided iterable.\n     * @param iterable  the iterable to wrap\n     */\n    private FluentIterable(final Iterable<E> iterable) {\n        this.iterable = iterable;\n    }\n\n    // fluent construction methods\n    // ----------------------------------------------------------------------\n    /**\n     * Returns a new FluentIterable whose iterator will first traverse\n     * the elements of the current iterable, followed by the provided\n     * elements.\n     *\n     * @param elements  the elements to append to the iterable\n     * @return a new iterable, combining this iterable with the elements\n     */\n    public FluentIterable<E> append(final E... elements) {\n        return append(Arrays.asList(elements));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will first traverse\n     * the elements of the current iterable, followed by the elements\n     * of the provided iterable.\n     *\n     * @param other  the other iterable to combine, may not be null\n     * @return a new iterable, combining this iterable with other\n     * @throws NullPointerException if other is null\n     */\n    public FluentIterable<E> append(final Iterable<? extends E> other) {\n        return of(IterableUtils.chainedIterable(iterable, other));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will traverse the\n     * elements of the current and provided iterable in natural order.\n     * <p>\n     * Example: natural ordering\n     * <ul>\n     *   <li>this contains elements [1, 3, 5, 7]\n     *   <li>other contains elements [2, 4, 6, 8]\n     * </ul>\n     * <p>\n     * The returned iterable will traverse the elements in the following\n     * order: [1, 2, 3, 4, 5, 6, 7, 8]\n     *\n     * @param other  the other iterable to collate, may not be null\n     * @return a new iterable, collating this iterable with the other in natural order\n     * @throws NullPointerException if other is null\n     * @see {@link org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}\n     */\n    public FluentIterable<E> collate(final Iterable<? extends E> other) {\n        return of(IterableUtils.collatedIterable(iterable, other));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will traverse the\n     * elements of the current and provided iterable according to the\n     * ordering defined by an comparator.\n     * <p>\n     * Example: descending order\n     * <ul>\n     *   <li>this contains elements [7, 5, 3, 1]\n     *   <li>other contains elements [8, 6, 4, 2]\n     * </ul>\n     * <p>\n     * The returned iterable will traverse the elements in the following\n     * order: [8, 7, 6, 5, 4, 3, 2, 1]\n     *\n     * @param comparator  the comparator to define an ordering, may be null,\n     *   in which case natural ordering will be used\n     * @param other  the other iterable to collate, may not be null\n     * @return a new iterable, collating this iterable with the other in natural order\n     * @throws NullPointerException if other is null\n     * @see {@link org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}\n     */\n    public FluentIterable<E> collate(final Iterable<? extends E> other, final Comparator<? super E> comparator) {\n        return of(IterableUtils.collatedIterable(comparator, iterable, other));\n    }\n\n    /**\n     * This method fully traverses an iterator of this iterable and returns\n     * a new iterable with the same contents, but without any reference\n     * to the originating iterables and/or iterators.\n     * <p>\n     * Calling this method is equivalent to:\n     * <pre>\n     *   FluentIterable<E> someIterable = ...;\n     *   FluentIterable.of(someIterable.toList());\n     * </pre>\n     *\n     * @return a new iterable with the same contents as this iterable\n     */\n    public FluentIterable<E> eval() {\n        return of(toList());\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will only return\n     * elements from this iterable matching the provided predicate.\n     *\n     * @param predicate  the predicate used to filter elements\n     * @return a new iterable, providing a filtered view of this iterable\n     * @throws NullPointerException if predicate is null\n     */\n    public FluentIterable<E> filter(final Predicate<? super E> predicate) {\n        return of(IterableUtils.filteredIterable(iterable, predicate));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will return at most\n     * the provided maximum number of elements from this iterable.\n     *\n     * @param maxSize  the maximum number of elements\n     * @return a new iterable, providing a bounded view of this iterable\n     * @throws IllegalArgumentException if maxSize is negative\n     */\n    public FluentIterable<E> limit(final long maxSize) {\n        return of(IterableUtils.boundedIterable(iterable, maxSize));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will loop infinitely\n     * over the elements from this iterable.\n     *\n     * @return a new iterable, providing a looping view of this iterable\n     */\n    public FluentIterable<E> loop() {\n        return of(IterableUtils.loopingIterable(iterable));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will traverse the\n     * elements from this iterable in reverse order.\n     *\n     * @return a new iterable, providing a reversed view of this iterable\n     */\n    public FluentIterable<E> reverse() {\n        return of(IterableUtils.reversedIterable(iterable));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will skip the first\n     * N elements from this iterable.\n     *\n     * @param elementsToSkip  the number of elements to skip\n     * @return a new iterable, providing a view of this iterable by skipping\n     *   the first N elements\n     * @throws IllegalArgumentException if elementsToSkip is negative\n     */\n    public FluentIterable<E> skip(final long elementsToSkip) {\n        return of(IterableUtils.skippingIterable(iterable, elementsToSkip));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will return all elements\n     * of this iterable transformed by the provided transformer.\n     *\n     * @param <O>  the output element type\n     * @param transformer  the transformer applied to each element\n     * @return a new iterable, providing a transformed view of this iterable\n     * @throws NullPointerException if transformer is null\n     */\n    public <O> FluentIterable<O> transform(final Transformer<? super E, ? extends O> transformer) {\n        return of(IterableUtils.transformedIterable(iterable, transformer));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will return a unique view\n     * of this iterable.\n     *\n     * @return a new iterable, providing a unique view of this iterable\n     */\n    public FluentIterable<E> unique() {\n        return of(IterableUtils.uniqueIterable(iterable));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will return an unmodifiable\n     * view of this iterable.\n     *\n     * @return a new iterable, providing an unmodifiable view of this iterable\n     */\n    public FluentIterable<E> unmodifiable() {\n        return of(IterableUtils.unmodifiableIterable(iterable));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will traverse\n     * the elements of this iterable and the other iterable in\n     * alternating order.\n     *\n     * @param other  the other iterable to interleave, may not be null\n     * @return a new iterable, interleaving this iterable with others\n     * @throws NullPointerException if other is null\n     */\n    public FluentIterable<E> zip(final Iterable<? extends E> other) {\n        return of(IterableUtils.zippingIterable(iterable, other));\n    }\n\n    /**\n     * Returns a new FluentIterable whose iterator will traverse\n     * the elements of this iterable and the other iterables in\n     * alternating order.\n     *\n     * @param others  the iterables to interleave, may not be null\n     * @return a new iterable, interleaving this iterable with others\n     * @throws NullPointerException if either of the provided iterables is null\n     */\n    public FluentIterable<E> zip(final Iterable<? extends E>... others) {\n        return of(IterableUtils.zippingIterable(iterable, others));\n    }\n\n    // convenience methods\n    // ----------------------------------------------------------------------\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public Iterator<E> iterator() {\n        return iterable.iterator();\n    }\n\n    /**\n     * Returns an Enumeration that will enumerate all elements contained\n     * in this iterable.\n     *\n     * @return an Enumeration over the elements of this iterable\n     */\n    public Enumeration<E> asEnumeration() {\n        return IteratorUtils.asEnumeration(iterator());\n    }\n\n    /**\n     * Checks if all elements contained in this iterable are matching the\n     * provided predicate.\n     * <p>\n     * A <code>null</code> or empty iterable returns true.\n     *\n     * @param predicate  the predicate to use, may not be null\n     * @return true if all elements contained in this iterable match the predicate,\n     *   false otherwise\n     * @throws NullPointerException if predicate is null\n     */\n    public boolean allMatch(final Predicate<? super E> predicate) {\n        return IterableUtils.matchesAll(iterable, predicate);\n    }\n\n    /**\n     * Checks if this iterable contains any element matching the provided predicate.\n     * <p>\n     * A <code>null</code> or empty iterable returns false.\n     *\n     * @param predicate  the predicate to use, may not be null\n     * @return true if at least one element contained in this iterable matches the predicate,\n     *   false otherwise\n     * @throws NullPointerException if predicate is null\n     */\n    public boolean anyMatch(final Predicate<? super E> predicate) {\n        return IterableUtils.matchesAny(iterable, predicate);\n    }\n\n    /**\n     * Checks if this iterable is empty.\n     *\n     * @return true if this iterable does not contain any elements, false otherwise\n     */\n    public boolean isEmpty() {\n        return IterableUtils.isEmpty(iterable);\n    }\n\n    /**\n     * Checks if the object is contained in this iterable.\n     *\n     * @param object  the object to check\n     * @return true if the object is contained in this iterable, false otherwise\n     */\n    public boolean contains(final Object object) {\n        return IterableUtils.contains(iterable, object);\n    }\n\n    /**\n     * Applies the closure to all elements contained in this iterable.\n     *\n     * @param closure  the closure to apply to each element, may not be null\n     * @throws NullPointerException if closure is null\n     */\n    public void forEach(final Closure<? super E> closure) {\n        IterableUtils.forEach(iterable, closure);\n    }\n\n    /**\n     * Returns the element at the provided position in this iterable.\n     * In order to return the element, an iterator needs to be traversed\n     * up to the requested position.\n     *\n     * @param position  the position of the element to return\n     * @return the element\n     * @throws IndexOutOfBoundsException if the provided position is outside the\n     *   valid range of this iterable: [0, size)\n     */\n    public E get(final int position) {\n        return IterableUtils.get(iterable, position);\n    }\n\n    /**\n     * Returns the number of elements that are contained in this iterable.\n     * In order to determine the size, an iterator needs to be traversed.\n     *\n     * @return the size of this iterable\n     */\n    public int size() {\n        return IterableUtils.size(iterable);\n    }\n\n    /**\n     * Traverses an iterator of this iterable and adds all elements\n     * to the provided collection.\n     *\n     * @param collection  the collection to add the elements\n     * @throws NullPointerException if collection is null\n     */\n    public void copyInto(final Collection<? super E> collection) {\n        if (collection == null) {\n            throw new NullPointerException(\"Collection must not be null\");\n        }\n        CollectionUtils.addAll(collection, iterable);\n    }\n\n    /**\n     * Returns an array containing all elements of this iterable by traversing\n     * its iterator.\n     *\n     * @param arrayClass  the class of array to create\n     * @return an array of the iterable contents\n     * @throws ArrayStoreException if arrayClass is invalid\n     */\n    public E[] toArray(final Class<E> arrayClass) {\n        return IteratorUtils.toArray(iterator(), arrayClass);\n    }\n\n    /**\n     * Returns a mutable list containing all elements of this iterable\n     * by traversing its iterator.\n     * <p>\n     * The returned list is guaranteed to be mutable.\n     *\n     * @return a list of the iterable contents\n     */\n    public List<E> toList() {\n        return IterableUtils.toList(iterable);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public String toString() {\n        return IterableUtils.toString(iterable);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "FluentIterable",
+        "parameters": [],
+        "javadoc": "/**\n * Package-private constructor, used by IterableUtils.\n */\n",
+        "tags": [],
+        "code": "// Constructor\n// ----------------------------------------------------------------------\n/**\n * Package-private constructor, used by IterableUtils.\n */\nFluentIterable() {\n    this.iterable = this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "empty",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Creates a new empty FluentIterable.\n *\n * @param <T>  the element type\n * @return a new empty FluentIterable\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the element type"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new empty FluentIterable",
+            "assertion": "assert methodResultID == true;",
+            "description": "a new empty FluentIterable"
+          }
+        ],
+        "code": "// Static factory methods\n// ----------------------------------------------------------------------\n/**\n * Creates a new empty FluentIterable.\n *\n * @param <T>  the element type\n * @return a new empty FluentIterable\n */\n@SuppressWarnings(\"unchecked\")\npublic static <T> FluentIterable<T> empty() {\n    return IterableUtils.EMPTY_ITERABLE;\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "singleton"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new FluentIterable of the single provided element.\n * <p>\n * The returned iterable's iterator does not support {@code remove()}.\n *\n * @param <T>  the element type\n * @param singleton  the singleton element\n * @return a new FluentIterable containing the singleton\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the element type"
+          },
+          {
+            "tag": "param",
+            "name": "singleton",
+            "content": "the singleton element",
+            "assertion": "assert args[0] != null;",
+            "description": "the singleton element"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new FluentIterable containing the singleton",
+            "assertion": "assert methodResultID instanceof java.util.FluentIterable;",
+            "description": "a new FluentIterable containing the singleton"
+          }
+        ],
+        "code": "/**\n * Creates a new FluentIterable of the single provided element.\n * <p>\n * The returned iterable's iterator does not support {@code remove()}.\n *\n * @param <T>  the element type\n * @param singleton  the singleton element\n * @return a new FluentIterable containing the singleton\n */\npublic static <T> FluentIterable<T> of(final T singleton) {\n    return of(IteratorUtils.asIterable(new SingletonIterator<T>(singleton, false)));\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "elements"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new FluentIterable from the provided elements.\n * <p>\n * The returned iterable's iterator does not support {@code remove()}.\n *\n * @param <T>  the element type\n * @param elements  the elements to be contained in the FluentIterable\n * @return a new FluentIterable containing the provided elements\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the element type"
+          },
+          {
+            "tag": "param",
+            "name": "elements",
+            "content": "the elements to be contained in the FluentIterable",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the elements to be contained in the FluentIterable"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new FluentIterable containing the provided elements",
+            "assertion": "assert methodResultID instanceof java.util.FluentIterable;",
+            "description": "a new FluentIterable containing the provided elements"
+          }
+        ],
+        "code": "/**\n * Creates a new FluentIterable from the provided elements.\n * <p>\n * The returned iterable's iterator does not support {@code remove()}.\n *\n * @param <T>  the element type\n * @param elements  the elements to be contained in the FluentIterable\n * @return a new FluentIterable containing the provided elements\n */\npublic static <T> FluentIterable<T> of(final T... elements) {\n    return of(Arrays.asList(elements));\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "iterable"
+          }
+        ],
+        "javadoc": "/**\n * Construct a new FluentIterable from the provided iterable. If the\n * iterable is already an instance of FluentIterable, the instance\n * will be returned instead.\n * <p>\n * The returned iterable's iterator supports {@code remove()} when the\n * corresponding input iterator supports it.\n *\n * @param <T>  the element type\n * @param iterable  the iterable to wrap into a FluentIterable, may not be null\n * @return a new FluentIterable wrapping the provided iterable\n * @throws NullPointerException if iterable is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the element type"
+          },
+          {
+            "tag": "param",
+            "name": "iterable",
+            "content": "the iterable to wrap into a FluentIterable, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the iterable to wrap into a FluentIterable, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new FluentIterable wrapping the provided iterable",
+            "assertion": "assert methodResultID == (args[0] != null);",
+            "description": "a new FluentIterable wrapping the provided iterable"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if iterable is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if iterable is null."
+          }
+        ],
+        "code": "/**\n * Construct a new FluentIterable from the provided iterable. If the\n * iterable is already an instance of FluentIterable, the instance\n * will be returned instead.\n * <p>\n * The returned iterable's iterator supports {@code remove()} when the\n * corresponding input iterator supports it.\n *\n * @param <T>  the element type\n * @param iterable  the iterable to wrap into a FluentIterable, may not be null\n * @return a new FluentIterable wrapping the provided iterable\n * @throws NullPointerException if iterable is null\n */\npublic static <T> FluentIterable<T> of(final Iterable<T> iterable) {\n    IterableUtils.checkNotNull(iterable);\n    if (iterable instanceof FluentIterable<?>) {\n        return (FluentIterable<T>) iterable;\n    } else {\n        return new FluentIterable<T>(iterable);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "append",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "elements"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will first traverse\n * the elements of the current iterable, followed by the provided\n * elements.\n *\n * @param elements  the elements to append to the iterable\n * @return a new iterable, combining this iterable with the elements\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "elements",
+            "content": "the elements to append to the iterable",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the elements to append to the iterable"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, combining this iterable with the elements",
+            "assertion": "assert methodResultID instanceof java.lang.Iterable;",
+            "description": "a new iterable, combining this iterable with the elements"
+          }
+        ],
+        "code": "// fluent construction methods\n// ----------------------------------------------------------------------\n/**\n * Returns a new FluentIterable whose iterator will first traverse\n * the elements of the current iterable, followed by the provided\n * elements.\n *\n * @param elements  the elements to append to the iterable\n * @return a new iterable, combining this iterable with the elements\n */\npublic FluentIterable<E> append(final E... elements) {\n    return append(Arrays.asList(elements));\n}"
+      },
+      {
+        "type": "method",
+        "name": "append",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will first traverse\n * the elements of the current iterable, followed by the elements\n * of the provided iterable.\n *\n * @param other  the other iterable to combine, may not be null\n * @return a new iterable, combining this iterable with other\n * @throws NullPointerException if other is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "the other iterable to combine, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the other iterable to combine, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, combining this iterable with other",
+            "assertion": "assert methodResultID == !receiverObjectID.isEmpty() || receiverObjectID.append(args[0]).anyMatch(x -> x != null);",
+            "description": "a new iterable, combining this iterable with other"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if other is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if other is null."
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will first traverse\n * the elements of the current iterable, followed by the elements\n * of the provided iterable.\n *\n * @param other  the other iterable to combine, may not be null\n * @return a new iterable, combining this iterable with other\n * @throws NullPointerException if other is null\n */\npublic FluentIterable<E> append(final Iterable<? extends E> other) {\n    return of(IterableUtils.chainedIterable(iterable, other));\n}"
+      },
+      {
+        "type": "method",
+        "name": "collate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will traverse the\n * elements of the current and provided iterable in natural order.\n * <p>\n * Example: natural ordering\n * <ul>\n *   <li>this contains elements [1, 3, 5, 7]\n *   <li>other contains elements [2, 4, 6, 8]\n * </ul>\n * <p>\n * The returned iterable will traverse the elements in the following\n * order: [1, 2, 3, 4, 5, 6, 7, 8]\n *\n * @param other  the other iterable to collate, may not be null\n * @return a new iterable, collating this iterable with the other in natural order\n * @throws NullPointerException if other is null\n * @see {@link org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "the other iterable to collate, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the other iterable to collate, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, collating this iterable with the other in natural order",
+            "assertion": "assert !args[0].isEmpty() && args[1].allMatch(args[0]::get);",
+            "description": "Returns a new FluentIterable whose iterator will traverse the elements of the current and provided iterable in natural order."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if other is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if other is null."
+          },
+          {
+            "tag": "see",
+            "name": "{@link",
+            "content": "org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will traverse the\n * elements of the current and provided iterable in natural order.\n * <p>\n * Example: natural ordering\n * <ul>\n *   <li>this contains elements [1, 3, 5, 7]\n *   <li>other contains elements [2, 4, 6, 8]\n * </ul>\n * <p>\n * The returned iterable will traverse the elements in the following\n * order: [1, 2, 3, 4, 5, 6, 7, 8]\n *\n * @param other  the other iterable to collate, may not be null\n * @return a new iterable, collating this iterable with the other in natural order\n * @throws NullPointerException if other is null\n * @see {@link org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}\n */\npublic FluentIterable<E> collate(final Iterable<? extends E> other) {\n    return of(IterableUtils.collatedIterable(iterable, other));\n}"
+      },
+      {
+        "type": "method",
+        "name": "collate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comparator"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will traverse the\n * elements of the current and provided iterable according to the\n * ordering defined by an comparator.\n * <p>\n * Example: descending order\n * <ul>\n *   <li>this contains elements [7, 5, 3, 1]\n *   <li>other contains elements [8, 6, 4, 2]\n * </ul>\n * <p>\n * The returned iterable will traverse the elements in the following\n * order: [8, 7, 6, 5, 4, 3, 2, 1]\n *\n * @param comparator  the comparator to define an ordering, may be null,\n *   in which case natural ordering will be used\n * @param other  the other iterable to collate, may not be null\n * @return a new iterable, collating this iterable with the other in natural order\n * @throws NullPointerException if other is null\n * @see {@link org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "comparator",
+            "content": "the comparator to define an ordering, may be null, in which case natural ordering will be used",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the comparator to define an ordering, may be null, in which case natural ordering will be used"
+          },
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "the other iterable to collate, may not be null",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the other iterable to collate, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, collating this iterable with the other in natural order",
+            "assertion": "assert methodResultID == !receiverObjectID.isEmpty() && receiverObjectID.collate(args[0], args[1]) != null;",
+            "description": "Returns a new FluentIterable whose iterator will traverse the elements of the current and provided iterable according to the ordering defined by an comparator."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if other is null",
+            "assertion": "",
+            "description": "if other is null"
+          },
+          {
+            "tag": "see",
+            "name": "{@link",
+            "content": "org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will traverse the\n * elements of the current and provided iterable according to the\n * ordering defined by an comparator.\n * <p>\n * Example: descending order\n * <ul>\n *   <li>this contains elements [7, 5, 3, 1]\n *   <li>other contains elements [8, 6, 4, 2]\n * </ul>\n * <p>\n * The returned iterable will traverse the elements in the following\n * order: [8, 7, 6, 5, 4, 3, 2, 1]\n *\n * @param comparator  the comparator to define an ordering, may be null,\n *   in which case natural ordering will be used\n * @param other  the other iterable to collate, may not be null\n * @return a new iterable, collating this iterable with the other in natural order\n * @throws NullPointerException if other is null\n * @see {@link org.apache.commons.collections4.iterators.CollatingIterator CollatingIterator}\n */\npublic FluentIterable<E> collate(final Iterable<? extends E> other, final Comparator<? super E> comparator) {\n    return of(IterableUtils.collatedIterable(comparator, iterable, other));\n}"
+      },
+      {
+        "type": "method",
+        "name": "eval",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * This method fully traverses an iterator of this iterable and returns\n * a new iterable with the same contents, but without any reference\n * to the originating iterables and/or iterators.\n * <p>\n * Calling this method is equivalent to:\n * <pre>\n *   FluentIterable<E> someIterable = ...;\n *   FluentIterable.of(someIterable.toList());\n * </pre>\n *\n * @return a new iterable with the same contents as this iterable\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable with the same contents as this iterable",
+            "assertion": "assert methodResultID == !receiverObjectID.isEmpty();",
+            "description": "a new iterable with the same contents as this iterable"
+          }
+        ],
+        "code": "/**\n * This method fully traverses an iterator of this iterable and returns\n * a new iterable with the same contents, but without any reference\n * to the originating iterables and/or iterators.\n * <p>\n * Calling this method is equivalent to:\n * <pre>\n *   FluentIterable<E> someIterable = ...;\n *   FluentIterable.of(someIterable.toList());\n * </pre>\n *\n * @return a new iterable with the same contents as this iterable\n */\npublic FluentIterable<E> eval() {\n    return of(toList());\n}"
+      },
+      {
+        "type": "method",
+        "name": "filter",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will only return\n * elements from this iterable matching the provided predicate.\n *\n * @param predicate  the predicate used to filter elements\n * @return a new iterable, providing a filtered view of this iterable\n * @throws NullPointerException if predicate is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "the predicate used to filter elements",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the predicate used to filter elements"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing a filtered view of this iterable",
+            "assertion": "assert methodResultID == !receiverObjectID.isEmpty() || receiverObjectID.allMatch(args[0]);",
+            "description": "a new iterable, providing a filtered view of this iterable"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if predicate is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if predicate is null."
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will only return\n * elements from this iterable matching the provided predicate.\n *\n * @param predicate  the predicate used to filter elements\n * @return a new iterable, providing a filtered view of this iterable\n * @throws NullPointerException if predicate is null\n */\npublic FluentIterable<E> filter(final Predicate<? super E> predicate) {\n    return of(IterableUtils.filteredIterable(iterable, predicate));\n}"
+      },
+      {
+        "type": "method",
+        "name": "limit",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will return at most\n * the provided maximum number of elements from this iterable.\n *\n * @param maxSize  the maximum number of elements\n * @return a new iterable, providing a bounded view of this iterable\n * @throws IllegalArgumentException if maxSize is negative\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "the maximum number of elements",
+            "assertion": "assert (args[0] < 0) == false;",
+            "description": "the maximum number of elements"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing a bounded view of this iterable",
+            "assertion": "assert methodResultID == (args[0] >= 0);",
+            "description": "a new iterable, providing a bounded view of this iterable"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if maxSize is negative",
+            "assertion": "assert args[0] < 0;",
+            "description": "if maxSize is negative"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will return at most\n * the provided maximum number of elements from this iterable.\n *\n * @param maxSize  the maximum number of elements\n * @return a new iterable, providing a bounded view of this iterable\n * @throws IllegalArgumentException if maxSize is negative\n */\npublic FluentIterable<E> limit(final long maxSize) {\n    return of(IterableUtils.boundedIterable(iterable, maxSize));\n}"
+      },
+      {
+        "type": "method",
+        "name": "loop",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will loop infinitely\n * over the elements from this iterable.\n *\n * @return a new iterable, providing a looping view of this iterable\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing a looping view of this iterable",
+            "assertion": "assert methodResultID instanceof receiverObjectID.FluentIterable;",
+            "description": "a new iterable, providing a looping view of this iterable"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will loop infinitely\n * over the elements from this iterable.\n *\n * @return a new iterable, providing a looping view of this iterable\n */\npublic FluentIterable<E> loop() {\n    return of(IterableUtils.loopingIterable(iterable));\n}"
+      },
+      {
+        "type": "method",
+        "name": "reverse",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will traverse the\n * elements from this iterable in reverse order.\n *\n * @return a new iterable, providing a reversed view of this iterable\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing a reversed view of this iterable",
+            "assertion": "assert methodResultID instanceof receiverObjectID.FluentIterable;",
+            "description": "a new iterable, providing a reversed view of this iterable"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will traverse the\n * elements from this iterable in reverse order.\n *\n * @return a new iterable, providing a reversed view of this iterable\n */\npublic FluentIterable<E> reverse() {\n    return of(IterableUtils.reversedIterable(iterable));\n}"
+      },
+      {
+        "type": "method",
+        "name": "skip",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "elementsToSkip"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will skip the first\n * N elements from this iterable.\n *\n * @param elementsToSkip  the number of elements to skip\n * @return a new iterable, providing a view of this iterable by skipping\n *   the first N elements\n * @throws IllegalArgumentException if elementsToSkip is negative\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "elementsToSkip",
+            "content": "the number of elements to skip",
+            "assertion": "assert (args[0] < 0) == false;",
+            "description": "the number of elements to skip"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing a view of this iterable by skipping the first N elements",
+            "assertion": "assert methodResultID == (args[0] >= 0);",
+            "description": "Returns a new FluentIterable whose iterator will skip the first N elements from this iterable."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if elementsToSkip is negative",
+            "assertion": "assert args[0] < 0;",
+            "description": "if elementsToSkip is negative"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will skip the first\n * N elements from this iterable.\n *\n * @param elementsToSkip  the number of elements to skip\n * @return a new iterable, providing a view of this iterable by skipping\n *   the first N elements\n * @throws IllegalArgumentException if elementsToSkip is negative\n */\npublic FluentIterable<E> skip(final long elementsToSkip) {\n    return of(IterableUtils.skippingIterable(iterable, elementsToSkip));\n}"
+      },
+      {
+        "type": "method",
+        "name": "transform",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Transformer",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "transformer"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will return all elements\n * of this iterable transformed by the provided transformer.\n *\n * @param <O>  the output element type\n * @param transformer  the transformer applied to each element\n * @return a new iterable, providing a transformed view of this iterable\n * @throws NullPointerException if transformer is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<O>",
+            "content": "the output element type"
+          },
+          {
+            "tag": "param",
+            "name": "transformer",
+            "content": "the transformer applied to each element",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the transformer"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing a transformed view of this iterable",
+            "assertion": "assert methodResultID instanceof receiverObjectID.FluentIterable;",
+            "description": "a new iterable, providing a transformed view of this iterable"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if transformer is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if transformer is null."
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will return all elements\n * of this iterable transformed by the provided transformer.\n *\n * @param <O>  the output element type\n * @param transformer  the transformer applied to each element\n * @return a new iterable, providing a transformed view of this iterable\n * @throws NullPointerException if transformer is null\n */\npublic <O> FluentIterable<O> transform(final Transformer<? super E, ? extends O> transformer) {\n    return of(IterableUtils.transformedIterable(iterable, transformer));\n}"
+      },
+      {
+        "type": "method",
+        "name": "unique",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will return a unique view\n * of this iterable.\n *\n * @return a new iterable, providing a unique view of this iterable\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing a unique view of this iterable",
+            "assertion": "assert methodResultID instanceof receiverObjectID.FluentIterable;",
+            "description": "a new iterable, providing a unique view of this iterable"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will return a unique view\n * of this iterable.\n *\n * @return a new iterable, providing a unique view of this iterable\n */\npublic FluentIterable<E> unique() {\n    return of(IterableUtils.uniqueIterable(iterable));\n}"
+      },
+      {
+        "type": "method",
+        "name": "unmodifiable",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will return an unmodifiable\n * view of this iterable.\n *\n * @return a new iterable, providing an unmodifiable view of this iterable\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, providing an unmodifiable view of this iterable",
+            "assertion": "assert methodResultID == !receiverObjectID.isEmpty();",
+            "description": "a new iterable, providing an unmodifiable view of this iterable"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will return an unmodifiable\n * view of this iterable.\n *\n * @return a new iterable, providing an unmodifiable view of this iterable\n */\npublic FluentIterable<E> unmodifiable() {\n    return of(IterableUtils.unmodifiableIterable(iterable));\n}"
+      },
+      {
+        "type": "method",
+        "name": "zip",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will traverse\n * the elements of this iterable and the other iterable in\n * alternating order.\n *\n * @param other  the other iterable to interleave, may not be null\n * @return a new iterable, interleaving this iterable with others\n * @throws NullPointerException if other is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "the other iterable to interleave, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the other iterable to interleave, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, interleaving this iterable with others",
+            "assertion": "assert !methodResultID.isNull() && methodResultID.anyMatch(args[0]::equals);",
+            "description": "Returns a new FluentIterable whose iterator will traverse the elements of this iterable and the other iterable in alternating order."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if other is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if other is null."
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will traverse\n * the elements of this iterable and the other iterable in\n * alternating order.\n *\n * @param other  the other iterable to interleave, may not be null\n * @return a new iterable, interleaving this iterable with others\n * @throws NullPointerException if other is null\n */\npublic FluentIterable<E> zip(final Iterable<? extends E> other) {\n    return of(IterableUtils.zippingIterable(iterable, other));\n}"
+      },
+      {
+        "type": "method",
+        "name": "zip",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FluentIterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "others"
+          }
+        ],
+        "javadoc": "/**\n * Returns a new FluentIterable whose iterator will traverse\n * the elements of this iterable and the other iterables in\n * alternating order.\n *\n * @param others  the iterables to interleave, may not be null\n * @return a new iterable, interleaving this iterable with others\n * @throws NullPointerException if either of the provided iterables is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "others",
+            "content": "the iterables to interleave, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the iterables to interleave, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new iterable, interleaving this iterable with others",
+            "assertion": "assert methodResultID == !args[0].isEmpty() && (methodResultID || args[1] == null);",
+            "description": "a new iterable, interleaving this iterable with others"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if either of the provided iterables is null",
+            "assertion": "assert args[0] == null || ((Iterable)args[0]).isEmpty();",
+            "description": "either of the provided iterables is null"
+          }
+        ],
+        "code": "/**\n * Returns a new FluentIterable whose iterator will traverse\n * the elements of this iterable and the other iterables in\n * alternating order.\n *\n * @param others  the iterables to interleave, may not be null\n * @return a new iterable, interleaving this iterable with others\n * @throws NullPointerException if either of the provided iterables is null\n */\npublic FluentIterable<E> zip(final Iterable<? extends E>... others) {\n    return of(IterableUtils.zippingIterable(iterable, others));\n}"
+      },
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "// convenience methods\n// ----------------------------------------------------------------------\n/**\n * {@inheritDoc}\n */\n@Override\npublic Iterator<E> iterator() {\n    return iterable.iterator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "asEnumeration",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Enumeration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns an Enumeration that will enumerate all elements contained\n * in this iterable.\n *\n * @return an Enumeration over the elements of this iterable\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Enumeration over the elements of this iterable",
+            "assertion": "assert methodResultID == receiverObjectID.asEnumeration().hasMoreElements();",
+            "description": "an Enumeration over the elements of this iterable"
+          }
+        ],
+        "code": "/**\n * Returns an Enumeration that will enumerate all elements contained\n * in this iterable.\n *\n * @return an Enumeration over the elements of this iterable\n */\npublic Enumeration<E> asEnumeration() {\n    return IteratorUtils.asEnumeration(iterator());\n}"
+      },
+      {
+        "type": "method",
+        "name": "allMatch",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate"
+          }
+        ],
+        "javadoc": "/**\n * Checks if all elements contained in this iterable are matching the\n * provided predicate.\n * <p>\n * A <code>null</code> or empty iterable returns true.\n *\n * @param predicate  the predicate to use, may not be null\n * @return true if all elements contained in this iterable match the predicate,\n *   false otherwise\n * @throws NullPointerException if predicate is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "the predicate to use, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the predicate to use, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if all elements contained in this iterable match the predicate, false otherwise",
+            "assertion": "assert !methodResultID || receiverObjectID.isEmpty();",
+            "description": "true if all elements contained in this iterable match the predicate."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if predicate is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if predicate is null."
+          }
+        ],
+        "code": "/**\n * Checks if all elements contained in this iterable are matching the\n * provided predicate.\n * <p>\n * A <code>null</code> or empty iterable returns true.\n *\n * @param predicate  the predicate to use, may not be null\n * @return true if all elements contained in this iterable match the predicate,\n *   false otherwise\n * @throws NullPointerException if predicate is null\n */\npublic boolean allMatch(final Predicate<? super E> predicate) {\n    return IterableUtils.matchesAll(iterable, predicate);\n}"
+      },
+      {
+        "type": "method",
+        "name": "anyMatch",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate"
+          }
+        ],
+        "javadoc": "/**\n * Checks if this iterable contains any element matching the provided predicate.\n * <p>\n * A <code>null</code> or empty iterable returns false.\n *\n * @param predicate  the predicate to use, may not be null\n * @return true if at least one element contained in this iterable matches the predicate,\n *   false otherwise\n * @throws NullPointerException if predicate is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "predicate",
+            "content": "the predicate to use, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the predicate to use, may not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if at least one element contained in this iterable matches the predicate, false otherwise",
+            "assertion": "assert !methodResultID || receiverObjectID.anyMatch(args[0]);",
+            "description": "true if at least one element contained in this iterable matches the predicate."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if predicate is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if predicate is null."
+          }
+        ],
+        "code": "/**\n * Checks if this iterable contains any element matching the provided predicate.\n * <p>\n * A <code>null</code> or empty iterable returns false.\n *\n * @param predicate  the predicate to use, may not be null\n * @return true if at least one element contained in this iterable matches the predicate,\n *   false otherwise\n * @throws NullPointerException if predicate is null\n */\npublic boolean anyMatch(final Predicate<? super E> predicate) {\n    return IterableUtils.matchesAny(iterable, predicate);\n}"
+      },
+      {
+        "type": "method",
+        "name": "isEmpty",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Checks if this iterable is empty.\n *\n * @return true if this iterable does not contain any elements, false otherwise\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if this iterable does not contain any elements, false otherwise",
+            "assertion": "assert methodResultID == receiverObjectID.isEmpty();",
+            "description": "true if this iterable does not contain any elements, false otherwise"
+          }
+        ],
+        "code": "/**\n * Checks if this iterable is empty.\n *\n * @return true if this iterable does not contain any elements, false otherwise\n */\npublic boolean isEmpty() {\n    return IterableUtils.isEmpty(iterable);\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": "/**\n * Checks if the object is contained in this iterable.\n *\n * @param object  the object to check\n * @return true if the object is contained in this iterable, false otherwise\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "object",
+            "content": "the object to check",
+            "assertion": "assert args[0] != null;",
+            "description": "the object to check"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if the object is contained in this iterable, false otherwise",
+            "assertion": "assert !methodResultID || receiverObjectID.contains(args[0]);",
+            "description": "true if the object is contained in this iterable."
+          }
+        ],
+        "code": "/**\n * Checks if the object is contained in this iterable.\n *\n * @param object  the object to check\n * @return true if the object is contained in this iterable, false otherwise\n */\npublic boolean contains(final Object object) {\n    return IterableUtils.contains(iterable, object);\n}"
+      },
+      {
+        "type": "method",
+        "name": "forEach",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Closure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "closure"
+          }
+        ],
+        "javadoc": "/**\n * Applies the closure to all elements contained in this iterable.\n *\n * @param closure  the closure to apply to each element, may not be null\n * @throws NullPointerException if closure is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "closure",
+            "content": "the closure to apply to each element, may not be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the closure to apply to each element, may not be null"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if closure is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if closure is null."
+          }
+        ],
+        "code": "/**\n * Applies the closure to all elements contained in this iterable.\n *\n * @param closure  the closure to apply to each element, may not be null\n * @throws NullPointerException if closure is null\n */\npublic void forEach(final Closure<? super E> closure) {\n    IterableUtils.forEach(iterable, closure);\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "position"
+          }
+        ],
+        "javadoc": "/**\n * Returns the element at the provided position in this iterable.\n * In order to return the element, an iterator needs to be traversed\n * up to the requested position.\n *\n * @param position  the position of the element to return\n * @return the element\n * @throws IndexOutOfBoundsException if the provided position is outside the\n *   valid range of this iterable: [0, size)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "position",
+            "content": "the position of the element to return",
+            "assertion": "assert (args[0] < 0) == false;",
+            "description": "the position of the element to return"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "element",
+            "assertion": "assert methodResultID == receiverObjectID.get(args[0]);",
+            "description": "Returns the element at the provided position in this iterable."
+          },
+          {
+            "tag": "throws",
+            "name": "IndexOutOfBoundsException",
+            "content": "if the provided position is outside the valid range of this iterable: [0, size)",
+            "assertion": "assert args[0] < 0 || args[0] >= receiverObjectID.size();",
+            "description": "if the provided position is outside the valid range of this iterable: [0, size)"
+          }
+        ],
+        "code": "/**\n * Returns the element at the provided position in this iterable.\n * In order to return the element, an iterator needs to be traversed\n * up to the requested position.\n *\n * @param position  the position of the element to return\n * @return the element\n * @throws IndexOutOfBoundsException if the provided position is outside the\n *   valid range of this iterable: [0, size)\n */\npublic E get(final int position) {\n    return IterableUtils.get(iterable, position);\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the number of elements that are contained in this iterable.\n * In order to determine the size, an iterator needs to be traversed.\n *\n * @return the size of this iterable\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "size of this iterable",
+            "assertion": "assert methodResultID == receiverObjectID.size();",
+            "description": "the size of this iterable"
+          }
+        ],
+        "code": "/**\n * Returns the number of elements that are contained in this iterable.\n * In order to determine the size, an iterator needs to be traversed.\n *\n * @return the size of this iterable\n */\npublic int size() {\n    return IterableUtils.size(iterable);\n}"
+      },
+      {
+        "type": "method",
+        "name": "copyInto",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "collection"
+          }
+        ],
+        "javadoc": "/**\n * Traverses an iterator of this iterable and adds all elements\n * to the provided collection.\n *\n * @param collection  the collection to add the elements\n * @throws NullPointerException if collection is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "collection",
+            "content": "the collection to add the elements",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the collection to add the elements"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if collection is null",
+            "assertion": "assert args[0] == null;",
+            "description": "if collection is null."
+          }
+        ],
+        "code": "/**\n * Traverses an iterator of this iterable and adds all elements\n * to the provided collection.\n *\n * @param collection  the collection to add the elements\n * @throws NullPointerException if collection is null\n */\npublic void copyInto(final Collection<? super E> collection) {\n    if (collection == null) {\n        throw new NullPointerException(\"Collection must not be null\");\n    }\n    CollectionUtils.addAll(collection, iterable);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Class",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "arrayClass"
+          }
+        ],
+        "javadoc": "/**\n * Returns an array containing all elements of this iterable by traversing\n * its iterator.\n *\n * @param arrayClass  the class of array to create\n * @return an array of the iterable contents\n * @throws ArrayStoreException if arrayClass is invalid\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "arrayClass",
+            "content": "the class of array to create",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the class of array to create"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "array of the iterable contents",
+            "assertion": "assert methodResultID instanceof Object[] && ((Object[])methodResultID).length == receiverObjectID.asEnumeration().count();",
+            "description": "an array containing all elements of this iterable by traversing its iterator."
+          },
+          {
+            "tag": "throws",
+            "name": "ArrayStoreException",
+            "content": "if arrayClass is invalid",
+            "assertion": "assert !arrayClass.isAssignableFrom(java.lang.Object.class);",
+            "description": "if arrayClass is invalid"
+          }
+        ],
+        "code": "/**\n * Returns an array containing all elements of this iterable by traversing\n * its iterator.\n *\n * @param arrayClass  the class of array to create\n * @return an array of the iterable contents\n * @throws ArrayStoreException if arrayClass is invalid\n */\npublic E[] toArray(final Class<E> arrayClass) {\n    return IteratorUtils.toArray(iterator(), arrayClass);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toList",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a mutable list containing all elements of this iterable\n * by traversing its iterator.\n * <p>\n * The returned list is guaranteed to be mutable.\n *\n * @return a list of the iterable contents\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list of the iterable contents",
+            "assertion": "assert methodResultID instanceof java.util.List;",
+            "description": "a list of the iterable contents"
+          }
+        ],
+        "code": "/**\n * Returns a mutable list containing all elements of this iterable\n * by traversing its iterator.\n * <p>\n * The returned list is guaranteed to be mutable.\n *\n * @return a list of the iterable contents\n */\npublic List<E> toList() {\n    return IterableUtils.toList(iterable);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic String toString() {\n    return IterableUtils.toString(iterable);\n}"
+      }
+    ]
+  }
+]
