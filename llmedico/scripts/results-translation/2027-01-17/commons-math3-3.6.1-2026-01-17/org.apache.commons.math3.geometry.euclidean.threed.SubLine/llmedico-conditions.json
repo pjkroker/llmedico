@@ -1,0 +1,251 @@
+[
+  {
+    "method": "SubLine",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Line",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "line"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "IntervalsSet",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "remainingRegion"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "underlying line",
+          "assertion": "assert args[0] != null;",
+          "name": "line",
+          "content": "underlying line"
+        },
+        {
+          "description": "remaining region of the line, not null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "remainingRegion",
+          "content": "remaining region of the line"
+        }
+      ]
+    }
+  },
+  {
+    "method": "SubLine",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "tolerance"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "start point",
+          "assertion": "assert args[0] != null;",
+          "name": "start",
+          "content": "start point"
+        },
+        {
+          "description": "end point",
+          "assertion": "assert args[1] != null;",
+          "name": "end",
+          "content": "end point"
+        },
+        {
+          "description": "tolerance below which points are considered identical, not null",
+          "assertion": "assert (args[2] == null) == false;",
+          "name": "tolerance",
+          "content": "tolerance below which points are considered identical"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathIllegalArgumentException",
+          "content": "if the points are equal",
+          "assertion": "",
+          "description": "if the points are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "SubLine",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "start point",
+          "assertion": "assert args[0] != null;",
+          "name": "start",
+          "content": "start point"
+        },
+        {
+          "description": "end point",
+          "assertion": "assert args[1] != null;",
+          "name": "end",
+          "content": "end point"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the points are equal",
+          "assertion": "assert args[0] == args[1];",
+          "name": "MathIllegalArgumentException",
+          "content": "if the points are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "SubLine",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Segment",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "segment"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "single segment forming the sub-line",
+          "assertion": "assert args[0] != null;",
+          "name": "segment",
+          "content": "single segment forming the sub-line"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the segment endpoints are equal",
+          "assertion": "assert args[0].getEndpoints().get(0).equals(args[0].getEndpoints().get(1));",
+          "name": "MathIllegalArgumentException",
+          "content": "if the segment endpoints are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSegments",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "of segments endpoints",
+          "assertion": "",
+          "description": "of segments endpoints"
+        }
+      ]
+    }
+  },
+  {
+    "method": "intersection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "SubLine",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "subLine"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "includeEndPoints"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "other sub-line which may intersect instance",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "subLine",
+          "content": "other sub-line which may intersect instance"
+        },
+        {
+          "description": "if true, endpoints are considered to belong to instance (i.e. they are closed sets) and may be returned, otherwise endpoints are considered to not belong to instance (i.e. they are open sets) and intersection occurring on endpoints lead to null being returned",
+          "assertion": "assert (args[1] == false) == false;",
+          "name": "includeEndPoints",
+          "content": "if true, endpoints are considered to belong to instance (i.e. they are closed sets) and may be returned, otherwise endpoints are considered to not belong to instance (i.e. they are open sets) and intersection occurring on endpoints lead to null being returned"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the intersection point if there is one, null if the sub-lines don't intersect",
+          "assertion": "assert methodResultID == receiverObjectID.intersection(args[0], args[1]) != null;",
+          "name": null,
+          "content": "the intersection point if there is one, null if the sub-lines don't intersect"
+        }
+      ]
+    }
+  }
+]

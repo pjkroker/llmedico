@@ -1,0 +1,254 @@
+[
+  {
+    "method": "IndianNationType",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "id"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Specification",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "specification"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The object identifier",
+          "assertion": "assert args[0] != null;",
+          "name": "id",
+          "content": "The object identifier"
+        },
+        {
+          "description": "The Specification to refer to, not null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "specification",
+          "content": "The <code>Specification</code> to refer to"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEuropean",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "False.",
+          "assertion": "assert !methodResultID;",
+          "name": null,
+          "content": "False."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isIndian",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "True.",
+          "assertion": "assert methodResultID == true;",
+          "name": null,
+          "content": "True."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isREF",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "False.",
+          "assertion": "assert !methodResultID;",
+          "name": null,
+          "content": "False."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSettlementTypeKey",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "plural"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Choose the plural form or not",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "plural",
+          "content": "Choose the plural form or not"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "A suitable message id.",
+          "assertion": "assert methodResultID == (args[0] ? receiverObjectID.isEuropean() ? \"EUROPEAN\" : receiverObjectID.isIndian() ? \"INDIAN\" : \"REF\" : \"SINGLE\");",
+          "name": null,
+          "content": "A suitable message id."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getRegionNames",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "list of regions identifiers.",
+          "assertion": "",
+          "description": "list of regions identifiers."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSkills",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "list of national skills.",
+          "assertion": "",
+          "description": "list of national skills."
+        }
+      ]
+    }
+  },
+  {
+    "method": "generateSkillsForTile",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Tile",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "tile"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The Tile where the settlement will be located.",
+          "assertion": "assert args[0] != null;",
+          "name": "tile",
+          "content": "The <code>Tile</code> where the settlement will be located."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "A random choice set of skills.",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "A random choice set of skills."
+        }
+      ]
+    }
+  },
+  {
+    "method": "writeChildren",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FreeColXMLWriter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "xw"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "readChildren",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FreeColXMLReader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "xr"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "readChild",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FreeColXMLReader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "xr"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "getXMLTagName",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "getXMLElementTagName",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "indian-nation-type",
+          "assertion": "assert methodResultID.equals(\"indian-nation-type\");",
+          "name": null,
+          "content": "indian-nation-type"
+        }
+      ]
+    }
+  }
+]

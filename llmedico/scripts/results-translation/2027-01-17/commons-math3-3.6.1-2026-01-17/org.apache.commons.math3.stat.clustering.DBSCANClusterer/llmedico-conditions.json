@@ -1,0 +1,123 @@
+[
+  {
+    "method": "DBSCANClusterer",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "eps"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minPts"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "maximum radius of the neighborhood to be considered",
+          "assertion": "assert (args[0] < 0.0) == false;",
+          "name": "eps",
+          "content": "maximum radius of the neighborhood to be considered"
+        },
+        {
+          "description": "minimum number of points needed for a cluster",
+          "assertion": "assert (args[1] < 0) == false;",
+          "name": "minPts",
+          "content": "minimum number of points needed for a cluster"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if eps < 0.0 or minPts < 0",
+          "assertion": "assert args[0] <= 0.0 || args[1] <= 0;",
+          "name": "NotPositiveException",
+          "content": "if {@code eps < 0.0} or {@code minPts < 0}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEps",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "maximum radius of the neighborhood",
+          "assertion": "assert methodResultID == receiverObjectID.getEps();",
+          "name": null,
+          "content": "maximum radius of the neighborhood"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMinPts",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "minimum number of points needed for a cluster",
+          "assertion": "assert methodResultID == args[0];",
+          "name": null,
+          "content": "minimum number of points needed for a cluster"
+        }
+      ]
+    }
+  },
+  {
+    "method": "cluster",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "points"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the points to cluster, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "points",
+          "content": "the points to cluster"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "list of clusters",
+          "assertion": "",
+          "description": "list of clusters"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullArgumentException",
+          "content": "if the data points are null",
+          "assertion": "",
+          "description": "if the data points are null"
+        }
+      ]
+    }
+  }
+]
