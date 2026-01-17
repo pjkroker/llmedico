@@ -1,0 +1,986 @@
+[
+  {
+    "name": "Converter",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.Converter",
+    "javadoc": "/**\n * A function from {@code A} to {@code B} with an associated <i>reverse</i> function from {@code B}\n * to {@code A}; used for converting back and forth between <i>different representations of the same\n * information</i>.\n *\n * <h3>Invertibility</h3>\n *\n * <p>The reverse operation <b>may</b> be a strict <i>inverse</i> (meaning that {@code\n * converter.reverse().convert(converter.convert(a)).equals(a)} is always true). However, it is\n * very common (perhaps <i>more</i> common) for round-trip conversion to be <i>lossy</i>. Consider\n * an example round-trip using {@link com.google.common.primitives.Doubles#stringConverter}:\n *\n * <ol>\n * <li>{@code stringConverter().convert(\"1.00\")} returns the {@code Double} value {@code 1.0}\n * <li>{@code stringConverter().reverse().convert(1.0)} returns the string {@code \"1.0\"} --\n *     <i>not</i> the same string ({@code \"1.00\"}) we started with\n * </ol>\n *\n * <p>Note that it should still be the case that the round-tripped and original objects are\n * <i>similar</i>.\n *\n * <h3>Nullability</h3>\n *\n * <p>A converter always converts {@code null} to {@code null} and non-null references to non-null\n * references. It would not make sense to consider {@code null} and a non-null reference to be\n * \"different representations of the same information\", since one is distinguishable from\n * <i>missing</i> information and the other is not. The {@link #convert} method handles this null\n * behavior for all converters; implementations of {@link #doForward} and {@link #doBackward} are\n * guaranteed to never be passed {@code null}, and must never return {@code null}.\n *\n * <h3>Common ways to use</h3>\n *\n * <p>Getting a converter:\n *\n * <ul>\n * <li>Use a provided converter implementation, such as {@link Enums#stringConverter}, {@link\n *     com.google.common.primitives.Ints#stringConverter Ints.stringConverter} or the {@linkplain\n *     #reverse reverse} views of these.\n * <li>Convert between specific preset values using {@link\n *     com.google.common.collect.Maps#asConverter Maps.asConverter}. For example, use this to create\n *     a \"fake\" converter for a unit test. It is unnecessary (and confusing) to <i>mock</i> the\n *     {@code Converter} type using a mocking framework.\n * <li>Extend this class and implement its {@link #doForward} and {@link #doBackward} methods.\n * <li>If using Java 8, you may prefer to pass two lambda expressions or method references to {@link\n *     #from}.\n * </ul>\n *\n * <p>Using a converter:\n *\n * <ul>\n * <li>Convert one instance in the \"forward\" direction using {@code converter.convert(a)}.\n * <li>Convert multiple instances \"forward\" using {@code converter.convertAll(as)}.\n * <li>Convert in the \"backward\" direction using {@code converter.reverse().convert(b)} or {@code\n *     converter.reverse().convertAll(bs)}.\n * <li>Use {@code converter} or {@code converter.reverse()} anywhere a {@link Function} is accepted\n * <li><b>Do not</b> call {@link #doForward} or {@link #doBackward} directly; these exist only to be\n *     overridden.\n * </ul>\n *\n * <h3>Example</h3>\n *\n * <pre>   {@code\n *\n *   return new Converter<Integer, String>() {\n *     @Override\n *     protected String doForward(Integer i) {\n *       return Integer.toHexString(i);\n *     }\n *\n *     @Override\n *     protected Integer doBackward(String s) {\n *       return parseUnsignedInt(s, 16);\n *     }\n *   };}</pre>\n *\n * <p>An alternative using Java 8: <pre>   {@code\n *\n *   return Converter.from(Integer::toHexString, s -> parseUnsignedInt(s, 16));}</pre>\n *\n * @author Mike Ward\n * @author Kurt Alfred Kluever\n * @author Gregory Kick\n * @since 16.0\n */\n",
+    "code": "/**\n * A function from {@code A} to {@code B} with an associated <i>reverse</i> function from {@code B}\n * to {@code A}; used for converting back and forth between <i>different representations of the same\n * information</i>.\n *\n * <h3>Invertibility</h3>\n *\n * <p>The reverse operation <b>may</b> be a strict <i>inverse</i> (meaning that {@code\n * converter.reverse().convert(converter.convert(a)).equals(a)} is always true). However, it is\n * very common (perhaps <i>more</i> common) for round-trip conversion to be <i>lossy</i>. Consider\n * an example round-trip using {@link com.google.common.primitives.Doubles#stringConverter}:\n *\n * <ol>\n * <li>{@code stringConverter().convert(\"1.00\")} returns the {@code Double} value {@code 1.0}\n * <li>{@code stringConverter().reverse().convert(1.0)} returns the string {@code \"1.0\"} --\n *     <i>not</i> the same string ({@code \"1.00\"}) we started with\n * </ol>\n *\n * <p>Note that it should still be the case that the round-tripped and original objects are\n * <i>similar</i>.\n *\n * <h3>Nullability</h3>\n *\n * <p>A converter always converts {@code null} to {@code null} and non-null references to non-null\n * references. It would not make sense to consider {@code null} and a non-null reference to be\n * \"different representations of the same information\", since one is distinguishable from\n * <i>missing</i> information and the other is not. The {@link #convert} method handles this null\n * behavior for all converters; implementations of {@link #doForward} and {@link #doBackward} are\n * guaranteed to never be passed {@code null}, and must never return {@code null}.\n *\n * <h3>Common ways to use</h3>\n *\n * <p>Getting a converter:\n *\n * <ul>\n * <li>Use a provided converter implementation, such as {@link Enums#stringConverter}, {@link\n *     com.google.common.primitives.Ints#stringConverter Ints.stringConverter} or the {@linkplain\n *     #reverse reverse} views of these.\n * <li>Convert between specific preset values using {@link\n *     com.google.common.collect.Maps#asConverter Maps.asConverter}. For example, use this to create\n *     a \"fake\" converter for a unit test. It is unnecessary (and confusing) to <i>mock</i> the\n *     {@code Converter} type using a mocking framework.\n * <li>Extend this class and implement its {@link #doForward} and {@link #doBackward} methods.\n * <li>If using Java 8, you may prefer to pass two lambda expressions or method references to {@link\n *     #from}.\n * </ul>\n *\n * <p>Using a converter:\n *\n * <ul>\n * <li>Convert one instance in the \"forward\" direction using {@code converter.convert(a)}.\n * <li>Convert multiple instances \"forward\" using {@code converter.convertAll(as)}.\n * <li>Convert in the \"backward\" direction using {@code converter.reverse().convert(b)} or {@code\n *     converter.reverse().convertAll(bs)}.\n * <li>Use {@code converter} or {@code converter.reverse()} anywhere a {@link Function} is accepted\n * <li><b>Do not</b> call {@link #doForward} or {@link #doBackward} directly; these exist only to be\n *     overridden.\n * </ul>\n *\n * <h3>Example</h3>\n *\n * <pre>   {@code\n *\n *   return new Converter<Integer, String>() {\n *     @Override\n *     protected String doForward(Integer i) {\n *       return Integer.toHexString(i);\n *     }\n *\n *     @Override\n *     protected Integer doBackward(String s) {\n *       return parseUnsignedInt(s, 16);\n *     }\n *   };}</pre>\n *\n * <p>An alternative using Java 8: <pre>   {@code\n *\n *   return Converter.from(Integer::toHexString, s -> parseUnsignedInt(s, 16));}</pre>\n *\n * @author Mike Ward\n * @author Kurt Alfred Kluever\n * @author Gregory Kick\n * @since 16.0\n */\n@Beta\n@GwtCompatible\npublic abstract class Converter<A, B> implements Function<A, B> {\n\n    private final boolean handleNullAutomatically;\n\n    // We lazily cache the reverse view to avoid allocating on every call to reverse().\n    private transient Converter<B, A> reverse;\n\n    /**\n     * Constructor for use by subclasses.\n     */\n    protected Converter() {\n        this(true);\n    }\n\n    /**\n     * Constructor used only by {@code LegacyConverter} to suspend automatic null-handling.\n     */\n    Converter(boolean handleNullAutomatically) {\n        this.handleNullAutomatically = handleNullAutomatically;\n    }\n\n    // SPI methods (what subclasses must implement)\n    /**\n     * Returns a representation of {@code a} as an instance of type {@code B}. If {@code a} cannot be\n     * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.\n     *\n     * @param a the instance to convert; will never be null\n     * @return the converted instance; <b>must not</b> be null\n     */\n    protected abstract B doForward(A a);\n\n    /**\n     * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be\n     * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.\n     *\n     * @param b the instance to convert; will never be null\n     * @return the converted instance; <b>must not</b> be null\n     * @throws UnsupportedOperationException if backward conversion is not implemented; this should be\n     *     very rare. Note that if backward conversion is not only unimplemented but\n     *     unimplement<i>able</i> (for example, consider a {@code Converter<Chicken, ChickenNugget>}),\n     *     then this is not logically a {@code Converter} at all, and should just implement {@link\n     *     Function}.\n     */\n    protected abstract A doBackward(B b);\n\n    // API (consumer-side) methods\n    /**\n     * Returns a representation of {@code a} as an instance of type {@code B}.\n     *\n     * @return the converted value; is null <i>if and only if</i> {@code a} is null\n     */\n    @Nullable\n    public final B convert(@Nullable A a) {\n        return correctedDoForward(a);\n    }\n\n    @Nullable\n    B correctedDoForward(@Nullable A a) {\n        if (handleNullAutomatically) {\n            // TODO(kevinb): we shouldn't be checking for a null result at runtime. Assert?\n            return a == null ? null : checkNotNull(doForward(a));\n        } else {\n            return doForward(a);\n        }\n    }\n\n    @Nullable\n    A correctedDoBackward(@Nullable B b) {\n        if (handleNullAutomatically) {\n            // TODO(kevinb): we shouldn't be checking for a null result at runtime. Assert?\n            return b == null ? null : checkNotNull(doBackward(b));\n        } else {\n            return doBackward(b);\n        }\n    }\n\n    /**\n     * Returns an iterable that applies {@code convert} to each element of {@code fromIterable}. The\n     * conversion is done lazily.\n     *\n     * <p>The returned iterable's iterator supports {@code remove()} if the input iterator does. After\n     * a successful {@code remove()} call, {@code fromIterable} no longer contains the corresponding\n     * element.\n     */\n    public Iterable<B> convertAll(final Iterable<? extends A> fromIterable) {\n        checkNotNull(fromIterable, \"fromIterable\");\n        return new Iterable<B>() {\n\n            @Override\n            public Iterator<B> iterator() {\n                return new Iterator<B>() {\n\n                    private final Iterator<? extends A> fromIterator = fromIterable.iterator();\n\n                    @Override\n                    public boolean hasNext() {\n                        return fromIterator.hasNext();\n                    }\n\n                    @Override\n                    public B next() {\n                        return convert(fromIterator.next());\n                    }\n\n                    @Override\n                    public void remove() {\n                        fromIterator.remove();\n                    }\n                };\n            }\n        };\n    }\n\n    /**\n     * Returns the reversed view of this converter, which converts {@code this.convert(a)} back to a\n     * value roughly equivalent to {@code a}.\n     *\n     * <p>The returned converter is serializable if {@code this} converter is.\n     */\n    // TODO(kak): Make this method final\n    public Converter<B, A> reverse() {\n        Converter<B, A> result = reverse;\n        return (result == null) ? reverse = new ReverseConverter<A, B>(this) : result;\n    }\n\n    private static final class ReverseConverter<A, B> extends Converter<B, A> implements Serializable {\n\n        final Converter<A, B> original;\n\n        ReverseConverter(Converter<A, B> original) {\n            this.original = original;\n        }\n\n        /*\n     * These gymnastics are a little confusing. Basically this class has neither legacy nor\n     * non-legacy behavior; it just needs to let the behavior of the backing converter shine\n     * through. So, we override the correctedDo* methods, after which the do* methods should never\n     * be reached.\n     */\n        @Override\n        protected A doForward(B b) {\n            throw new AssertionError();\n        }\n\n        @Override\n        protected B doBackward(A a) {\n            throw new AssertionError();\n        }\n\n        @Override\n        @Nullable\n        A correctedDoForward(@Nullable B b) {\n            return original.correctedDoBackward(b);\n        }\n\n        @Override\n        @Nullable\n        B correctedDoBackward(@Nullable A a) {\n            return original.correctedDoForward(a);\n        }\n\n        @Override\n        public Converter<A, B> reverse() {\n            return original;\n        }\n\n        @Override\n        public boolean equals(@Nullable Object object) {\n            if (object instanceof ReverseConverter) {\n                ReverseConverter<?, ?> that = (ReverseConverter<?, ?>) object;\n                return this.original.equals(that.original);\n            }\n            return false;\n        }\n\n        @Override\n        public int hashCode() {\n            return ~original.hashCode();\n        }\n\n        @Override\n        public String toString() {\n            return original + \".reverse()\";\n        }\n\n        private static final long serialVersionUID = 0L;\n    }\n\n    /**\n     * Returns a converter whose {@code convert} method applies {@code secondConverter} to the result\n     * of this converter. Its {@code reverse} method applies the converters in reverse order.\n     *\n     * <p>The returned converter is serializable if {@code this} converter and {@code secondConverter}\n     * are.\n     */\n    public final <C> Converter<A, C> andThen(Converter<B, C> secondConverter) {\n        return doAndThen(secondConverter);\n    }\n\n    /**\n     * Package-private non-final implementation of andThen() so only we can override it.\n     */\n    <C> Converter<A, C> doAndThen(Converter<B, C> secondConverter) {\n        return new ConverterComposition<A, B, C>(this, checkNotNull(secondConverter));\n    }\n\n    private static final class ConverterComposition<A, B, C> extends Converter<A, C> implements Serializable {\n\n        final Converter<A, B> first;\n\n        final Converter<B, C> second;\n\n        ConverterComposition(Converter<A, B> first, Converter<B, C> second) {\n            this.first = first;\n            this.second = second;\n        }\n\n        /*\n     * These gymnastics are a little confusing. Basically this class has neither legacy nor\n     * non-legacy behavior; it just needs to let the behaviors of the backing converters shine\n     * through (which might even differ from each other!). So, we override the correctedDo* methods,\n     * after which the do* methods should never be reached.\n     */\n        @Override\n        protected C doForward(A a) {\n            throw new AssertionError();\n        }\n\n        @Override\n        protected A doBackward(C c) {\n            throw new AssertionError();\n        }\n\n        @Override\n        @Nullable\n        C correctedDoForward(@Nullable A a) {\n            return second.correctedDoForward(first.correctedDoForward(a));\n        }\n\n        @Override\n        @Nullable\n        A correctedDoBackward(@Nullable C c) {\n            return first.correctedDoBackward(second.correctedDoBackward(c));\n        }\n\n        @Override\n        public boolean equals(@Nullable Object object) {\n            if (object instanceof ConverterComposition) {\n                ConverterComposition<?, ?, ?> that = (ConverterComposition<?, ?, ?>) object;\n                return this.first.equals(that.first) && this.second.equals(that.second);\n            }\n            return false;\n        }\n\n        @Override\n        public int hashCode() {\n            return 31 * first.hashCode() + second.hashCode();\n        }\n\n        @Override\n        public String toString() {\n            return first + \".andThen(\" + second + \")\";\n        }\n\n        private static final long serialVersionUID = 0L;\n    }\n\n    /**\n     * @deprecated Provided to satisfy the {@code Function} interface; use {@link #convert} instead.\n     */\n    @Deprecated\n    @Override\n    @Nullable\n    public final B apply(@Nullable A a) {\n        return convert(a);\n    }\n\n    /**\n     * Indicates whether another object is equal to this converter.\n     *\n     * <p>Most implementations will have no reason to override the behavior of {@link Object#equals}.\n     * However, an implementation may also choose to return {@code true} whenever {@code object} is a\n     * {@link Converter} that it considers <i>interchangeable</i> with this one. \"Interchangeable\"\n     * <i>typically</i> means that {@code Objects.equal(this.convert(a), that.convert(a))} is true for\n     * all {@code a} of type {@code A} (and similarly for {@code reverse}). Note that a {@code false}\n     * result from this method does not imply that the converters are known <i>not</i> to be\n     * interchangeable.\n     */\n    @Override\n    public boolean equals(@Nullable Object object) {\n        return super.equals(object);\n    }\n\n    // Static converters\n    /**\n     * Returns a converter based on <i>existing</i> forward and backward functions. Note that it is\n     * unnecessary to create <i>new</i> classes implementing {@code Function} just to pass them in\n     * here. Instead, simply subclass {@code Converter} and implement its {@link #doForward} and\n     * {@link #doBackward} methods directly.\n     *\n     * <p>These functions will never be passed {@code null} and must not under any circumstances\n     * return {@code null}. If a value cannot be converted, the function should throw an unchecked\n     * exception (typically, but not necessarily, {@link IllegalArgumentException}).\n     *\n     * <p>The returned converter is serializable if both provided functions are.\n     *\n     * @since 17.0\n     */\n    public static <A, B> Converter<A, B> from(Function<? super A, ? extends B> forwardFunction, Function<? super B, ? extends A> backwardFunction) {\n        return new FunctionBasedConverter<A, B>(forwardFunction, backwardFunction);\n    }\n\n    private static final class FunctionBasedConverter<A, B> extends Converter<A, B> implements Serializable {\n\n        private final Function<? super A, ? extends B> forwardFunction;\n\n        private final Function<? super B, ? extends A> backwardFunction;\n\n        private FunctionBasedConverter(Function<? super A, ? extends B> forwardFunction, Function<? super B, ? extends A> backwardFunction) {\n            this.forwardFunction = checkNotNull(forwardFunction);\n            this.backwardFunction = checkNotNull(backwardFunction);\n        }\n\n        @Override\n        protected B doForward(A a) {\n            return forwardFunction.apply(a);\n        }\n\n        @Override\n        protected A doBackward(B b) {\n            return backwardFunction.apply(b);\n        }\n\n        @Override\n        public boolean equals(@Nullable Object object) {\n            if (object instanceof FunctionBasedConverter) {\n                FunctionBasedConverter<?, ?> that = (FunctionBasedConverter<?, ?>) object;\n                return this.forwardFunction.equals(that.forwardFunction) && this.backwardFunction.equals(that.backwardFunction);\n            }\n            return false;\n        }\n\n        @Override\n        public int hashCode() {\n            return forwardFunction.hashCode() * 31 + backwardFunction.hashCode();\n        }\n\n        @Override\n        public String toString() {\n            return \"Converter.from(\" + forwardFunction + \", \" + backwardFunction + \")\";\n        }\n    }\n\n    /**\n     * Returns a serializable converter that always converts or reverses an object to itself.\n     */\n    // implementation is \"fully variant\"\n    @SuppressWarnings(\"unchecked\")\n    public static <T> Converter<T, T> identity() {\n        return (IdentityConverter<T>) IdentityConverter.INSTANCE;\n    }\n\n    /**\n     * A converter that always converts or reverses an object to itself. Note that T is now a\n     * \"pass-through type\".\n     */\n    private static final class IdentityConverter<T> extends Converter<T, T> implements Serializable {\n\n        static final IdentityConverter INSTANCE = new IdentityConverter();\n\n        @Override\n        protected T doForward(T t) {\n            return t;\n        }\n\n        @Override\n        protected T doBackward(T t) {\n            return t;\n        }\n\n        @Override\n        public IdentityConverter<T> reverse() {\n            return this;\n        }\n\n        @Override\n        <S> Converter<T, S> doAndThen(Converter<T, S> otherConverter) {\n            return checkNotNull(otherConverter, \"otherConverter\");\n        }\n\n        /*\n     * We *could* override convertAll() to return its input, but it's a rather pointless\n     * optimization and opened up a weird type-safety problem.\n     */\n        @Override\n        public String toString() {\n            return \"Converter.identity()\";\n        }\n\n        private Object readResolve() {\n            return INSTANCE;\n        }\n\n        private static final long serialVersionUID = 0L;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Converter",
+        "parameters": [],
+        "javadoc": "/**\n * Constructor for use by subclasses.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructor for use by subclasses.\n */\nprotected Converter() {\n    this(true);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "Converter",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "handleNullAutomatically"
+          }
+        ],
+        "javadoc": "/**\n * Constructor used only by {@code LegacyConverter} to suspend automatic null-handling.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructor used only by {@code LegacyConverter} to suspend automatic null-handling.\n */\nConverter(boolean handleNullAutomatically) {\n    this.handleNullAutomatically = handleNullAutomatically;\n}"
+      },
+      {
+        "type": "method",
+        "name": "doForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * Returns a representation of {@code a} as an instance of type {@code B}. If {@code a} cannot be\n * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.\n *\n * @param a the instance to convert; will never be null\n * @return the converted instance; <b>must not</b> be null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a",
+            "content": "the instance to convert; will never be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the instance to convert; will never be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "converted instance; <b>must not</b> be null",
+            "assertion": "assert methodResultID != null;",
+            "description": "Returns a representation of a as an instance of type B. If a cannot be converted, an unchecked exception (such as IllegalArgumentException) should be thrown."
+          }
+        ],
+        "code": "// SPI methods (what subclasses must implement)\n/**\n * Returns a representation of {@code a} as an instance of type {@code B}. If {@code a} cannot be\n * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.\n *\n * @param a the instance to convert; will never be null\n * @return the converted instance; <b>must not</b> be null\n */\nprotected abstract B doForward(A a);"
+      },
+      {
+        "type": "method",
+        "name": "doBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": "/**\n * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be\n * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.\n *\n * @param b the instance to convert; will never be null\n * @return the converted instance; <b>must not</b> be null\n * @throws UnsupportedOperationException if backward conversion is not implemented; this should be\n *     very rare. Note that if backward conversion is not only unimplemented but\n *     unimplement<i>able</i> (for example, consider a {@code Converter<Chicken, ChickenNugget>}),\n *     then this is not logically a {@code Converter} at all, and should just implement {@link\n *     Function}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "b",
+            "content": "the instance to convert; will never be null",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the instance to convert; will never be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "converted instance; <b>must not</b> be null",
+            "assertion": "assert methodResultID != null;",
+            "description": "Returns a representation of b as an instance of type A."
+          },
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "if backward conversion is not implemented; this should be very rare. Note that if backward conversion is not only unimplemented but unimplement<i>able</i> (for example, consider a {@code Converter<Chicken, ChickenNugget>}), then this is not logically a {@code Converter} at all, and should just implement {@link Function}.",
+            "assertion": "assert !receiverObjectID.supportsBackwardConversion();",
+            "description": "if backward conversion is not implemented"
+          }
+        ],
+        "code": "/**\n * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be\n * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.\n *\n * @param b the instance to convert; will never be null\n * @return the converted instance; <b>must not</b> be null\n * @throws UnsupportedOperationException if backward conversion is not implemented; this should be\n *     very rare. Note that if backward conversion is not only unimplemented but\n *     unimplement<i>able</i> (for example, consider a {@code Converter<Chicken, ChickenNugget>}),\n *     then this is not logically a {@code Converter} at all, and should just implement {@link\n *     Function}.\n */\nprotected abstract A doBackward(B b);"
+      },
+      {
+        "type": "method",
+        "name": "convert",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * Returns a representation of {@code a} as an instance of type {@code B}.\n *\n * @return the converted value; is null <i>if and only if</i> {@code a} is null\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "converted value; is null <i>if and only if</i> {@code a} is null",
+            "assertion": "assert methodResultID == (args[0] == null);",
+            "description": "the converted value; is null if and only if a is null"
+          }
+        ],
+        "code": "// API (consumer-side) methods\n/**\n * Returns a representation of {@code a} as an instance of type {@code B}.\n *\n * @return the converted value; is null <i>if and only if</i> {@code a} is null\n */\n@Nullable\npublic final B convert(@Nullable A a) {\n    return correctedDoForward(a);\n}"
+      },
+      {
+        "type": "method",
+        "name": "correctedDoForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Nullable\nB correctedDoForward(@Nullable A a) {\n    if (handleNullAutomatically) {\n        // TODO(kevinb): we shouldn't be checking for a null result at runtime. Assert?\n        return a == null ? null : checkNotNull(doForward(a));\n    } else {\n        return doForward(a);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "correctedDoBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Nullable\nA correctedDoBackward(@Nullable B b) {\n    if (handleNullAutomatically) {\n        // TODO(kevinb): we shouldn't be checking for a null result at runtime. Assert?\n        return b == null ? null : checkNotNull(doBackward(b));\n    } else {\n        return doBackward(b);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "convertAll",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromIterable"
+          }
+        ],
+        "javadoc": "/**\n * Returns an iterable that applies {@code convert} to each element of {@code fromIterable}. The\n * conversion is done lazily.\n *\n * <p>The returned iterable's iterator supports {@code remove()} if the input iterator does. After\n * a successful {@code remove()} call, {@code fromIterable} no longer contains the corresponding\n * element.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns an iterable that applies {@code convert} to each element of {@code fromIterable}. The\n * conversion is done lazily.\n *\n * <p>The returned iterable's iterator supports {@code remove()} if the input iterator does. After\n * a successful {@code remove()} call, {@code fromIterable} no longer contains the corresponding\n * element.\n */\npublic Iterable<B> convertAll(final Iterable<? extends A> fromIterable) {\n    checkNotNull(fromIterable, \"fromIterable\");\n    return new Iterable<B>() {\n\n        @Override\n        public Iterator<B> iterator() {\n            return new Iterator<B>() {\n\n                private final Iterator<? extends A> fromIterator = fromIterable.iterator();\n\n                @Override\n                public boolean hasNext() {\n                    return fromIterator.hasNext();\n                }\n\n                @Override\n                public B next() {\n                    return convert(fromIterator.next());\n                }\n\n                @Override\n                public void remove() {\n                    fromIterator.remove();\n                }\n            };\n        }\n    };\n}"
+      },
+      {
+        "type": "method",
+        "name": "reverse",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n   * Returns the reversed view of this converter, which converts {@code this.convert(a)} back to a\n   * value roughly equivalent to {@code a}.\n   *\n   * <p>The returned converter is serializable if {@code this} converter is.\n   */",
+        "tags": [],
+        "code": "/**\n * Returns the reversed view of this converter, which converts {@code this.convert(a)} back to a\n * value roughly equivalent to {@code a}.\n *\n * <p>The returned converter is serializable if {@code this} converter is.\n */\n// TODO(kak): Make this method final\npublic Converter<B, A> reverse() {\n    Converter<B, A> result = reverse;\n    return (result == null) ? reverse = new ReverseConverter<A, B>(this) : result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "andThen",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Converter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "secondConverter"
+          }
+        ],
+        "javadoc": "/**\n * Returns a converter whose {@code convert} method applies {@code secondConverter} to the result\n * of this converter. Its {@code reverse} method applies the converters in reverse order.\n *\n * <p>The returned converter is serializable if {@code this} converter and {@code secondConverter}\n * are.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns a converter whose {@code convert} method applies {@code secondConverter} to the result\n * of this converter. Its {@code reverse} method applies the converters in reverse order.\n *\n * <p>The returned converter is serializable if {@code this} converter and {@code secondConverter}\n * are.\n */\npublic final <C> Converter<A, C> andThen(Converter<B, C> secondConverter) {\n    return doAndThen(secondConverter);\n}"
+      },
+      {
+        "type": "method",
+        "name": "doAndThen",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Converter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "secondConverter"
+          }
+        ],
+        "javadoc": "/**\n * Package-private non-final implementation of andThen() so only we can override it.\n */\n",
+        "tags": [],
+        "code": "/**\n * Package-private non-final implementation of andThen() so only we can override it.\n */\n<C> Converter<A, C> doAndThen(Converter<B, C> secondConverter) {\n    return new ConverterComposition<A, B, C>(this, checkNotNull(secondConverter));\n}"
+      },
+      {
+        "type": "method",
+        "name": "apply",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * @deprecated Provided to satisfy the {@code Function} interface; use {@link #convert} instead.\n */\n",
+        "tags": [
+          {
+            "tag": "deprecated",
+            "name": "Provided",
+            "content": "to satisfy the {@code Function} interface; use {@link #convert} instead."
+          }
+        ],
+        "code": "/**\n * @deprecated Provided to satisfy the {@code Function} interface; use {@link #convert} instead.\n */\n@Deprecated\n@Override\n@Nullable\npublic final B apply(@Nullable A a) {\n    return convert(a);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": "/**\n * Indicates whether another object is equal to this converter.\n *\n * <p>Most implementations will have no reason to override the behavior of {@link Object#equals}.\n * However, an implementation may also choose to return {@code true} whenever {@code object} is a\n * {@link Converter} that it considers <i>interchangeable</i> with this one. \"Interchangeable\"\n * <i>typically</i> means that {@code Objects.equal(this.convert(a), that.convert(a))} is true for\n * all {@code a} of type {@code A} (and similarly for {@code reverse}). Note that a {@code false}\n * result from this method does not imply that the converters are known <i>not</i> to be\n * interchangeable.\n */\n",
+        "tags": [],
+        "code": "/**\n * Indicates whether another object is equal to this converter.\n *\n * <p>Most implementations will have no reason to override the behavior of {@link Object#equals}.\n * However, an implementation may also choose to return {@code true} whenever {@code object} is a\n * {@link Converter} that it considers <i>interchangeable</i> with this one. \"Interchangeable\"\n * <i>typically</i> means that {@code Objects.equal(this.convert(a), that.convert(a))} is true for\n * all {@code a} of type {@code A} (and similarly for {@code reverse}). Note that a {@code false}\n * result from this method does not imply that the converters are known <i>not</i> to be\n * interchangeable.\n */\n@Override\npublic boolean equals(@Nullable Object object) {\n    return super.equals(object);\n}"
+      },
+      {
+        "type": "method",
+        "name": "from",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Function",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "forwardFunction"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Function",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "backwardFunction"
+          }
+        ],
+        "javadoc": "/**\n * Returns a converter based on <i>existing</i> forward and backward functions. Note that it is\n * unnecessary to create <i>new</i> classes implementing {@code Function} just to pass them in\n * here. Instead, simply subclass {@code Converter} and implement its {@link #doForward} and\n * {@link #doBackward} methods directly.\n *\n * <p>These functions will never be passed {@code null} and must not under any circumstances\n * return {@code null}. If a value cannot be converted, the function should throw an unchecked\n * exception (typically, but not necessarily, {@link IllegalArgumentException}).\n *\n * <p>The returned converter is serializable if both provided functions are.\n *\n * @since 17.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "17.0",
+            "content": ""
+          }
+        ],
+        "code": "// Static converters\n/**\n * Returns a converter based on <i>existing</i> forward and backward functions. Note that it is\n * unnecessary to create <i>new</i> classes implementing {@code Function} just to pass them in\n * here. Instead, simply subclass {@code Converter} and implement its {@link #doForward} and\n * {@link #doBackward} methods directly.\n *\n * <p>These functions will never be passed {@code null} and must not under any circumstances\n * return {@code null}. If a value cannot be converted, the function should throw an unchecked\n * exception (typically, but not necessarily, {@link IllegalArgumentException}).\n *\n * <p>The returned converter is serializable if both provided functions are.\n *\n * @since 17.0\n */\npublic static <A, B> Converter<A, B> from(Function<? super A, ? extends B> forwardFunction, Function<? super B, ? extends A> backwardFunction) {\n    return new FunctionBasedConverter<A, B>(forwardFunction, backwardFunction);\n}"
+      },
+      {
+        "type": "method",
+        "name": "identity",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a serializable converter that always converts or reverses an object to itself.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns a serializable converter that always converts or reverses an object to itself.\n */\n// implementation is \"fully variant\"\n@SuppressWarnings(\"unchecked\")\npublic static <T> Converter<T, T> identity() {\n    return (IdentityConverter<T>) IdentityConverter.INSTANCE;\n}"
+      }
+    ]
+  },
+  {
+    "name": "ReverseConverter",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.ReverseConverter",
+    "javadoc": null,
+    "code": "private static final class ReverseConverter<A, B> extends Converter<B, A> implements Serializable {\n\n    final Converter<A, B> original;\n\n    ReverseConverter(Converter<A, B> original) {\n        this.original = original;\n    }\n\n    /*\n     * These gymnastics are a little confusing. Basically this class has neither legacy nor\n     * non-legacy behavior; it just needs to let the behavior of the backing converter shine\n     * through. So, we override the correctedDo* methods, after which the do* methods should never\n     * be reached.\n     */\n    @Override\n    protected A doForward(B b) {\n        throw new AssertionError();\n    }\n\n    @Override\n    protected B doBackward(A a) {\n        throw new AssertionError();\n    }\n\n    @Override\n    @Nullable\n    A correctedDoForward(@Nullable B b) {\n        return original.correctedDoBackward(b);\n    }\n\n    @Override\n    @Nullable\n    B correctedDoBackward(@Nullable A a) {\n        return original.correctedDoForward(a);\n    }\n\n    @Override\n    public Converter<A, B> reverse() {\n        return original;\n    }\n\n    @Override\n    public boolean equals(@Nullable Object object) {\n        if (object instanceof ReverseConverter) {\n            ReverseConverter<?, ?> that = (ReverseConverter<?, ?>) object;\n            return this.original.equals(that.original);\n        }\n        return false;\n    }\n\n    @Override\n    public int hashCode() {\n        return ~original.hashCode();\n    }\n\n    @Override\n    public String toString() {\n        return original + \".reverse()\";\n    }\n\n    private static final long serialVersionUID = 0L;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "ReverseConverter",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Converter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "original"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "ReverseConverter(Converter<A, B> original) {\n    this.original = original;\n}"
+      },
+      {
+        "type": "method",
+        "name": "doForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*\n     * These gymnastics are a little confusing. Basically this class has neither legacy nor\n     * non-legacy behavior; it just needs to let the behavior of the backing converter shine\n     * through. So, we override the correctedDo* methods, after which the do* methods should never\n     * be reached.\n     */\n@Override\nprotected A doForward(B b) {\n    throw new AssertionError();\n}"
+      },
+      {
+        "type": "method",
+        "name": "doBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected B doBackward(A a) {\n    throw new AssertionError();\n}"
+      },
+      {
+        "type": "method",
+        "name": "correctedDoForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\n@Nullable\nA correctedDoForward(@Nullable B b) {\n    return original.correctedDoBackward(b);\n}"
+      },
+      {
+        "type": "method",
+        "name": "correctedDoBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\n@Nullable\nB correctedDoBackward(@Nullable A a) {\n    return original.correctedDoForward(a);\n}"
+      },
+      {
+        "type": "method",
+        "name": "reverse",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Converter<A, B> reverse() {\n    return original;\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean equals(@Nullable Object object) {\n    if (object instanceof ReverseConverter) {\n        ReverseConverter<?, ?> that = (ReverseConverter<?, ?>) object;\n        return this.original.equals(that.original);\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int hashCode() {\n    return ~original.hashCode();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic String toString() {\n    return original + \".reverse()\";\n}"
+      }
+    ]
+  },
+  {
+    "name": "ConverterComposition",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.ConverterComposition",
+    "javadoc": null,
+    "code": "private static final class ConverterComposition<A, B, C> extends Converter<A, C> implements Serializable {\n\n    final Converter<A, B> first;\n\n    final Converter<B, C> second;\n\n    ConverterComposition(Converter<A, B> first, Converter<B, C> second) {\n        this.first = first;\n        this.second = second;\n    }\n\n    /*\n     * These gymnastics are a little confusing. Basically this class has neither legacy nor\n     * non-legacy behavior; it just needs to let the behaviors of the backing converters shine\n     * through (which might even differ from each other!). So, we override the correctedDo* methods,\n     * after which the do* methods should never be reached.\n     */\n    @Override\n    protected C doForward(A a) {\n        throw new AssertionError();\n    }\n\n    @Override\n    protected A doBackward(C c) {\n        throw new AssertionError();\n    }\n\n    @Override\n    @Nullable\n    C correctedDoForward(@Nullable A a) {\n        return second.correctedDoForward(first.correctedDoForward(a));\n    }\n\n    @Override\n    @Nullable\n    A correctedDoBackward(@Nullable C c) {\n        return first.correctedDoBackward(second.correctedDoBackward(c));\n    }\n\n    @Override\n    public boolean equals(@Nullable Object object) {\n        if (object instanceof ConverterComposition) {\n            ConverterComposition<?, ?, ?> that = (ConverterComposition<?, ?, ?>) object;\n            return this.first.equals(that.first) && this.second.equals(that.second);\n        }\n        return false;\n    }\n\n    @Override\n    public int hashCode() {\n        return 31 * first.hashCode() + second.hashCode();\n    }\n\n    @Override\n    public String toString() {\n        return first + \".andThen(\" + second + \")\";\n    }\n\n    private static final long serialVersionUID = 0L;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "ConverterComposition",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Converter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "first"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Converter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "second"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "ConverterComposition(Converter<A, B> first, Converter<B, C> second) {\n    this.first = first;\n    this.second = second;\n}"
+      },
+      {
+        "type": "method",
+        "name": "doForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*\n     * These gymnastics are a little confusing. Basically this class has neither legacy nor\n     * non-legacy behavior; it just needs to let the behaviors of the backing converters shine\n     * through (which might even differ from each other!). So, we override the correctedDo* methods,\n     * after which the do* methods should never be reached.\n     */\n@Override\nprotected C doForward(A a) {\n    throw new AssertionError();\n}"
+      },
+      {
+        "type": "method",
+        "name": "doBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "c"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected A doBackward(C c) {\n    throw new AssertionError();\n}"
+      },
+      {
+        "type": "method",
+        "name": "correctedDoForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\n@Nullable\nC correctedDoForward(@Nullable A a) {\n    return second.correctedDoForward(first.correctedDoForward(a));\n}"
+      },
+      {
+        "type": "method",
+        "name": "correctedDoBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "c"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\n@Nullable\nA correctedDoBackward(@Nullable C c) {\n    return first.correctedDoBackward(second.correctedDoBackward(c));\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean equals(@Nullable Object object) {\n    if (object instanceof ConverterComposition) {\n        ConverterComposition<?, ?, ?> that = (ConverterComposition<?, ?, ?>) object;\n        return this.first.equals(that.first) && this.second.equals(that.second);\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int hashCode() {\n    return 31 * first.hashCode() + second.hashCode();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic String toString() {\n    return first + \".andThen(\" + second + \")\";\n}"
+      }
+    ]
+  },
+  {
+    "name": "FunctionBasedConverter",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.FunctionBasedConverter",
+    "javadoc": null,
+    "code": "private static final class FunctionBasedConverter<A, B> extends Converter<A, B> implements Serializable {\n\n    private final Function<? super A, ? extends B> forwardFunction;\n\n    private final Function<? super B, ? extends A> backwardFunction;\n\n    private FunctionBasedConverter(Function<? super A, ? extends B> forwardFunction, Function<? super B, ? extends A> backwardFunction) {\n        this.forwardFunction = checkNotNull(forwardFunction);\n        this.backwardFunction = checkNotNull(backwardFunction);\n    }\n\n    @Override\n    protected B doForward(A a) {\n        return forwardFunction.apply(a);\n    }\n\n    @Override\n    protected A doBackward(B b) {\n        return backwardFunction.apply(b);\n    }\n\n    @Override\n    public boolean equals(@Nullable Object object) {\n        if (object instanceof FunctionBasedConverter) {\n            FunctionBasedConverter<?, ?> that = (FunctionBasedConverter<?, ?>) object;\n            return this.forwardFunction.equals(that.forwardFunction) && this.backwardFunction.equals(that.backwardFunction);\n        }\n        return false;\n    }\n\n    @Override\n    public int hashCode() {\n        return forwardFunction.hashCode() * 31 + backwardFunction.hashCode();\n    }\n\n    @Override\n    public String toString() {\n        return \"Converter.from(\" + forwardFunction + \", \" + backwardFunction + \")\";\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "doForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected B doForward(A a) {\n    return forwardFunction.apply(a);\n}"
+      },
+      {
+        "type": "method",
+        "name": "doBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected A doBackward(B b) {\n    return backwardFunction.apply(b);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean equals(@Nullable Object object) {\n    if (object instanceof FunctionBasedConverter) {\n        FunctionBasedConverter<?, ?> that = (FunctionBasedConverter<?, ?>) object;\n        return this.forwardFunction.equals(that.forwardFunction) && this.backwardFunction.equals(that.backwardFunction);\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int hashCode() {\n    return forwardFunction.hashCode() * 31 + backwardFunction.hashCode();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic String toString() {\n    return \"Converter.from(\" + forwardFunction + \", \" + backwardFunction + \")\";\n}"
+      }
+    ]
+  },
+  {
+    "name": "IdentityConverter",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.IdentityConverter",
+    "javadoc": "/**\n * A converter that always converts or reverses an object to itself. Note that T is now a\n * \"pass-through type\".\n */\n",
+    "code": "/**\n * A converter that always converts or reverses an object to itself. Note that T is now a\n * \"pass-through type\".\n */\nprivate static final class IdentityConverter<T> extends Converter<T, T> implements Serializable {\n\n    static final IdentityConverter INSTANCE = new IdentityConverter();\n\n    @Override\n    protected T doForward(T t) {\n        return t;\n    }\n\n    @Override\n    protected T doBackward(T t) {\n        return t;\n    }\n\n    @Override\n    public IdentityConverter<T> reverse() {\n        return this;\n    }\n\n    @Override\n    <S> Converter<T, S> doAndThen(Converter<T, S> otherConverter) {\n        return checkNotNull(otherConverter, \"otherConverter\");\n    }\n\n    /*\n     * We *could* override convertAll() to return its input, but it's a rather pointless\n     * optimization and opened up a weird type-safety problem.\n     */\n    @Override\n    public String toString() {\n        return \"Converter.identity()\";\n    }\n\n    private Object readResolve() {\n        return INSTANCE;\n    }\n\n    private static final long serialVersionUID = 0L;\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "doForward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "t"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected T doForward(T t) {\n    return t;\n}"
+      },
+      {
+        "type": "method",
+        "name": "doBackward",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "t"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected T doBackward(T t) {\n    return t;\n}"
+      },
+      {
+        "type": "method",
+        "name": "reverse",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "IdentityConverter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic IdentityConverter<T> reverse() {\n    return this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "doAndThen",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Converter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Converter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "otherConverter"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\n<S> Converter<T, S> doAndThen(Converter<T, S> otherConverter) {\n    return checkNotNull(otherConverter, \"otherConverter\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*\n     * We *could* override convertAll() to return its input, but it's a rather pointless\n     * optimization and opened up a weird type-safety problem.\n     */\n@Override\npublic String toString() {\n    return \"Converter.identity()\";\n}"
+      }
+    ]
+  }
+]

@@ -1,0 +1,752 @@
+[
+  {
+    "name": "Splitter",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.Splitter",
+    "javadoc": "/**\n * Extracts non-overlapping substrings from an input string, typically by\n * recognizing appearances of a <i>separator</i> sequence. This separator can be\n * specified as a single {@linkplain #on(char) character}, fixed {@linkplain\n * #on(String) string}, {@linkplain #onPattern regular expression} or {@link\n * #on(CharMatcher) CharMatcher} instance. Or, instead of using a separator at\n * all, a splitter can extract adjacent substrings of a given {@linkplain\n * #fixedLength fixed length}.\n *\n * <p>For example, this expression: <pre>   {@code\n *\n *   Splitter.on(',').split(\"foo,bar,qux\")}</pre>\n *\n * ... produces an {@code Iterable} containing {@code \"foo\"}, {@code \"bar\"} and\n * {@code \"qux\"}, in that order.\n *\n * <p>By default, {@code Splitter}'s behavior is simplistic and unassuming. The\n * following expression: <pre>   {@code\n *\n *   Splitter.on(',').split(\" foo,,,  bar ,\")}</pre>\n *\n * ... yields the substrings {@code [\" foo\", \"\", \"\", \"  bar \", \"\"]}. If this\n * is not the desired behavior, use configuration methods to obtain a <i>new</i>\n * splitter instance with modified behavior: <pre>   {@code\n *\n *   private static final Splitter MY_SPLITTER = Splitter.on(',')\n *       .trimResults()\n *       .omitEmptyStrings();}</pre>\n *\n * <p>Now {@code MY_SPLITTER.split(\"foo,,,  bar ,\")} returns just {@code [\"foo\",\n * \"bar\"]}. Note that the order in which these configuration methods are called\n * is never significant.\n *\n * <p><b>Warning:</b> Splitter instances are immutable. Invoking a configuration\n * method has no effect on the receiving instance; you must store and use the\n * new splitter instance it returns instead. <pre>   {@code\n *\n *   // Do NOT do this\n *   Splitter splitter = Splitter.on('/');\n *   splitter.trimResults(); // does nothing!\n *   return splitter.split(\"wrong / wrong / wrong\");}</pre>\n *\n * <p>For separator-based splitters that do not use {@code omitEmptyStrings}, an\n * input string containing {@code n} occurrences of the separator naturally\n * yields an iterable of size {@code n + 1}. So if the separator does not occur\n * anywhere in the input, a single substring is returned containing the entire\n * input. Consequently, all splitters split the empty string to {@code [\"\"]}\n * (note: even fixed-length splitters).\n *\n * <p>Splitter instances are thread-safe immutable, and are therefore safe to\n * store as {@code static final} constants.\n *\n * <p>The {@link Joiner} class provides the inverse operation to splitting, but\n * note that a round-trip between the two should be assumed to be lossy.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/StringsExplained#splitter\">\n * {@code Splitter}</a>.\n *\n * @author Julien Silland\n * @author Jesse Wilson\n * @author Kevin Bourrillion\n * @author Louis Wasserman\n * @since 1.0\n */\n",
+    "code": "/**\n * Extracts non-overlapping substrings from an input string, typically by\n * recognizing appearances of a <i>separator</i> sequence. This separator can be\n * specified as a single {@linkplain #on(char) character}, fixed {@linkplain\n * #on(String) string}, {@linkplain #onPattern regular expression} or {@link\n * #on(CharMatcher) CharMatcher} instance. Or, instead of using a separator at\n * all, a splitter can extract adjacent substrings of a given {@linkplain\n * #fixedLength fixed length}.\n *\n * <p>For example, this expression: <pre>   {@code\n *\n *   Splitter.on(',').split(\"foo,bar,qux\")}</pre>\n *\n * ... produces an {@code Iterable} containing {@code \"foo\"}, {@code \"bar\"} and\n * {@code \"qux\"}, in that order.\n *\n * <p>By default, {@code Splitter}'s behavior is simplistic and unassuming. The\n * following expression: <pre>   {@code\n *\n *   Splitter.on(',').split(\" foo,,,  bar ,\")}</pre>\n *\n * ... yields the substrings {@code [\" foo\", \"\", \"\", \"  bar \", \"\"]}. If this\n * is not the desired behavior, use configuration methods to obtain a <i>new</i>\n * splitter instance with modified behavior: <pre>   {@code\n *\n *   private static final Splitter MY_SPLITTER = Splitter.on(',')\n *       .trimResults()\n *       .omitEmptyStrings();}</pre>\n *\n * <p>Now {@code MY_SPLITTER.split(\"foo,,,  bar ,\")} returns just {@code [\"foo\",\n * \"bar\"]}. Note that the order in which these configuration methods are called\n * is never significant.\n *\n * <p><b>Warning:</b> Splitter instances are immutable. Invoking a configuration\n * method has no effect on the receiving instance; you must store and use the\n * new splitter instance it returns instead. <pre>   {@code\n *\n *   // Do NOT do this\n *   Splitter splitter = Splitter.on('/');\n *   splitter.trimResults(); // does nothing!\n *   return splitter.split(\"wrong / wrong / wrong\");}</pre>\n *\n * <p>For separator-based splitters that do not use {@code omitEmptyStrings}, an\n * input string containing {@code n} occurrences of the separator naturally\n * yields an iterable of size {@code n + 1}. So if the separator does not occur\n * anywhere in the input, a single substring is returned containing the entire\n * input. Consequently, all splitters split the empty string to {@code [\"\"]}\n * (note: even fixed-length splitters).\n *\n * <p>Splitter instances are thread-safe immutable, and are therefore safe to\n * store as {@code static final} constants.\n *\n * <p>The {@link Joiner} class provides the inverse operation to splitting, but\n * note that a round-trip between the two should be assumed to be lossy.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/StringsExplained#splitter\">\n * {@code Splitter}</a>.\n *\n * @author Julien Silland\n * @author Jesse Wilson\n * @author Kevin Bourrillion\n * @author Louis Wasserman\n * @since 1.0\n */\n@GwtCompatible(emulated = true)\npublic final class Splitter {\n\n    private final CharMatcher trimmer;\n\n    private final boolean omitEmptyStrings;\n\n    private final Strategy strategy;\n\n    private final int limit;\n\n    private Splitter(Strategy strategy) {\n        this(strategy, false, CharMatcher.NONE, Integer.MAX_VALUE);\n    }\n\n    private Splitter(Strategy strategy, boolean omitEmptyStrings, CharMatcher trimmer, int limit) {\n        this.strategy = strategy;\n        this.omitEmptyStrings = omitEmptyStrings;\n        this.trimmer = trimmer;\n        this.limit = limit;\n    }\n\n    /**\n     * Returns a splitter that uses the given single-character separator. For\n     * example, {@code Splitter.on(',').split(\"foo,,bar\")} returns an iterable\n     * containing {@code [\"foo\", \"\", \"bar\"]}.\n     *\n     * @param separator the character to recognize as a separator\n     * @return a splitter, with default settings, that recognizes that separator\n     */\n    @CheckReturnValue\n    public static Splitter on(char separator) {\n        return on(CharMatcher.is(separator));\n    }\n\n    /**\n     * Returns a splitter that considers any single character matched by the\n     * given {@code CharMatcher} to be a separator. For example, {@code\n     * Splitter.on(CharMatcher.anyOf(\";,\")).split(\"foo,;bar,quux\")} returns an\n     * iterable containing {@code [\"foo\", \"\", \"bar\", \"quux\"]}.\n     *\n     * @param separatorMatcher a {@link CharMatcher} that determines whether a\n     *     character is a separator\n     * @return a splitter, with default settings, that uses this matcher\n     */\n    @CheckReturnValue\n    public static Splitter on(final CharMatcher separatorMatcher) {\n        checkNotNull(separatorMatcher);\n        return new Splitter(new Strategy() {\n\n            @Override\n            public SplittingIterator iterator(Splitter splitter, final CharSequence toSplit) {\n                return new SplittingIterator(splitter, toSplit) {\n\n                    @Override\n                    int separatorStart(int start) {\n                        return separatorMatcher.indexIn(toSplit, start);\n                    }\n\n                    @Override\n                    int separatorEnd(int separatorPosition) {\n                        return separatorPosition + 1;\n                    }\n                };\n            }\n        });\n    }\n\n    /**\n     * Returns a splitter that uses the given fixed string as a separator. For\n     * example, {@code Splitter.on(\", \").split(\"foo, bar,baz\")} returns an\n     * iterable containing {@code [\"foo\", \"bar,baz\"]}.\n     *\n     * @param separator the literal, nonempty string to recognize as a separator\n     * @return a splitter, with default settings, that recognizes that separator\n     */\n    @CheckReturnValue\n    public static Splitter on(final String separator) {\n        checkArgument(separator.length() != 0, \"The separator may not be the empty string.\");\n        if (separator.length() == 1) {\n            return Splitter.on(separator.charAt(0));\n        }\n        return new Splitter(new Strategy() {\n\n            @Override\n            public SplittingIterator iterator(Splitter splitter, CharSequence toSplit) {\n                return new SplittingIterator(splitter, toSplit) {\n\n                    @Override\n                    public int separatorStart(int start) {\n                        int separatorLength = separator.length();\n                        positions: for (int p = start, last = toSplit.length() - separatorLength; p <= last; p++) {\n                            for (int i = 0; i < separatorLength; i++) {\n                                if (toSplit.charAt(i + p) != separator.charAt(i)) {\n                                    continue positions;\n                                }\n                            }\n                            return p;\n                        }\n                        return -1;\n                    }\n\n                    @Override\n                    public int separatorEnd(int separatorPosition) {\n                        return separatorPosition + separator.length();\n                    }\n                };\n            }\n        });\n    }\n\n    /**\n     * Returns a splitter that considers any subsequence matching {@code\n     * pattern} to be a separator. For example, {@code\n     * Splitter.on(Pattern.compile(\"\\r?\\n\")).split(entireFile)} splits a string\n     * into lines whether it uses DOS-style or UNIX-style line terminators.\n     *\n     * @param separatorPattern the pattern that determines whether a subsequence\n     *     is a separator. This pattern may not match the empty string.\n     * @return a splitter, with default settings, that uses this pattern\n     * @throws IllegalArgumentException if {@code separatorPattern} matches the\n     *     empty string\n     */\n    @CheckReturnValue\n    @GwtIncompatible(\"java.util.regex\")\n    public static Splitter on(final Pattern separatorPattern) {\n        checkNotNull(separatorPattern);\n        checkArgument(!separatorPattern.matcher(\"\").matches(), \"The pattern may not match the empty string: %s\", separatorPattern);\n        return new Splitter(new Strategy() {\n\n            @Override\n            public SplittingIterator iterator(final Splitter splitter, CharSequence toSplit) {\n                final Matcher matcher = separatorPattern.matcher(toSplit);\n                return new SplittingIterator(splitter, toSplit) {\n\n                    @Override\n                    public int separatorStart(int start) {\n                        return matcher.find(start) ? matcher.start() : -1;\n                    }\n\n                    @Override\n                    public int separatorEnd(int separatorPosition) {\n                        return matcher.end();\n                    }\n                };\n            }\n        });\n    }\n\n    /**\n     * Returns a splitter that considers any subsequence matching a given\n     * pattern (regular expression) to be a separator. For example, {@code\n     * Splitter.onPattern(\"\\r?\\n\").split(entireFile)} splits a string into lines\n     * whether it uses DOS-style or UNIX-style line terminators. This is\n     * equivalent to {@code Splitter.on(Pattern.compile(pattern))}.\n     *\n     * @param separatorPattern the pattern that determines whether a subsequence\n     *     is a separator. This pattern may not match the empty string.\n     * @return a splitter, with default settings, that uses this pattern\n     * @throws java.util.regex.PatternSyntaxException if {@code separatorPattern}\n     *     is a malformed expression\n     * @throws IllegalArgumentException if {@code separatorPattern} matches the\n     *     empty string\n     */\n    @CheckReturnValue\n    @GwtIncompatible(\"java.util.regex\")\n    public static Splitter onPattern(String separatorPattern) {\n        return on(Pattern.compile(separatorPattern));\n    }\n\n    /**\n     * Returns a splitter that divides strings into pieces of the given length.\n     * For example, {@code Splitter.fixedLength(2).split(\"abcde\")} returns an\n     * iterable containing {@code [\"ab\", \"cd\", \"e\"]}. The last piece can be\n     * smaller than {@code length} but will never be empty.\n     *\n     * <p><b>Exception:</b> for consistency with separator-based splitters, {@code\n     * split(\"\")} does not yield an empty iterable, but an iterable containing\n     * {@code \"\"}. This is the only case in which {@code\n     * Iterables.size(split(input))} does not equal {@code\n     * IntMath.divide(input.length(), length, CEILING)}. To avoid this behavior,\n     * use {@code omitEmptyStrings}.\n     *\n     * @param length the desired length of pieces after splitting, a positive\n     *     integer\n     * @return a splitter, with default settings, that can split into fixed sized\n     *     pieces\n     * @throws IllegalArgumentException if {@code length} is zero or negative\n     */\n    @CheckReturnValue\n    public static Splitter fixedLength(final int length) {\n        checkArgument(length > 0, \"The length may not be less than 1\");\n        return new Splitter(new Strategy() {\n\n            @Override\n            public SplittingIterator iterator(final Splitter splitter, CharSequence toSplit) {\n                return new SplittingIterator(splitter, toSplit) {\n\n                    @Override\n                    public int separatorStart(int start) {\n                        int nextChunkStart = start + length;\n                        return (nextChunkStart < toSplit.length() ? nextChunkStart : -1);\n                    }\n\n                    @Override\n                    public int separatorEnd(int separatorPosition) {\n                        return separatorPosition;\n                    }\n                };\n            }\n        });\n    }\n\n    /**\n     * Returns a splitter that behaves equivalently to {@code this} splitter, but\n     * automatically omits empty strings from the results. For example, {@code\n     * Splitter.on(',').omitEmptyStrings().split(\",a,,,b,c,,\")} returns an\n     * iterable containing only {@code [\"a\", \"b\", \"c\"]}.\n     *\n     * <p>If either {@code trimResults} option is also specified when creating a\n     * splitter, that splitter always trims results first before checking for\n     * emptiness. So, for example, {@code\n     * Splitter.on(':').omitEmptyStrings().trimResults().split(\": : : \")} returns\n     * an empty iterable.\n     *\n     * <p>Note that it is ordinarily not possible for {@link #split(CharSequence)}\n     * to return an empty iterable, but when using this option, it can (if the\n     * input sequence consists of nothing but separators).\n     *\n     * @return a splitter with the desired configuration\n     */\n    @CheckReturnValue\n    public Splitter omitEmptyStrings() {\n        return new Splitter(strategy, true, trimmer, limit);\n    }\n\n    /**\n     * Returns a splitter that behaves equivalently to {@code this} splitter but\n     * stops splitting after it reaches the limit.\n     * The limit defines the maximum number of items returned by the iterator, or\n     * the maximum size of the list returned by {@link #splitToList}.\n     *\n     * <p>For example,\n     * {@code Splitter.on(',').limit(3).split(\"a,b,c,d\")} returns an iterable\n     * containing {@code [\"a\", \"b\", \"c,d\"]}.  When omitting empty strings, the\n     * omitted strings do no count.  Hence,\n     * {@code Splitter.on(',').limit(3).omitEmptyStrings().split(\"a,,,b,,,c,d\")}\n     * returns an iterable containing {@code [\"a\", \"b\", \"c,d\"}.\n     * When trim is requested, all entries, including the last are trimmed.  Hence\n     * {@code Splitter.on(',').limit(3).trimResults().split(\" a , b , c , d \")}\n     * results in {@code [\"a\", \"b\", \"c , d\"]}.\n     *\n     * @param limit the maximum number of items returned\n     * @return a splitter with the desired configuration\n     * @since 9.0\n     */\n    @CheckReturnValue\n    public Splitter limit(int limit) {\n        checkArgument(limit > 0, \"must be greater than zero: %s\", limit);\n        return new Splitter(strategy, omitEmptyStrings, trimmer, limit);\n    }\n\n    /**\n     * Returns a splitter that behaves equivalently to {@code this} splitter, but\n     * automatically removes leading and trailing {@linkplain\n     * CharMatcher#WHITESPACE whitespace} from each returned substring; equivalent\n     * to {@code trimResults(CharMatcher.WHITESPACE)}. For example, {@code\n     * Splitter.on(',').trimResults().split(\" a, b ,c \")} returns an iterable\n     * containing {@code [\"a\", \"b\", \"c\"]}.\n     *\n     * @return a splitter with the desired configuration\n     */\n    @CheckReturnValue\n    public Splitter trimResults() {\n        return trimResults(CharMatcher.WHITESPACE);\n    }\n\n    /**\n     * Returns a splitter that behaves equivalently to {@code this} splitter, but\n     * removes all leading or trailing characters matching the given {@code\n     * CharMatcher} from each returned substring. For example, {@code\n     * Splitter.on(',').trimResults(CharMatcher.is('_')).split(\"_a ,_b_ ,c__\")}\n     * returns an iterable containing {@code [\"a \", \"b_ \", \"c\"]}.\n     *\n     * @param trimmer a {@link CharMatcher} that determines whether a character\n     *     should be removed from the beginning/end of a subsequence\n     * @return a splitter with the desired configuration\n     */\n    // TODO(kevinb): throw if a trimmer was already specified!\n    @CheckReturnValue\n    public Splitter trimResults(CharMatcher trimmer) {\n        checkNotNull(trimmer);\n        return new Splitter(strategy, omitEmptyStrings, trimmer, limit);\n    }\n\n    /**\n     * Splits {@code sequence} into string components and makes them available\n     * through an {@link Iterator}, which may be lazily evaluated. If you want\n     * an eagerly computed {@link List}, use {@link #splitToList(CharSequence)}.\n     *\n     * @param sequence the sequence of characters to split\n     * @return an iteration over the segments split from the parameter.\n     */\n    @CheckReturnValue\n    public Iterable<String> split(final CharSequence sequence) {\n        checkNotNull(sequence);\n        return new Iterable<String>() {\n\n            @Override\n            public Iterator<String> iterator() {\n                return splittingIterator(sequence);\n            }\n\n            @Override\n            public String toString() {\n                return Joiner.on(\", \").appendTo(new StringBuilder().append('['), this).append(']').toString();\n            }\n        };\n    }\n\n    private Iterator<String> splittingIterator(CharSequence sequence) {\n        return strategy.iterator(this, sequence);\n    }\n\n    /**\n     * Splits {@code sequence} into string components and returns them as\n     * an immutable list. If you want an {@link Iterable} which may be lazily\n     * evaluated, use {@link #split(CharSequence)}.\n     *\n     * @param sequence the sequence of characters to split\n     * @return an immutable list of the segments split from the parameter\n     * @since 15.0\n     */\n    @CheckReturnValue\n    @Beta\n    public List<String> splitToList(CharSequence sequence) {\n        checkNotNull(sequence);\n        Iterator<String> iterator = splittingIterator(sequence);\n        List<String> result = new ArrayList<String>();\n        while (iterator.hasNext()) {\n            result.add(iterator.next());\n        }\n        return Collections.unmodifiableList(result);\n    }\n\n    /**\n     * Returns a {@code MapSplitter} which splits entries based on this splitter,\n     * and splits entries into keys and values using the specified separator.\n     *\n     * @since 10.0\n     */\n    @CheckReturnValue\n    @Beta\n    public MapSplitter withKeyValueSeparator(String separator) {\n        return withKeyValueSeparator(on(separator));\n    }\n\n    /**\n     * Returns a {@code MapSplitter} which splits entries based on this splitter,\n     * and splits entries into keys and values using the specified separator.\n     *\n     * @since 14.0\n     */\n    @CheckReturnValue\n    @Beta\n    public MapSplitter withKeyValueSeparator(char separator) {\n        return withKeyValueSeparator(on(separator));\n    }\n\n    /**\n     * Returns a {@code MapSplitter} which splits entries based on this splitter,\n     * and splits entries into keys and values using the specified key-value\n     * splitter.\n     *\n     * @since 10.0\n     */\n    @CheckReturnValue\n    @Beta\n    public MapSplitter withKeyValueSeparator(Splitter keyValueSplitter) {\n        return new MapSplitter(this, keyValueSplitter);\n    }\n\n    /**\n     * An object that splits strings into maps as {@code Splitter} splits\n     * iterables and lists. Like {@code Splitter}, it is thread-safe and\n     * immutable.\n     *\n     * @since 10.0\n     */\n    @Beta\n    public static final class MapSplitter {\n\n        private static final String INVALID_ENTRY_MESSAGE = \"Chunk [%s] is not a valid entry\";\n\n        private final Splitter outerSplitter;\n\n        private final Splitter entrySplitter;\n\n        private MapSplitter(Splitter outerSplitter, Splitter entrySplitter) {\n            // only \"this\" is passed\n            this.outerSplitter = outerSplitter;\n            this.entrySplitter = checkNotNull(entrySplitter);\n        }\n\n        /**\n         * Splits {@code sequence} into substrings, splits each substring into\n         * an entry, and returns an unmodifiable map with each of the entries. For\n         * example, <code>\n         * Splitter.on(';').trimResults().withKeyValueSeparator(\"=>\")\n         * .split(\"a=>b ; c=>b\")\n         * </code> will return a mapping from {@code \"a\"} to {@code \"b\"} and\n         * {@code \"c\"} to {@code b}.\n         *\n         * <p>The returned map preserves the order of the entries from\n         * {@code sequence}.\n         *\n         * @throws IllegalArgumentException if the specified sequence does not split\n         *         into valid map entries, or if there are duplicate keys\n         */\n        @CheckReturnValue\n        public Map<String, String> split(CharSequence sequence) {\n            Map<String, String> map = new LinkedHashMap<String, String>();\n            for (String entry : outerSplitter.split(sequence)) {\n                Iterator<String> entryFields = entrySplitter.splittingIterator(entry);\n                checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n                String key = entryFields.next();\n                checkArgument(!map.containsKey(key), \"Duplicate key [%s] found.\", key);\n                checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n                String value = entryFields.next();\n                map.put(key, value);\n                checkArgument(!entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n            }\n            return Collections.unmodifiableMap(map);\n        }\n    }\n\n    private interface Strategy {\n\n        Iterator<String> iterator(Splitter splitter, CharSequence toSplit);\n    }\n\n    private abstract static class SplittingIterator extends AbstractIterator<String> {\n\n        final CharSequence toSplit;\n\n        final CharMatcher trimmer;\n\n        final boolean omitEmptyStrings;\n\n        /**\n         * Returns the first index in {@code toSplit} at or after {@code start}\n         * that contains the separator.\n         */\n        abstract int separatorStart(int start);\n\n        /**\n         * Returns the first index in {@code toSplit} after {@code\n         * separatorPosition} that does not contain a separator. This method is only\n         * invoked after a call to {@code separatorStart}.\n         */\n        abstract int separatorEnd(int separatorPosition);\n\n        int offset = 0;\n\n        int limit;\n\n        protected SplittingIterator(Splitter splitter, CharSequence toSplit) {\n            this.trimmer = splitter.trimmer;\n            this.omitEmptyStrings = splitter.omitEmptyStrings;\n            this.limit = splitter.limit;\n            this.toSplit = toSplit;\n        }\n\n        @Override\n        protected String computeNext() {\n            /*\n       * The returned string will be from the end of the last match to the\n       * beginning of the next one. nextStart is the start position of the\n       * returned substring, while offset is the place to start looking for a\n       * separator.\n       */\n            int nextStart = offset;\n            while (offset != -1) {\n                int start = nextStart;\n                int end;\n                int separatorPosition = separatorStart(offset);\n                if (separatorPosition == -1) {\n                    end = toSplit.length();\n                    offset = -1;\n                } else {\n                    end = separatorPosition;\n                    offset = separatorEnd(separatorPosition);\n                }\n                if (offset == nextStart) {\n                    /*\n           * This occurs when some pattern has an empty match, even if it\n           * doesn't match the empty string -- for example, if it requires\n           * lookahead or the like. The offset must be increased to look for\n           * separators beyond this point, without changing the start position\n           * of the next returned substring -- so nextStart stays the same.\n           */\n                    offset++;\n                    if (offset >= toSplit.length()) {\n                        offset = -1;\n                    }\n                    continue;\n                }\n                while (start < end && trimmer.matches(toSplit.charAt(start))) {\n                    start++;\n                }\n                while (end > start && trimmer.matches(toSplit.charAt(end - 1))) {\n                    end--;\n                }\n                if (omitEmptyStrings && start == end) {\n                    // Don't include the (unused) separator in next split string.\n                    nextStart = offset;\n                    continue;\n                }\n                if (limit == 1) {\n                    // The limit has been reached, return the rest of the string as the\n                    // final item.  This is tested after empty string removal so that\n                    // empty strings do not count towards the limit.\n                    end = toSplit.length();\n                    offset = -1;\n                    // Since we may have changed the end, we need to trim it again.\n                    while (end > start && trimmer.matches(toSplit.charAt(end - 1))) {\n                        end--;\n                    }\n                } else {\n                    limit--;\n                }\n                return toSplit.subSequence(start, end).toString();\n            }\n            return endOfData();\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "on",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separator"
+          }
+        ],
+        "javadoc": "/**\n * Returns a splitter that uses the given single-character separator. For\n * example, {@code Splitter.on(',').split(\"foo,,bar\")} returns an iterable\n * containing {@code [\"foo\", \"\", \"bar\"]}.\n *\n * @param separator the character to recognize as a separator\n * @return a splitter, with default settings, that recognizes that separator\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "separator",
+            "content": "the character to recognize as a separator",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the character to recognize as a separator"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter, with default settings, that recognizes that separator",
+            "assertion": "assert !args[0].charValue() == 0;",
+            "description": "Returns a splitter that uses the given single-character separator."
+          }
+        ],
+        "code": "/**\n * Returns a splitter that uses the given single-character separator. For\n * example, {@code Splitter.on(',').split(\"foo,,bar\")} returns an iterable\n * containing {@code [\"foo\", \"\", \"bar\"]}.\n *\n * @param separator the character to recognize as a separator\n * @return a splitter, with default settings, that recognizes that separator\n */\n@CheckReturnValue\npublic static Splitter on(char separator) {\n    return on(CharMatcher.is(separator));\n}"
+      },
+      {
+        "type": "method",
+        "name": "on",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharMatcher",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separatorMatcher"
+          }
+        ],
+        "javadoc": "/**\n * Returns a splitter that considers any single character matched by the\n * given {@code CharMatcher} to be a separator. For example, {@code\n * Splitter.on(CharMatcher.anyOf(\";,\")).split(\"foo,;bar,quux\")} returns an\n * iterable containing {@code [\"foo\", \"\", \"bar\", \"quux\"]}.\n *\n * @param separatorMatcher a {@link CharMatcher} that determines whether a\n *     character is a separator\n * @return a splitter, with default settings, that uses this matcher\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "separatorMatcher",
+            "content": "a {@link CharMatcher} that determines whether a character is a separator",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "a CharMatcher that determines whether a character is a separator, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter, with default settings, that uses this matcher",
+            "assertion": "assert methodResultID == !args[0].matchesAnyOf(args[1]);",
+            "description": "Returns a splitter that considers any single character matched by the given CharMatcher to be a separator."
+          }
+        ],
+        "code": "/**\n * Returns a splitter that considers any single character matched by the\n * given {@code CharMatcher} to be a separator. For example, {@code\n * Splitter.on(CharMatcher.anyOf(\";,\")).split(\"foo,;bar,quux\")} returns an\n * iterable containing {@code [\"foo\", \"\", \"bar\", \"quux\"]}.\n *\n * @param separatorMatcher a {@link CharMatcher} that determines whether a\n *     character is a separator\n * @return a splitter, with default settings, that uses this matcher\n */\n@CheckReturnValue\npublic static Splitter on(final CharMatcher separatorMatcher) {\n    checkNotNull(separatorMatcher);\n    return new Splitter(new Strategy() {\n\n        @Override\n        public SplittingIterator iterator(Splitter splitter, final CharSequence toSplit) {\n            return new SplittingIterator(splitter, toSplit) {\n\n                @Override\n                int separatorStart(int start) {\n                    return separatorMatcher.indexIn(toSplit, start);\n                }\n\n                @Override\n                int separatorEnd(int separatorPosition) {\n                    return separatorPosition + 1;\n                }\n            };\n        }\n    });\n}"
+      },
+      {
+        "type": "method",
+        "name": "on",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separator"
+          }
+        ],
+        "javadoc": "/**\n * Returns a splitter that uses the given fixed string as a separator. For\n * example, {@code Splitter.on(\", \").split(\"foo, bar,baz\")} returns an\n * iterable containing {@code [\"foo\", \"bar,baz\"]}.\n *\n * @param separator the literal, nonempty string to recognize as a separator\n * @return a splitter, with default settings, that recognizes that separator\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "separator",
+            "content": "the literal, nonempty string to recognize as a separator",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the literal, nonempty string to recognize as a separator"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter, with default settings, that recognizes that separator",
+            "assertion": "assert methodResultID == !args[0].isEmpty();",
+            "description": "Returns a splitter that uses the given fixed string as a separator."
+          }
+        ],
+        "code": "/**\n * Returns a splitter that uses the given fixed string as a separator. For\n * example, {@code Splitter.on(\", \").split(\"foo, bar,baz\")} returns an\n * iterable containing {@code [\"foo\", \"bar,baz\"]}.\n *\n * @param separator the literal, nonempty string to recognize as a separator\n * @return a splitter, with default settings, that recognizes that separator\n */\n@CheckReturnValue\npublic static Splitter on(final String separator) {\n    checkArgument(separator.length() != 0, \"The separator may not be the empty string.\");\n    if (separator.length() == 1) {\n        return Splitter.on(separator.charAt(0));\n    }\n    return new Splitter(new Strategy() {\n\n        @Override\n        public SplittingIterator iterator(Splitter splitter, CharSequence toSplit) {\n            return new SplittingIterator(splitter, toSplit) {\n\n                @Override\n                public int separatorStart(int start) {\n                    int separatorLength = separator.length();\n                    positions: for (int p = start, last = toSplit.length() - separatorLength; p <= last; p++) {\n                        for (int i = 0; i < separatorLength; i++) {\n                            if (toSplit.charAt(i + p) != separator.charAt(i)) {\n                                continue positions;\n                            }\n                        }\n                        return p;\n                    }\n                    return -1;\n                }\n\n                @Override\n                public int separatorEnd(int separatorPosition) {\n                    return separatorPosition + separator.length();\n                }\n            };\n        }\n    });\n}"
+      },
+      {
+        "type": "method",
+        "name": "on",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Pattern",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separatorPattern"
+          }
+        ],
+        "javadoc": "/**\n * Returns a splitter that considers any subsequence matching {@code\n * pattern} to be a separator. For example, {@code\n * Splitter.on(Pattern.compile(\"\\r?\\n\")).split(entireFile)} splits a string\n * into lines whether it uses DOS-style or UNIX-style line terminators.\n *\n * @param separatorPattern the pattern that determines whether a subsequence\n *     is a separator. This pattern may not match the empty string.\n * @return a splitter, with default settings, that uses this pattern\n * @throws IllegalArgumentException if {@code separatorPattern} matches the\n *     empty string\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "separatorPattern",
+            "content": "the pattern that determines whether a subsequence is a separator. This pattern may not match the empty string.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the pattern that determines whether a subsequence is a separator, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter, with default settings, that uses this pattern",
+            "assertion": "assert !methodResultID.matcher(args[0]).matches();",
+            "description": "Returns a splitter that considers any subsequence matching pattern to be a separator."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code separatorPattern} matches the empty string",
+            "assertion": "assert !args[0].matches(\"^$\");",
+            "description": "if separatorPattern matches the empty string"
+          }
+        ],
+        "code": "/**\n * Returns a splitter that considers any subsequence matching {@code\n * pattern} to be a separator. For example, {@code\n * Splitter.on(Pattern.compile(\"\\r?\\n\")).split(entireFile)} splits a string\n * into lines whether it uses DOS-style or UNIX-style line terminators.\n *\n * @param separatorPattern the pattern that determines whether a subsequence\n *     is a separator. This pattern may not match the empty string.\n * @return a splitter, with default settings, that uses this pattern\n * @throws IllegalArgumentException if {@code separatorPattern} matches the\n *     empty string\n */\n@CheckReturnValue\n@GwtIncompatible(\"java.util.regex\")\npublic static Splitter on(final Pattern separatorPattern) {\n    checkNotNull(separatorPattern);\n    checkArgument(!separatorPattern.matcher(\"\").matches(), \"The pattern may not match the empty string: %s\", separatorPattern);\n    return new Splitter(new Strategy() {\n\n        @Override\n        public SplittingIterator iterator(final Splitter splitter, CharSequence toSplit) {\n            final Matcher matcher = separatorPattern.matcher(toSplit);\n            return new SplittingIterator(splitter, toSplit) {\n\n                @Override\n                public int separatorStart(int start) {\n                    return matcher.find(start) ? matcher.start() : -1;\n                }\n\n                @Override\n                public int separatorEnd(int separatorPosition) {\n                    return matcher.end();\n                }\n            };\n        }\n    });\n}"
+      },
+      {
+        "type": "method",
+        "name": "onPattern",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separatorPattern"
+          }
+        ],
+        "javadoc": "/**\n * Returns a splitter that considers any subsequence matching a given\n * pattern (regular expression) to be a separator. For example, {@code\n * Splitter.onPattern(\"\\r?\\n\").split(entireFile)} splits a string into lines\n * whether it uses DOS-style or UNIX-style line terminators. This is\n * equivalent to {@code Splitter.on(Pattern.compile(pattern))}.\n *\n * @param separatorPattern the pattern that determines whether a subsequence\n *     is a separator. This pattern may not match the empty string.\n * @return a splitter, with default settings, that uses this pattern\n * @throws java.util.regex.PatternSyntaxException if {@code separatorPattern}\n *     is a malformed expression\n * @throws IllegalArgumentException if {@code separatorPattern} matches the\n *     empty string\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "separatorPattern",
+            "content": "the pattern that determines whether a subsequence is a separator. This pattern may not match the empty string.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the pattern that determines whether a subsequence is a separator, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter, with default settings, that uses this pattern",
+            "assertion": "assert methodResultID == !Pattern.matches(args[0], \"\");",
+            "description": "Returns a splitter that considers any subsequence matching a given pattern (regular expression) to be a separator."
+          },
+          {
+            "tag": "throws",
+            "name": "java.util.regex.PatternSyntaxException",
+            "content": "if {@code separatorPattern} is a malformed expression",
+            "assertion": "",
+            "description": "if {@code separatorPattern} is a malformed expression"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code separatorPattern} matches the empty string",
+            "assertion": "",
+            "description": "if {@code separatorPattern} matches the empty string"
+          }
+        ],
+        "code": "/**\n * Returns a splitter that considers any subsequence matching a given\n * pattern (regular expression) to be a separator. For example, {@code\n * Splitter.onPattern(\"\\r?\\n\").split(entireFile)} splits a string into lines\n * whether it uses DOS-style or UNIX-style line terminators. This is\n * equivalent to {@code Splitter.on(Pattern.compile(pattern))}.\n *\n * @param separatorPattern the pattern that determines whether a subsequence\n *     is a separator. This pattern may not match the empty string.\n * @return a splitter, with default settings, that uses this pattern\n * @throws java.util.regex.PatternSyntaxException if {@code separatorPattern}\n *     is a malformed expression\n * @throws IllegalArgumentException if {@code separatorPattern} matches the\n *     empty string\n */\n@CheckReturnValue\n@GwtIncompatible(\"java.util.regex\")\npublic static Splitter onPattern(String separatorPattern) {\n    return on(Pattern.compile(separatorPattern));\n}"
+      },
+      {
+        "type": "method",
+        "name": "fixedLength",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "length"
+          }
+        ],
+        "javadoc": "/**\n * Returns a splitter that divides strings into pieces of the given length.\n * For example, {@code Splitter.fixedLength(2).split(\"abcde\")} returns an\n * iterable containing {@code [\"ab\", \"cd\", \"e\"]}. The last piece can be\n * smaller than {@code length} but will never be empty.\n *\n * <p><b>Exception:</b> for consistency with separator-based splitters, {@code\n * split(\"\")} does not yield an empty iterable, but an iterable containing\n * {@code \"\"}. This is the only case in which {@code\n * Iterables.size(split(input))} does not equal {@code\n * IntMath.divide(input.length(), length, CEILING)}. To avoid this behavior,\n * use {@code omitEmptyStrings}.\n *\n * @param length the desired length of pieces after splitting, a positive\n *     integer\n * @return a splitter, with default settings, that can split into fixed sized\n *     pieces\n * @throws IllegalArgumentException if {@code length} is zero or negative\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "length",
+            "content": "the desired length of pieces after splitting, a positive integer",
+            "assertion": "assert (args[0] < 0) == false;",
+            "description": "a positive integer"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter, with default settings, that can split into fixed sized pieces",
+            "assertion": "assert !methodResultID.split(new String(new char[]{})).isEmpty();",
+            "description": "Returns a splitter that divides strings into pieces of the given length."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code length} is zero or negative",
+            "assertion": "assert args[0] <= 0;",
+            "description": "if length is zero or negative"
+          }
+        ],
+        "code": "/**\n * Returns a splitter that divides strings into pieces of the given length.\n * For example, {@code Splitter.fixedLength(2).split(\"abcde\")} returns an\n * iterable containing {@code [\"ab\", \"cd\", \"e\"]}. The last piece can be\n * smaller than {@code length} but will never be empty.\n *\n * <p><b>Exception:</b> for consistency with separator-based splitters, {@code\n * split(\"\")} does not yield an empty iterable, but an iterable containing\n * {@code \"\"}. This is the only case in which {@code\n * Iterables.size(split(input))} does not equal {@code\n * IntMath.divide(input.length(), length, CEILING)}. To avoid this behavior,\n * use {@code omitEmptyStrings}.\n *\n * @param length the desired length of pieces after splitting, a positive\n *     integer\n * @return a splitter, with default settings, that can split into fixed sized\n *     pieces\n * @throws IllegalArgumentException if {@code length} is zero or negative\n */\n@CheckReturnValue\npublic static Splitter fixedLength(final int length) {\n    checkArgument(length > 0, \"The length may not be less than 1\");\n    return new Splitter(new Strategy() {\n\n        @Override\n        public SplittingIterator iterator(final Splitter splitter, CharSequence toSplit) {\n            return new SplittingIterator(splitter, toSplit) {\n\n                @Override\n                public int separatorStart(int start) {\n                    int nextChunkStart = start + length;\n                    return (nextChunkStart < toSplit.length() ? nextChunkStart : -1);\n                }\n\n                @Override\n                public int separatorEnd(int separatorPosition) {\n                    return separatorPosition;\n                }\n            };\n        }\n    });\n}"
+      },
+      {
+        "type": "method",
+        "name": "omitEmptyStrings",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a splitter that behaves equivalently to {@code this} splitter, but\n * automatically omits empty strings from the results. For example, {@code\n * Splitter.on(',').omitEmptyStrings().split(\",a,,,b,c,,\")} returns an\n * iterable containing only {@code [\"a\", \"b\", \"c\"]}.\n *\n * <p>If either {@code trimResults} option is also specified when creating a\n * splitter, that splitter always trims results first before checking for\n * emptiness. So, for example, {@code\n * Splitter.on(':').omitEmptyStrings().trimResults().split(\": : : \")} returns\n * an empty iterable.\n *\n * <p>Note that it is ordinarily not possible for {@link #split(CharSequence)}\n * to return an empty iterable, but when using this option, it can (if the\n * input sequence consists of nothing but separators).\n *\n * @return a splitter with the desired configuration\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter with the desired configuration",
+            "assertion": "assert !args[0].omitEmptyStrings().split(\"\").isEmpty();",
+            "description": "a splitter with the desired configuration"
+          }
+        ],
+        "code": "/**\n * Returns a splitter that behaves equivalently to {@code this} splitter, but\n * automatically omits empty strings from the results. For example, {@code\n * Splitter.on(',').omitEmptyStrings().split(\",a,,,b,c,,\")} returns an\n * iterable containing only {@code [\"a\", \"b\", \"c\"]}.\n *\n * <p>If either {@code trimResults} option is also specified when creating a\n * splitter, that splitter always trims results first before checking for\n * emptiness. So, for example, {@code\n * Splitter.on(':').omitEmptyStrings().trimResults().split(\": : : \")} returns\n * an empty iterable.\n *\n * <p>Note that it is ordinarily not possible for {@link #split(CharSequence)}\n * to return an empty iterable, but when using this option, it can (if the\n * input sequence consists of nothing but separators).\n *\n * @return a splitter with the desired configuration\n */\n@CheckReturnValue\npublic Splitter omitEmptyStrings() {\n    return new Splitter(strategy, true, trimmer, limit);\n}"
+      },
+      {
+        "type": "method",
+        "name": "limit",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "limit"
+          }
+        ],
+        "javadoc": "/**\n * Returns a splitter that behaves equivalently to {@code this} splitter but\n * stops splitting after it reaches the limit.\n * The limit defines the maximum number of items returned by the iterator, or\n * the maximum size of the list returned by {@link #splitToList}.\n *\n * <p>For example,\n * {@code Splitter.on(',').limit(3).split(\"a,b,c,d\")} returns an iterable\n * containing {@code [\"a\", \"b\", \"c,d\"]}.  When omitting empty strings, the\n * omitted strings do no count.  Hence,\n * {@code Splitter.on(',').limit(3).omitEmptyStrings().split(\"a,,,b,,,c,d\")}\n * returns an iterable containing {@code [\"a\", \"b\", \"c,d\"}.\n * When trim is requested, all entries, including the last are trimmed.  Hence\n * {@code Splitter.on(',').limit(3).trimResults().split(\" a , b , c , d \")}\n * results in {@code [\"a\", \"b\", \"c , d\"]}.\n *\n * @param limit the maximum number of items returned\n * @return a splitter with the desired configuration\n * @since 9.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "limit",
+            "content": "the maximum number of items returned",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the maximum number of items returned"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter with the desired configuration",
+            "assertion": "assert methodResultID == !methodResultID.split(args[0]).limit(args[0]).trimResults().splitToList().size() > args[0];",
+            "description": "Returns a splitter that behaves equivalently to this splitter but stops splitting after it reaches the limit."
+          },
+          {
+            "tag": "since",
+            "name": "9.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a splitter that behaves equivalently to {@code this} splitter but\n * stops splitting after it reaches the limit.\n * The limit defines the maximum number of items returned by the iterator, or\n * the maximum size of the list returned by {@link #splitToList}.\n *\n * <p>For example,\n * {@code Splitter.on(',').limit(3).split(\"a,b,c,d\")} returns an iterable\n * containing {@code [\"a\", \"b\", \"c,d\"]}.  When omitting empty strings, the\n * omitted strings do no count.  Hence,\n * {@code Splitter.on(',').limit(3).omitEmptyStrings().split(\"a,,,b,,,c,d\")}\n * returns an iterable containing {@code [\"a\", \"b\", \"c,d\"}.\n * When trim is requested, all entries, including the last are trimmed.  Hence\n * {@code Splitter.on(',').limit(3).trimResults().split(\" a , b , c , d \")}\n * results in {@code [\"a\", \"b\", \"c , d\"]}.\n *\n * @param limit the maximum number of items returned\n * @return a splitter with the desired configuration\n * @since 9.0\n */\n@CheckReturnValue\npublic Splitter limit(int limit) {\n    checkArgument(limit > 0, \"must be greater than zero: %s\", limit);\n    return new Splitter(strategy, omitEmptyStrings, trimmer, limit);\n}"
+      },
+      {
+        "type": "method",
+        "name": "trimResults",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a splitter that behaves equivalently to {@code this} splitter, but\n * automatically removes leading and trailing {@linkplain\n * CharMatcher#WHITESPACE whitespace} from each returned substring; equivalent\n * to {@code trimResults(CharMatcher.WHITESPACE)}. For example, {@code\n * Splitter.on(',').trimResults().split(\" a, b ,c \")} returns an iterable\n * containing {@code [\"a\", \"b\", \"c\"]}.\n *\n * @return a splitter with the desired configuration\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter with the desired configuration",
+            "assertion": "assert methodResultID == receiverObjectID.trimResults();",
+            "description": "a splitter with the desired configuration"
+          }
+        ],
+        "code": "/**\n * Returns a splitter that behaves equivalently to {@code this} splitter, but\n * automatically removes leading and trailing {@linkplain\n * CharMatcher#WHITESPACE whitespace} from each returned substring; equivalent\n * to {@code trimResults(CharMatcher.WHITESPACE)}. For example, {@code\n * Splitter.on(',').trimResults().split(\" a, b ,c \")} returns an iterable\n * containing {@code [\"a\", \"b\", \"c\"]}.\n *\n * @return a splitter with the desired configuration\n */\n@CheckReturnValue\npublic Splitter trimResults() {\n    return trimResults(CharMatcher.WHITESPACE);\n}"
+      },
+      {
+        "type": "method",
+        "name": "trimResults",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharMatcher",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "trimmer"
+          }
+        ],
+        "javadoc": "/**\n   * Returns a splitter that behaves equivalently to {@code this} splitter, but\n   * removes all leading or trailing characters matching the given {@code\n   * CharMatcher} from each returned substring. For example, {@code\n   * Splitter.on(',').trimResults(CharMatcher.is('_')).split(\"_a ,_b_ ,c__\")}\n   * returns an iterable containing {@code [\"a \", \"b_ \", \"c\"]}.\n   *\n   * @param trimmer a {@link CharMatcher} that determines whether a character\n   *     should be removed from the beginning/end of a subsequence\n   * @return a splitter with the desired configuration\n   */",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "trimmer",
+            "content": "a {@link CharMatcher} that determines whether a character should be removed from the beginning/end of a subsequence",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "a CharMatcher that determines whether a character should be removed from the beginning/end of a subsequence, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "splitter with the desired configuration",
+            "assertion": "assert methodResultID == !args[0].matches(methodResultID.toString().trim());",
+            "description": "Returns a splitter that behaves equivalently to this splitter, but removes all leading or trailing characters matching the given CharMatcher from each returned substring."
+          }
+        ],
+        "code": "/**\n * Returns a splitter that behaves equivalently to {@code this} splitter, but\n * removes all leading or trailing characters matching the given {@code\n * CharMatcher} from each returned substring. For example, {@code\n * Splitter.on(',').trimResults(CharMatcher.is('_')).split(\"_a ,_b_ ,c__\")}\n * returns an iterable containing {@code [\"a \", \"b_ \", \"c\"]}.\n *\n * @param trimmer a {@link CharMatcher} that determines whether a character\n *     should be removed from the beginning/end of a subsequence\n * @return a splitter with the desired configuration\n */\n// TODO(kevinb): throw if a trimmer was already specified!\n@CheckReturnValue\npublic Splitter trimResults(CharMatcher trimmer) {\n    checkNotNull(trimmer);\n    return new Splitter(strategy, omitEmptyStrings, trimmer, limit);\n}"
+      },
+      {
+        "type": "method",
+        "name": "split",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sequence"
+          }
+        ],
+        "javadoc": "/**\n * Splits {@code sequence} into string components and makes them available\n * through an {@link Iterator}, which may be lazily evaluated. If you want\n * an eagerly computed {@link List}, use {@link #splitToList(CharSequence)}.\n *\n * @param sequence the sequence of characters to split\n * @return an iteration over the segments split from the parameter.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sequence",
+            "content": "the sequence of characters to split",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the sequence of characters to split"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "iteration over the segments split from the parameter.",
+            "assertion": "assert methodResultID instanceof java.lang.Iterable;",
+            "description": "an iteration over the segments split from the parameter."
+          }
+        ],
+        "code": "/**\n * Splits {@code sequence} into string components and makes them available\n * through an {@link Iterator}, which may be lazily evaluated. If you want\n * an eagerly computed {@link List}, use {@link #splitToList(CharSequence)}.\n *\n * @param sequence the sequence of characters to split\n * @return an iteration over the segments split from the parameter.\n */\n@CheckReturnValue\npublic Iterable<String> split(final CharSequence sequence) {\n    checkNotNull(sequence);\n    return new Iterable<String>() {\n\n        @Override\n        public Iterator<String> iterator() {\n            return splittingIterator(sequence);\n        }\n\n        @Override\n        public String toString() {\n            return Joiner.on(\", \").appendTo(new StringBuilder().append('['), this).append(']').toString();\n        }\n    };\n}"
+      },
+      {
+        "type": "method",
+        "name": "splitToList",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sequence"
+          }
+        ],
+        "javadoc": "/**\n * Splits {@code sequence} into string components and returns them as\n * an immutable list. If you want an {@link Iterable} which may be lazily\n * evaluated, use {@link #split(CharSequence)}.\n *\n * @param sequence the sequence of characters to split\n * @return an immutable list of the segments split from the parameter\n * @since 15.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "sequence",
+            "content": "the sequence of characters to split",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the sequence of characters to split"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "immutable list of the segments split from the parameter",
+            "assertion": "assert methodResultID instanceof java.util.List;",
+            "description": "an immutable list of the segments split from the parameter"
+          },
+          {
+            "tag": "since",
+            "name": "15.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Splits {@code sequence} into string components and returns them as\n * an immutable list. If you want an {@link Iterable} which may be lazily\n * evaluated, use {@link #split(CharSequence)}.\n *\n * @param sequence the sequence of characters to split\n * @return an immutable list of the segments split from the parameter\n * @since 15.0\n */\n@CheckReturnValue\n@Beta\npublic List<String> splitToList(CharSequence sequence) {\n    checkNotNull(sequence);\n    Iterator<String> iterator = splittingIterator(sequence);\n    List<String> result = new ArrayList<String>();\n    while (iterator.hasNext()) {\n        result.add(iterator.next());\n    }\n    return Collections.unmodifiableList(result);\n}"
+      },
+      {
+        "type": "method",
+        "name": "withKeyValueSeparator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "MapSplitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separator"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code MapSplitter} which splits entries based on this splitter,\n * and splits entries into keys and values using the specified separator.\n *\n * @since 10.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "10.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a {@code MapSplitter} which splits entries based on this splitter,\n * and splits entries into keys and values using the specified separator.\n *\n * @since 10.0\n */\n@CheckReturnValue\n@Beta\npublic MapSplitter withKeyValueSeparator(String separator) {\n    return withKeyValueSeparator(on(separator));\n}"
+      },
+      {
+        "type": "method",
+        "name": "withKeyValueSeparator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "MapSplitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separator"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code MapSplitter} which splits entries based on this splitter,\n * and splits entries into keys and values using the specified separator.\n *\n * @since 14.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "14.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a {@code MapSplitter} which splits entries based on this splitter,\n * and splits entries into keys and values using the specified separator.\n *\n * @since 14.0\n */\n@CheckReturnValue\n@Beta\npublic MapSplitter withKeyValueSeparator(char separator) {\n    return withKeyValueSeparator(on(separator));\n}"
+      },
+      {
+        "type": "method",
+        "name": "withKeyValueSeparator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "MapSplitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Splitter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "keyValueSplitter"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code MapSplitter} which splits entries based on this splitter,\n * and splits entries into keys and values using the specified key-value\n * splitter.\n *\n * @since 10.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "10.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a {@code MapSplitter} which splits entries based on this splitter,\n * and splits entries into keys and values using the specified key-value\n * splitter.\n *\n * @since 10.0\n */\n@CheckReturnValue\n@Beta\npublic MapSplitter withKeyValueSeparator(Splitter keyValueSplitter) {\n    return new MapSplitter(this, keyValueSplitter);\n}"
+      }
+    ]
+  },
+  {
+    "name": "MapSplitter",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.MapSplitter",
+    "javadoc": "/**\n * An object that splits strings into maps as {@code Splitter} splits\n * iterables and lists. Like {@code Splitter}, it is thread-safe and\n * immutable.\n *\n * @since 10.0\n */\n",
+    "code": "/**\n * An object that splits strings into maps as {@code Splitter} splits\n * iterables and lists. Like {@code Splitter}, it is thread-safe and\n * immutable.\n *\n * @since 10.0\n */\n@Beta\npublic static final class MapSplitter {\n\n    private static final String INVALID_ENTRY_MESSAGE = \"Chunk [%s] is not a valid entry\";\n\n    private final Splitter outerSplitter;\n\n    private final Splitter entrySplitter;\n\n    private MapSplitter(Splitter outerSplitter, Splitter entrySplitter) {\n        // only \"this\" is passed\n        this.outerSplitter = outerSplitter;\n        this.entrySplitter = checkNotNull(entrySplitter);\n    }\n\n    /**\n     * Splits {@code sequence} into substrings, splits each substring into\n     * an entry, and returns an unmodifiable map with each of the entries. For\n     * example, <code>\n     * Splitter.on(';').trimResults().withKeyValueSeparator(\"=>\")\n     * .split(\"a=>b ; c=>b\")\n     * </code> will return a mapping from {@code \"a\"} to {@code \"b\"} and\n     * {@code \"c\"} to {@code b}.\n     *\n     * <p>The returned map preserves the order of the entries from\n     * {@code sequence}.\n     *\n     * @throws IllegalArgumentException if the specified sequence does not split\n     *         into valid map entries, or if there are duplicate keys\n     */\n    @CheckReturnValue\n    public Map<String, String> split(CharSequence sequence) {\n        Map<String, String> map = new LinkedHashMap<String, String>();\n        for (String entry : outerSplitter.split(sequence)) {\n            Iterator<String> entryFields = entrySplitter.splittingIterator(entry);\n            checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n            String key = entryFields.next();\n            checkArgument(!map.containsKey(key), \"Duplicate key [%s] found.\", key);\n            checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n            String value = entryFields.next();\n            map.put(key, value);\n            checkArgument(!entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n        }\n        return Collections.unmodifiableMap(map);\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "split",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Map",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sequence"
+          }
+        ],
+        "javadoc": "/**\n * Splits {@code sequence} into substrings, splits each substring into\n * an entry, and returns an unmodifiable map with each of the entries. For\n * example, <code>\n * Splitter.on(';').trimResults().withKeyValueSeparator(\"=>\")\n * .split(\"a=>b ; c=>b\")\n * </code> will return a mapping from {@code \"a\"} to {@code \"b\"} and\n * {@code \"c\"} to {@code b}.\n *\n * <p>The returned map preserves the order of the entries from\n * {@code sequence}.\n *\n * @throws IllegalArgumentException if the specified sequence does not split\n *         into valid map entries, or if there are duplicate keys\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the specified sequence does not split into valid map entries, or if there are duplicate keys"
+          }
+        ],
+        "code": "/**\n * Splits {@code sequence} into substrings, splits each substring into\n * an entry, and returns an unmodifiable map with each of the entries. For\n * example, <code>\n * Splitter.on(';').trimResults().withKeyValueSeparator(\"=>\")\n * .split(\"a=>b ; c=>b\")\n * </code> will return a mapping from {@code \"a\"} to {@code \"b\"} and\n * {@code \"c\"} to {@code b}.\n *\n * <p>The returned map preserves the order of the entries from\n * {@code sequence}.\n *\n * @throws IllegalArgumentException if the specified sequence does not split\n *         into valid map entries, or if there are duplicate keys\n */\n@CheckReturnValue\npublic Map<String, String> split(CharSequence sequence) {\n    Map<String, String> map = new LinkedHashMap<String, String>();\n    for (String entry : outerSplitter.split(sequence)) {\n        Iterator<String> entryFields = entrySplitter.splittingIterator(entry);\n        checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n        String key = entryFields.next();\n        checkArgument(!map.containsKey(key), \"Duplicate key [%s] found.\", key);\n        checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n        String value = entryFields.next();\n        map.put(key, value);\n        checkArgument(!entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);\n    }\n    return Collections.unmodifiableMap(map);\n}"
+      }
+    ]
+  },
+  {
+    "name": "Strategy",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.Strategy",
+    "javadoc": null,
+    "code": "private interface Strategy {\n\n    Iterator<String> iterator(Splitter splitter, CharSequence toSplit);\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Splitter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "splitter"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toSplit"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "Iterator<String> iterator(Splitter splitter, CharSequence toSplit);"
+      }
+    ]
+  },
+  {
+    "name": "SplittingIterator",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.SplittingIterator",
+    "javadoc": null,
+    "code": "private abstract static class SplittingIterator extends AbstractIterator<String> {\n\n    final CharSequence toSplit;\n\n    final CharMatcher trimmer;\n\n    final boolean omitEmptyStrings;\n\n    /**\n     * Returns the first index in {@code toSplit} at or after {@code start}\n     * that contains the separator.\n     */\n    abstract int separatorStart(int start);\n\n    /**\n     * Returns the first index in {@code toSplit} after {@code\n     * separatorPosition} that does not contain a separator. This method is only\n     * invoked after a call to {@code separatorStart}.\n     */\n    abstract int separatorEnd(int separatorPosition);\n\n    int offset = 0;\n\n    int limit;\n\n    protected SplittingIterator(Splitter splitter, CharSequence toSplit) {\n        this.trimmer = splitter.trimmer;\n        this.omitEmptyStrings = splitter.omitEmptyStrings;\n        this.limit = splitter.limit;\n        this.toSplit = toSplit;\n    }\n\n    @Override\n    protected String computeNext() {\n        /*\n       * The returned string will be from the end of the last match to the\n       * beginning of the next one. nextStart is the start position of the\n       * returned substring, while offset is the place to start looking for a\n       * separator.\n       */\n        int nextStart = offset;\n        while (offset != -1) {\n            int start = nextStart;\n            int end;\n            int separatorPosition = separatorStart(offset);\n            if (separatorPosition == -1) {\n                end = toSplit.length();\n                offset = -1;\n            } else {\n                end = separatorPosition;\n                offset = separatorEnd(separatorPosition);\n            }\n            if (offset == nextStart) {\n                /*\n           * This occurs when some pattern has an empty match, even if it\n           * doesn't match the empty string -- for example, if it requires\n           * lookahead or the like. The offset must be increased to look for\n           * separators beyond this point, without changing the start position\n           * of the next returned substring -- so nextStart stays the same.\n           */\n                offset++;\n                if (offset >= toSplit.length()) {\n                    offset = -1;\n                }\n                continue;\n            }\n            while (start < end && trimmer.matches(toSplit.charAt(start))) {\n                start++;\n            }\n            while (end > start && trimmer.matches(toSplit.charAt(end - 1))) {\n                end--;\n            }\n            if (omitEmptyStrings && start == end) {\n                // Don't include the (unused) separator in next split string.\n                nextStart = offset;\n                continue;\n            }\n            if (limit == 1) {\n                // The limit has been reached, return the rest of the string as the\n                // final item.  This is tested after empty string removal so that\n                // empty strings do not count towards the limit.\n                end = toSplit.length();\n                offset = -1;\n                // Since we may have changed the end, we need to trim it again.\n                while (end > start && trimmer.matches(toSplit.charAt(end - 1))) {\n                    end--;\n                }\n            } else {\n                limit--;\n            }\n            return toSplit.subSequence(start, end).toString();\n        }\n        return endOfData();\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "SplittingIterator",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Splitter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "splitter"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toSplit"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "protected SplittingIterator(Splitter splitter, CharSequence toSplit) {\n    this.trimmer = splitter.trimmer;\n    this.omitEmptyStrings = splitter.omitEmptyStrings;\n    this.limit = splitter.limit;\n    this.toSplit = toSplit;\n}"
+      },
+      {
+        "type": "method",
+        "name": "separatorStart",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "start"
+          }
+        ],
+        "javadoc": "/**\n * Returns the first index in {@code toSplit} at or after {@code start}\n * that contains the separator.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns the first index in {@code toSplit} at or after {@code start}\n * that contains the separator.\n */\nabstract int separatorStart(int start);"
+      },
+      {
+        "type": "method",
+        "name": "separatorEnd",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "separatorPosition"
+          }
+        ],
+        "javadoc": "/**\n * Returns the first index in {@code toSplit} after {@code\n * separatorPosition} that does not contain a separator. This method is only\n * invoked after a call to {@code separatorStart}.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns the first index in {@code toSplit} after {@code\n * separatorPosition} that does not contain a separator. This method is only\n * invoked after a call to {@code separatorStart}.\n */\nabstract int separatorEnd(int separatorPosition);"
+      },
+      {
+        "type": "method",
+        "name": "computeNext",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nprotected String computeNext() {\n    /*\n       * The returned string will be from the end of the last match to the\n       * beginning of the next one. nextStart is the start position of the\n       * returned substring, while offset is the place to start looking for a\n       * separator.\n       */\n    int nextStart = offset;\n    while (offset != -1) {\n        int start = nextStart;\n        int end;\n        int separatorPosition = separatorStart(offset);\n        if (separatorPosition == -1) {\n            end = toSplit.length();\n            offset = -1;\n        } else {\n            end = separatorPosition;\n            offset = separatorEnd(separatorPosition);\n        }\n        if (offset == nextStart) {\n            /*\n           * This occurs when some pattern has an empty match, even if it\n           * doesn't match the empty string -- for example, if it requires\n           * lookahead or the like. The offset must be increased to look for\n           * separators beyond this point, without changing the start position\n           * of the next returned substring -- so nextStart stays the same.\n           */\n            offset++;\n            if (offset >= toSplit.length()) {\n                offset = -1;\n            }\n            continue;\n        }\n        while (start < end && trimmer.matches(toSplit.charAt(start))) {\n            start++;\n        }\n        while (end > start && trimmer.matches(toSplit.charAt(end - 1))) {\n            end--;\n        }\n        if (omitEmptyStrings && start == end) {\n            // Don't include the (unused) separator in next split string.\n            nextStart = offset;\n            continue;\n        }\n        if (limit == 1) {\n            // The limit has been reached, return the rest of the string as the\n            // final item.  This is tested after empty string removal so that\n            // empty strings do not count towards the limit.\n            end = toSplit.length();\n            offset = -1;\n            // Since we may have changed the end, we need to trim it again.\n            while (end > start && trimmer.matches(toSplit.charAt(end - 1))) {\n                end--;\n            }\n        } else {\n            limit--;\n        }\n        return toSplit.subSequence(start, end).toString();\n    }\n    return endOfData();\n}"
+      }
+    ]
+  }
+]

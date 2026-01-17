@@ -1,0 +1,803 @@
+2026-01-17 17:08:19,288 - DEBUG - llmedico.main - ---Starting LLMedico---
+2026-01-17 17:08:19,289 - DEBUG - llmedico.config.config - Loaded config from /vol/fob-vol3/mi20/krokerpa/ba/llmedico/llmedico/config.toml
+2026-01-17 17:08:19,289 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2026-01-17 17:08:19,301 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2026-01-17 17:08:19,301 - DEBUG - llmedico.main - translating every method of the class
+2026-01-17 17:08:19,301 - DEBUG - llmedico.main - current method name: create
+2026-01-17 17:08:19,301 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Creates a new, empty {@code ArrayListMultimap} with the default initial
+ * capacities.
+ */
+
+2026-01-17 17:08:19,301 - WARNING - llmedico.main - create contains not tags?
+2026-01-17 17:08:19,302 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2026-01-17 17:08:19,302 - DEBUG - llmedico.main - the following java assertion have been generated for {} for create:
+ {}
+2026-01-17 17:08:19,302 - DEBUG - llmedico.main - current method name: create
+2026-01-17 17:08:19,302 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Constructs an empty {@code ArrayListMultimap} with enough capacity to hold
+ * the specified numbers of keys and values without resizing.
+ *
+ * @param expectedKeys the expected number of distinct keys
+ * @param expectedValuesPerKey the expected average number of values per key
+ * @throws IllegalArgumentException if {@code expectedKeys} or {@code
+ *      expectedValuesPerKey} is negative
+ */
+
+2026-01-17 17:08:19,302 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 2, 'THROWS': 1}
+2026-01-17 17:08:19,302 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'expectedKeys', 'content': 'the expected number of distinct keys'}, {'tag': 'param', 'name': 'expectedValuesPerKey', 'content': 'the expected average number of values per key'}, {'tag': 'throws', 'name': 'IllegalArgumentException', 'content': 'if {@code expectedKeys} or {@code expectedValuesPerKey} is negative'}]
+2026-01-17 17:08:19,302 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    BAD Example: assert !args[0].length == 0 && !args[1].length == 0;
+    GOOD Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    J. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    K. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    L. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    M. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    N. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    O. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    P: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-17 17:08:19,302 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
+    These never produce assertions.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Parameter Semantic Classification Rule
+    Before generating an assertion, classify the @param description as one of:
+    Value-validating: describes nullability, range, size, or intrinsic validity of the parameter
+    Receiver-defining: describes how the parameter configures, toggles, or controls receiver state
+    Rules:
+    For value-validating parameters, assertions MUST be written only in terms of args[i]
+    For receiver-defining parameters, assertions MUST be written in terms of receiverObjectID and MUST NOT restate the condition directly on args[i]
+    Assertions must be written either purely in terms of args[i] or purely in terms of receiverObjectID.
+    Do not mix parameter checks with receiver semantics in the same assertion.
+    @param collection not null
+    Correct (value-validating):
+    assert (args[0] == null) == false;
+
+    Incorrect (receiver misuse):
+    assert !receiverObjectID.isEmpty();
+    
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
+    In that case, express the assertion using receiverObjectID.
+    Example:
+    Input Javadoc:
+    /**
+    * Create a new Closure that calls one of the closures depending
+    * on the predicates.
+    * <p>
+    * The closure at array location 0 is called if the predicate at array
+    * location 0 returned true. Each predicate is evaluated
+    * until one returns true.
+    *
+    * @see org.apache.commons.collections4.functors.SwitchClosure
+    *
+    * @param <E>  the type that the closure acts on
+    * @param predicates  an array of predicates to check, not null
+    * @param closures  an array of closures to call, not null
+    * @return the <code>switch</code> closure
+    * @throws NullPointerException if the either array is null
+    * @throws NullPointerException if any element in the arrays is null
+    * @throws IllegalArgumentException if the arrays have different sizes
+    */
+    Input Method Name:
+    switchClosure
+     Input Parameters:
+    [{'type': {'qualified_name': None, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}, 'name': 'predicates'}, {'type': {'qualified_name': None, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}, 'name': 'closures'}]
+    Input Return Type:
+    {'qualified_name': None, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}
+    And the following available instance methods:
+    None exceptionClosure()
+    None nopClosure()
+    None asClosure(None transformer)
+    None forClosure(int count,None closure)
+    None whileClosure(None predicate,None closure)
+    None doWhileClosure(None closure,None predicate)
+    None invokerClosure(None methodName)
+    None invokerClosure(None methodName,None paramTypes,None args)
+    None chainedClosure(None closures)
+    None chainedClosure(None closures)
+    None ifClosure(None predicate,None trueClosure)
+    None ifClosure(None predicate,None trueClosure,None falseClosure)
+    None switchClosure(None predicates,None closures)
+    None switchClosure(None predicates,None closures,None defaultClosure)
+    None switchClosure(None predicatesAndClosures)
+    None switchMapClosure(None objectsAndClosures)
+    Output Java assertions:
+    ```json
+    [{"description": "an array of predicates to check, not null",
+    "assertion": "assert (args[0]==null) == false;",
+    "name": "predicates",
+    "content": "an array of predicates to check, not null"},
+    {"description": "an array of closures to call, not null",
+    "assertion": "assert (args[1]==null) == false;",
+    "name": "closures ",
+    "content": "an array of closures to call, not null"}]
+    ```
+    Input Javadoc:
+    /**
+    * Disallow the addition of new parameters. The already declared parameters
+    * are still modifiable, but no new parameter can be added.
+    * @param on If true the environment is locked.
+    */
+    Input Method Name:
+    "lockEnvironment"
+     Input Parameters:
+    [{'type': {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}, 'name': 'on'}]
+    Input Return Type:
+    None
+    Instance Methods:
+    boolean isLocked()
+    boolean hasParameter(None parameter)
+    boolean getBooleanParameter(None parameter)
+    int getBooleanParameteri(None parameter)
+    double getNumberParameter(None parameter)
+    int getParameterCount()
+    void lockEnvironment(boolean on)
+    
+    Output Java assertions:
+    ```json
+    [
+        {
+        "description": "the environment is locked",
+        "assertion": "assert receiverObjectID.isLocked();",
+        "name": "on",
+        "content": "true"
+        }
+    ]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Constructs an empty {@code ArrayListMultimap} with enough capacity to hold
+ * the specified numbers of keys and values without resizing.
+ *
+ * @param expectedKeys the expected number of distinct keys
+ * @param expectedValuesPerKey the expected average number of values per key
+ * @throws IllegalArgumentException if {@code expectedKeys} or {@code
+ *      expectedValuesPerKey} is negative
+ */
+"
+    For the method:
+    "create"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'expectedKeys'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'expectedValuesPerKey'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ArrayListMultimap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None create()
+None create(int expectedKeys,int expectedValuesPerKey)
+None create(None multimap)
+None createCollection()
+void trimToSize()
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+Finally, ONLY return the List of JSON Elements like shown in the example. DO NOT return actual Java or Phyton Code!
+2026-01-17 17:08:21,894 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here is the output:
+
+```json
+[
+    {
+        "description": "the expected number of distinct keys",
+        "assertion": "assert (args[0] < 0) == false;",
+        "name": "expectedKeys",
+        "content": "the expected number of distinct keys"
+    },
+    {
+        "description": "the expected average number of values per key",
+        "assertion": "assert (args[1] < 0) == false;",
+        "name": "expectedValuesPerKey",
+        "content": "the expected average number of values per key"
+    }
+]
+```
+2026-01-17 17:08:21,896 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the expected number of distinct keys', 'assertion': 'assert (args[0] < 0) == false;', 'name': 'expectedKeys', 'content': 'the expected number of distinct keys'}, {'description': 'the expected average number of values per key', 'assertion': 'assert (args[1] < 0) == false;', 'name': 'expectedValuesPerKey', 'content': 'the expected average number of values per key'}]
+2026-01-17 17:08:21,896 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'param', 'name': 'expectedKeys', 'content': 'the expected number of distinct keys'}, {'tag': 'param', 'name': 'expectedValuesPerKey', 'content': 'the expected average number of values per key'}, {'tag': 'throws', 'name': 'IllegalArgumentException', 'content': 'if {@code expectedKeys} or {@code expectedValuesPerKey} is negative'}]
+2026-01-17 17:08:21,896 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    BAD Example: assert !args[0].length == 0 && !args[1].length == 0;
+    GOOD Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    J. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    K. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    L. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    M. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    N. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    O. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    P: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-17 17:08:21,897 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Constructs an empty {@code ArrayListMultimap} with enough capacity to hold
+ * the specified numbers of keys and values without resizing.
+ *
+ * @param expectedKeys the expected number of distinct keys
+ * @param expectedValuesPerKey the expected average number of values per key
+ * @throws IllegalArgumentException if {@code expectedKeys} or {@code
+ *      expectedValuesPerKey} is negative
+ */
+"
+    For the Method:
+    "create"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'expectedKeys'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'expectedValuesPerKey'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ArrayListMultimap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None create()
+None create(int expectedKeys,int expectedValuesPerKey)
+None create(None multimap)
+None createCollection()
+void trimToSize()
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+Finally, ONLY return the List of JSON Elements like shown in the example. DO NOT return actual Java or Phyton Code!
+2026-01-17 17:08:23,699 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here is the generated list of Java assertions:
+
+```json
+[
+  {
+    "description": "expectedKeys or expectedValuesPerKey is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if expectedKeys or expectedValuesPerKey is negative"
+  }
+]
+```
+2026-01-17 17:08:23,701 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'expectedKeys or expectedValuesPerKey is negative', 'assertion': 'assert args[0] < 0 || args[1] < 0;', 'name': 'IllegalArgumentException', 'content': 'if expectedKeys or expectedValuesPerKey is negative'}]
+2026-01-17 17:08:23,701 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 2, 'THROWS': 1} for create:
+ {'PARAM': [{'description': 'the expected number of distinct keys', 'assertion': 'assert (args[0] < 0) == false;', 'name': 'expectedKeys', 'content': 'the expected number of distinct keys'}, {'description': 'the expected average number of values per key', 'assertion': 'assert (args[1] < 0) == false;', 'name': 'expectedValuesPerKey', 'content': 'the expected average number of values per key'}], 'THROWS': [{'description': 'expectedKeys or expectedValuesPerKey is negative', 'assertion': 'assert args[0] < 0 || args[1] < 0;', 'name': 'IllegalArgumentException', 'content': 'if expectedKeys or expectedValuesPerKey is negative'}]}
+2026-01-17 17:08:23,701 - DEBUG - llmedico.main - current method name: create
+2026-01-17 17:08:23,701 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Constructs an {@code ArrayListMultimap} with the same mappings as the
+ * specified multimap.
+ *
+ * @param multimap the multimap whose contents are copied to this multimap
+ */
+
+2026-01-17 17:08:23,701 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1}
+2026-01-17 17:08:23,701 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'multimap', 'content': 'the multimap whose contents are copied to this multimap'}]
+2026-01-17 17:08:23,702 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    BAD Example: assert !args[0].length == 0 && !args[1].length == 0;
+    GOOD Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    J. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    K. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    L. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    M. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    N. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    O. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    P: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-17 17:08:23,702 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
+    These never produce assertions.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Parameter Semantic Classification Rule
+    Before generating an assertion, classify the @param description as one of:
+    Value-validating: describes nullability, range, size, or intrinsic validity of the parameter
+    Receiver-defining: describes how the parameter configures, toggles, or controls receiver state
+    Rules:
+    For value-validating parameters, assertions MUST be written only in terms of args[i]
+    For receiver-defining parameters, assertions MUST be written in terms of receiverObjectID and MUST NOT restate the condition directly on args[i]
+    Assertions must be written either purely in terms of args[i] or purely in terms of receiverObjectID.
+    Do not mix parameter checks with receiver semantics in the same assertion.
+    @param collection not null
+    Correct (value-validating):
+    assert (args[0] == null) == false;
+
+    Incorrect (receiver misuse):
+    assert !receiverObjectID.isEmpty();
+    
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
+    In that case, express the assertion using receiverObjectID.
+    Example:
+    Input Javadoc:
+    /**
+    * Create a new Closure that calls one of the closures depending
+    * on the predicates.
+    * <p>
+    * The closure at array location 0 is called if the predicate at array
+    * location 0 returned true. Each predicate is evaluated
+    * until one returns true.
+    *
+    * @see org.apache.commons.collections4.functors.SwitchClosure
+    *
+    * @param <E>  the type that the closure acts on
+    * @param predicates  an array of predicates to check, not null
+    * @param closures  an array of closures to call, not null
+    * @return the <code>switch</code> closure
+    * @throws NullPointerException if the either array is null
+    * @throws NullPointerException if any element in the arrays is null
+    * @throws IllegalArgumentException if the arrays have different sizes
+    */
+    Input Method Name:
+    switchClosure
+     Input Parameters:
+    [{'type': {'qualified_name': None, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}, 'name': 'predicates'}, {'type': {'qualified_name': None, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}, 'name': 'closures'}]
+    Input Return Type:
+    {'qualified_name': None, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}
+    And the following available instance methods:
+    None exceptionClosure()
+    None nopClosure()
+    None asClosure(None transformer)
+    None forClosure(int count,None closure)
+    None whileClosure(None predicate,None closure)
+    None doWhileClosure(None closure,None predicate)
+    None invokerClosure(None methodName)
+    None invokerClosure(None methodName,None paramTypes,None args)
+    None chainedClosure(None closures)
+    None chainedClosure(None closures)
+    None ifClosure(None predicate,None trueClosure)
+    None ifClosure(None predicate,None trueClosure,None falseClosure)
+    None switchClosure(None predicates,None closures)
+    None switchClosure(None predicates,None closures,None defaultClosure)
+    None switchClosure(None predicatesAndClosures)
+    None switchMapClosure(None objectsAndClosures)
+    Output Java assertions:
+    ```json
+    [{"description": "an array of predicates to check, not null",
+    "assertion": "assert (args[0]==null) == false;",
+    "name": "predicates",
+    "content": "an array of predicates to check, not null"},
+    {"description": "an array of closures to call, not null",
+    "assertion": "assert (args[1]==null) == false;",
+    "name": "closures ",
+    "content": "an array of closures to call, not null"}]
+    ```
+    Input Javadoc:
+    /**
+    * Disallow the addition of new parameters. The already declared parameters
+    * are still modifiable, but no new parameter can be added.
+    * @param on If true the environment is locked.
+    */
+    Input Method Name:
+    "lockEnvironment"
+     Input Parameters:
+    [{'type': {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}, 'name': 'on'}]
+    Input Return Type:
+    None
+    Instance Methods:
+    boolean isLocked()
+    boolean hasParameter(None parameter)
+    boolean getBooleanParameter(None parameter)
+    int getBooleanParameteri(None parameter)
+    double getNumberParameter(None parameter)
+    int getParameterCount()
+    void lockEnvironment(boolean on)
+    
+    Output Java assertions:
+    ```json
+    [
+        {
+        "description": "the environment is locked",
+        "assertion": "assert receiverObjectID.isLocked();",
+        "name": "on",
+        "content": "true"
+        }
+    ]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Constructs an {@code ArrayListMultimap} with the same mappings as the
+ * specified multimap.
+ *
+ * @param multimap the multimap whose contents are copied to this multimap
+ */
+"
+    For the method:
+    "create"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Multimap', 'is_array': False, 'array_dimensions': 0}, 'name': 'multimap'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ArrayListMultimap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None create()
+None create(int expectedKeys,int expectedValuesPerKey)
+None create(None multimap)
+None createCollection()
+void trimToSize()
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+Finally, ONLY return the List of JSON Elements like shown in the example. DO NOT return actual Java or Phyton Code!
+2026-01-17 17:08:25,530 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here is the generated Java pre-condition assertions:
+
+```json
+[
+    {
+        "description": "the multimap whose contents are copied to this multimap",
+        "assertion": "assert args[0] != null;",
+        "name": "multimap",
+        "content": "the multimap whose contents are copied to this multimap"
+    }
+]
+```
+2026-01-17 17:08:25,532 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the multimap whose contents are copied to this multimap', 'assertion': 'assert args[0] != null;', 'name': 'multimap', 'content': 'the multimap whose contents are copied to this multimap'}]
+2026-01-17 17:08:25,532 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1} for create:
+ {'PARAM': [{'description': 'the multimap whose contents are copied to this multimap', 'assertion': 'assert args[0] != null;', 'name': 'multimap', 'content': 'the multimap whose contents are copied to this multimap'}]}
+2026-01-17 17:08:25,532 - DEBUG - llmedico.main - current method name: createCollection
+2026-01-17 17:08:25,532 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Creates a new, empty {@code ArrayList} to hold the collection of values for
+ * an arbitrary key.
+ */
+
+2026-01-17 17:08:25,533 - WARNING - llmedico.main - createCollection contains not tags?
+2026-01-17 17:08:25,533 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2026-01-17 17:08:25,533 - DEBUG - llmedico.main - the following java assertion have been generated for {} for createCollection:
+ {}
+2026-01-17 17:08:25,533 - DEBUG - llmedico.main - current method name: trimToSize
+2026-01-17 17:08:25,533 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Reduces the memory used by this {@code ArrayListMultimap}, if feasible.
+ */
+
+2026-01-17 17:08:25,533 - WARNING - llmedico.main - trimToSize contains not tags?
+2026-01-17 17:08:25,533 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2026-01-17 17:08:25,533 - DEBUG - llmedico.main - the following java assertion have been generated for {} for trimToSize:
+ {}
+2026-01-17 17:08:25,535 - DEBUG - llmedico.main - the following java assertions have been generated for com.google.common.collect.ArrayListMultimap: 
+ [{'method': 'create', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'create', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'expectedKeys'}, {'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'expectedValuesPerKey'}], 'conditions': {'PARAM': [{'description': 'the expected number of distinct keys', 'assertion': 'assert (args[0] < 0) == false;', 'name': 'expectedKeys', 'content': 'the expected number of distinct keys'}, {'description': 'the expected average number of values per key', 'assertion': 'assert (args[1] < 0) == false;', 'name': 'expectedValuesPerKey', 'content': 'the expected average number of values per key'}], 'THROWS': [{'description': 'expectedKeys or expectedValuesPerKey is negative', 'assertion': 'assert args[0] < 0 || args[1] < 0;', 'name': 'IllegalArgumentException', 'content': 'if expectedKeys or expectedValuesPerKey is negative'}]}}, {'method': 'create', 'type': 'method', 'parameters': [{'type': {'qualified_name': None, 'simple_name': 'Multimap', 'is_array': False, 'array_dimensions': 0}, 'name': 'multimap'}], 'conditions': {'PARAM': [{'description': 'the multimap whose contents are copied to this multimap', 'assertion': 'assert args[0] != null;', 'name': 'multimap', 'content': 'the multimap whose contents are copied to this multimap'}]}}, {'method': 'createCollection', 'type': 'method', 'parameters': [], 'conditions': {}}, {'method': 'trimToSize', 'type': 'method', 'parameters': [], 'conditions': {}}]
+2026-01-17 17:08:25,535 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2026-01-17 17:08:25,535 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "ArrayListMultimap",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.ArrayListMultimap",
+    "javadoc": "/**\n * Implementation of {@code Multimap} that uses an {@code ArrayList} to store\n * the values for a given key. A {@link HashMap} associates each key with an\n * {@link ArrayList} of values.\n *\n * <p>When iterating through the collections supplied by this class, the\n * ordering of values for a given key agrees with the order in which the values\n * were added.\n *\n * <p>This multimap allows duplicate key-value pairs. After adding a new\n * key-value pair equal to an existing key-value pair, the {@code\n * ArrayListMultimap} will contain entries for both the new value and the old\n * value.\n *\n * <p>Keys and values may be null. All optional multimap methods are supported,\n * and all returned views are modifiable.\n *\n * <p>The lists returned by {@link #get}, {@link #removeAll}, and {@link\n * #replaceValues} all implement {@link java.util.RandomAccess}.\n *\n * <p>This class is not threadsafe when any concurrent operations update the\n * multimap. Concurrent read operations will work correctly. To allow concurrent\n * update operations, wrap your multimap with a call to {@link\n * Multimaps#synchronizedListMultimap}.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/NewCollectionTypesExplained#multimap\">\n * {@code Multimap}</a>.\n *\n * @author Jared Levy\n * @since 2.0\n */\n",
+    "code": "/**\n * Implementation of {@code Multimap} that uses an {@code ArrayList} to store\n * the values for a given key. A {@link HashMap} associates each key with an\n * {@link ArrayList} of values.\n *\n * <p>When iterating through the collections supplied by this class, the\n * ordering of values for a given key agrees with the order in which the values\n * were added.\n *\n * <p>This multimap allows duplicate key-value pairs. After adding a new\n * key-value pair equal to an existing key-value pair, the {@code\n * ArrayListMultimap} will contain entries for both the new value and the old\n * value.\n *\n * <p>Keys and values may be null. All optional multimap methods are supported,\n * and all returned views are modifiable.\n *\n * <p>The lists returned by {@link #get}, {@link #removeAll}, and {@link\n * #replaceValues} all implement {@link java.util.RandomAccess}.\n *\n * <p>This class is not threadsafe when any concurrent operations update the\n * multimap. Concurrent read operations will work correctly. To allow concurrent\n * update operations, wrap your multimap with a call to {@link\n * Multimaps#synchronizedListMultimap}.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/NewCollectionTypesExplained#multimap\">\n * {@code Multimap}</a>.\n *\n * @author Jared Levy\n * @since 2.0\n */\n@GwtCompatible(serializable = true, emulated = true)\npublic final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {\n\n    // Default from ArrayList\n    private static final int DEFAULT_VALUES_PER_KEY = 3;\n\n    @VisibleForTesting\n    transient int expectedValuesPerKey;\n\n    /**\n     * Creates a new, empty {@code ArrayListMultimap} with the default initial\n     * capacities.\n     */\n    public static <K, V> ArrayListMultimap<K, V> create() {\n        return new ArrayListMultimap<K, V>();\n    }\n\n    /**\n     * Constructs an empty {@code ArrayListMultimap} with enough capacity to hold\n     * the specified numbers of keys and values without resizing.\n     *\n     * @param expectedKeys the expected number of distinct keys\n     * @param expectedValuesPerKey the expected average number of values per key\n     * @throws IllegalArgumentException if {@code expectedKeys} or {@code\n     *      expectedValuesPerKey} is negative\n     */\n    public static <K, V> ArrayListMultimap<K, V> create(int expectedKeys, int expectedValuesPerKey) {\n        return new ArrayListMultimap<K, V>(expectedKeys, expectedValuesPerKey);\n    }\n\n    /**\n     * Constructs an {@code ArrayListMultimap} with the same mappings as the\n     * specified multimap.\n     *\n     * @param multimap the multimap whose contents are copied to this multimap\n     */\n    public static <K, V> ArrayListMultimap<K, V> create(Multimap<? extends K, ? extends V> multimap) {\n        return new ArrayListMultimap<K, V>(multimap);\n    }\n\n    private ArrayListMultimap() {\n        super(new HashMap<K, Collection<V>>());\n        expectedValuesPerKey = DEFAULT_VALUES_PER_KEY;\n    }\n\n    private ArrayListMultimap(int expectedKeys, int expectedValuesPerKey) {\n        super(Maps.<K, Collection<V>>newHashMapWithExpectedSize(expectedKeys));\n        checkNonnegative(expectedValuesPerKey, \"expectedValuesPerKey\");\n        this.expectedValuesPerKey = expectedValuesPerKey;\n    }\n\n    private ArrayListMultimap(Multimap<? extends K, ? extends V> multimap) {\n        this(multimap.keySet().size(), (multimap instanceof ArrayListMultimap) ? ((ArrayListMultimap<?, ?>) multimap).expectedValuesPerKey : DEFAULT_VALUES_PER_KEY);\n        putAll(multimap);\n    }\n\n    /**\n     * Creates a new, empty {@code ArrayList} to hold the collection of values for\n     * an arbitrary key.\n     */\n    @Override\n    List<V> createCollection() {\n        return new ArrayList<V>(expectedValuesPerKey);\n    }\n\n    /**\n     * Reduces the memory used by this {@code ArrayListMultimap}, if feasible.\n     */\n    public void trimToSize() {\n        for (Collection<V> collection : backingMap().values()) {\n            ArrayList<V> arrayList = (ArrayList<V>) collection;\n            arrayList.trimToSize();\n        }\n    }\n\n    /**\n     * @serialData expectedValuesPerKey, number of distinct keys, and then for\n     *     each distinct key: the key, number of values for that key, and the\n     *     key's values\n     */\n    @GwtIncompatible(\"java.io.ObjectOutputStream\")\n    private void writeObject(ObjectOutputStream stream) throws IOException {\n        stream.defaultWriteObject();\n        Serialization.writeMultimap(this, stream);\n    }\n\n    @GwtIncompatible(\"java.io.ObjectOutputStream\")\n    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {\n        stream.defaultReadObject();\n        expectedValuesPerKey = DEFAULT_VALUES_PER_KEY;\n        int distinctKeys = Serialization.readCount(stream);\n        Map<K, Collection<V>> map = Maps.newHashMap();\n        setMap(map);\n        Serialization.populateMultimap(this, stream, distinctKeys);\n    }\n\n    @GwtIncompatible(\"Not needed in emulated source.\")\n    private static final long serialVersionUID = 0;\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "create",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ArrayListMultimap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Creates a new, empty {@code ArrayListMultimap} with the default initial\n * capacities.\n */\n",
+        "tags": [],
+        "code": "/**\n * Creates a new, empty {@code ArrayListMultimap} with the default initial\n * capacities.\n */\npublic static <K, V> ArrayListMultimap<K, V> create() {\n    return new ArrayListMultimap<K, V>();\n}"
+      },
+      {
+        "type": "method",
+        "name": "create",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ArrayListMultimap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "expectedKeys"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "expectedValuesPerKey"
+          }
+        ],
+        "javadoc": "/**\n * Constructs an empty {@code ArrayListMultimap} with enough capacity to hold\n * the specified numbers of keys and values without resizing.\n *\n * @param expectedKeys the expected number of distinct keys\n * @param expectedValuesPerKey the expected average number of values per key\n * @throws IllegalArgumentException if {@code expectedKeys} or {@code\n *      expectedValuesPerKey} is negative\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "expectedKeys",
+            "content": "the expected number of distinct keys",
+            "assertion": "assert (args[0] < 0) == false;",
+            "description": "the expected number of distinct keys"
+          },
+          {
+            "tag": "param",
+            "name": "expectedValuesPerKey",
+            "content": "the expected average number of values per key",
+            "assertion": "assert (args[1] < 0) == false;",
+            "description": "the expected average number of values per key"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code expectedKeys} or {@code expectedValuesPerKey} is negative",
+            "assertion": "assert args[0] < 0 || args[1] < 0;",
+            "description": "expectedKeys or expectedValuesPerKey is negative"
+          }
+        ],
+        "code": "/**\n * Constructs an empty {@code ArrayListMultimap} with enough capacity to hold\n * the specified numbers of keys and values without resizing.\n *\n * @param expectedKeys the expected number of distinct keys\n * @param expectedValuesPerKey the expected average number of values per key\n * @throws IllegalArgumentException if {@code expectedKeys} or {@code\n *      expectedValuesPerKey} is negative\n */\npublic static <K, V> ArrayListMultimap<K, V> create(int expectedKeys, int expectedValuesPerKey) {\n    return new ArrayListMultimap<K, V>(expectedKeys, expectedValuesPerKey);\n}"
+      },
+      {
+        "type": "method",
+        "name": "create",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ArrayListMultimap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Multimap",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "multimap"
+          }
+        ],
+        "javadoc": "/**\n * Constructs an {@code ArrayListMultimap} with the same mappings as the\n * specified multimap.\n *\n * @param multimap the multimap whose contents are copied to this multimap\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "multimap",
+            "content": "the multimap whose contents are copied to this multimap",
+            "assertion": "assert args[0] != null;",
+            "description": "the multimap whose contents are copied to this multimap"
+          }
+        ],
+        "code": "/**\n * Constructs an {@code ArrayListMultimap} with the same mappings as the\n * specified multimap.\n *\n * @param multimap the multimap whose contents are copied to this multimap\n */\npublic static <K, V> ArrayListMultimap<K, V> create(Multimap<? extends K, ? extends V> multimap) {\n    return new ArrayListMultimap<K, V>(multimap);\n}"
+      },
+      {
+        "type": "method",
+        "name": "createCollection",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Creates a new, empty {@code ArrayList} to hold the collection of values for\n * an arbitrary key.\n */\n",
+        "tags": [],
+        "code": "/**\n * Creates a new, empty {@code ArrayList} to hold the collection of values for\n * an arbitrary key.\n */\n@Override\nList<V> createCollection() {\n    return new ArrayList<V>(expectedValuesPerKey);\n}"
+      },
+      {
+        "type": "method",
+        "name": "trimToSize",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": "/**\n * Reduces the memory used by this {@code ArrayListMultimap}, if feasible.\n */\n",
+        "tags": [],
+        "code": "/**\n * Reduces the memory used by this {@code ArrayListMultimap}, if feasible.\n */\npublic void trimToSize() {\n    for (Collection<V> collection : backingMap().values()) {\n        ArrayList<V> arrayList = (ArrayList<V>) collection;\n        arrayList.trimToSize();\n    }\n}"
+      }
+    ]
+  }
+]
+2026-01-17 17:08:25,536 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2026-01-17 17:08:25,537 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2026-01-17 17:08:25,538 - DEBUG - llmedico.main - ---Ending LLMedico---
