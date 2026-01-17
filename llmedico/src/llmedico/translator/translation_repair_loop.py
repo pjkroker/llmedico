@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from llm_caller.utils.processing import extract_code_by_language
+from llm_caller.utils.processing import extract_code_by_language, extract_list_raw
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +14,15 @@ class TranslationRepairLoop:
     def _first_aid_repair(self, raw_response: str, errors: list[str], expected_len: int) -> Optional[str]:
         if errors[0].startswith("No code snippets found for language"):
             logger.debug("Trying to fix output format")
-            broken_response = extract_code_by_language(raw_response, "")
-            fixed_response = "```json\n" + broken_response[0] + "\n```"
+            try:
+                broken_response = extract_code_by_language(raw_response, "")
+                fixed_response = "```json\n" + broken_response[0] + "\n```"
+            except RuntimeError as e:
+                broken_response = extract_list_raw(raw_response)
+                if broken_response is not None:
+                    fixed_response = "```json\n" + broken_response + "\n```"
+
+                else: return None
 
             errors = self.validator.validate(fixed_response, expected_len)
             if errors:
