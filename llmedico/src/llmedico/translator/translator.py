@@ -119,7 +119,7 @@ class Translator():
             template = [{"description": "", "assertion": "", "name": condition["name"], "content": condition["content"]} for condition in current_tags]
             template = (str(template).replace("{'", "{{'").replace("'}", "'}}").replace('{"', '{{"').replace('"}', '"}}').
                         replace("None", "null").replace(r"\n", r"\\n"))
-            return_type = "void" if return_type is None else return_type.replace("'qualified_name': None", "'qualified_name': null")
+            return_type = "void" if return_type is None else str(return_type).replace("'qualified_name': None", "'qualified_name': null")
             logger.debug(f"translating for current mode: {mode} with the following tags: \n{tags}")
             expected_len = modes[mode]
             result = self._translate_once(javadoc, method_name, template, parameters, return_type, method_selection, mode, [], "")
