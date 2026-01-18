@@ -1,0 +1,1277 @@
+[
+  {
+    "method": "Complex",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "real"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Real part.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "real",
+          "content": "Real part."
+        }
+      ]
+    }
+  },
+  {
+    "method": "Complex",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "real"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "imaginary"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Real part.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "real",
+          "content": "Real part."
+        },
+        {
+          "description": "Imaginary part.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "imaginary",
+          "content": "Imaginary part."
+        }
+      ]
+    }
+  },
+  {
+    "method": "abs",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Return the absolute value.",
+          "assertion": "assert methodResultID == (args[0] >= 0);",
+          "name": null,
+          "content": "absolute value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "addend"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Value to be added to this Complex.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "addend",
+          "content": "Value to be added to this Complex."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this + addend.",
+          "assertion": "assert methodResultID == receiverObjectID.add(args[0]);",
+          "name": null,
+          "content": "Returns a Complex whose value is this + addend."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if addend is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullArgumentException",
+          "content": "if @code addend is @code null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "addend"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Value to be added to this Complex.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "addend",
+          "content": "Value to be added to this Complex."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this + addend, with addend interpreted as a real number.",
+          "assertion": "assert methodResultID == receiverObjectID.add(args[0]);",
+          "name": null,
+          "content": "Returns a Complex whose value is this + addend, with addend interpreted as a real number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "conjugate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "conjugate of this Complex object.",
+          "assertion": "assert methodResultID == !receiverObjectID.isNaN() && (methodResultID.getReal() == receiverObjectID.getReal() || java.lang.Double.isInfinite(receiverObjectID.getReal()) && methodResultID.getImaginaryPart() == -receiverObjectID.getImaginaryPart());",
+          "name": null,
+          "content": "conjugate of this Complex object."
+        }
+      ]
+    }
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "divisor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "divisor cannot be null",
+          "assertion": "assert !receiverObjectID.equals(null);",
+          "name": "divisor",
+          "content": "Value by which this Complex is to be divided."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this / divisor",
+          "assertion": "assert !this.isInfinite() || divisor.isNaN() || this.equals(divisor, 0);",
+          "name": null,
+          "content": "this / divisor"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either this or divisor has a NaN value in either part.",
+          "assertion": "assert (receiverObjectID.isNaN() || args[0].isNaN()) && !args[0].equals(receiverObjectID.ZERO);",
+          "name": "NullArgumentException",
+          "content": "if either this or divisor has a NaN value in either part."
+        }
+      ]
+    }
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "divisor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Value by which this Complex is to be divided.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "divisor",
+          "content": "Value by which this Complex is to be divided."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this / divisor.",
+          "assertion": "assert methodResultID == receiverObjectID.divide(args[0]);",
+          "name": null,
+          "content": "this / divisor"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reciprocal",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Object to test for equality with this instance.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "other",
+          "content": "Object to test for equality with this instance."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "true} if the objects are equal, {@code false} if object is {@code null}, not an instance of {@code Complex}, or not equal to this instance.",
+          "assertion": "",
+          "description": "true} if the objects are equal, {@code false} if object is {@code null}, not an instance of {@code Complex}, or not equal to this instance."
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxUlps"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "First value (cannot be @code null).",
+          "assertion": "assert args[0] != null;",
+          "name": "x",
+          "content": "First value (cannot be @code null)."
+        },
+        {
+          "description": "Second value (cannot be @code null).",
+          "assertion": "assert args[1] != null;",
+          "name": "y",
+          "content": "Second value (cannot be @code null)."
+        },
+        {
+          "description": "@code (maxUlps - 1) is the number of floating point values between the real (resp. imaginary) parts of @code x and @code y.",
+          "assertion": "assert args[2] >= 0;",
+          "name": "maxUlps",
+          "content": "@code (maxUlps - 1) is the number of floating point values between the real (resp. imaginary) parts of @code x and @code y."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "there are fewer than @code maxUlps floating point values between the real (resp. imaginary) parts of @code x and @code y.",
+          "assertion": "assert equals(args[0], args[1], args[2]);",
+          "name": null,
+          "content": "true if there are fewer than @code maxUlps floating point values between the real (resp. imaginary) parts of @code x and @code y."
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "First value (cannot be @code null).",
+          "assertion": "assert args[0] != null;",
+          "name": "x",
+          "content": "First value (cannot be @code null)."
+        },
+        {
+          "description": "Second value (cannot be @code null).",
+          "assertion": "assert args[1] != null;",
+          "name": "y",
+          "content": "Second value (cannot be @code null)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the values are equal.",
+          "assertion": "assert methodResultID == receiverObjectID.equals(args[0], args[1]);",
+          "name": null,
+          "content": "true if the values are equal."
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "eps"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "First value (cannot be @code null).",
+          "assertion": "assert args[0] == null == false;",
+          "name": "x",
+          "content": "First value (cannot be @code null)."
+        },
+        {
+          "description": "Second value (cannot be @code null).",
+          "assertion": "assert args[1] == null == false;",
+          "name": "y",
+          "content": "Second value (cannot be @code null)."
+        },
+        {
+          "description": "Amount of allowed absolute error.",
+          "assertion": "assert args[2] == null == false;",
+          "name": "eps",
+          "content": "Amount of allowed absolute error."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the values are two adjacent floating point numbers or they are within range of each other.",
+          "assertion": "assert methodResultID == receiverObjectID.equals(args[0], args[1]);",
+          "name": null,
+          "content": "true if the values are two adjacent floating point numbers or they are within range of each other."
+        }
+      ]
+    }
+  },
+  {
+    "method": "equalsWithRelativeTolerance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "eps"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "First value (cannot be @code null).",
+          "assertion": "assert args[0] == null == false;",
+          "name": "x",
+          "content": "First value (cannot be @code null)."
+        },
+        {
+          "description": "Second value (cannot be @code null).",
+          "assertion": "assert args[1] == null == false;",
+          "name": "y",
+          "content": "Second value (cannot be @code null)."
+        },
+        {
+          "description": "Amount of allowed relative error.",
+          "assertion": "assert args[2] >= 0;",
+          "name": "eps",
+          "content": "Amount of allowed relative error."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the values are two adjacent floating point numbers or they are within range of each other.",
+          "assertion": "assert methodResultID == !receiverObjectID.equalsWithRelativeTolerance(args[0], args[1], args[2]);",
+          "name": null,
+          "content": "true if the values are two adjacent floating point numbers or they are within range of each other."
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a hash code value for this object.",
+          "assertion": "assert methodResultID == 7 || (receiverObjectID.getReal() != Double.NaN && receiverObjectID.getImaginary() != Double.NaN);",
+          "name": null,
+          "content": "a hash code value for this object."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getImaginary",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the imaginary part.",
+          "assertion": "assert methodResultID == args[0];",
+          "name": null,
+          "content": "the imaginary part."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getReal",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the real part.",
+          "assertion": "assert methodResultID == receiverObjectID.getReal();",
+          "name": null,
+          "content": "the real part."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isNaN",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "if either or both parts of this complex number is NaN; false otherwise.",
+          "assertion": "assert methodResultID == receiverObjectID.isNaN();",
+          "name": null,
+          "content": "if either or both parts of this complex number is NaN; false otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isInfinite",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "if one or both parts of this complex number are infinite and neither part is NaN.",
+          "assertion": "assert methodResultID == receiverObjectID.isInfinite();",
+          "name": null,
+          "content": "if one or both parts of this complex number are infinite and neither part is NaN."
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "factor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "value to be multiplied by this Complex.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "factor",
+          "content": "value to be multiplied by this Complex."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this * factor.",
+          "assertion": "assert methodResultID == !receiverObjectID.isNaN() && !args[0].isNaN();",
+          "name": null,
+          "content": "Returns a Complex whose value is this * factor."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if factor is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullArgumentException",
+          "content": "if @code factor} is @code null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "factor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "value to be multiplied by this Complex.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "factor",
+          "content": "value to be multiplied by this Complex."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this * factor, with factor interpreted as an integer number.",
+          "assertion": "assert methodResultID == receiverObjectID.multiply(args[0]);",
+          "name": null,
+          "content": "this * factor"
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "factor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "value to be multiplied by this Complex.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "factor",
+          "content": "value to be multiplied by this Complex."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this * factor, with factor interpreted as a real number.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.multiply(args[0]));",
+          "name": null,
+          "content": "this * factor"
+        }
+      ]
+    }
+  },
+  {
+    "method": "negate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is -this.",
+          "assertion": "assert methodResultID == receiverObjectID.negate().isNaN() ? null : receiverObjectID; ",
+          "name": null,
+          "content": "Returns a Complex whose value is -this."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "subtrahend"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "value to be subtracted from this Complex.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "subtrahend",
+          "content": "value to be subtracted from this Complex."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this - subtrahend.",
+          "assertion": "assert !args[0].isNaN() && (methodResultID.getReal() == args[0].getReal() - receiverObjectID.getReal()) && (methodResultID.getImaginaryPart() == args[0].getImaginaryPart() - receiverObjectID.getImaginaryPart());",
+          "name": null,
+          "content": "Returns a Complex whose value is this - subtrahend."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either this or subtrahend has a NaN value in either part.",
+          "assertion": "assert (receiverObjectID.isNaN() || receiverObjectID.getReal().isNaN()) || ((Complex)args[0]).isNaN();",
+          "name": "NullArgumentException",
+          "content": "if either this or subtrahend has a NaN value in either part."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "subtrahend"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "value to be subtracted from this Complex.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "subtrahend",
+          "content": "value to be subtracted from this Complex."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a Complex whose value is this - subtrahend.",
+          "assertion": "assert methodResultID == receiverObjectID.subtract(args[0]);",
+          "name": null,
+          "content": "this - subtrahend"
+        }
+      ]
+    }
+  },
+  {
+    "method": "acos",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the inverse cosine of this complex number.",
+          "assertion": "assert methodResultID == !receiverObjectID.isNaN() && receiverObjectID.getReal().equals(0) || receiverObjectID.getImaginary().equals(0);",
+          "name": null,
+          "content": "inverse cosine of this complex number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "asin",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the inverse sine of this complex number.",
+          "assertion": "assert methodResultID == !receiverObjectID.isNaN() && receiverObjectID.getReal().equals(0) || receiverObjectID.getImaginary().equals(0);",
+          "name": null,
+          "content": "the inverse sine of this complex number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "atan",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "inverse tangent of this complex number",
+          "assertion": "assert methodResultID instanceof Complex; ",
+          "name": null,
+          "content": "inverse tangent of this complex number"
+        }
+      ]
+    }
+  },
+  {
+    "method": "cos",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "cosine of this complex number.",
+          "assertion": "",
+          "description": "cosine of this complex number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "cosh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "hyperbolic cosine of this complex number.",
+          "assertion": "",
+          "description": "hyperbolic cosine of this complex number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "exp",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns Complex.NaN if either real or imaginary part of the input argument is NaN.",
+          "assertion": "assert result == (args.length > 0 && ((args[0].isNaN() || args[0].isInfinite())));",
+          "name": null,
+          "content": "Returns Complex.NaN if either real or imaginary part of the input argument is NaN."
+        }
+      ]
+    }
+  },
+  {
+    "method": "log",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the natural logarithm of this complex number.",
+          "assertion": "assert methodResultID == !args[0].isNaN() && !args[1].isNaN();",
+          "name": null,
+          "content": "value <code>ln &nbsp; this</code>, the natural logarithm of @code this."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "exponent to which this Complex is to be raised.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "x",
+          "content": "exponent to which this Complex is to be raised."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns this<sup>x</sup>.",
+          "assertion": "assert methodResultID == !receiverObjectID.isNaN() && receiverObjectID.getReal() != 0 && receiverObjectID.getImaginary() != 0;",
+          "name": null,
+          "content": "Returns this<sup>x</sup>."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "either real or imaginary part of the input argument is NaN or infinite, or if y equals Complex#ZERO.",
+          "assertion": "assert (receiverObjectID.getReal() != receiverObjectID.getReal() || receiverObjectID.getImaginaryPart() != receiverObjectID.getImaginaryPart()) || receiverObjectID.equals(Complex.ZERO);",
+          "name": "NullArgumentException",
+          "content": "if either real or imaginary part of the input argument is NaN or infinite, or if y equals Complex#ZERO."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "exponent to which this Complex is to be raised",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "x",
+          "content": "exponent to which this Complex is to be raised."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns the value of this complex number raised to the power of x.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.createComplex(1));",
+          "name": null,
+          "content": "Returns the value of this complex number raised to the power of x."
+        }
+      ]
+    }
+  },
+  {
+    "method": "sin",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns Complex.NaN if either real or imaginary part of the input argument is NaN.",
+          "assertion": "assert result == (args[0].isNaN() || args[0].isInfinite()) ? Complex.NAN : FastMath.sin(args[0].getReal()) * FastMath.cosh(args[0].getImaginaryPart()) - FastMath.cos(args[0].getReal()) * FastMath.sinh(args[0].getImaginaryPart());",
+          "name": null,
+          "content": "sine of this complex number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "sinh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns NaN if either real or imaginary part of the input argument is NaN.",
+          "assertion": "assert result == !args[0].isNaN() && args[0].getReal() != 0 || args[0].getImaginaryPart() != 0;",
+          "name": null,
+          "content": "hyperbolic sine of @code this."
+        }
+      ]
+    }
+  },
+  {
+    "method": "sqrt",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the square root of this complex number.",
+          "assertion": "assert methodResultID == args[0].sqrt();",
+          "name": null,
+          "content": "square root of @code this."
+        }
+      ]
+    }
+  },
+  {
+    "method": "sqrt1z",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the square root of 1 - this<sup>2</sup>.",
+          "assertion": "assert methodResultID == receiverObjectID.sqrt();",
+          "name": null,
+          "content": "square root of <code>1 - this<sup>2</sup></code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "tan",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns NaN if either real or imaginary part of the input argument is NaN.",
+          "assertion": "assert result == (args.length > 0 && !Complex.valueOf(args[0]).isNaN());",
+          "name": null,
+          "content": "tangent of @code this."
+        }
+      ]
+    }
+  },
+  {
+    "method": "tanh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "hyperbolic tangent of {@code this}.",
+          "assertion": "",
+          "description": "hyperbolic tangent of {@code this}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getArgument",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the argument of this complex number.",
+          "assertion": "assert methodResultID >= -Math.PI && methodResultID <= Math.PI;",
+          "name": null,
+          "content": "the argument of this complex number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nthRoot",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Degree of root.",
+          "assertion": "assert (args[0] <= 0) == false;",
+          "name": "n",
+          "content": "Degree of root."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "List of all @code n}-th roots of @code this.",
+          "assertion": "assert !args[0].isNaN() && !args[0].isInfinite() || result == java.util.Collections.singletonList(complex.NAN) || result == java.util.Collections.singletonList(complex.INF);",
+          "name": null,
+          "content": "List of all @code n}-th roots of @code this."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n <= 0.",
+          "assertion": "assert args[0] > 0;",
+          "name": "NotPositiveException",
+          "content": "if @code n <= 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "createComplex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "realPart"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "imaginaryPart"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Real part.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "realPart",
+          "content": "Real part."
+        },
+        {
+          "description": "Imaginary part.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "imaginaryPart",
+          "content": "Imaginary part."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new complex number instance.",
+          "assertion": "assert methodResultID instanceof receiverObjectID.Complex;",
+          "name": null,
+          "content": "a new complex number instance."
+        }
+      ]
+    }
+  },
+  {
+    "method": "valueOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "realPart"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "imaginaryPart"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Real part.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "realPart",
+          "content": "Real part."
+        },
+        {
+          "description": "Imaginary part.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "imaginaryPart",
+          "content": "Imaginary part."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a Complex instance.",
+          "assertion": "assert methodResultID instanceof Complex;",
+          "name": null,
+          "content": "Complex instance."
+        }
+      ]
+    }
+  },
+  {
+    "method": "valueOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "realPart"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Real part.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "realPart",
+          "content": "Real part."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Complex instance.",
+          "assertion": "assert methodResultID instanceof Complex;",
+          "name": null,
+          "content": "Complex instance."
+        }
+      ]
+    }
+  },
+  {
+    "method": "readResolve",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "A Complex instance with all fields resolved.",
+          "assertion": "assert methodResultID == receiverObjectID.createComplex();",
+          "name": null,
+          "content": "A Complex instance with all fields resolved."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getField",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  }
+]

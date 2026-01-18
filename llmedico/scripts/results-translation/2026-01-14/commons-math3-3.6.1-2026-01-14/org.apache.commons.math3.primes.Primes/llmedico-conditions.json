@@ -1,0 +1,117 @@
+[
+  {
+    "method": "isPrime",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n must be a positive integer",
+          "assertion": "assert args[0] > 0;",
+          "name": "n",
+          "content": "&lt;center&gt;The number to test must be a positive integer&lt;/center&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if n is prime. (All numbers < 2 return false).",
+          "assertion": "assert methodResultID == (receiverObjectID.n >= 2);",
+          "name": null,
+          "content": "true if n is prime. (All numbers &lt; 2 return false)."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextPrime",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "n",
+          "content": "a positive number."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the smallest prime greater than or equal to n.",
+          "assertion": "assert methodResultID == ((receiverObjectID.nextPrime(methodResultID)) > (n + 1));",
+          "name": null,
+          "content": ""
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "&lt;n&gt; &lt; 0",
+          "assertion": "assert args[0] < 0;",
+          "name": "MathIllegalArgumentException",
+          "content": "&lt;n&gt; &lt; 0"
+        }
+      ]
+    }
+  },
+  {
+    "method": "primeFactors",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n must be &ge; 2",
+          "assertion": "assert receiverObjectID.isPrime(args[0]) || args[0] >= 2;",
+          "name": "n",
+          "content": "&lt;em&gt;n must be &amp;ge; 2&lt;/em&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "list of prime factors of n",
+          "assertion": "assert receiverObjectID.primeFactors(methodResultID).size() > 0 && receiverObjectID.isPrime(n) == false;",
+          "name": null,
+          "content": "list of prime factors of n"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n < 2.",
+          "assertion": "assert (args[0] < 2);",
+          "name": "MathIllegalArgumentException",
+          "content": "if n &lt; 2."
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,655 @@
+[
+  {
+    "name": "Vector",
+    "package": "org.apache.commons.math3.geometry",
+    "qualified_name": "org.apache.commons.math3.geometry.Vector",
+    "javadoc": "/**\n * This interface represents a generic vector in a vectorial space or a point in an affine space.\n * @param <S> Type of the space.\n * @see Space\n * @see Point\n * @since 3.0\n */\n",
+    "code": "/**\n * This interface represents a generic vector in a vectorial space or a point in an affine space.\n * @param <S> Type of the space.\n * @see Space\n * @see Point\n * @since 3.0\n */\npublic interface Vector<S extends Space> extends Point<S> {\n\n    /**\n     * Get the null vector of the vectorial space or origin point of the affine space.\n     * @return null vector of the vectorial space or origin point of the affine space\n     */\n    Vector<S> getZero();\n\n    /**\n     * Get the L<sub>1</sub> norm for the vector.\n     * @return L<sub>1</sub> norm for the vector\n     */\n    double getNorm1();\n\n    /**\n     * Get the L<sub>2</sub> norm for the vector.\n     * @return Euclidean norm for the vector\n     */\n    double getNorm();\n\n    /**\n     * Get the square of the norm for the vector.\n     * @return square of the Euclidean norm for the vector\n     */\n    double getNormSq();\n\n    /**\n     * Get the L<sub>&infin;</sub> norm for the vector.\n     * @return L<sub>&infin;</sub> norm for the vector\n     */\n    double getNormInf();\n\n    /**\n     * Add a vector to the instance.\n     * @param v vector to add\n     * @return a new vector\n     */\n    Vector<S> add(Vector<S> v);\n\n    /**\n     * Add a scaled vector to the instance.\n     * @param factor scale factor to apply to v before adding it\n     * @param v vector to add\n     * @return a new vector\n     */\n    Vector<S> add(double factor, Vector<S> v);\n\n    /**\n     * Subtract a vector from the instance.\n     * @param v vector to subtract\n     * @return a new vector\n     */\n    Vector<S> subtract(Vector<S> v);\n\n    /**\n     * Subtract a scaled vector from the instance.\n     * @param factor scale factor to apply to v before subtracting it\n     * @param v vector to subtract\n     * @return a new vector\n     */\n    Vector<S> subtract(double factor, Vector<S> v);\n\n    /**\n     * Get the opposite of the instance.\n     * @return a new vector which is opposite to the instance\n     */\n    Vector<S> negate();\n\n    /**\n     * Get a normalized vector aligned with the instance.\n     * @return a new normalized vector\n     * @exception MathArithmeticException if the norm is zero\n     */\n    Vector<S> normalize() throws MathArithmeticException;\n\n    /**\n     * Multiply the instance by a scalar.\n     * @param a scalar\n     * @return a new vector\n     */\n    Vector<S> scalarMultiply(double a);\n\n    /**\n     * Returns true if any coordinate of this vector is infinite and none are NaN;\n     * false otherwise\n     * @return  true if any coordinate of this vector is infinite and none are NaN;\n     * false otherwise\n     */\n    boolean isInfinite();\n\n    /**\n     * Compute the distance between the instance and another vector according to the L<sub>1</sub> norm.\n     * <p>Calling this method is equivalent to calling:\n     * <code>q.subtract(p).getNorm1()</code> except that no intermediate\n     * vector is built</p>\n     * @param v second vector\n     * @return the distance between the instance and p according to the L<sub>1</sub> norm\n     */\n    double distance1(Vector<S> v);\n\n    /**\n     * Compute the distance between the instance and another vector according to the L<sub>2</sub> norm.\n     * <p>Calling this method is equivalent to calling:\n     * <code>q.subtract(p).getNorm()</code> except that no intermediate\n     * vector is built</p>\n     * @param v second vector\n     * @return the distance between the instance and p according to the L<sub>2</sub> norm\n     */\n    double distance(Vector<S> v);\n\n    /**\n     * Compute the distance between the instance and another vector according to the L<sub>&infin;</sub> norm.\n     * <p>Calling this method is equivalent to calling:\n     * <code>q.subtract(p).getNormInf()</code> except that no intermediate\n     * vector is built</p>\n     * @param v second vector\n     * @return the distance between the instance and p according to the L<sub>&infin;</sub> norm\n     */\n    double distanceInf(Vector<S> v);\n\n    /**\n     * Compute the square of the distance between the instance and another vector.\n     * <p>Calling this method is equivalent to calling:\n     * <code>q.subtract(p).getNormSq()</code> except that no intermediate\n     * vector is built</p>\n     * @param v second vector\n     * @return the square of the distance between the instance and p\n     */\n    double distanceSq(Vector<S> v);\n\n    /**\n     * Compute the dot-product of the instance and another vector.\n     * @param v second vector\n     * @return the dot product this.v\n     */\n    double dotProduct(Vector<S> v);\n\n    /**\n     * Get a string representation of this vector.\n     * @param format the custom format for components\n     * @return a string representation of this vector\n     */\n    String toString(final NumberFormat format);\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "getZero",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the null vector of the vectorial space or origin point of the affine space.\n * @return null vector of the vectorial space or origin point of the affine space\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "vector of the vectorial space or origin point of the affine space",
+            "assertion": "assert methodResultID == receiverObjectID.getZero();",
+            "description": "null vector of the vectorial space or origin point of the affine space"
+          }
+        ],
+        "code": "/**\n * Get the null vector of the vectorial space or origin point of the affine space.\n * @return null vector of the vectorial space or origin point of the affine space\n */\nVector<S> getZero();"
+      },
+      {
+        "type": "method",
+        "name": "getNorm1",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the L<sub>1</sub> norm for the vector.\n * @return L<sub>1</sub> norm for the vector\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "norm for the vector",
+            "assertion": "assert methodResultID == receiverObjectID.getNorm1();",
+            "description": "L<sub>1</sub> norm for the vector"
+          }
+        ],
+        "code": "/**\n * Get the L<sub>1</sub> norm for the vector.\n * @return L<sub>1</sub> norm for the vector\n */\ndouble getNorm1();"
+      },
+      {
+        "type": "method",
+        "name": "getNorm",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the L<sub>2</sub> norm for the vector.\n * @return Euclidean norm for the vector\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "norm for the vector",
+            "assertion": "assert methodResultID == receiverObjectID.getNorm();",
+            "description": "Euclidean norm for the vector"
+          }
+        ],
+        "code": "/**\n * Get the L<sub>2</sub> norm for the vector.\n * @return Euclidean norm for the vector\n */\ndouble getNorm();"
+      },
+      {
+        "type": "method",
+        "name": "getNormSq",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the square of the norm for the vector.\n * @return square of the Euclidean norm for the vector\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of the Euclidean norm for the vector",
+            "assertion": "assert methodResultID == receiverObjectID.getNormSq();",
+            "description": "square of the Euclidean norm for the vector"
+          }
+        ],
+        "code": "/**\n * Get the square of the norm for the vector.\n * @return square of the Euclidean norm for the vector\n */\ndouble getNormSq();"
+      },
+      {
+        "type": "method",
+        "name": "getNormInf",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the L<sub>&infin;</sub> norm for the vector.\n * @return L<sub>&infin;</sub> norm for the vector\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "norm for the vector",
+            "assertion": "assert methodResultID == receiverObjectID.getNormInf();",
+            "description": "L<sub>&infin;</sub> norm for the vector"
+          }
+        ],
+        "code": "/**\n * Get the L<sub>&infin;</sub> norm for the vector.\n * @return L<sub>&infin;</sub> norm for the vector\n */\ndouble getNormInf();"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Add a vector to the instance.\n * @param v vector to add\n * @return a new vector\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vector to add",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "vector to add"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new vector",
+            "assertion": "assert methodResultID == receiverObjectID.add(args[0]);",
+            "description": "a new vector"
+          }
+        ],
+        "code": "/**\n * Add a vector to the instance.\n * @param v vector to add\n * @return a new vector\n */\nVector<S> add(Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "factor"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Add a scaled vector to the instance.\n * @param factor scale factor to apply to v before adding it\n * @param v vector to add\n * @return a new vector\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "factor",
+            "content": "scale factor to apply to v before adding it",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "scale factor to apply to v before adding it"
+          },
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vector to add",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "vector to add"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new vector",
+            "assertion": "assert methodResultID.equals(receiverObjectID.add(args[0], args[1]));",
+            "description": "a new vector"
+          }
+        ],
+        "code": "/**\n * Add a scaled vector to the instance.\n * @param factor scale factor to apply to v before adding it\n * @param v vector to add\n * @return a new vector\n */\nVector<S> add(double factor, Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Subtract a vector from the instance.\n * @param v vector to subtract\n * @return a new vector\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vector to subtract",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "vector to subtract, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new vector",
+            "assertion": "assert methodResultID == receiverObjectID.subtract(args[0]);",
+            "description": "a new vector"
+          }
+        ],
+        "code": "/**\n * Subtract a vector from the instance.\n * @param v vector to subtract\n * @return a new vector\n */\nVector<S> subtract(Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "factor"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Subtract a scaled vector from the instance.\n * @param factor scale factor to apply to v before subtracting it\n * @param v vector to subtract\n * @return a new vector\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "factor",
+            "content": "scale factor to apply to v before subtracting it",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "scale factor to apply to v before subtracting it"
+          },
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vector to subtract",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "vector to subtract"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new vector",
+            "assertion": "assert methodResultID != null; ",
+            "description": "a new vector"
+          }
+        ],
+        "code": "/**\n * Subtract a scaled vector from the instance.\n * @param factor scale factor to apply to v before subtracting it\n * @param v vector to subtract\n * @return a new vector\n */\nVector<S> subtract(double factor, Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "negate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the opposite of the instance.\n * @return a new vector which is opposite to the instance\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new vector which is opposite to the instance",
+            "assertion": "assert methodResultID instanceof java.util.Vector; ",
+            "description": "a new vector which is opposite to the instance"
+          }
+        ],
+        "code": "/**\n * Get the opposite of the instance.\n * @return a new vector which is opposite to the instance\n */\nVector<S> negate();"
+      },
+      {
+        "type": "method",
+        "name": "normalize",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get a normalized vector aligned with the instance.\n * @return a new normalized vector\n * @exception MathArithmeticException if the norm is zero\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new normalized vector",
+            "assertion": "assert methodResultID != receiverObjectID.getZero();",
+            "description": "a new normalized vector"
+          },
+          {
+            "tag": "throws",
+            "name": "MathArithmeticException",
+            "content": "if the norm is zero",
+            "assertion": "assert args[0] == 0;",
+            "description": "if the norm is zero"
+          }
+        ],
+        "code": "/**\n * Get a normalized vector aligned with the instance.\n * @return a new normalized vector\n * @exception MathArithmeticException if the norm is zero\n */\nVector<S> normalize() throws MathArithmeticException;"
+      },
+      {
+        "type": "method",
+        "name": "scalarMultiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * Multiply the instance by a scalar.\n * @param a scalar\n * @return a new vector\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a",
+            "content": "scalar",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "a scalar"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new vector",
+            "assertion": "assert methodResultID instanceof receiverObjectID.Vector; ",
+            "description": "a new vector"
+          }
+        ],
+        "code": "/**\n * Multiply the instance by a scalar.\n * @param a scalar\n * @return a new vector\n */\nVector<S> scalarMultiply(double a);"
+      },
+      {
+        "type": "method",
+        "name": "isInfinite",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns true if any coordinate of this vector is infinite and none are NaN;\n * false otherwise\n * @return  true if any coordinate of this vector is infinite and none are NaN;\n * false otherwise\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if any coordinate of this vector is infinite and none are NaN; false otherwise",
+            "assertion": "assert !methodResultID || receiverObjectID.getNormInf() > 0;",
+            "description": "true if any coordinate of this vector is infinite and none are NaN; false otherwise"
+          }
+        ],
+        "code": "/**\n * Returns true if any coordinate of this vector is infinite and none are NaN;\n * false otherwise\n * @return  true if any coordinate of this vector is infinite and none are NaN;\n * false otherwise\n */\nboolean isInfinite();"
+      },
+      {
+        "type": "method",
+        "name": "distance1",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Compute the distance between the instance and another vector according to the L<sub>1</sub> norm.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNorm1()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the distance between the instance and p according to the L<sub>1</sub> norm\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "second vector",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "second vector"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "distance between the instance and p according to the L<sub>1</sub> norm",
+            "assertion": "assert methodResultID == receiverObjectID.subtract(args[0]).getNorm1();",
+            "description": "distance between the instance and p according to the L<sub>1</sub> norm"
+          }
+        ],
+        "code": "/**\n * Compute the distance between the instance and another vector according to the L<sub>1</sub> norm.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNorm1()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the distance between the instance and p according to the L<sub>1</sub> norm\n */\ndouble distance1(Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "distance",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Compute the distance between the instance and another vector according to the L<sub>2</sub> norm.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNorm()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the distance between the instance and p according to the L<sub>2</sub> norm\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "second vector",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "second vector"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "distance between the instance and p according to the L<sub>2</sub> norm",
+            "assertion": "assert methodResultID == receiverObjectID.distance(null, args[0]).getNorm();",
+            "description": "distance between the instance and p according to the L<sub>2</sub> norm"
+          }
+        ],
+        "code": "/**\n * Compute the distance between the instance and another vector according to the L<sub>2</sub> norm.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNorm()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the distance between the instance and p according to the L<sub>2</sub> norm\n */\ndouble distance(Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "distanceInf",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Compute the distance between the instance and another vector according to the L<sub>&infin;</sub> norm.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNormInf()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the distance between the instance and p according to the L<sub>&infin;</sub> norm\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "second vector",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "second vector"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "distance between the instance and p according to the L<sub>&infin;</sub> norm",
+            "assertion": "assert methodResultID == receiverObjectID.distanceInf(args[0]);",
+            "description": "distance between the instance and p according to the L<sub>&infin;</sub> norm"
+          }
+        ],
+        "code": "/**\n * Compute the distance between the instance and another vector according to the L<sub>&infin;</sub> norm.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNormInf()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the distance between the instance and p according to the L<sub>&infin;</sub> norm\n */\ndouble distanceInf(Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "distanceSq",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Compute the square of the distance between the instance and another vector.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNormSq()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the square of the distance between the instance and p\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "second vector",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "second vector"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "square of the distance between the instance and p",
+            "assertion": "assert methodResultID == receiverObjectID.distanceSq(args[0]);",
+            "description": "square of the distance between the instance and p"
+          }
+        ],
+        "code": "/**\n * Compute the square of the distance between the instance and another vector.\n * <p>Calling this method is equivalent to calling:\n * <code>q.subtract(p).getNormSq()</code> except that no intermediate\n * vector is built</p>\n * @param v second vector\n * @return the square of the distance between the instance and p\n */\ndouble distanceSq(Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "dotProduct",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Compute the dot-product of the instance and another vector.\n * @param v second vector\n * @return the dot product this.v\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "second vector",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "second vector"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "dot product this.v",
+            "assertion": "assert methodResultID == receiverObjectID.dotProduct(args[0]);",
+            "description": "the dot product this.v"
+          }
+        ],
+        "code": "/**\n * Compute the dot-product of the instance and another vector.\n * @param v second vector\n * @return the dot product this.v\n */\ndouble dotProduct(Vector<S> v);"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "NumberFormat",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "format"
+          }
+        ],
+        "javadoc": "/**\n * Get a string representation of this vector.\n * @param format the custom format for components\n * @return a string representation of this vector\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "format",
+            "content": "the custom format for components",
+            "assertion": "assert args[0] != null;",
+            "description": "the custom format for components"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "string representation of this vector",
+            "assertion": "assert methodResultID.equals(receiverObjectID.toString(args[0]));",
+            "description": "a string representation of this vector"
+          }
+        ],
+        "code": "/**\n * Get a string representation of this vector.\n * @param format the custom format for components\n * @return a string representation of this vector\n */\nString toString(final NumberFormat format);"
+      }
+    ]
+  }
+]

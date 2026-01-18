@@ -1,0 +1,970 @@
+[
+  {
+    "name": "Graphs",
+    "package": "org.jgrapht",
+    "qualified_name": "org.jgrapht.Graphs",
+    "javadoc": "/**\n * A collection of utilities to assist with graph manipulation.\n *\n * @author Barak Naveh\n * @since Jul 31, 2003\n */\n",
+    "code": "/**\n * A collection of utilities to assist with graph manipulation.\n *\n * @author Barak Naveh\n * @since Jul 31, 2003\n */\npublic abstract class Graphs {\n\n    /**\n     * Creates a new edge and adds it to the specified graph similarly to the\n     * {@link Graph#addEdge(Object, Object)} method.\n     *\n     * @param g the graph for which the edge to be added.\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     * @param weight weight of the edge.\n     *\n     * @return The newly created edge if added to the graph, otherwise <code>\n     * null</code>.\n     *\n     * @see Graph#addEdge(Object, Object)\n     */\n    public static <V, E> E addEdge(Graph<V, E> g, V sourceVertex, V targetVertex, double weight) {\n        EdgeFactory<V, E> ef = g.getEdgeFactory();\n        E e = ef.createEdge(sourceVertex, targetVertex);\n        // we first create the edge and set the weight to make sure that\n        // listeners will see the correct weight upon addEdge.\n        assert (g instanceof WeightedGraph<?, ?>) : g.getClass();\n        ((WeightedGraph<V, E>) g).setEdgeWeight(e, weight);\n        return g.addEdge(sourceVertex, targetVertex, e) ? e : null;\n    }\n\n    /**\n     * Adds the specified source and target vertices to the graph, if not\n     * already included, and creates a new edge and adds it to the specified\n     * graph similarly to the {@link Graph#addEdge(Object, Object)} method.\n     *\n     * @param g the graph for which the specified edge to be added.\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     *\n     * @return The newly created edge if added to the graph, otherwise <code>\n     * null</code>.\n     */\n    public static <V, E> E addEdgeWithVertices(Graph<V, E> g, V sourceVertex, V targetVertex) {\n        g.addVertex(sourceVertex);\n        g.addVertex(targetVertex);\n        return g.addEdge(sourceVertex, targetVertex);\n    }\n\n    /**\n     * Adds the specified edge to the graph, including its vertices if not\n     * already included.\n     *\n     * @param targetGraph the graph for which the specified edge to be added.\n     * @param sourceGraph the graph in which the specified edge is already\n     * present\n     * @param edge edge to add\n     *\n     * @return <tt>true</tt> if the target graph did not already contain the\n     * specified edge.\n     */\n    public static <V, E> boolean addEdgeWithVertices(Graph<V, E> targetGraph, Graph<V, E> sourceGraph, E edge) {\n        V sourceVertex = sourceGraph.getEdgeSource(edge);\n        V targetVertex = sourceGraph.getEdgeTarget(edge);\n        targetGraph.addVertex(sourceVertex);\n        targetGraph.addVertex(targetVertex);\n        return targetGraph.addEdge(sourceVertex, targetVertex, edge);\n    }\n\n    /**\n     * Adds the specified source and target vertices to the graph, if not\n     * already included, and creates a new weighted edge and adds it to the\n     * specified graph similarly to the {@link Graph#addEdge(Object, Object)}\n     * method.\n     *\n     * @param g the graph for which the specified edge to be added.\n     * @param sourceVertex source vertex of the edge.\n     * @param targetVertex target vertex of the edge.\n     * @param weight weight of the edge.\n     *\n     * @return The newly created edge if added to the graph, otherwise <code>\n     * null</code>.\n     */\n    public static <V, E> E addEdgeWithVertices(Graph<V, E> g, V sourceVertex, V targetVertex, double weight) {\n        g.addVertex(sourceVertex);\n        g.addVertex(targetVertex);\n        return addEdge(g, sourceVertex, targetVertex, weight);\n    }\n\n    /**\n     * Adds all the vertices and all the edges of the specified source graph to\n     * the specified destination graph. First all vertices of the source graph\n     * are added to the destination graph. Then every edge of the source graph\n     * is added to the destination graph. This method returns <code>true</code>\n     * if the destination graph has been modified as a result of this operation,\n     * otherwise it returns <code>false</code>.\n     *\n     * <p>The behavior of this operation is undefined if any of the specified\n     * graphs is modified while operation is in progress.</p>\n     *\n     * @param destination the graph to which vertices and edges are added.\n     * @param source the graph used as source for vertices and edges to add.\n     *\n     * @return <code>true</code> if and only if the destination graph has been\n     * changed as a result of this operation.\n     */\n    public static <V, E> boolean addGraph(Graph<? super V, ? super E> destination, Graph<V, E> source) {\n        boolean modified = addAllVertices(destination, source.vertexSet());\n        modified |= addAllEdges(destination, source, source.edgeSet());\n        return modified;\n    }\n\n    /**\n     * Adds all the vertices and all the edges of the specified source digraph\n     * to the specified destination digraph, reversing all of the edges. If you\n     * want to do this as a linked view of the source graph (rather than by\n     * copying to a destination graph), use {@link EdgeReversedGraph} instead.\n     *\n     * <p>The behavior of this operation is undefined if any of the specified\n     * graphs is modified while operation is in progress.</p>\n     *\n     * @param destination the graph to which vertices and edges are added.\n     * @param source the graph used as source for vertices and edges to add.\n     *\n     * @see EdgeReversedGraph\n     */\n    public static <V, E> void addGraphReversed(DirectedGraph<? super V, ? super E> destination, DirectedGraph<V, E> source) {\n        addAllVertices(destination, source.vertexSet());\n        for (E edge : source.edgeSet()) {\n            destination.addEdge(source.getEdgeTarget(edge), source.getEdgeSource(edge));\n        }\n    }\n\n    /**\n     * Adds a subset of the edges of the specified source graph to the specified\n     * destination graph. The behavior of this operation is undefined if either\n     * of the graphs is modified while the operation is in progress. {@link\n     * #addEdgeWithVertices} is used for the transfer, so source vertexes will\n     * be added automatically to the target graph.\n     *\n     * @param destination the graph to which edges are to be added\n     * @param source the graph used as a source for edges to add\n     * @param edges the edges to be added\n     *\n     * @return <tt>true</tt> if this graph changed as a result of the call\n     */\n    public static <V, E> boolean addAllEdges(Graph<? super V, ? super E> destination, Graph<V, E> source, Collection<? extends E> edges) {\n        boolean modified = false;\n        for (E e : edges) {\n            V s = source.getEdgeSource(e);\n            V t = source.getEdgeTarget(e);\n            destination.addVertex(s);\n            destination.addVertex(t);\n            modified |= destination.addEdge(s, t, e);\n        }\n        return modified;\n    }\n\n    /**\n     * Adds all of the specified vertices to the destination graph. The behavior\n     * of this operation is undefined if the specified vertex collection is\n     * modified while the operation is in progress. This method will invoke the\n     * {@link Graph#addVertex(Object)} method.\n     *\n     * @param destination the graph to which edges are to be added\n     * @param vertices the vertices to be added to the graph.\n     *\n     * @return <tt>true</tt> if graph changed as a result of the call\n     *\n     * @throws NullPointerException if the specified vertices contains one or\n     * more null vertices, or if the specified vertex collection is <tt>\n     * null</tt>.\n     *\n     * @see Graph#addVertex(Object)\n     */\n    public static <V, E> boolean addAllVertices(Graph<? super V, ? super E> destination, Collection<? extends V> vertices) {\n        boolean modified = false;\n        for (V v : vertices) {\n            modified |= destination.addVertex(v);\n        }\n        return modified;\n    }\n\n    /**\n     * Returns a list of vertices that are the neighbors of a specified vertex.\n     * If the graph is a multigraph vertices may appear more than once in the\n     * returned list.\n     *\n     * @param g the graph to look for neighbors in.\n     * @param vertex the vertex to get the neighbors of.\n     *\n     * @return a list of the vertices that are the neighbors of the specified\n     * vertex.\n     */\n    public static <V, E> List<V> neighborListOf(Graph<V, E> g, V vertex) {\n        List<V> neighbors = new ArrayList<V>();\n        for (E e : g.edgesOf(vertex)) {\n            neighbors.add(getOppositeVertex(g, e, vertex));\n        }\n        return neighbors;\n    }\n\n    /**\n     * Returns a list of vertices that are the direct predecessors of a\n     * specified vertex. If the graph is a multigraph, vertices may appear more\n     * than once in the returned list.\n     *\n     * @param g the graph to look for predecessors in.\n     * @param vertex the vertex to get the predecessors of.\n     *\n     * @return a list of the vertices that are the direct predecessors of the\n     * specified vertex.\n     */\n    public static <V, E> List<V> predecessorListOf(DirectedGraph<V, E> g, V vertex) {\n        List<V> predecessors = new ArrayList<V>();\n        Set<? extends E> edges = g.incomingEdgesOf(vertex);\n        for (E e : edges) {\n            predecessors.add(getOppositeVertex(g, e, vertex));\n        }\n        return predecessors;\n    }\n\n    /**\n     * Returns a list of vertices that are the direct successors of a specified\n     * vertex. If the graph is a multigraph vertices may appear more than once\n     * in the returned list.\n     *\n     * @param g the graph to look for successors in.\n     * @param vertex the vertex to get the successors of.\n     *\n     * @return a list of the vertices that are the direct successors of the\n     * specified vertex.\n     */\n    public static <V, E> List<V> successorListOf(DirectedGraph<V, E> g, V vertex) {\n        List<V> successors = new ArrayList<V>();\n        Set<? extends E> edges = g.outgoingEdgesOf(vertex);\n        for (E e : edges) {\n            successors.add(getOppositeVertex(g, e, vertex));\n        }\n        return successors;\n    }\n\n    /**\n     * Returns an undirected view of the specified graph. If the specified graph\n     * is directed, returns an undirected view of it. If the specified graph is\n     * already undirected, just returns it.\n     *\n     * @param g the graph for which an undirected view is to be returned.\n     *\n     * @return an undirected view of the specified graph, if it is directed, or\n     * or the specified graph itself if it is already undirected.\n     *\n     * @throws IllegalArgumentException if the graph is neither DirectedGraph\n     * nor UndirectedGraph.\n     *\n     * @see AsUndirectedGraph\n     */\n    public static <V, E> UndirectedGraph<V, E> undirectedGraph(Graph<V, E> g) {\n        if (g instanceof DirectedGraph<?, ?>) {\n            return new AsUndirectedGraph<V, E>((DirectedGraph<V, E>) g);\n        } else if (g instanceof UndirectedGraph<?, ?>) {\n            return (UndirectedGraph<V, E>) g;\n        } else {\n            throw new IllegalArgumentException(\"Graph must be either DirectedGraph or UndirectedGraph\");\n        }\n    }\n\n    /**\n     * Tests whether an edge is incident to a vertex.\n     *\n     * @param g graph containing e and v\n     * @param e edge in g\n     * @param v vertex in g\n     *\n     * @return true iff e is incident on v\n     */\n    public static <V, E> boolean testIncidence(Graph<V, E> g, E e, V v) {\n        return (g.getEdgeSource(e).equals(v)) || (g.getEdgeTarget(e).equals(v));\n    }\n\n    /**\n     * Gets the vertex opposite another vertex across an edge.\n     *\n     * @param g graph containing e and v\n     * @param e edge in g\n     * @param v vertex in g\n     *\n     * @return vertex opposite to v across e\n     */\n    public static <V, E> V getOppositeVertex(Graph<V, E> g, E e, V v) {\n        V source = g.getEdgeSource(e);\n        V target = g.getEdgeTarget(e);\n        if (v.equals(source)) {\n            return target;\n        } else if (v.equals(target)) {\n            return source;\n        } else {\n            throw new IllegalArgumentException(\"no such vertex: \" + v.toString());\n        }\n    }\n\n    /**\n     * Gets the list of vertices visited by a path.\n     *\n     * @param path path of interest\n     *\n     * @return corresponding vertex list\n     */\n    public static <V, E> List<V> getPathVertexList(GraphPath<V, E> path) {\n        Graph<V, E> g = path.getGraph();\n        List<V> list = new ArrayList<V>();\n        V v = path.getStartVertex();\n        list.add(v);\n        for (E e : path.getEdgeList()) {\n            v = getOppositeVertex(g, e, v);\n            list.add(v);\n        }\n        return list;\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "addEdge",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "targetVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "weight"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new edge and adds it to the specified graph similarly to the\n * {@link Graph#addEdge(Object, Object)} method.\n *\n * @param g the graph for which the edge to be added.\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n * @param weight weight of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n *\n * @see Graph#addEdge(Object, Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the graph for which the edge to be added.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph for which the edge to be added."
+          },
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge.",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "target vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "weight",
+            "content": "weight of the edge.",
+            "assertion": "assert !Double.isNaN((double) args[3]);",
+            "description": "weight of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "newly created edge if added to the graph, otherwise <code> null</code>.",
+            "assertion": "assert result == g.addEdge(args[2], args[1], args[0]);",
+            "description": "The newly created edge if added to the graph, otherwise null."
+          },
+          {
+            "tag": "see",
+            "name": "Graph#addEdge(Object,",
+            "content": "Object)"
+          }
+        ],
+        "code": "/**\n * Creates a new edge and adds it to the specified graph similarly to the\n * {@link Graph#addEdge(Object, Object)} method.\n *\n * @param g the graph for which the edge to be added.\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n * @param weight weight of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n *\n * @see Graph#addEdge(Object, Object)\n */\npublic static <V, E> E addEdge(Graph<V, E> g, V sourceVertex, V targetVertex, double weight) {\n    EdgeFactory<V, E> ef = g.getEdgeFactory();\n    E e = ef.createEdge(sourceVertex, targetVertex);\n    // we first create the edge and set the weight to make sure that\n    // listeners will see the correct weight upon addEdge.\n    assert (g instanceof WeightedGraph<?, ?>) : g.getClass();\n    ((WeightedGraph<V, E>) g).setEdgeWeight(e, weight);\n    return g.addEdge(sourceVertex, targetVertex, e) ? e : null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "addEdgeWithVertices",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "targetVertex"
+          }
+        ],
+        "javadoc": "/**\n * Adds the specified source and target vertices to the graph, if not\n * already included, and creates a new edge and adds it to the specified\n * graph similarly to the {@link Graph#addEdge(Object, Object)} method.\n *\n * @param g the graph for which the specified edge to be added.\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the graph for which the specified edge to be added.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph for which the specified edge to be added."
+          },
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge.",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "target vertex of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "newly created edge if added to the graph, otherwise <code> null</code>.",
+            "assertion": "assert methodResultID == receiverObjectID.addEdgeWithVertices(args[1], args[2]) != null;",
+            "description": "The newly created edge if added to the graph, otherwise null."
+          }
+        ],
+        "code": "/**\n * Adds the specified source and target vertices to the graph, if not\n * already included, and creates a new edge and adds it to the specified\n * graph similarly to the {@link Graph#addEdge(Object, Object)} method.\n *\n * @param g the graph for which the specified edge to be added.\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n */\npublic static <V, E> E addEdgeWithVertices(Graph<V, E> g, V sourceVertex, V targetVertex) {\n    g.addVertex(sourceVertex);\n    g.addVertex(targetVertex);\n    return g.addEdge(sourceVertex, targetVertex);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addEdgeWithVertices",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "targetGraph"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sourceGraph"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "edge"
+          }
+        ],
+        "javadoc": "/**\n * Adds the specified edge to the graph, including its vertices if not\n * already included.\n *\n * @param targetGraph the graph for which the specified edge to be added.\n * @param sourceGraph the graph in which the specified edge is already\n * present\n * @param edge edge to add\n *\n * @return <tt>true</tt> if the target graph did not already contain the\n * specified edge.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "targetGraph",
+            "content": "the graph for which the specified edge to be added.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph for which the specified edge to be added"
+          },
+          {
+            "tag": "param",
+            "name": "sourceGraph",
+            "content": "the graph in which the specified edge is already present",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the graph in which the specified edge is already present"
+          },
+          {
+            "tag": "param",
+            "name": "edge",
+            "content": "edge to add",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "edge to add"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if the target graph did not already contain the specified edge.",
+            "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+            "description": "true if the target graph did not already contain the specified edge."
+          }
+        ],
+        "code": "/**\n * Adds the specified edge to the graph, including its vertices if not\n * already included.\n *\n * @param targetGraph the graph for which the specified edge to be added.\n * @param sourceGraph the graph in which the specified edge is already\n * present\n * @param edge edge to add\n *\n * @return <tt>true</tt> if the target graph did not already contain the\n * specified edge.\n */\npublic static <V, E> boolean addEdgeWithVertices(Graph<V, E> targetGraph, Graph<V, E> sourceGraph, E edge) {\n    V sourceVertex = sourceGraph.getEdgeSource(edge);\n    V targetVertex = sourceGraph.getEdgeTarget(edge);\n    targetGraph.addVertex(sourceVertex);\n    targetGraph.addVertex(targetVertex);\n    return targetGraph.addEdge(sourceVertex, targetVertex, edge);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addEdgeWithVertices",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sourceVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "targetVertex"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "weight"
+          }
+        ],
+        "javadoc": "/**\n * Adds the specified source and target vertices to the graph, if not\n * already included, and creates a new weighted edge and adds it to the\n * specified graph similarly to the {@link Graph#addEdge(Object, Object)}\n * method.\n *\n * @param g the graph for which the specified edge to be added.\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n * @param weight weight of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the graph for which the specified edge to be added.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph for which the specified edge to be added."
+          },
+          {
+            "tag": "param",
+            "name": "sourceVertex",
+            "content": "source vertex of the edge.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "source vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "targetVertex",
+            "content": "target vertex of the edge.",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "target vertex of the edge."
+          },
+          {
+            "tag": "param",
+            "name": "weight",
+            "content": "weight of the edge.",
+            "assertion": "assert (args[3] == 0.0) == false;",
+            "description": "weight of the edge."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "newly created edge if added to the graph, otherwise <code> null</code>.",
+            "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+            "description": "true if this graph did not already contain the specified edge."
+          }
+        ],
+        "code": "/**\n * Adds the specified source and target vertices to the graph, if not\n * already included, and creates a new weighted edge and adds it to the\n * specified graph similarly to the {@link Graph#addEdge(Object, Object)}\n * method.\n *\n * @param g the graph for which the specified edge to be added.\n * @param sourceVertex source vertex of the edge.\n * @param targetVertex target vertex of the edge.\n * @param weight weight of the edge.\n *\n * @return The newly created edge if added to the graph, otherwise <code>\n * null</code>.\n */\npublic static <V, E> E addEdgeWithVertices(Graph<V, E> g, V sourceVertex, V targetVertex, double weight) {\n    g.addVertex(sourceVertex);\n    g.addVertex(targetVertex);\n    return addEdge(g, sourceVertex, targetVertex, weight);\n}"
+      },
+      {
+        "type": "method",
+        "name": "addGraph",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "destination"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "source"
+          }
+        ],
+        "javadoc": "/**\n * Adds all the vertices and all the edges of the specified source graph to\n * the specified destination graph. First all vertices of the source graph\n * are added to the destination graph. Then every edge of the source graph\n * is added to the destination graph. This method returns <code>true</code>\n * if the destination graph has been modified as a result of this operation,\n * otherwise it returns <code>false</code>.\n *\n * <p>The behavior of this operation is undefined if any of the specified\n * graphs is modified while operation is in progress.</p>\n *\n * @param destination the graph to which vertices and edges are added.\n * @param source the graph used as source for vertices and edges to add.\n *\n * @return <code>true</code> if and only if the destination graph has been\n * changed as a result of this operation.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "destination",
+            "content": "the graph to which vertices and edges are added.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph to which vertices and edges are added, not null"
+          },
+          {
+            "tag": "param",
+            "name": "source",
+            "content": "the graph used as source for vertices and edges to add.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the graph used as source for vertices and edges to add, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if and only if the destination graph has been changed as a result of this operation.",
+            "assertion": "assert methodResultID == receiverObjectID.addGraph(args[0], args[1]);",
+            "description": "true if the destination graph has been modified as a result of this operation."
+          }
+        ],
+        "code": "/**\n * Adds all the vertices and all the edges of the specified source graph to\n * the specified destination graph. First all vertices of the source graph\n * are added to the destination graph. Then every edge of the source graph\n * is added to the destination graph. This method returns <code>true</code>\n * if the destination graph has been modified as a result of this operation,\n * otherwise it returns <code>false</code>.\n *\n * <p>The behavior of this operation is undefined if any of the specified\n * graphs is modified while operation is in progress.</p>\n *\n * @param destination the graph to which vertices and edges are added.\n * @param source the graph used as source for vertices and edges to add.\n *\n * @return <code>true</code> if and only if the destination graph has been\n * changed as a result of this operation.\n */\npublic static <V, E> boolean addGraph(Graph<? super V, ? super E> destination, Graph<V, E> source) {\n    boolean modified = addAllVertices(destination, source.vertexSet());\n    modified |= addAllEdges(destination, source, source.edgeSet());\n    return modified;\n}"
+      },
+      {
+        "type": "method",
+        "name": "addGraphReversed",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DirectedGraph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "destination"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DirectedGraph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "source"
+          }
+        ],
+        "javadoc": "/**\n * Adds all the vertices and all the edges of the specified source digraph\n * to the specified destination digraph, reversing all of the edges. If you\n * want to do this as a linked view of the source graph (rather than by\n * copying to a destination graph), use {@link EdgeReversedGraph} instead.\n *\n * <p>The behavior of this operation is undefined if any of the specified\n * graphs is modified while operation is in progress.</p>\n *\n * @param destination the graph to which vertices and edges are added.\n * @param source the graph used as source for vertices and edges to add.\n *\n * @see EdgeReversedGraph\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "destination",
+            "content": "the graph to which vertices and edges are added.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph to which vertices and edges are added, not null"
+          },
+          {
+            "tag": "param",
+            "name": "source",
+            "content": "the graph used as source for vertices and edges to add.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the graph used as source for vertices and edges to add, not null"
+          },
+          {
+            "tag": "see",
+            "name": "EdgeReversedGraph",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Adds all the vertices and all the edges of the specified source digraph\n * to the specified destination digraph, reversing all of the edges. If you\n * want to do this as a linked view of the source graph (rather than by\n * copying to a destination graph), use {@link EdgeReversedGraph} instead.\n *\n * <p>The behavior of this operation is undefined if any of the specified\n * graphs is modified while operation is in progress.</p>\n *\n * @param destination the graph to which vertices and edges are added.\n * @param source the graph used as source for vertices and edges to add.\n *\n * @see EdgeReversedGraph\n */\npublic static <V, E> void addGraphReversed(DirectedGraph<? super V, ? super E> destination, DirectedGraph<V, E> source) {\n    addAllVertices(destination, source.vertexSet());\n    for (E edge : source.edgeSet()) {\n        destination.addEdge(source.getEdgeTarget(edge), source.getEdgeSource(edge));\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "addAllEdges",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "destination"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "source"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "edges"
+          }
+        ],
+        "javadoc": "/**\n * Adds a subset of the edges of the specified source graph to the specified\n * destination graph. The behavior of this operation is undefined if either\n * of the graphs is modified while the operation is in progress. {@link\n * #addEdgeWithVertices} is used for the transfer, so source vertexes will\n * be added automatically to the target graph.\n *\n * @param destination the graph to which edges are to be added\n * @param source the graph used as a source for edges to add\n * @param edges the edges to be added\n *\n * @return <tt>true</tt> if this graph changed as a result of the call\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "destination",
+            "content": "the graph to which edges are to be added",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph to which edges are to be added"
+          },
+          {
+            "tag": "param",
+            "name": "source",
+            "content": "the graph used as a source for edges to add",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the graph used as a source for edges to add"
+          },
+          {
+            "tag": "param",
+            "name": "edges",
+            "content": "the edges to be added",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "the edges to be added, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if this graph changed as a result of the call",
+            "assertion": "assert methodResultID == receiverObjectID.addAllEdges(args[0], args[1], args[2]);",
+            "description": "true if this graph changed as a result of the call"
+          }
+        ],
+        "code": "/**\n * Adds a subset of the edges of the specified source graph to the specified\n * destination graph. The behavior of this operation is undefined if either\n * of the graphs is modified while the operation is in progress. {@link\n * #addEdgeWithVertices} is used for the transfer, so source vertexes will\n * be added automatically to the target graph.\n *\n * @param destination the graph to which edges are to be added\n * @param source the graph used as a source for edges to add\n * @param edges the edges to be added\n *\n * @return <tt>true</tt> if this graph changed as a result of the call\n */\npublic static <V, E> boolean addAllEdges(Graph<? super V, ? super E> destination, Graph<V, E> source, Collection<? extends E> edges) {\n    boolean modified = false;\n    for (E e : edges) {\n        V s = source.getEdgeSource(e);\n        V t = source.getEdgeTarget(e);\n        destination.addVertex(s);\n        destination.addVertex(t);\n        modified |= destination.addEdge(s, t, e);\n    }\n    return modified;\n}"
+      },
+      {
+        "type": "method",
+        "name": "addAllVertices",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "destination"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vertices"
+          }
+        ],
+        "javadoc": "/**\n * Adds all of the specified vertices to the destination graph. The behavior\n * of this operation is undefined if the specified vertex collection is\n * modified while the operation is in progress. This method will invoke the\n * {@link Graph#addVertex(Object)} method.\n *\n * @param destination the graph to which edges are to be added\n * @param vertices the vertices to be added to the graph.\n *\n * @return <tt>true</tt> if graph changed as a result of the call\n *\n * @throws NullPointerException if the specified vertices contains one or\n * more null vertices, or if the specified vertex collection is <tt>\n * null</tt>.\n *\n * @see Graph#addVertex(Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "destination",
+            "content": "the graph to which edges are to be added",
+            "assertion": "assert args[0] != null;",
+            "description": "the destination graph is not null"
+          },
+          {
+            "tag": "param",
+            "name": "vertices",
+            "content": "the vertices to be added to the graph.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the specified vertices to be added to the graph"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if graph changed as a result of the call",
+            "assertion": "assert methodResultID == receiverObjectID.addAllVertices(args[1], args[0]);",
+            "description": "true if graph changed as a result of the call"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified vertices contains one or more null vertices, or if the specified vertex collection is <tt> null</tt>.",
+            "assertion": "assert args[1] == null || !args[1].stream().anyMatch(v -> v == null);",
+            "description": "if the specified vertices contains one or more null vertices, or if the specified vertex collection is null."
+          },
+          {
+            "tag": "see",
+            "name": "Graph#addVertex(Object)",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Adds all of the specified vertices to the destination graph. The behavior\n * of this operation is undefined if the specified vertex collection is\n * modified while the operation is in progress. This method will invoke the\n * {@link Graph#addVertex(Object)} method.\n *\n * @param destination the graph to which edges are to be added\n * @param vertices the vertices to be added to the graph.\n *\n * @return <tt>true</tt> if graph changed as a result of the call\n *\n * @throws NullPointerException if the specified vertices contains one or\n * more null vertices, or if the specified vertex collection is <tt>\n * null</tt>.\n *\n * @see Graph#addVertex(Object)\n */\npublic static <V, E> boolean addAllVertices(Graph<? super V, ? super E> destination, Collection<? extends V> vertices) {\n    boolean modified = false;\n    for (V v : vertices) {\n        modified |= destination.addVertex(v);\n    }\n    return modified;\n}"
+      },
+      {
+        "type": "method",
+        "name": "neighborListOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * Returns a list of vertices that are the neighbors of a specified vertex.\n * If the graph is a multigraph vertices may appear more than once in the\n * returned list.\n *\n * @param g the graph to look for neighbors in.\n * @param vertex the vertex to get the neighbors of.\n *\n * @return a list of the vertices that are the neighbors of the specified\n * vertex.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the graph to look for neighbors in.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph to look for neighbors in, not null"
+          },
+          {
+            "tag": "param",
+            "name": "vertex",
+            "content": "the vertex to get the neighbors of.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the vertex to get the neighbors of, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list of the vertices that are the neighbors of the specified vertex.",
+            "assertion": "assert methodResultID == receiverObjectID.neighborListOf(args[1]);",
+            "description": "a list of the vertices that are the neighbors of the specified vertex."
+          }
+        ],
+        "code": "/**\n * Returns a list of vertices that are the neighbors of a specified vertex.\n * If the graph is a multigraph vertices may appear more than once in the\n * returned list.\n *\n * @param g the graph to look for neighbors in.\n * @param vertex the vertex to get the neighbors of.\n *\n * @return a list of the vertices that are the neighbors of the specified\n * vertex.\n */\npublic static <V, E> List<V> neighborListOf(Graph<V, E> g, V vertex) {\n    List<V> neighbors = new ArrayList<V>();\n    for (E e : g.edgesOf(vertex)) {\n        neighbors.add(getOppositeVertex(g, e, vertex));\n    }\n    return neighbors;\n}"
+      },
+      {
+        "type": "method",
+        "name": "predecessorListOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DirectedGraph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * Returns a list of vertices that are the direct predecessors of a\n * specified vertex. If the graph is a multigraph, vertices may appear more\n * than once in the returned list.\n *\n * @param g the graph to look for predecessors in.\n * @param vertex the vertex to get the predecessors of.\n *\n * @return a list of the vertices that are the direct predecessors of the\n * specified vertex.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the graph to look for predecessors in.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph to look for predecessors in, not null"
+          },
+          {
+            "tag": "param",
+            "name": "vertex",
+            "content": "the vertex to get the predecessors of.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the vertex to get the predecessors of, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list of the vertices that are the direct predecessors of the specified vertex.",
+            "assertion": "assert methodResultID == receiverObjectID.predecessorListOf(args[1]);",
+            "description": "Returns a list of vertices that are the direct predecessors of a specified vertex."
+          }
+        ],
+        "code": "/**\n * Returns a list of vertices that are the direct predecessors of a\n * specified vertex. If the graph is a multigraph, vertices may appear more\n * than once in the returned list.\n *\n * @param g the graph to look for predecessors in.\n * @param vertex the vertex to get the predecessors of.\n *\n * @return a list of the vertices that are the direct predecessors of the\n * specified vertex.\n */\npublic static <V, E> List<V> predecessorListOf(DirectedGraph<V, E> g, V vertex) {\n    List<V> predecessors = new ArrayList<V>();\n    Set<? extends E> edges = g.incomingEdgesOf(vertex);\n    for (E e : edges) {\n        predecessors.add(getOppositeVertex(g, e, vertex));\n    }\n    return predecessors;\n}"
+      },
+      {
+        "type": "method",
+        "name": "successorListOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DirectedGraph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * Returns a list of vertices that are the direct successors of a specified\n * vertex. If the graph is a multigraph vertices may appear more than once\n * in the returned list.\n *\n * @param g the graph to look for successors in.\n * @param vertex the vertex to get the successors of.\n *\n * @return a list of the vertices that are the direct successors of the\n * specified vertex.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the graph to look for successors in.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph to look for successors in, not null"
+          },
+          {
+            "tag": "param",
+            "name": "vertex",
+            "content": "the vertex to get the successors of.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the vertex to get the successors of, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list of the vertices that are the direct successors of the specified vertex.",
+            "assertion": "assert methodResultID == receiverObjectID.successorListOf(args[1]);",
+            "description": "a list of the vertices that are the direct successors of the specified vertex."
+          }
+        ],
+        "code": "/**\n * Returns a list of vertices that are the direct successors of a specified\n * vertex. If the graph is a multigraph vertices may appear more than once\n * in the returned list.\n *\n * @param g the graph to look for successors in.\n * @param vertex the vertex to get the successors of.\n *\n * @return a list of the vertices that are the direct successors of the\n * specified vertex.\n */\npublic static <V, E> List<V> successorListOf(DirectedGraph<V, E> g, V vertex) {\n    List<V> successors = new ArrayList<V>();\n    Set<? extends E> edges = g.outgoingEdgesOf(vertex);\n    for (E e : edges) {\n        successors.add(getOppositeVertex(g, e, vertex));\n    }\n    return successors;\n}"
+      },
+      {
+        "type": "method",
+        "name": "undirectedGraph",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "UndirectedGraph",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          }
+        ],
+        "javadoc": "/**\n * Returns an undirected view of the specified graph. If the specified graph\n * is directed, returns an undirected view of it. If the specified graph is\n * already undirected, just returns it.\n *\n * @param g the graph for which an undirected view is to be returned.\n *\n * @return an undirected view of the specified graph, if it is directed, or\n * or the specified graph itself if it is already undirected.\n *\n * @throws IllegalArgumentException if the graph is neither DirectedGraph\n * nor UndirectedGraph.\n *\n * @see AsUndirectedGraph\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "the graph for which an undirected view is to be returned.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the graph for which an undirected view is to be returned"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "undirected view of the specified graph, if it is directed, or or the specified graph itself if it is already undirected.",
+            "assertion": "assert methodResultID == (args[0] instanceof UndirectedGraph) || args[0].equals(methodResultID);",
+            "description": "Returns an undirected view of the specified graph. If the specified graph is directed, returns an undirected view of it. If the specified graph is already undirected, just returns it."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the graph is neither DirectedGraph nor UndirectedGraph.",
+            "assertion": "assert !(receiverObjectID instanceof DirectedGraph && receiverObjectID instanceof UndirectedGraph);",
+            "description": "if the graph is neither DirectedGraph nor UndirectedGraph."
+          },
+          {
+            "tag": "see",
+            "name": "AsUndirectedGraph",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns an undirected view of the specified graph. If the specified graph\n * is directed, returns an undirected view of it. If the specified graph is\n * already undirected, just returns it.\n *\n * @param g the graph for which an undirected view is to be returned.\n *\n * @return an undirected view of the specified graph, if it is directed, or\n * or the specified graph itself if it is already undirected.\n *\n * @throws IllegalArgumentException if the graph is neither DirectedGraph\n * nor UndirectedGraph.\n *\n * @see AsUndirectedGraph\n */\npublic static <V, E> UndirectedGraph<V, E> undirectedGraph(Graph<V, E> g) {\n    if (g instanceof DirectedGraph<?, ?>) {\n        return new AsUndirectedGraph<V, E>((DirectedGraph<V, E>) g);\n    } else if (g instanceof UndirectedGraph<?, ?>) {\n        return (UndirectedGraph<V, E>) g;\n    } else {\n        throw new IllegalArgumentException(\"Graph must be either DirectedGraph or UndirectedGraph\");\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "testIncidence",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "e"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Tests whether an edge is incident to a vertex.\n *\n * @param g graph containing e and v\n * @param e edge in g\n * @param v vertex in g\n *\n * @return true iff e is incident on v\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "graph containing e and v",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "graph containing e and v"
+          },
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge in g",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "edge in g"
+          },
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vertex in g",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "vertex in g"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "iff e is incident on v",
+            "assertion": "assert methodResultID == receiverObjectID.testIncidence(args[0], args[1], args[2]);",
+            "description": "true iff e is incident on v"
+          }
+        ],
+        "code": "/**\n * Tests whether an edge is incident to a vertex.\n *\n * @param g graph containing e and v\n * @param e edge in g\n * @param v vertex in g\n *\n * @return true iff e is incident on v\n */\npublic static <V, E> boolean testIncidence(Graph<V, E> g, E e, V v) {\n    return (g.getEdgeSource(e).equals(v)) || (g.getEdgeTarget(e).equals(v));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getOppositeVertex",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "g"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "e"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v"
+          }
+        ],
+        "javadoc": "/**\n * Gets the vertex opposite another vertex across an edge.\n *\n * @param g graph containing e and v\n * @param e edge in g\n * @param v vertex in g\n *\n * @return vertex opposite to v across e\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "g",
+            "content": "graph containing e and v",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "graph containing e and v"
+          },
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "edge in g",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "edge in g"
+          },
+          {
+            "tag": "param",
+            "name": "v",
+            "content": "vertex in g",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "vertex in g"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "opposite to v across e",
+            "assertion": "assert methodResultID == receiverObjectID.getOppositeVertex(args[0], args[1]);",
+            "description": "vertex opposite to v across e"
+          }
+        ],
+        "code": "/**\n * Gets the vertex opposite another vertex across an edge.\n *\n * @param g graph containing e and v\n * @param e edge in g\n * @param v vertex in g\n *\n * @return vertex opposite to v across e\n */\npublic static <V, E> V getOppositeVertex(Graph<V, E> g, E e, V v) {\n    V source = g.getEdgeSource(e);\n    V target = g.getEdgeTarget(e);\n    if (v.equals(source)) {\n        return target;\n    } else if (v.equals(target)) {\n        return source;\n    } else {\n        throw new IllegalArgumentException(\"no such vertex: \" + v.toString());\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPathVertexList",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "GraphPath",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "path"
+          }
+        ],
+        "javadoc": "/**\n * Gets the list of vertices visited by a path.\n *\n * @param path path of interest\n *\n * @return corresponding vertex list\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "path",
+            "content": "path of interest",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "path of interest"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "vertex list",
+            "assertion": "assert methodResultID == args[0].getPathVertexList();",
+            "description": "corresponding vertex list"
+          }
+        ],
+        "code": "/**\n * Gets the list of vertices visited by a path.\n *\n * @param path path of interest\n *\n * @return corresponding vertex list\n */\npublic static <V, E> List<V> getPathVertexList(GraphPath<V, E> path) {\n    Graph<V, E> g = path.getGraph();\n    List<V> list = new ArrayList<V>();\n    V v = path.getStartVertex();\n    list.add(v);\n    for (E e : path.getEdgeList()) {\n        v = getOppositeVertex(g, e, v);\n        list.add(v);\n    }\n    return list;\n}"
+      }
+    ]
+  }
+]

@@ -1,0 +1,642 @@
+[
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "value",
+          "content": "a primitive {@code float} value",
+          "assertion": "",
+          "description": "a primitive {@code float} value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a hash code for the value",
+          "assertion": "assert methodResultID == ((Float) receiverObjectID.value).hashCode();",
+          "name": null,
+          "content": "a hash code for the value"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a must be finite",
+          "assertion": "assert receiverObjectID.hashCode(args[0]) == Integer.MAX_VALUE;",
+          "name": "a",
+          "content": "&lt;code&gt;a must be finite&lt;/code&gt;"
+        },
+        {
+          "description": "b must be finite",
+          "assertion": "assert receiverObjectID.hashCode(args[1]) == Integer.MAX_VALUE;",
+          "name": "b",
+          "content": "&lt;code&gt;b must be finite&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the result of invoking Float#compare(a, b)",
+          "assertion": "assert methodResultID == Float.compare(args[0], args[1]);",
+          "name": null,
+          "content": "the result of invoking Float#compare(a, b)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isFinite",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "contains",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "array must be a float array",
+          "assertion": "assert receiverObjectID.array instanceof Float[] && receiverObjectID.array.length > 0;",
+          "name": "array",
+          "content": "an array of float values, possibly empty"
+        },
+        {
+          "description": "target must not be NaN",
+          "assertion": "assert !(args[1] == null || args[1].equals(Float.NaN));",
+          "name": "target",
+          "content": "a primitive float value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if target is present as an element anywhere in array. Note that this always returns false when target is NaN.",
+          "assertion": "assert receiverObjectID.contains(args[1]) && receiverObjectID.array[0] != receiverObjectID.NAN;",
+          "name": null,
+          "content": "true if target is present as an element anywhere in array. Note that this always returns false when target is NaN."
+        }
+      ]
+    }
+  },
+  {
+    "method": "indexOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the array must be of type float[]",
+          "assertion": "assert (array == null || array instanceof float[]) && ((array != null && array instanceof java.util.List<?>) || array instanceof float[]);",
+          "name": "array",
+          "content": "an array of float values, possibly empty"
+        },
+        {
+          "description": "the target must be of type float",
+          "assertion": "assert target instanceof java.lang.Float;",
+          "name": "target",
+          "content": "a primitive float value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the least index i for which array[i] == target, or -1 if no such index exists.",
+          "assertion": "assert methodResultID == (args[0].contains(args[1]) ? args[0].indexOf(args[1]) : -1);",
+          "name": null,
+          "content": "the least index i for which array[i] == target, or -1 if no such index exists."
+        }
+      ]
+    }
+  },
+  {
+    "method": "indexOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be finite",
+          "assertion": "assert receiverObjectID.min(receiverObjectID.value) != null;",
+          "name": "value",
+          "content": "&lt;code&gt;NaN&lt;/code&gt;"
+        },
+        {
+          "description": "the array must contain the target",
+          "assertion": "assert receiverObjectID.contains(receiverObjectID.array,receiverObjectID.target) != null;",
+          "name": "array",
+          "content": "&lt;code&gt;containsX&lt;/code&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "lastIndexOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "target"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "array must be an array of floats",
+          "assertion": "assert args[0].getClass().equals(java.lang.Float.class) && ((java.lang.Float[])args[0]).length > 0;",
+          "name": "array",
+          "content": "<code>an array of float values, possibly empty</code>"
+        },
+        {
+          "description": "target must be a primitive float value",
+          "assertion": "assert args[1].getClass().equals(java.lang.Float.class) && ((java.lang.Float)args[1]).isNaN() == false;",
+          "name": "target",
+          "content": "<code>a primitive float value</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the greatest index i for which array[i] == target, or -1 if no such index exists.",
+          "assertion": "assert methodResultID == receiverObjectID.lastIndexOf(args[0]);",
+          "name": null,
+          "content": "the greatest index i for which array[i] == target, or -1 if no such index exists."
+        }
+      ]
+    }
+  },
+  {
+    "method": "min",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "array",
+          "content": "a <i>nonempty</i> array of {@code float} values",
+          "assertion": "",
+          "description": "a <i>nonempty</i> array of {@code float} values"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the value present in array that is less than or equal to every other value in the array",
+          "assertion": "assert methodResultID == Math.min(receiverObjectID.array, receiverObjectID.array[0]);",
+          "name": null,
+          "content": "the value present in array that is less than or equal to every other value in the array"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if {@code array} is empty",
+          "assertion": "",
+          "description": "if {@code array} is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "max",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "array",
+          "content": "a <i>nonempty</i> array of {@code float} values",
+          "assertion": "",
+          "description": "a <i>nonempty</i> array of {@code float} values"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "value present in {@code array} that is greater than or equal to every other value in the array",
+          "assertion": "",
+          "description": "value present in {@code array} that is greater than or equal to every other value in the array"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if {@code array} is empty",
+          "assertion": "",
+          "description": "if {@code array} is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "concat",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "arrays"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "arrays must be zero or more float arrays",
+          "assertion": "assert args[0] instanceof java.util.Arrays;",
+          "name": "arrays",
+          "content": "zero or more <float> arrays"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "single array containing all the values from the source arrays, in order",
+          "assertion": "",
+          "description": "single array containing all the values from the source arrays, in order"
+        }
+      ]
+    }
+  },
+  {
+    "method": "stringConverter",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "ensureCapacity",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minLength"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "padding"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "array",
+          "content": "the source array",
+          "assertion": "",
+          "description": "the source array"
+        },
+        {
+          "tag": "param",
+          "name": "minLength",
+          "content": "the minimum length the returned array must guarantee",
+          "assertion": "",
+          "description": "the minimum length the returned array must guarantee"
+        },
+        {
+          "tag": "param",
+          "name": "padding",
+          "content": "an extra amount to \"grow\" the array by if growth is necessary",
+          "assertion": "",
+          "description": "an extra amount to \"grow\" the array by if growth is necessary"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if minLength or padding is negative",
+          "assertion": "assert args[0] < 0 || args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if length or padding are negative"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an array containing the same values as {@code array}, but guaranteed to be of a specified minimum length.",
+          "assertion": "assert methodResultID == Arrays.copyOfRange(receiverObjectID.array, receiverObjectID.length, Math.max(receiverObjectID.length, receiverObjectID.minLength + receiverObjectID.padding));",
+          "name": null,
+          "content": "an array containing the same values as {@code array}, but guaranteed to be of a specified minimum length."
+        }
+      ]
+    }
+  },
+  {
+    "method": "join",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be a string",
+          "assertion": "assert args[0] instanceof String;",
+          "name": "separator",
+          "content": "the text that should appear between consecutive values in the resulting string (but not at the start or end)"
+        },
+        {
+          "description": "x must be a float",
+          "assertion": "assert args[1] instanceof Float;",
+          "name": "array",
+          "content": "an array of float values, possibly empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "lexicographicalComparator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "toArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "collection",
+          "content": "a collection of {@code Number} instances",
+          "assertion": "",
+          "description": "a collection of {@code Number} instances"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "an",
+          "content": "array containing the same values as {@code collection}, in the same order, converted to primitives",
+          "assertion": "",
+          "description": "array containing the same values as {@code collection}, in the same order, converted to primitives"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if {@code collection} or any of its elements is null",
+          "assertion": "",
+          "description": "if {@code collection} or any of its elements is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "asList",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "backingArray"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "backingArray",
+          "content": "the array to back the list",
+          "assertion": "",
+          "description": "the array to back the list"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a fixed-size list backed by the specified array.",
+          "assertion": "assert methodResultID instanceof List && ((List)receiverObjectID).get(0) == (float[])methodResultID.getBackingArray();",
+          "name": null,
+          "content": "Returns a fixed-size list backed by the specified array."
+        }
+      ]
+    }
+  },
+  {
+    "method": "tryParse",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "string must be exactly non-empty",
+          "assertion": "assert !String.valueOf(args[0]).isEmpty();",
+          "name": "string",
+          "content": "the string representation of a float value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "&lt;code&gt;null&lt;/code&gt; if {@code string} has a length of zero or cannot be parsed as a {@code float} value.",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "&lt;code&gt;null&lt;/code&gt; if {@code string} has a length of zero or cannot be parsed as a {@code float} value."
+        }
+      ]
+    }
+  }
+]

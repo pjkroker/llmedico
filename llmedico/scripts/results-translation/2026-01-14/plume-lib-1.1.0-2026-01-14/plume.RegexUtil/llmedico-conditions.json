@@ -1,0 +1,341 @@
+[
+  {
+    "method": "isRegex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "isRegex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "groups"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "s must be a syntactically valid regular expression",
+          "assertion": "assert args[0].getClass().equals(String.class) && args[0] instanceof String;",
+          "name": "s",
+          "content": "string to check for being a regular expression"
+        },
+        {
+          "description": "groups must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "groups",
+          "content": "number of groups expected"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the argument is a syntactically valid regular expression with at least the given number of groups.",
+          "assertion": "assert methodResultID == (receiverObjectID.asRegex(args[0]) && receiverObjectID.groups >= args[1]);",
+          "name": null,
+          "content": "true if the argument is a syntactically valid regular expression with at least the given number of groups."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isRegex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "c"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "c must be a regular expression",
+          "assertion": "assert receiverObjectID.isRegex(args[0]) == true;",
+          "name": "c",
+          "content": "&lt;c&gt; must be a regular expression"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true iff c is a regular expression",
+          "assertion": "assert methodResultID == (args[0] != 0 && args[0] != '\\n' && args[0] != '\\r' && args[0] != '\\t');",
+          "name": null,
+          "content": "true iff c is a regular expression"
+        }
+      ]
+    }
+  },
+  {
+    "method": "regexError",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "&lt;#0&gt; must be a syntactically valid regular expression",
+          "assertion": "assert args[0] instanceof java.util.regex.Pattern;",
+          "name": "s",
+          "content": "&lt;#0&gt; must be a syntactically valid regular expression"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "null,",
+          "content": "or a string describing why the argument is not a regex",
+          "assertion": "",
+          "description": "or a string describing why the argument is not a regex"
+        }
+      ]
+    }
+  },
+  {
+    "method": "regexError",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "groups"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "string to check for being a regular expression must be non-null",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "s",
+          "content": "<code>s</code> must be non-null"
+        },
+        {
+          "description": "number of groups expected must be positive",
+          "assertion": "assert args[1] > 0;",
+          "name": "groups",
+          "content": "the number of groups expected; must be positive"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "null if the argument is a syntactically valid regular expression with at least the given number of groups. Otherwise returns a string describing why the argument is not a regex.",
+          "assertion": "assert methodResultID == null || (receiverObjectID.regexError(args[0], args[1]) && receiverObjectID.isRegex(args[0]));",
+          "name": null,
+          "content": "null if the argument is a syntactically valid regular expression with at least the given number of groups. Otherwise returns a string describing why the argument is not a regex."
+        }
+      ]
+    }
+  },
+  {
+    "method": "regexException",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the argument must be a syntactically valid regular expression",
+          "assertion": "assert receiverObjectID.asRegex(args[0]) != null;",
+          "name": "s",
+          "content": "&lt;string to check for being a regular expression&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "null if the argument is a syntactically valid regular expression. Otherwise returns a PatternSyntaxException.",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "null if the argument is a syntactically valid regular expression. Otherwise returns a PatternSyntaxException."
+        }
+      ]
+    }
+  },
+  {
+    "method": "regexException",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "groups"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "s",
+          "content": "string to check for being a regular expression",
+          "assertion": "",
+          "description": "string to check for being a regular expression"
+        },
+        {
+          "tag": "param",
+          "name": "groups",
+          "content": "number of groups expected",
+          "assertion": "",
+          "description": "number of groups expected"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "null,",
+          "content": "or a PatternSyntaxException describing why the argument is not a regex",
+          "assertion": "",
+          "description": "or a PatternSyntaxException describing why the argument is not a regex"
+        }
+      ]
+    }
+  },
+  {
+    "method": "asRegex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "asRegex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "groups"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "s",
+          "content": "string to check for being a regular expression",
+          "assertion": "",
+          "description": "string to check for being a regular expression"
+        },
+        {
+          "tag": "param",
+          "name": "groups",
+          "content": "number of groups expected",
+          "assertion": "",
+          "description": "number of groups expected"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "its",
+          "content": "argument",
+          "assertion": "",
+          "description": "argument"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "Error",
+          "content": "if argument is not a regex",
+          "assertion": "",
+          "description": "if argument is not a regex"
+        }
+      ]
+    }
+  }
+]

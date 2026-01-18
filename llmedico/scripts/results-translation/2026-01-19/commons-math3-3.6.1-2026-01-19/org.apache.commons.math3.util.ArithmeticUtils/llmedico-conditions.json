@@ -1,0 +1,1411 @@
+[
+  {
+    "method": "addAndCheck",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an addend",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "x",
+          "content": "an addend"
+        },
+        {
+          "description": "an addend",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "y",
+          "content": "an addend"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the sum x+y",
+          "assertion": "assert methodResultID == (args[0] + args[1]);",
+          "name": null,
+          "content": "the sum x+y"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "x + y > Integer.MAX_VALUE || x + y < Integer.MIN_VALUE",
+          "assertion": "assert (args[0] + args[1]) > Integer.MAX_VALUE || (args[0] + args[1]) < Integer.MIN_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result can not be represented as an {@code int}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "addAndCheck",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an addend",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "an addend"
+        },
+        {
+          "description": "an addend",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "an addend"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the sum a+b",
+          "assertion": "assert methodResultID == (args[0] + args[1]);",
+          "name": null,
+          "content": "the sum @code a+b"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the result can not be represented as an long",
+          "assertion": "assert (args[0] + args[1]) > Long.MAX_VALUE || (args[0] + args[1]) < Long.MIN_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result can not be represented as an long"
+        }
+      ]
+    }
+  },
+  {
+    "method": "binomialCoefficient",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n and k are non-negative integers",
+          "assertion": "assert 0 <= args[0] && args[0] >= args[1];",
+          "name": "n",
+          "content": "the size of the set"
+        },
+        {
+          "description": "k is less than or equal to n",
+          "assertion": "assert args[1] <= args[0];",
+          "name": "k",
+          "content": "the size of the subsets to be counted"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "n choose k",
+          "assertion": "assert methodResultID == binomialCoefficient(args[0], args[1]);",
+          "name": null,
+          "content": "n choose k"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n < 0",
+          "assertion": "assert args[0] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code n < 0."
+        },
+        {
+          "description": "if k > n",
+          "assertion": "assert args[1] <= args[0];",
+          "name": "NumberIsTooLargeException",
+          "content": "if @code k > n."
+        },
+        {
+          "description": "if the result is too large to be represented by a long integer.",
+          "assertion": "assert receiverObjectID.binomialCoefficient(args[0], args[1]) <= Long.MAX_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result is too large to be represented by a long integer."
+        }
+      ]
+    }
+  },
+  {
+    "method": "binomialCoefficientDouble",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n is greater than or equal to 0",
+          "assertion": "assert (0 <= args[0]);",
+          "name": "n",
+          "content": "the size of the set"
+        },
+        {
+          "description": "k is less than or equal to n and k is not greater than n",
+          "assertion": "assert (args[1] <= args[0] && 0 <= args[1]);",
+          "name": "k",
+          "content": "the size of the subsets to be counted"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "n choose k",
+          "assertion": "assert methodResultID == Math.pow((double)args[0], -1) * binomialCoefficientDouble(args[0], args[1]);",
+          "name": null,
+          "content": "n choose k"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n < 0",
+          "assertion": "assert args[0] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code n < 0."
+        },
+        {
+          "description": "if k > n",
+          "assertion": "assert args[1] <= args[0];",
+          "name": "NumberIsTooLargeException",
+          "content": "if @code k > n."
+        },
+        {
+          "description": "if the result is too large to be represented by a long integer.",
+          "assertion": "assert true;",
+          "name": "MathArithmeticException",
+          "content": "if the result is too large to be represented by a long integer."
+        }
+      ]
+    }
+  },
+  {
+    "method": "binomialCoefficientLog",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "0 <= k <= n",
+          "assertion": "assert (args[1] < 0) || (args[1] > args[0]);",
+          "name": "k",
+          "content": "the size of the subsets to be counted"
+        },
+        {
+          "description": "n >= 0",
+          "assertion": "assert !receiverObjectID.isNotPositive();",
+          "name": "n",
+          "content": "the size of the set"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "n choose k}",
+          "assertion": "",
+          "description": "n choose k}"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n < 0",
+          "assertion": "assert args[0] < 0;",
+          "name": "NotPositiveException",
+          "content": "if @code n < 0."
+        },
+        {
+          "description": "if k > n",
+          "assertion": "assert args[1] > args[0];",
+          "name": "NumberIsTooLargeException",
+          "content": "if @code k > n."
+        },
+        {
+          "description": "if the result is too large to be represented by a long integer.",
+          "assertion": "assert false;",
+          "name": "MathArithmeticException",
+          "content": "if the result is too large to be represented by a long integer."
+        }
+      ]
+    }
+  },
+  {
+    "method": "factorial",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "n",
+          "content": "argument",
+          "assertion": "",
+          "description": "argument"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "n!}",
+          "assertion": "",
+          "description": "n!}"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "n < 0",
+          "assertion": "assert args[0] < 0;",
+          "name": "NotPositiveException",
+          "content": "if n < 0."
+        },
+        {
+          "description": "the result is too large to be represented by a long.",
+          "assertion": "assert args[0] > 20;",
+          "name": "MathArithmeticException",
+          "content": "if the result is too large to be represented by a @code long."
+        },
+        {
+          "description": "n > 20: The factorial value is too large to fit in a long.",
+          "assertion": "assert args[0] > 20;",
+          "name": "MathArithmeticException",
+          "content": "if n > 20: The factorial value is too large to fit in a @code long."
+        }
+      ]
+    }
+  },
+  {
+    "method": "factorialDouble",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Argument.",
+          "assertion": "assert (args[0] < 0) == false;",
+          "name": "n",
+          "content": "Argument."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "n!}",
+          "assertion": "",
+          "description": "n!}"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n < 0.",
+          "assertion": "assert args[0] < 0;",
+          "name": "NotPositiveException",
+          "content": "if @code n < 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "factorialLog",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Argument.",
+          "assertion": "assert (args[0] < 0) == false;",
+          "name": "n",
+          "content": "Argument."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "n!",
+          "assertion": "assert methodResultID == Math.log(Math.pow(args[0], 1));",
+          "name": null,
+          "content": "n!"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n < 0.",
+          "assertion": "assert args[0] < 0;",
+          "name": "NotPositiveException",
+          "content": "if @code n < 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "gcd",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "q"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "p and q are valid numbers",
+          "assertion": "assert p >= -2147483648 && p <= 2147483647 && q >= -2147483648 && q <= 2147483647;",
+          "name": "p",
+          "content": "Number."
+        },
+        {
+          "description": "p and q are valid numbers",
+          "assertion": "assert p >= -2147483648 && p <= 2147483647 && q >= -2147483648 && q <= 2147483647;",
+          "name": "q",
+          "content": "Number."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the greatest common divisor (never negative).",
+          "assertion": "assert result == Math.abs(Math.gcd(args[0], args[1]));",
+          "name": null,
+          "content": "the greatest common divisor (never negative)."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "gcd(Integer.MIN_VALUE, Integer.MIN_VALUE), gcd(Integer.MIN_VALUE, 0) and gcd(0, Integer.MIN_VALUE) are called.",
+          "assertion": "assert (args[0] == Integer.MIN_VALUE && args[1] == Integer.MIN_VALUE) || (args[0] == Integer.MIN_VALUE && args[1] == 0) || (args[0] == 0 && args[1] == Integer.MIN_VALUE);",
+          "name": "MathArithmeticException",
+          "content": "if the result cannot be represented as a non-negative @code int value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "gcd",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "q"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "p is a number",
+          "assertion": "assert p instanceof Long;",
+          "name": "p",
+          "content": "Number."
+        },
+        {
+          "description": "q is a number",
+          "assertion": "assert q instanceof Long;",
+          "name": "q",
+          "content": "Number."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the greatest common divisor, never negative.",
+          "assertion": "assert result == Math.abs(gcd(args[0], args[1]));",
+          "name": null,
+          "content": "greatest common divisor, never negative."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "p and q are both Long.MAX_VALUE",
+          "assertion": "assert args[0] == Long.MAX_VALUE && args[1] == Long.MAX_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result cannot be represented as a non-negative @code long value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "lcm",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "Number."
+        },
+        {
+          "description": "Number.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "Number."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the least common multiple, never negative.",
+          "assertion": "assert args[2] >= 0 && (args[1] == 0 || args[0] == 0 || !isPowerOfTwo(Math.abs(args[0])) || !isPowerOfTwo(Math.abs(args[1])));",
+          "name": null,
+          "content": "least common multiple, never negative."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the invocations lcm(Integer.MIN_VALUE, n) and lcm(n, Integer.MIN_VALUE), where abs(n) is a power of 2, throw an ArithmeticException, because the result would be 2^31, which is too large for an int value.",
+          "assertion": "assert (args[0] == Integer.MIN_VALUE && args[1] > 0) || (args[0] > 0 && args[1] == Integer.MIN_VALUE);",
+          "name": "MathArithmeticException",
+          "content": "if the result cannot be represented as a non-negative int value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "lcm",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "Number."
+        },
+        {
+          "description": "Number.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "Number."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "least common multiple, never negative.",
+          "assertion": "",
+          "description": "least common multiple, never negative."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if vertex is null",
+          "assertion": "assert args[0] == 0 || args[1] == 0;",
+          "name": "MathArithmeticException",
+          "content": "if the result cannot be represented as a non-negative @code long value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mulAndCheck",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Factor.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "x",
+          "content": "Factor."
+        },
+        {
+          "description": "Factor.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "y",
+          "content": "Factor."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the product @code x * y.",
+          "assertion": "assert methodResultID == (args[0] * args[1]);",
+          "name": null,
+          "content": "the product @code x * y."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the result can not be represented as an int.",
+          "assertion": "assert Math.addExact(args[0], args[1]) == Integer.MAX_VALUE || Math.multiplyExact(args[0], args[1]) > Integer.MAX_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result can not be represented as an @code int."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mulAndCheck",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Factor.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "Factor."
+        },
+        {
+          "description": "Factor.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "Factor."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the product @code a * b.",
+          "assertion": "assert methodResultID == receiverObjectID.mulAndCheck(args[0], args[1]);",
+          "name": null,
+          "content": "the product @code a * b."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the result can not be represented as a long.",
+          "assertion": "assert (args[0] * args[1]) > Long.MAX_VALUE || (args[0] * args[1]) < Long.MIN_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result can not be represented as a @code long."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subAndCheck",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Minuend.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "x",
+          "content": "Minuend."
+        },
+        {
+          "description": "Subtrahend.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "y",
+          "content": "Subtrahend."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the difference @code x - y.",
+          "assertion": "assert methodResultID == receiverObjectID.addAndCheck(args[0], args[1]);",
+          "name": null,
+          "content": "the difference @code x - y."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "x - y can not be represented as an int.",
+          "assertion": "assert (int)args[0] - (int)args[1] > Integer.MAX_VALUE || (int)args[0] - (int)args[1] < Integer.MIN_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result can not be represented as an @code int."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subAndCheck",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Value.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "Value."
+        },
+        {
+          "description": "Value.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "Value."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the difference @code a - b.",
+          "assertion": "assert methodResultID == receiverObjectID.subAndCheck(args[0], args[1]);",
+          "name": null,
+          "content": "the difference @code a - b."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "a - b can not be represented as a long.",
+          "assertion": "assert (args[0] > Long.MAX_VALUE - args[1]) || (args[0] < Long.MIN_VALUE + args[1]);",
+          "name": "MathArithmeticException",
+          "content": "if the result can not be represented as a @code long."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number to raise.",
+          "assertion": "assert (args[0] < 0) == false;",
+          "name": "k",
+          "content": "Number to raise."
+        },
+        {
+          "description": "Exponent (must be positive or zero).",
+          "assertion": "assert (args[1] < 0) == false;",
+          "name": "e",
+          "content": "Exponent (must be positive or zero)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "k^e )",
+          "assertion": "assert methodResultID == Math.pow(args[0], args[1]);",
+          "name": null,
+          "content": "k^e )"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if e < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code e < 0."
+        },
+        {
+          "description": "if the result would overflow.",
+          "assertion": "assert !((int) Math.pow(args[0], args[1])) == Integer.MAX_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if the result would overflow."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number to raise.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "k",
+          "content": "Number to raise."
+        },
+        {
+          "description": "Exponent (must be positive or zero).",
+          "assertion": "assert ((long) args[1] < 0) == false;",
+          "name": "e",
+          "content": "Exponent (must be positive or zero)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Raise an int to a long power.",
+          "assertion": "assert methodResultID == (args[1] >= 0);",
+          "name": null,
+          "content": "Raise an int to a long power."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if e < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code e < 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number to raise.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "k",
+          "content": "Number to raise."
+        },
+        {
+          "description": "Exponent (must be positive or zero).",
+          "assertion": "assert ((args[1] < 0)) == false;",
+          "name": "e",
+          "content": "Exponent (must be positive or zero)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "k^e )",
+          "assertion": "assert methodResultID == Math.pow(args[0], args[1]);",
+          "name": null,
+          "content": "k^e )"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if e < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code e < 0."
+        },
+        {
+          "description": "if the result would overflow.",
+          "assertion": "assert !((args[0] * (long) Math.pow(2, args[1])) > Integer.MAX_VALUE);",
+          "name": "MathArithmeticException",
+          "content": "if the result would overflow."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number to raise.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "k",
+          "content": "Number to raise."
+        },
+        {
+          "description": "Exponent (must be positive or zero).",
+          "assertion": "assert ((args[1] < 0)) == false;",
+          "name": "e",
+          "content": "Exponent (must be positive or zero)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "k to the power e.",
+          "assertion": "assert methodResultID == Math.pow(args[0], args[1]);",
+          "name": null,
+          "content": "k to the power e."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if e < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code e < 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number to raise.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "k",
+          "content": "Number to raise."
+        },
+        {
+          "description": "Exponent (must be positive or zero).",
+          "assertion": "assert ((int) args[1]) >= 0;",
+          "name": "e",
+          "content": "Exponent (must be positive or zero)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "k to the power e.",
+          "assertion": "assert methodResultID == receiverObjectID.pow(args[0], args[1]);",
+          "name": null,
+          "content": "k to the power e."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if e < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code e < 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number to raise.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "k",
+          "content": "Number to raise."
+        },
+        {
+          "description": "Exponent (must be positive or zero).",
+          "assertion": "assert ((long) args[1] < 0) == false;",
+          "name": "e",
+          "content": "Exponent (must be positive or zero)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "k to the power e.",
+          "assertion": "assert methodResultID == receiverObjectID.pow(args[0], args[1]);",
+          "name": null,
+          "content": "k to the power e."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if e < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code e < 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Number to raise.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "k",
+          "content": "Number to raise."
+        },
+        {
+          "description": "Exponent (must be positive or zero).",
+          "assertion": "assert ((args[1] < 0)) == false;",
+          "name": "e",
+          "content": "Exponent (must be positive or zero)."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "k to the power e.",
+          "assertion": "assert methodResultID == receiverObjectID.pow(args[0], args[1]);",
+          "name": null,
+          "content": "k to the power e."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if e < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code e < 0."
+        }
+      ]
+    }
+  },
+  {
+    "method": "stirlingS2",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the size of the set",
+          "assertion": "assert (args[0] < 0) == false;",
+          "name": "n",
+          "content": "the size of the set"
+        },
+        {
+          "description": "the number of non-empty subsets",
+          "assertion": "assert (args[1] < 0 || args[1] > args[0]) == false;",
+          "name": "k",
+          "content": "the number of non-empty subsets"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the number of ways to partition an n-element set into k non-empty subsets",
+          "assertion": "assert methodResultID == stirlingS2(args[0], args[1]);",
+          "name": null,
+          "content": "S(n,k)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if k < 0.",
+          "assertion": "assert args[1] >= 0;",
+          "name": "NotPositiveException",
+          "content": "if @code k < 0."
+        },
+        {
+          "description": "if k > n.",
+          "assertion": "assert args[1] <= args[0];",
+          "name": "NumberIsTooLargeException",
+          "content": "if @code k > n."
+        },
+        {
+          "description": "if some overflow happens, typically for n exceeding 25 and k between 20 and n-2 (S(n,n-1) is handled specifically and does not overflow).",
+          "assertion": "assert !((args[0] > 25) && (args[1] >= 20) && (args[1] <= args[0]-2));",
+          "name": "MathArithmeticException",
+          "content": "if some overflow happens, typically for n exceeding 25 and k between 20 and n-2 (S(n,n-1) is handled specifically and does not overflow)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isPowerOfTwo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the number to test",
+          "assertion": "assert (args[0] == 0) == false;",
+          "name": "n",
+          "content": "the number to test"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the argument is a power of two",
+          "assertion": "assert methodResultID == (args[0] % 2 == 0 && args[0] > 0);",
+          "name": null,
+          "content": "if the argument is a power of two"
+        }
+      ]
+    }
+  }
+]

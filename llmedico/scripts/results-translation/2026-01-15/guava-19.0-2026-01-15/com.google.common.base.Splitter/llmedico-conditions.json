@@ -1,0 +1,442 @@
+[
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the character to recognize as a separator",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "separator",
+          "content": "the character to recognize as a separator"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that uses the given single-character separator.",
+          "assertion": "assert methodResultID == new java.util.Splitter(args[0]);",
+          "name": null,
+          "content": "a splitter that uses the given single-character separator."
+        }
+      ]
+    }
+  },
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separatorMatcher"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a CharMatcher that determines whether a character is a separator",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "separatorMatcher",
+          "content": "a CharMatcher that determines whether a character is a separator"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that considers any single character matched by the given CharMatcher to be a separator",
+          "assertion": "assert methodResultID == !args[0].anyOf().split(\"foo,;bar,quux\").isEmpty();",
+          "name": null,
+          "content": "a splitter that considers any single character matched by the given CharMatcher to be a separator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the literal, nonempty string to recognize as a separator",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "separator",
+          "content": "the literal, nonempty string to recognize as a separator"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that uses the given fixed string as a separator.",
+          "assertion": "assert methodResultID == !args[0].isEmpty();",
+          "name": null,
+          "content": "a splitter that uses the given fixed string as a separator."
+        }
+      ]
+    }
+  },
+  {
+    "method": "on",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Pattern",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separatorPattern"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the pattern that determines whether a subsequence is a separator, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "separatorPattern",
+          "content": "the pattern that determines whether a subsequence is a separator. This pattern may not match the empty string."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter, with default settings, that uses this pattern",
+          "assertion": "assert methodResultID != null && !args[0].matches(\"^$\") || args[0] == Pattern.compile(\"^$\");",
+          "name": null,
+          "content": "a splitter, with default settings, that uses this pattern"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if separatorPattern matches the empty string",
+          "assertion": "assert !args[0].matches(\"^$\");",
+          "name": "IllegalArgumentException",
+          "content": "if separatorPattern matches the empty string"
+        }
+      ]
+    }
+  },
+  {
+    "method": "onPattern",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separatorPattern"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the pattern that determines whether a subsequence is a separator, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "separatorPattern",
+          "content": "the pattern that determines whether a subsequence is a separator, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter, with default settings, that uses this pattern",
+          "assertion": "assert methodResultID == !Pattern.matches(args[0], \"\");",
+          "name": null,
+          "content": "a splitter, with default settings, that uses this pattern"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if separatorPattern is a malformed expression",
+          "assertion": "assert !java.util.regex.Pattern.matches(separatorPattern, \"\") && !separatorPattern.isEmpty();",
+          "name": "PatternSyntaxException",
+          "content": "if separatorPattern is a malformed expression"
+        },
+        {
+          "description": "if separatorPattern matches the empty string",
+          "assertion": "assert !java.util.regex.Pattern.matches(separatorPattern, \"\") || !separatorPattern.isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if separatorPattern matches the empty string"
+        }
+      ]
+    }
+  },
+  {
+    "method": "fixedLength",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "length"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a positive integer",
+          "assertion": "assert (args[0] < 0) == false;",
+          "name": "length",
+          "content": "the desired length of pieces after splitting, a positive integer"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this splitter divides strings into pieces of the given length.",
+          "assertion": "assert methodResultID == !args[0].equals(0) && args[0] > 0;",
+          "name": null,
+          "content": "true if this splitter divides strings into pieces of the given length."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if length is zero or negative",
+          "assertion": "assert args[0] <= 0;",
+          "name": "IllegalArgumentException",
+          "content": "if length is zero or negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "omitEmptyStrings",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "splitter with the desired configuration",
+          "assertion": "",
+          "description": "splitter with the desired configuration"
+        }
+      ]
+    }
+  },
+  {
+    "method": "limit",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "limit"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum number of items returned",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "limit",
+          "content": "the maximum number of items returned"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a splitter that behaves equivalently to this splitter but stops splitting after it reaches the limit.",
+          "assertion": "assert methodResultID == !methodResultID.split(args[0]).limit(args[0]).trimResults().splitToList().size() > args[0];",
+          "name": null,
+          "content": "a splitter that behaves equivalently to this splitter but stops splitting after it reaches the limit."
+        }
+      ]
+    }
+  },
+  {
+    "method": "trimResults",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "splitter with the desired configuration",
+          "assertion": "",
+          "description": "splitter with the desired configuration"
+        }
+      ]
+    }
+  },
+  {
+    "method": "trimResults",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "trimmer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a CharMatcher that determines whether a character should be removed from the beginning/end of a subsequence",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "trimmer",
+          "content": "a CharMatcher that determines whether a character should be removed from the beginning/end of a subsequence"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a splitter that behaves equivalently to this splitter, but removes all leading or trailing characters matching the given CharMatcher from each returned substring.",
+          "assertion": "assert methodResultID == !args[0].matches(methodResultID.toString().trim());",
+          "name": null,
+          "content": "Returns a splitter that behaves equivalently to this splitter, but removes all leading or trailing characters matching the given CharMatcher from each returned substring."
+        }
+      ]
+    }
+  },
+  {
+    "method": "split",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sequence"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the sequence of characters to split",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "sequence",
+          "content": "the sequence of characters to split"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an iteration over the segments split from the parameter.",
+          "assertion": "assert methodResultID instanceof java.lang.Iterable;",
+          "name": null,
+          "content": "an iteration over the segments split from the parameter."
+        }
+      ]
+    }
+  },
+  {
+    "method": "splitToList",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sequence"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the sequence of characters to split",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "sequence",
+          "content": "the sequence of characters to split"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an immutable list of the segments split from the parameter",
+          "assertion": "assert methodResultID == java.util.Arrays.asList(args[0].split(\"\"));",
+          "name": null,
+          "content": "an immutable list of the segments split from the parameter"
+        }
+      ]
+    }
+  },
+  {
+    "method": "withKeyValueSeparator",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "withKeyValueSeparator",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "separator"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "withKeyValueSeparator",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Splitter",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "keyValueSplitter"
+      }
+    ],
+    "conditions": {}
+  }
+]

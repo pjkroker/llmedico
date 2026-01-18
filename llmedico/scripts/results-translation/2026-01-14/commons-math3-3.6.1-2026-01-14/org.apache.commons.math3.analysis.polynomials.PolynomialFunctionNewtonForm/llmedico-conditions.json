@@ -1,0 +1,329 @@
+[
+  {
+    "method": "PolynomialFunctionNewtonForm",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "c"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a[] must be an array of doubles with length greater than 0",
+          "assertion": "assert args[0] instanceof double[][] && ((double[][])args[0]).length > 0;",
+          "name": "a",
+          "content": "<p>Coefficients in Newton form formula.</p>"
+        },
+        {
+          "description": "c[] must be an array of doubles with length greater than 0",
+          "assertion": "assert args[1] instanceof double[][] && ((double[][])args[1]).length > 0;",
+          "name": "c",
+          "content": "<p>Centers.</p>"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if any argument is null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullArgumentException",
+          "content": "if any argument is {@code null}."
+        },
+        {
+          "description": "if any array has zero length.",
+          "assertion": "assert (args[0].length > 0) && (args[1].length > 0);",
+          "name": "NoDataException",
+          "content": "if any array has zero length."
+        },
+        {
+          "description": "if the size difference between a and c is not equal to 1.",
+          "assertion": "assert args[0].length - args[1].length != 1;",
+          "name": "DimensionMismatchException",
+          "content": "if the size difference between {@code a} and {@code c} is not equal to 1."
+        }
+      ]
+    }
+  },
+  {
+    "method": "value",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "z"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "z",
+          "content": "Point at which the function value is to be computed.",
+          "assertion": "",
+          "description": "Point at which the function value is to be computed."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the function value at the given point.",
+          "assertion": "assert methodResultID == receiverObjectID.value(args[0]);",
+          "name": null,
+          "content": "the function value at the given point."
+        }
+      ]
+    }
+  },
+  {
+    "method": "value",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "degree",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the degree of the polynomial",
+          "assertion": "assert receiverObjectID.degree() == 0;",
+          "name": null,
+          "content": "the degree of the polynomial"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNewtonCoefficients",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a fresh copy of coefficients in Newton form formula",
+          "assertion": "assert new double[1][0] == methodResultID;",
+          "name": null,
+          "content": "a fresh copy of coefficients in Newton form formula"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getCenters",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "&lt;div&gt;A fresh copy of the centers array&lt;/div&gt;",
+          "assertion": "assert receiverObjectID.getCenters().equals(new double[0]);",
+          "name": null,
+          "content": "&lt;div&gt;The returned copy is a new, independent array. Any changes to it will not affect the original polynomial.&lt;/div&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getCoefficients",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "fresh copy of the coefficients array.",
+          "assertion": "",
+          "description": "fresh copy of the coefficients array."
+        }
+      ]
+    }
+  },
+  {
+    "method": "evaluate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "c"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "z"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "Coefficients in Newton form formula.",
+          "assertion": "",
+          "description": "Coefficients in Newton form formula."
+        },
+        {
+          "tag": "param",
+          "name": "c",
+          "content": "Centers.",
+          "assertion": "",
+          "description": "Centers."
+        },
+        {
+          "tag": "param",
+          "name": "z",
+          "content": "Point at which the function value is to be computed.",
+          "assertion": "",
+          "description": "Point at which the function value is to be computed."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "function value.",
+          "assertion": "",
+          "description": "function value."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "&lt;code&gt;null&lt;/code&gt; argument is present.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullArgumentException",
+          "content": "&lt;code&gt;null&lt;/code&gt; argument is present."
+        },
+        {
+          "description": "&lt;code&gt;zero length array&lt;/code&gt; has a zero length.",
+          "assertion": "assert args[0].length==0 || args[1].length==0;",
+          "name": "NoDataException",
+          "content": "&lt;code&gt;zero length array&lt;/code&gt; has a zero length."
+        },
+        {
+          "description": "Size difference between &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;c&lt;/code&gt; is not equal to 1.",
+          "assertion": "assert args[0].length!=1 || args[1].length!=1;",
+          "name": "DimensionMismatchException",
+          "content": "Size difference between &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;c&lt;/code&gt; is not equal to 1."
+        }
+      ]
+    }
+  },
+  {
+    "method": "computeCoefficients",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "verifyInputArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "c"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a must be an array of doubles",
+          "assertion": "assert (args[0] instanceof double[]) && args[0].length == 1;",
+          "name": "a",
+          "content": "<p>The coefficients in Newton form formula</p>"
+        },
+        {
+          "description": "c must be an array of doubles",
+          "assertion": "assert (args[1] instanceof double[]) && args[1].length == 1;",
+          "name": "c",
+          "content": "<p>The centers</p>"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullArgumentException",
+          "content": "if any argument is {@code null}.",
+          "assertion": "",
+          "description": "if any argument is {@code null}."
+        },
+        {
+          "tag": "throws",
+          "name": "NoDataException",
+          "content": "if any array has zero length.",
+          "assertion": "",
+          "description": "if any array has zero length."
+        },
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if the size difference between {@code a} and {@code c} is not equal to 1.",
+          "assertion": "",
+          "description": "if the size difference between {@code a} and {@code c} is not equal to 1."
+        }
+      ]
+    }
+  }
+]

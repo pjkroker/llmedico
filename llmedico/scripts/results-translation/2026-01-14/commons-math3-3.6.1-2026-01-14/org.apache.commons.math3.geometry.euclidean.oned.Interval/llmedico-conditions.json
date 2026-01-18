@@ -1,0 +1,210 @@
+[
+  {
+    "method": "Interval",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lower"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "upper"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the lower bound of the interval must be valid",
+          "assertion": "assert receiverObjectID.getLower() >= 0;",
+          "name": "lower",
+          "content": "&lt;lower&gt; lower bound of the interval"
+        },
+        {
+          "description": "the upper bound of the interval must be valid",
+          "assertion": "assert receiverObjectID.getUpper() > 0;",
+          "name": "upper",
+          "content": "&lt;upper&gt; upper bound of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInf",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "lower bound of the interval",
+          "assertion": "assert methodResultID == receiverObjectID.getInf();",
+          "name": null,
+          "content": "lower bound of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getLower",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "lower bound of the interval",
+          "assertion": "assert methodResultID == receiverObjectID.getLower();",
+          "name": null,
+          "content": "lower bound of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSup",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "upper bound of the interval",
+          "assertion": "assert methodResultID == receiverObjectID.getInf();",
+          "name": null,
+          "content": "upper bound of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getUpper",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "&lt;?&gt; double &lt;/?&gt;",
+          "assertion": "assert methodResultID == receiverObjectID.getInf();",
+          "name": null,
+          "content": "&lt;?&gt; double &lt;/?&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSize",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "size of the interval",
+          "assertion": "assert methodResultID == receiverObjectID.getSize() && receiverObjectID.getSize() < Infinity;",
+          "name": null,
+          "content": "size of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getLength",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "length of the interval",
+          "assertion": "assert methodResultID == receiverObjectID.getSize();",
+          "name": null,
+          "content": "length of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getBarycenter",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "barycenter of the interval",
+          "assertion": "assert methodResultID == ((receiverObjectID.getLower() + receiverObjectID.getUpper()) / 2.0);",
+          "name": null,
+          "content": "barycenter of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMidPoint",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "midpoint of the interval",
+          "assertion": "assert methodResultID == (receiverObjectID.getSup() + receiverObjectID.getLower()) / 2;",
+          "name": null,
+          "content": "midpoint of the interval"
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkPoint",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "point"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "tolerance"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be defined",
+          "assertion": "assert receiverObjectID.getInf() != null;",
+          "name": "point",
+          "content": "the code must be defined"
+        },
+        {
+          "description": "the tolerance must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "tolerance",
+          "content": "the tolerance below which points are considered to belong to the boundary"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a code representing the point status: either Location#INSIDE, Location#OUTSIDE or Location#BOUNDARY",
+          "assertion": "assert methodResultID == new java.lang.Location(java.lang.Location$Enum$INSIDE);",
+          "name": null,
+          "content": "a code representing the point status: either Location#INSIDE, Location#OUTSIDE or Location#BOUNDARY"
+        }
+      ]
+    }
+  }
+]

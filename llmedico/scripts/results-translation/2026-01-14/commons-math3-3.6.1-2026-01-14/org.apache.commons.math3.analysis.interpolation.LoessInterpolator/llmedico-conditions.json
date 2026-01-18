@@ -1,0 +1,377 @@
+[
+  {
+    "method": "LoessInterpolator",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "LoessInterpolator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "bandwidth"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "robustnessIters"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "bandwidth must be a double value",
+          "assertion": "assert args[0] instanceof java.lang.Double && receiverObjectID.smooth(args[0], 0.25, new double[]{}) > 0;",
+          "name": "bandwidth",
+          "content": "when computing the loess fit at a particular point, this fraction of source points closest to the current point is taken into account for computing a least-squares regression."
+        },
+        {
+          "description": "robustnessIters must be an int value",
+          "assertion": "assert args[1] instanceof java.lang.Integer && receiverObjectID.interpolate(0, receiverObjectID.smooth(args[1], 0.25, new double[]{}), new double[]{}) > 0;",
+          "name": "robustnessIters",
+          "content": "This many robustness iterations are done."
+        }
+      ]
+    }
+  },
+  {
+    "method": "LoessInterpolator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "bandwidth"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "robustnessIters"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "accuracy"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "bandwidth must be between 0 and 1",
+          "assertion": "assert (receiverObjectID.bandwidth() >= 0) && (receiverObjectID.Bandwidth() <= 1);",
+          "name": "bandwidth",
+          "content": "A sensible value is usually 0.25 to 0.5, the default value is {@link #DEFAULT_BANDWIDTH}."
+        },
+        {
+          "description": "robustnessIters must be positive",
+          "assertion": "assert receiverObjectID.RobustnessIters() > 0;",
+          "name": "robustnessIters",
+          "content": "A sensible value is usually 0 (just the initial fit without any robustness iterations) to 4, the default value is {@link #DEFAULT_ROBUSTNESS_ITERS}."
+        },
+        {
+          "description": "accuracy must be positive",
+          "assertion": "assert receiverObjectID.Accuracy() > 0;",
+          "name": "accuracy",
+          "content": "If the median residual at a certain robustness iteration is less than this amount, no more iterations are done."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "bandwidth does not lie in the interval [0,1].",
+          "assertion": "assert receiverObjectID.bandwidth >= 0 && receiverObjectID.Bandwidth <= 1;",
+          "name": "OutOfRangeException",
+          "content": "A sensible value is usually 0.25 to 0.5, the default value is LoessInterpolator.DEFAULT_BANDWIDTH."
+        },
+        {
+          "description": "robustnessIters is negative.",
+          "assertion": "assert receiverObjectID.RobustnessIters < 0;",
+          "name": "NotPositiveException",
+          "content": "A sensible value is usually 0 (just the initial fit without any robustness iterations) to 4, the default value is LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS."
+        }
+      ]
+    }
+  },
+  {
+    "method": "interpolate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "xval"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "yval"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "xval or yval must be sorted",
+          "assertion": "assert (args[0] != null && args[0].sort() == null) || (args[1] != null && args[1].sort() == null);",
+          "name": "interpolate",
+          "content": "&lt;xval&gt; or &lt;yval&gt; must be sorted"
+        },
+        {
+          "description": "xval and yval must have the same size",
+          "assertion": "assert args[0].size() == args[1].size();",
+          "name": "interpolate",
+          "content": "&lt;xval&gt; and &lt;yval&gt; must have the same size"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "A cubic spline built upon a loess fit to the data at the original abscissae",
+          "assertion": "assert methodResultID == receiverObjectID.smooth(args[0], args[1]);",
+          "name": null,
+          "content": "A cubic spline built upon a loess fit to the data at the original abscissae"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NonMonotonicSequenceException",
+          "content": "if {@code xval} not sorted in strictly increasing order.",
+          "assertion": "",
+          "description": "if {@code xval} not sorted in strictly increasing order."
+        },
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code xval} and {@code yval} have different sizes.",
+          "assertion": "",
+          "description": "if {@code xval} and {@code yval} have different sizes."
+        },
+        {
+          "tag": "throws",
+          "name": "NoDataException",
+          "content": "if {@code xval} or {@code yval} has zero size.",
+          "assertion": "",
+          "description": "if {@code xval} or {@code yval} has zero size."
+        },
+        {
+          "tag": "throws",
+          "name": "NotFiniteNumberException",
+          "content": "if any of the arguments and values are not finite real numbers.",
+          "assertion": "",
+          "description": "if any of the arguments and values are not finite real numbers."
+        },
+        {
+          "tag": "throws",
+          "name": "NumberIsTooSmallException",
+          "content": "if the bandwidth is too small to accomodate the size of the input data (i.e. the bandwidth must be larger than 2/n).",
+          "assertion": "",
+          "description": "if the bandwidth is too small to accomodate the size of the input data (i.e. the bandwidth must be larger than 2/n)."
+        }
+      ]
+    }
+  },
+  {
+    "method": "smooth",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "xval"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "yval"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "weights"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "xval must be an array of doubles",
+          "assertion": "assert args[0] instanceof double[] && ((double[])args[0]).length > 0;",
+          "name": "xval",
+          "content": "Arguments for the interpolation points."
+        },
+        {
+          "description": "yval must be an array of doubles",
+          "assertion": "assert args[1] instanceof double[] && ((double[])args[1]).length > 0;",
+          "name": "yval",
+          "content": "Values for the interpolation points."
+        },
+        {
+          "description": "weights must be an array of doubles",
+          "assertion": "assert args[2] instanceof double[] && ((double[])args[2]).length > 0;",
+          "name": "weights",
+          "content": "point weights: coefficients by which the robustness weight"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Compute a weighted loess fit on the data at the original abscissae.",
+          "assertion": "assert methodResultID == receiverObjectID.interpolate(args[0], args[1]) || methodResultID == receiverObjectID.smooth(args[0], args[1]) || methodResultID == receiverObjectID.smooth(args[0], args[1]);",
+          "name": null,
+          "content": "Compute a weighted loess fit on the data at the original abscissae."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if {@code xval} not sorted in strictly increasing order.",
+          "assertion": "assert java.util.Arrays.binarySearch(xval) >= 0 && receiverObjectID.xval[0] == receiverObjectID.xval[jumpIndex];",
+          "name": "NonMonotonicSequenceException",
+          "content": "if {@code xval} not sorted in strictly increasing order."
+        },
+        {
+          "description": "if {@code xval} and {@code yval} have different sizes.",
+          "assertion": "assert receiverObjectID.xval.length == receiverObjectID.yval.length;",
+          "name": "DimensionMismatchException",
+          "content": "if {@code xval} and {@code yval} have different sizes."
+        },
+        {
+          "description": "@throws NoDataException if {@code xval} or {@code yval} has zero size.",
+          "assertion": "assert receiverObjectID.xval.length > 0 && receiverObjectID.yval.length > 0;",
+          "name": "NoDataException",
+          "content": "if {@code xval} or {@code yval} has zero size."
+        },
+        {
+          "description": "@throws NotFiniteNumberException if any of the arguments and values are not finite real numbers.",
+          "assertion": "assert receiverObjectID.xval[0] != Double.NaN && receiverObjectID.yval[0] != Double.NaN && receiverObjectID.weights[0] != Double.NaN;",
+          "name": "NotFiniteNumberException",
+          "content": "if any of the arguments and values are not finite real numbers."
+        },
+        {
+          "description": "@throws NumberIsTooSmallException if the bandwidth is too small to accommodate the size of the input data (i.e. the bandwidth must be larger than 2/n).",
+          "assertion": "assert receiverObjectID.weights[0] > 1 / Math.max(receiverObjectID.xval.length, receiverObjectID.yval.length) * 2;",
+          "name": "NumberIsTooSmallException",
+          "content": "if the bandwidth is too small to accommodate the size of the input data (i.e. the bandwidth must be larger than 2/n)."
+        }
+      ]
+    }
+  },
+  {
+    "method": "smooth",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "xval"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "yval"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "xval must be an array of double",
+          "assertion": "assert args[0].length > 0 && args[0][0] instanceof java.lang.Double;",
+          "name": "xval",
+          "content": "&lt;double&gt;"
+        },
+        {
+          "description": "yval must be an array of double",
+          "assertion": "assert args[1].length > 0 && args[1][0] instanceof java.lang.Double;",
+          "name": "yval",
+          "content": "&lt;double&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "values of the loess fit at corresponding original abscissae",
+          "assertion": "assert methodResultID == receiverObjectID.smooth(args[0], args[1]);",
+          "name": null,
+          "content": "values of the loess fit at corresponding original abscissae."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if {@code xval} not sorted in strictly increasing order.",
+          "assertion": "assert (!receiverObjectID.stream().sorted((a, b) -> Double.compare(a, b)).anyMatch(i -> i != i + 1)) : NonMonotonicSequenceException;",
+          "name": "NonMonotonicSequenceException",
+          "content": "if {@code xval} not sorted in strictly increasing order."
+        },
+        {
+          "description": "if {@code xval} and {@code yval} have different sizes.",
+          "assertion": "assert receiverObjectID.stream().mapToInt(i -> i.length()).toArray().length == 1 : DimensionMismatchException;",
+          "name": "DimensionMismatchException",
+          "content": "if {@code xval} and {@code yval} have different sizes."
+        },
+        {
+          "description": "if {@code xval} or {@code yval} has zero size.",
+          "assertion": "assert receiverObjectID.stream().mapToInt(i -> i.length()).toArray().length > 0 : NoDataException;",
+          "name": "NoDataException",
+          "content": "if {@code xval} or {@code yval} has zero size."
+        },
+        {
+          "description": "if any of the arguments and values are not finite real numbers.",
+          "assertion": "assert receiverObjectID.stream().allMatch(i -> i instanceof Double && i.doubleValue() == i) : NotFiniteNumberException;",
+          "name": "NotFiniteNumberException",
+          "content": "if any of the arguments and values are not finite real numbers."
+        },
+        {
+          "description": "if the bandwidth is too small to accommodate the size of the input data.",
+          "assertion": "assert receiverObjectID.stream().mapToInt(i -> i.length()).toArray().length > 2/receiverObjectID.stream().mapToInt(i -> i).sum() : NumberIsTooSmallException;",
+          "name": "NumberIsTooSmallException",
+          "content": "if the bandwidth is too small to accommodate the size of the input data."
+        }
+      ]
+    }
+  }
+]

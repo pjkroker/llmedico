@@ -1,0 +1,270 @@
+[
+  {
+    "method": "S2Point",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "theta"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "phi"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "theta",
+          "content": "azimuthal angle \\( \\theta \\) in the x-y plane",
+          "assertion": "",
+          "description": "azimuthal angle \\( \\theta \\) in the x-y plane"
+        },
+        {
+          "tag": "param",
+          "name": "phi",
+          "content": "polar angle \\( \\varphi \\)",
+          "assertion": "",
+          "description": "polar angle \\( \\varphi \\)"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "OutOfRangeException",
+          "content": "if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range",
+          "assertion": "",
+          "description": "if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range"
+        }
+      ]
+    }
+  },
+  {
+    "method": "S2Point",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "vector"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "3D vector",
+          "assertion": "assert args[0] != null;",
+          "name": "vector",
+          "content": "3D vector"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if vector norm is zero",
+          "assertion": "assert args[0].getNorm() == 0;",
+          "name": "MathArithmeticException",
+          "content": " if vector norm is zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTheta",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "azimuthal angle θ in the x-y plane",
+          "assertion": "assert methodResultID == 0; // assume theta is always in the range [0, 2π)",
+          "name": null,
+          "content": "azimuthal angle θ in the x-y plane"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getPhi",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "polar angle φ",
+          "assertion": "assert methodResultID == receiverObjectID.getPhi();",
+          "name": null,
+          "content": "polar angle φ"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getVector",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "normalized vector",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "normalized vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSpace",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "isNaN",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "negate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new vector which is opposite to the instance",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getVector());",
+          "name": null,
+          "content": "a new vector which is opposite to the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "distance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "point"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "distance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "S2Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "S2Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "first vector",
+          "assertion": "assert args[0] != null;",
+          "name": "p1",
+          "content": "first vector"
+        },
+        {
+          "description": "second vector",
+          "assertion": "assert args[1] != null;",
+          "name": "p2",
+          "content": "second vector"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the angular separation between p1 and p2",
+          "assertion": "assert methodResultID == receiverObjectID.distance(args[0], args[1]);",
+          "name": null,
+          "content": "the angular separation between p1 and p2"
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Object to test for equality to this",
+          "assertion": "assert args[0] == null || (args[0].getClass() != S2Point.class) == false;",
+          "name": "other",
+          "content": "Object to test for equality to this"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if two points on the 2-sphere objects are equal, false if object is null, not an instance of S2Point, or not equal to this S2Point instance",
+          "assertion": "assert methodResultID == (args[0] != null && args[0].getClass() == receiverObjectID.getClass() && !receiverObjectID.isNaN() && receiverObjectID.getTheta() == ((S2Point)args[0]).getTheta() && receiverObjectID.getPhi() == ((S2Point)args[0]).getPhi());",
+          "name": null,
+          "content": "true if two points on the 2-sphere objects are equal, false if object is null, not an instance of S2Point, or not equal to this S2Point instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a hash code value for this object",
+          "assertion": "assert methodResultID == 0 || receiverObjectID.isNaN();",
+          "name": null,
+          "content": "a hash code value for this object"
+        }
+      ]
+    }
+  }
+]

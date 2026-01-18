@@ -1,0 +1,991 @@
+[
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum size of the map",
+          "assertion": "assert args[0] >= 1;",
+          "name": "maxSize",
+          "content": "the maximum size of the map"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the maximum size is less than one",
+          "assertion": "assert args[0] < 1;",
+          "name": "IllegalArgumentException",
+          "content": "if the maximum size is less than one"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "initialSize"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum size of the map",
+          "assertion": "assert (args[0] < 1) == false;",
+          "name": "maxSize",
+          "content": "the maximum size of the map"
+        },
+        {
+          "description": "the initial size of the map",
+          "assertion": "assert args[1] >= 0 && args[1] <= args[0];",
+          "name": "initialSize",
+          "content": "the initial size of the map"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the maximum size is less than one",
+          "assertion": "assert args[0] < 1;",
+          "name": "IllegalArgumentException",
+          "content": "if the maximum size is less than one"
+        },
+        {
+          "description": "the initial size is negative or larger than the maximum size",
+          "assertion": "assert args[1] < 0 || args[1] > args[0];",
+          "name": "IllegalArgumentException",
+          "content": "if the initial size is negative or larger than the maximum size"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "scanUntilRemovable"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum size of the map",
+          "assertion": "assert (args[0] < 1) == false;",
+          "name": "maxSize",
+          "content": "the maximum size"
+        },
+        {
+          "description": "scan until a removeable entry is found, default false",
+          "assertion": "assert receiverObjectID.isScanUntilRemovable();",
+          "name": "scanUntilRemovable",
+          "content": "scan until a removeable entry is found, default false"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the maximum size is less than one",
+          "assertion": "assert args[0] < 1;",
+          "name": "IllegalArgumentException",
+          "content": "if the maximum size is less than one"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "loadFactor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum size of the map",
+          "assertion": "assert (args[0] < 1) == false;",
+          "name": "maxSize",
+          "content": "the maximum size of the map"
+        },
+        {
+          "description": "the load factor",
+          "assertion": "assert (args[1] >= 0.0) == false;",
+          "name": "loadFactor",
+          "content": "the load factor"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the maximum size is less than one",
+          "assertion": "assert args[0] < 1;",
+          "name": "IllegalArgumentException",
+          "content": "if the maximum size is less than one"
+        },
+        {
+          "description": "the load factor is less than zero",
+          "assertion": "assert args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if the load factor is less than zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "initialSize"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "loadFactor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum size of the map",
+          "assertion": "assert (args[0] < 1) == false;",
+          "name": "maxSize",
+          "content": "the maximum size of the map"
+        },
+        {
+          "description": "the initial size of the map",
+          "assertion": "assert args[1] >= 0 && args[1] <= args[0];",
+          "name": "initialSize",
+          "content": "the initial size of the map"
+        },
+        {
+          "description": "the load factor",
+          "assertion": "assert args[2] >= 0;",
+          "name": "loadFactor",
+          "content": "the load factor"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the maximum size is less than one",
+          "assertion": "assert args[0] < 1;",
+          "name": "IllegalArgumentException",
+          "content": "if the maximum size is less than one"
+        },
+        {
+          "description": "if the initial size is negative or larger than the maximum size",
+          "assertion": "assert args[1] <= 0 || args[1] > args[0];",
+          "name": "IllegalArgumentException",
+          "content": "if the initial size is negative or larger than the maximum size"
+        },
+        {
+          "description": "if the load factor is less than zero",
+          "assertion": "assert args[2] >= 0;",
+          "name": "IllegalArgumentException",
+          "content": "if the load factor is less than zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "loadFactor"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "scanUntilRemovable"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum size of the map",
+          "assertion": "assert (args[0] < 1) == false;",
+          "name": "maxSize",
+          "content": "the maximum size of the map"
+        },
+        {
+          "description": "the load factor",
+          "assertion": "assert (args[1] >= 0.0) == false;",
+          "name": "loadFactor",
+          "content": "the load factor"
+        },
+        {
+          "description": "scan until a removeable entry is found, default false",
+          "assertion": "assert receiverObjectID.isScanUntilRemovable();",
+          "name": "scanUntilRemovable",
+          "content": "scan until a removeable entry is found, default false"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the maximum size is less than one",
+          "assertion": "assert args[0] < 1;",
+          "name": "IllegalArgumentException",
+          "content": "if the maximum size is less than one"
+        },
+        {
+          "description": "the load factor is less than zero",
+          "assertion": "assert args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if the load factor is less than zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "initialSize"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "loadFactor"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "scanUntilRemovable"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum size of the map",
+          "assertion": "assert (args[0] < 1) == false;",
+          "name": "maxSize",
+          "content": "the maximum size of the map"
+        },
+        {
+          "description": "the initial size of the map",
+          "assertion": "assert (args[1] >= 0 && args[1] <= args[0]) == true;",
+          "name": "initialSize",
+          "content": "the initial size of the map"
+        },
+        {
+          "description": "the load factor",
+          "assertion": "assert (args[2] >= 0) == true;",
+          "name": "loadFactor",
+          "content": "the load factor"
+        },
+        {
+          "description": "scan until a removeable entry is found, default false",
+          "assertion": "assert receiverObjectID.isScanUntilRemovable();",
+          "name": "scanUntilRemovable",
+          "content": "scan until a removeable entry is found, default false"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the maximum size is less than one",
+          "assertion": "assert args[0] < 1;",
+          "name": "IllegalArgumentException",
+          "content": "if the maximum size is less than one"
+        },
+        {
+          "description": "if the initial size is negative or larger than the maximum size",
+          "assertion": "assert args[1] <= 0 || args[1] > args[0];",
+          "name": "IllegalArgumentException",
+          "content": "if the initial size is negative or larger than the maximum size"
+        },
+        {
+          "description": "if the load factor is less than zero",
+          "assertion": "assert args[2] >= 0;",
+          "name": "IllegalArgumentException",
+          "content": "if the load factor is less than zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Map",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "map"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the map to copy, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "map",
+          "content": "the map to copy"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the map is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the map is null"
+        },
+        {
+          "description": "if the map is empty",
+          "assertion": "assert !args[0].isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if the map is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "LRUMap",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Map",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "map"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "scanUntilRemovable"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the map to copy",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "map",
+          "content": "the map to copy"
+        },
+        {
+          "description": "scan until a removeable entry is found, default false",
+          "assertion": "assert receiverObjectID.isScanUntilRemovable();",
+          "name": "scanUntilRemovable",
+          "content": "scan until a removeable entry is found, default false"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the map is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the map is null"
+        },
+        {
+          "description": "if the map is empty",
+          "assertion": "assert !receiverObjectID.isFull();",
+          "name": "IllegalArgumentException",
+          "content": "if the map is empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the key",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "key",
+          "content": "the key"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "mapped value, null if no match",
+          "assertion": "assert methodResultID == receiverObjectID.get(args[0]);",
+          "name": null,
+          "content": "mapped value, null if no match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "updateToMRU"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the key",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "key",
+          "content": "the key"
+        },
+        {
+          "description": "whether the key shall be updated to the most recently used position",
+          "assertion": "assert receiverObjectID; // receiver-defining, no direct check on args[i]",
+          "name": "updateToMRU",
+          "content": "whether the key shall be updated to the most recently used position"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "mapped value, null if no match",
+          "assertion": "assert methodResultID == receiverObjectID.get(args[0], args[1]);",
+          "name": null,
+          "content": "mapped value, null if no match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "moveToMRU",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "LinkEntry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the entry to update",
+          "assertion": "assert args[0] != null;",
+          "name": "entry",
+          "content": "the entry to update"
+        }
+      ]
+    }
+  },
+  {
+    "method": "updateEntry",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "HashEntry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "newValue"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the entry to update",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "entry",
+          "content": "the entry to update"
+        },
+        {
+          "description": "the new value to store",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "newValue",
+          "content": "the new value to store"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addMapping",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashIndex"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashCode"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the index into the data array to store at",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "hashIndex",
+          "content": "the index into the data array to store at"
+        },
+        {
+          "description": "the hash code of the key to add",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "hashCode",
+          "content": "the hash code of the key to add"
+        },
+        {
+          "description": "the key to add",
+          "assertion": "assert (args[2] == null) == false;",
+          "name": "key",
+          "content": "the key to add"
+        },
+        {
+          "description": "the value to add",
+          "assertion": "assert (args[3] == null) == false;",
+          "name": "value",
+          "content": "the value to add"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reuseMapping",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "LinkEntry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashIndex"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashCode"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the entry to reuse",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "entry",
+          "content": "the entry to reuse"
+        },
+        {
+          "description": "the index into the data array to store at",
+          "assertion": "assert (args[1] < 0 || args[1] > Integer.MAX_VALUE) == false;",
+          "name": "hashIndex",
+          "content": "the index into the data array to store at"
+        },
+        {
+          "description": "the hash code of the key to add",
+          "assertion": "assert (args[2] < 0 || args[2] > Integer.MAX_VALUE) == false;",
+          "name": "hashCode",
+          "content": "the hash code of the key to add"
+        },
+        {
+          "description": "the key to add",
+          "assertion": "assert receiverObjectID.get(args[3]) != null;",
+          "name": "key",
+          "content": "the key to add"
+        },
+        {
+          "description": "the value to add",
+          "assertion": "assert receiverObjectID.get(args[4]) != null;",
+          "name": "value",
+          "content": "the value to add"
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeLRU",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "LinkEntry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the entry to be removed",
+          "assertion": "assert args[0] != null;",
+          "name": "entry",
+          "content": "the entry to be removed"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "true}",
+          "assertion": "",
+          "description": "true}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isFull",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "if the map is full",
+          "assertion": "assert methodResultID == receiverObjectID.isFull();",
+          "name": null,
+          "content": "if the map is full"
+        }
+      ]
+    }
+  },
+  {
+    "method": "maxSize",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "maximum number of elements the map can hold",
+          "assertion": "assert methodResultID == receiverObjectID.maxSize();",
+          "name": null,
+          "content": "maximum number of elements the map can hold"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isScanUntilRemovable",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Whether this LRUMap will scan until a removable entry is found when the map is full.",
+          "assertion": "assert methodResultID == receiverObjectID.isScanUntilRemovable();",
+          "name": null,
+          "content": "if this map scans"
+        }
+      ]
+    }
+  },
+  {
+    "method": "clone",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a shallow clone",
+          "assertion": "assert methodResultID instanceof LRUMap; ",
+          "name": null,
+          "content": "a shallow clone"
+        }
+      ]
+    }
+  },
+  {
+    "method": "doWriteObject",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ObjectOutputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "out"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the output stream",
+          "assertion": "assert args[0] != null;",
+          "name": "out",
+          "content": "the output stream"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if an error occurs while writing to the stream.",
+          "assertion": "assert args[0].writeException() != null;",
+          "name": "IOException",
+          "content": "if an error occurs while writing to the stream."
+        }
+      ]
+    }
+  },
+  {
+    "method": "doReadObject",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ObjectInputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "in"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input stream",
+          "assertion": "assert args[0] != null;",
+          "name": "in",
+          "content": "the input stream"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if an error occurs while reading from the stream",
+          "assertion": "assert args[0].read() < 0;",
+          "name": "IOException",
+          "content": "if an error occurs while reading from the stream"
+        },
+        {
+          "description": "if an object read from the stream can not be loaded",
+          "assertion": "assert !args[0].available();",
+          "name": "ClassNotFoundException",
+          "content": "if an object read from the stream can not be loaded"
+        }
+      ]
+    }
+  }
+]

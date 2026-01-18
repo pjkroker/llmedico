@@ -1,0 +1,797 @@
+[
+  {
+    "method": "SummaryStatistics",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "SummaryStatistics",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "SummaryStatistics",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "original"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the SummaryStatistics instance to copy, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "original",
+          "content": "the SummaryStatistics instance to copy"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if original is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullArgumentException",
+          "content": "if original is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSummary",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Current values of statistics",
+          "assertion": "assert methodResultID instanceof StatisticalSummary;",
+          "name": null,
+          "content": "Current values of statistics"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addValue",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the value to add",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "value",
+          "content": "the value to add"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getN",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "The number of available values",
+          "assertion": "assert methodResultID == receiverObjectID.getN();",
+          "name": null,
+          "content": "The number of available values"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSum",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "The sum or Double.NaN if no values have been added",
+          "assertion": "assert methodResultID == (args[0] != 0.0);",
+          "name": null,
+          "content": "The sum or Double.NaN if no values have been added"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSumsq",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Double.NaN is returned if no values have been added.",
+          "assertion": "assert methodResultID == (receiverObjectID.getSum() == 0.0);",
+          "name": null,
+          "content": "Double.NaN is returned if no values have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMean",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Double.NaN is returned if no values have been added.",
+          "assertion": "assert methodResultID == (receiverObjectID.getSum() == 0.0);",
+          "name": null,
+          "content": "Double.NaN is returned if no values have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getStandardDeviation",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Double.NaN is returned if no values have been added.",
+          "assertion": "assert methodResultID == (receiverObjectID.getN() == 0);",
+          "name": null,
+          "content": "Double.NaN is returned if no values have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getQuadraticMean",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "The quadratic mean or Double.NaN if no values have been added.",
+          "assertion": "assert methodResultID == (receiverObjectID.getN() > 0) ? receiverObjectID.getSum() / receiverObjectID.getN() : Double.NaN;",
+          "name": null,
+          "content": "The quadratic mean or Double.NaN if no values have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getVariance",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns the (sample) variance of the available values.",
+          "assertion": "assert methodResultID == (args[0].length == 0 ? Double.NaN : Math.pow(args[0], 2) / (args[0].length - 1));",
+          "name": null,
+          "content": "Returns the (sample) variance of the available values."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getPopulationVariance",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the population variance",
+          "assertion": "assert methodResultID == (args[0] == Double.NaN ? false : !Double.isNaN(methodResultID));",
+          "name": null,
+          "content": "the population variance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMax",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Double.NaN is returned if no values have been added.",
+          "assertion": "assert methodResultID == Double.isNaN(receiverObjectID.getSum());",
+          "name": null,
+          "content": "Double.NaN is returned if no values have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMin",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Double.NaN is returned if no values have been added.",
+          "assertion": "assert methodResultID == (args[0] == Double.NaN);",
+          "name": null,
+          "content": "Double.NaN is returned if no values have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getGeometricMean",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the geometric mean",
+          "assertion": "assert methodResultID == (args[0].length == 0 ? Double.NaN : Math.exp(Math.log(args[0][0]) / args[0].length));",
+          "name": null,
+          "content": "the geometric mean"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSumOfLogs",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Double.NaN is returned if no values have been added.",
+          "assertion": "assert methodResultID == Double.isNaN(receiverObjectID.getSumOfLogs());",
+          "name": null,
+          "content": "Double.NaN is returned if no values have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSecondMoment",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns a statistic related to the Second Central Moment. Specifically, what is returned is the sum of squared deviations from the sample mean among the values that have been added.",
+          "assertion": "assert methodResultID == (args[0].equals(Double.NaN) ? Double.isNaN(methodResultID) : (methodResultID == 0 || receiverObjectID.getN() > 1));",
+          "name": null,
+          "content": "Returns a statistic related to the Second Central Moment. Specifically, what is returned is the sum of squared deviations from the sample mean among the values that have been added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "String with line feeds displaying statistics",
+          "assertion": "assert methodResultID.equals(\"\\n\");",
+          "name": null,
+          "content": "String with line feeds displaying statistics"
+        }
+      ]
+    }
+  },
+  {
+    "method": "clear",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to test equality against",
+          "assertion": "assert args[0] != null;",
+          "name": "object",
+          "content": "the object to test equality against"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if object equals this",
+          "assertion": "assert methodResultID == receiverObjectID.equals(args[0]);",
+          "name": null,
+          "content": "true if object equals this"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "hash code",
+          "assertion": "assert methodResultID == receiverObjectID.hashCode();",
+          "name": null,
+          "content": "hash code"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSumImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the sum",
+          "assertion": "assert methodResultID == receiverObjectID.getSumImpl() != null;",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the sum"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setSumImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sumImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the Sum",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "sumImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the Sum"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathIllegalStateException",
+          "content": "if data has already been added (i.e if n >0)",
+          "assertion": "",
+          "description": "if data has already been added (i.e if n >0)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSumsqImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the sum of squares",
+          "assertion": "assert methodResultID == receiverObjectID.getSumsqImpl();",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the sum of squares"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setSumsqImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sumsqImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the sum of squares",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "sumsqImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the sum of squares"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if data has already been added (i.e if n > 0)",
+          "assertion": "assert receiverObjectID.getN() <= 0;",
+          "name": "MathIllegalStateException",
+          "content": "if data has already been added (i.e if n > 0)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMinImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the minimum",
+          "assertion": "assert methodResultID == receiverObjectID.getMinImpl();",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the minimum"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setMinImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the minimum",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "minImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the minimum"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if data has already been added (i.e if n > 0)",
+          "assertion": "assert receiverObjectID.getN() > 0;",
+          "name": "MathIllegalStateException",
+          "content": "if it is activated after data has been added"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMaxImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the maximum",
+          "assertion": "assert methodResultID == receiverObjectID.getMeanImpl() != null;",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the maximum"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setMaxImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the maximum",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "maxImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the maximum"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if data has already been added (i.e if n > 0)",
+          "assertion": "assert receiverObjectID.getN() <= 0;",
+          "name": "MathIllegalStateException",
+          "content": "if it is activated after data has been added, an IllegalStateException will be thrown."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSumLogImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the log sum",
+          "assertion": "assert methodResultID instanceof StorelessUnivariateStatistic;",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the log sum"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setSumLogImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sumLogImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the log sum",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "sumLogImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the log sum"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathIllegalStateException",
+          "content": "if data has already been added (i.e if n > 0)",
+          "assertion": "",
+          "description": "if data has already been added (i.e if n > 0)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getGeoMeanImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the geometric mean",
+          "assertion": "assert methodResultID == receiverObjectID.getGeoMeanImpl() != null;",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the geometric mean"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setGeoMeanImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "geoMeanImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the geometric mean",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "geoMeanImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the geometric mean"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathIllegalStateException",
+          "content": "if data has already been added (i.e if n > 0)",
+          "assertion": "",
+          "description": "if data has already been added (i.e if n > 0)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMeanImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the mean",
+          "assertion": "assert methodResultID == receiverObjectID.getMeanImpl() != null;",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the mean"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setMeanImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "meanImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the mean",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "meanImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the mean"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathIllegalStateException",
+          "content": "if data has already been added (i.e if n > 0)",
+          "assertion": "",
+          "description": "if data has already been added (i.e if n > 0)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getVarianceImpl",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the StorelessUnivariateStatistic implementing the variance",
+          "assertion": "assert methodResultID == receiverObjectID.getVarianceImpl() != null;",
+          "name": null,
+          "content": "the StorelessUnivariateStatistic implementing the variance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setVarianceImpl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "varianceImpl"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the StorelessUnivariateStatistic instance to use for computing the variance, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "varianceImpl",
+          "content": "the StorelessUnivariateStatistic instance to use for computing the variance"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathIllegalStateException",
+          "content": "if data has already been added (i.e if n > 0)",
+          "assertion": "",
+          "description": "if data has already been added (i.e if n > 0)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "copy",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a copy of this",
+          "assertion": "assert methodResultID instanceof receiverObjectID.SummaryStatistics;",
+          "name": null,
+          "content": "a copy of this"
+        }
+      ]
+    }
+  },
+  {
+    "method": "copy",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "SummaryStatistics",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "source"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "SummaryStatistics",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "dest"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "SummaryStatistics to copy, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "source",
+          "content": "SummaryStatistics to copy"
+        },
+        {
+          "description": "SummaryStatistics to copy to, not null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "dest",
+          "content": "SummaryStatistics to copy to"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either source or dest is null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullArgumentException",
+          "content": "if either source or dest is null."
+        }
+      ]
+    }
+  }
+]

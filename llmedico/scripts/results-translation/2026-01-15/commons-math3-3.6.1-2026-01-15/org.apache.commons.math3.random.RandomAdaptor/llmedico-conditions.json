@@ -1,0 +1,264 @@
+[
+  {
+    "method": "RandomAdaptor",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RandomGenerator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "randomGenerator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the wrapped generator",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "randomGenerator",
+          "content": "the wrapped generator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "createAdaptor",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RandomGenerator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "randomGenerator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "wrapped RandomGenerator instance",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "randomGenerator",
+          "content": "wrapped RandomGenerator instance"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a Random instance wrapping the RandomGenerator",
+          "assertion": "assert methodResultID == new Random(args[0]);",
+          "name": null,
+          "content": "a Random instance wrapping the RandomGenerator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextBoolean",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the next pseudorandom, uniformly distributed boolean value from this random number generator's sequence.",
+          "assertion": "assert methodResultID == true;",
+          "name": null,
+          "content": "the next pseudorandom, uniformly distributed boolean value from this random number generator's sequence."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextBytes",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "bytes"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the non-null byte array in which to put the random bytes",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "bytes",
+          "content": "the non-null byte array in which to put the random bytes"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextDouble",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the next pseudorandom, uniformly distributed double value between 0.0 and 1.0 from this random number generator's sequence.",
+          "assertion": "assert methodResultID >= 0.0 && methodResultID <= 1.0;",
+          "name": null,
+          "content": "the next pseudorandom, uniformly distributed double value between 0.0 and 1.0 from this random number generator's sequence."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextFloat",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the next pseudorandom, uniformly distributed float value between 0.0 and 1.0 from this random number generator's sequence",
+          "assertion": "assert methodResultID >= 0.0 && methodResultID <= 1.0;",
+          "name": null,
+          "content": "the next pseudorandom, uniformly distributed float value between 0.0 and 1.0 from this random number generator's sequence"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextGaussian",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the next pseudorandom, Gaussian (\"normally\") distributed double value with mean 0.0 and standard deviation 1.0 from this random number generator's sequence.",
+          "assertion": "assert methodResultID >= -6.0 && methodResultID <= 6.0;",
+          "name": null,
+          "content": "the next pseudorandom, Gaussian (\"normally\") distributed double value with mean 0.0 and standard deviation 1.0 from this random number generator's sequence."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextInt",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "All 2<sup>32</sup> possible int values should be produced with (approximately) equal probability.",
+          "assertion": "assert methodResultID >= -2147483648 && methodResultID <= 2147483647;",
+          "name": null,
+          "content": "All 2<font size=\"-1\"><sup>32</sup></font> possible int values should be produced with (approximately) equal probability."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextInt",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Must be positive",
+          "assertion": "assert (args[0] <= 0) == false;",
+          "name": "n",
+          "content": "the bound on the random number to be returned. Must be positive"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a pseudorandom, uniformly distributed int value between 0 (inclusive) and n (exclusive).",
+          "assertion": "assert methodResultID >= 0 && methodResultID < args[0];",
+          "name": null,
+          "content": "a pseudorandom, uniformly distributed int value between 0 (inclusive) and n (exclusive)."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if n is not positive.",
+          "assertion": "assert args[0] <= 0;",
+          "name": "IllegalArgumentException",
+          "content": " if n is not positive."
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextLong",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns the next pseudorandom, uniformly distributed long value from this random number generator's sequence.",
+          "assertion": "assert (int) methodResultID >= 0 && (int) methodResultID <= Integer.MAX_VALUE;",
+          "name": null,
+          "content": "Returns the next pseudorandom, uniformly distributed long value from this random number generator's sequence."
+        }
+      ]
+    }
+  },
+  {
+    "method": "setSeed",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "seed"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "setSeed",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "seed"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "setSeed",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "seed"
+      }
+    ],
+    "conditions": {}
+  }
+]

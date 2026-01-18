@@ -1,0 +1,440 @@
+[
+  {
+    "method": "ConcurrentHashMultiset",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ConcurrentMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "countMap"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "backing map for storing the elements in the multiset and\n    their counts. It must be empty.",
+          "assertion": "assert (args[0] != null) && ((ConcurrentHashMap) args[0]).isEmpty();",
+          "name": "countMap",
+          "content": "backing map for storing the elements in the multiset and\n    their counts. It must be empty."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if @code countMap is not empty",
+          "assertion": "assert !args[0].isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if @code countMap is not empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "create",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "create",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "elements"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the elements that the multiset should contain",
+          "assertion": "assert args[0] != null;",
+          "name": "elements",
+          "content": "the elements that the multiset should contain"
+        }
+      ]
+    }
+  },
+  {
+    "method": "create",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "MapMaker",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "mapMaker"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "count",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "element"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the element to look for",
+          "assertion": "assert args[0] != null;",
+          "name": "element",
+          "content": "the element to look for"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "nonnegative number of occurrences of the element",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "nonnegative number of occurrences of the element"
+        }
+      ]
+    }
+  },
+  {
+    "method": "size",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "toArray",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "toArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "element"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "occurrences"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the element to add",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "element",
+          "content": "the element to add"
+        },
+        {
+          "description": "the number of occurrences to add",
+          "assertion": "assert (args[1] >= 0) && !((int) (args[1])) > Integer.MAX_VALUE;",
+          "name": "occurrences",
+          "content": "the number of occurrences to add"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the previous count of the element before the operation; possibly zero",
+          "assertion": "assert methodResultID >= 0 && methodResultID <= Integer.MAX_VALUE;",
+          "name": null,
+          "content": "previous count of the element before the operation; possibly zero"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if occurrences is negative, or if the resulting amount would exceed Integer#MAX_VALUE",
+          "assertion": "assert args[1] < 0 || receiverObjectID.add(args[0], args[1]) > Integer.MAX_VALUE;",
+          "name": "IllegalArgumentException",
+          "content": "if @code occurrences is negative, or if the resulting amount would exceed @link Integer#MAX_VALUE"
+        }
+      ]
+    }
+  },
+  {
+    "method": "remove",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "element"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "occurrences"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the element whose occurrences should be removed",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "element",
+          "content": "the element whose occurrences should be removed"
+        },
+        {
+          "description": "the number of occurrences of the element to remove",
+          "assertion": "assert ((int) args[1]) >= 0;",
+          "name": "occurrences",
+          "content": "the number of occurrences of the element to remove"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the count of the element before the operation; possibly zero",
+          "assertion": "assert methodResultID == receiverObjectID.count(args[0]) - args[1];",
+          "name": null,
+          "content": "count of the element before the operation; possibly zero"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if occurrences is negative",
+          "assertion": "assert args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if {@code occurrences} is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeExactly",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "element"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "occurrences"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the element to remove",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "element",
+          "content": "the element to remove"
+        },
+        {
+          "description": "the number of occurrences of the element to remove to remove",
+          "assertion": "assert (args[1] < 0) == false;",
+          "name": "occurrences",
+          "content": "the number of occurrences of the element to remove to remove"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the removal was possible (including if occurrences is zero)",
+          "assertion": "assert methodResultID == receiverObjectID.removeExactly(args[0], args[1]) > 0;",
+          "name": null,
+          "content": "true if the removal was possible (including if occurrences is zero)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if occurrences is negative",
+          "assertion": "assert args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if {{@code occurrences}} is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setCount",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "element"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "count"
+      }
+    ],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "count of element in the multiset before this call",
+          "assertion": "assert methodResultID == receiverObjectID.count(args[0]);",
+          "name": null,
+          "content": "count of element in the multiset before this call"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if @code count is negative",
+          "assertion": "assert args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if @code count is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setCount",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "element"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "expectedOldCount"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "newCount"
+      }
+    ],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if the change was successful. This usually indicates that the multiset has been modified, but not always: in the case that expectedOldCount == newCount, the method will return true if the condition was met.",
+          "assertion": "assert methodResultID == (args[0] == args[1]);",
+          "name": null,
+          "content": "true"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if expectedOldCount or newCount is negative",
+          "assertion": "assert args[2] < 0 || args[3] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if expectedOldCount or newCount is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "createElementSet",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "createEntrySet",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "distinctElements",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "isEmpty",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "entryIterator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "clear",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  }
+]

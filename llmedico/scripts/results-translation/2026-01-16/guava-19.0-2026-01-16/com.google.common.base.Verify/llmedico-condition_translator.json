@@ -1,0 +1,214 @@
+[
+  {
+    "name": "Verify",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.Verify",
+    "javadoc": "/**\n * Static convenience methods that serve the same purpose as Java language\n * <a href=\"http://docs.oracle.com/javase/7/docs/technotes/guides/language/assert.html\">\n * assertions</a>, except that they are always enabled. These methods should be used instead of Java\n * assertions whenever there is a chance the check may fail \"in real life\". Example: <pre>   {@code\n *\n *   Bill bill = remoteService.getLastUnpaidBill();\n *\n *   // In case bug 12345 happens again we'd rather just die\n *   Verify.verify(bill.status() == Status.UNPAID,\n *       \"Unexpected bill status: %s\", bill.status());}</pre>\n *\n * <h3>Comparison to alternatives</h3>\n *\n * <p><b>Note:</b> In some cases the differences explained below can be subtle. When it's unclear\n * which approach to use, <b>don't worry</b> too much about it; just pick something that seems\n * reasonable and it will be fine.\n *\n * <ul>\n * <li>If checking whether the <i>caller</i> has violated your method or constructor's contract\n *     (such as by passing an invalid argument), use the utilities of the {@link Preconditions}\n *     class instead.\n *\n * <li>If checking an <i>impossible</i> condition (which <i>cannot</i> happen unless your own class\n *     or its <i>trusted</i> dependencies is badly broken), this is what ordinary Java assertions\n *     are for. Note that assertions are not enabled by default; they are essentially considered\n *     \"compiled comments.\"\n *\n * <li>An explicit {@code if/throw} (as illustrated below) is always acceptable; we still recommend\n *     using our {@link VerifyException} exception type. Throwing a plain {@link RuntimeException}\n *     is frowned upon.\n *\n * <li>Use of {@link java.util.Objects#requireNonNull(Object)} is generally discouraged, since\n *     {@link #verifyNotNull(Object)} and {@link Preconditions#checkNotNull(Object)} perform the\n *     same function with more clarity.\n * </ul>\n *\n * <h3>Warning about performance</h3>\n *\n * <p>Remember that parameter values for message construction must all be computed eagerly, and\n * autoboxing and varargs array creation may happen as well, even when the verification succeeds and\n * the message ends up unneeded. Performance-sensitive verification checks should continue to use\n * usual form: <pre>   {@code\n *\n *   Bill bill = remoteService.getLastUnpaidBill();\n *   if (bill.status() != Status.UNPAID) {\n *     throw new VerifyException(\"Unexpected bill status: \" + bill.status());\n *   }}</pre>\n *\n * <h3>Only {@code %s} is supported</h3>\n *\n * <p>As with {@link Preconditions} error message template strings, only the {@code \"%s\"} specifier\n * is supported, not the full range of {@link java.util.Formatter} specifiers. However, note that\n * if the number of arguments does not match the number of occurrences of {@code \"%s\"} in the\n * format string, {@code Verify} will still behave as expected, and will still include all argument\n * values in the error message; the message will simply not be formatted exactly as intended.\n *\n * <h3>More information</h3>\n *\n * See\n * <a href=\"https://github.com/google/guava/wiki/ConditionalFailuresExplained\">Conditional\n * failures explained</a> in the Guava User Guide for advice on when this class should be used.\n *\n * @since 17.0\n */\n",
+    "code": "/**\n * Static convenience methods that serve the same purpose as Java language\n * <a href=\"http://docs.oracle.com/javase/7/docs/technotes/guides/language/assert.html\">\n * assertions</a>, except that they are always enabled. These methods should be used instead of Java\n * assertions whenever there is a chance the check may fail \"in real life\". Example: <pre>   {@code\n *\n *   Bill bill = remoteService.getLastUnpaidBill();\n *\n *   // In case bug 12345 happens again we'd rather just die\n *   Verify.verify(bill.status() == Status.UNPAID,\n *       \"Unexpected bill status: %s\", bill.status());}</pre>\n *\n * <h3>Comparison to alternatives</h3>\n *\n * <p><b>Note:</b> In some cases the differences explained below can be subtle. When it's unclear\n * which approach to use, <b>don't worry</b> too much about it; just pick something that seems\n * reasonable and it will be fine.\n *\n * <ul>\n * <li>If checking whether the <i>caller</i> has violated your method or constructor's contract\n *     (such as by passing an invalid argument), use the utilities of the {@link Preconditions}\n *     class instead.\n *\n * <li>If checking an <i>impossible</i> condition (which <i>cannot</i> happen unless your own class\n *     or its <i>trusted</i> dependencies is badly broken), this is what ordinary Java assertions\n *     are for. Note that assertions are not enabled by default; they are essentially considered\n *     \"compiled comments.\"\n *\n * <li>An explicit {@code if/throw} (as illustrated below) is always acceptable; we still recommend\n *     using our {@link VerifyException} exception type. Throwing a plain {@link RuntimeException}\n *     is frowned upon.\n *\n * <li>Use of {@link java.util.Objects#requireNonNull(Object)} is generally discouraged, since\n *     {@link #verifyNotNull(Object)} and {@link Preconditions#checkNotNull(Object)} perform the\n *     same function with more clarity.\n * </ul>\n *\n * <h3>Warning about performance</h3>\n *\n * <p>Remember that parameter values for message construction must all be computed eagerly, and\n * autoboxing and varargs array creation may happen as well, even when the verification succeeds and\n * the message ends up unneeded. Performance-sensitive verification checks should continue to use\n * usual form: <pre>   {@code\n *\n *   Bill bill = remoteService.getLastUnpaidBill();\n *   if (bill.status() != Status.UNPAID) {\n *     throw new VerifyException(\"Unexpected bill status: \" + bill.status());\n *   }}</pre>\n *\n * <h3>Only {@code %s} is supported</h3>\n *\n * <p>As with {@link Preconditions} error message template strings, only the {@code \"%s\"} specifier\n * is supported, not the full range of {@link java.util.Formatter} specifiers. However, note that\n * if the number of arguments does not match the number of occurrences of {@code \"%s\"} in the\n * format string, {@code Verify} will still behave as expected, and will still include all argument\n * values in the error message; the message will simply not be formatted exactly as intended.\n *\n * <h3>More information</h3>\n *\n * See\n * <a href=\"https://github.com/google/guava/wiki/ConditionalFailuresExplained\">Conditional\n * failures explained</a> in the Guava User Guide for advice on when this class should be used.\n *\n * @since 17.0\n */\n@Beta\n@GwtCompatible\npublic final class Verify {\n\n    /**\n     * Ensures that {@code expression} is {@code true}, throwing a {@code VerifyException} with no\n     * message otherwise.\n     *\n     * @throws VerifyException if {@code expression} is {@code false}\n     */\n    public static void verify(boolean expression) {\n        if (!expression) {\n            throw new VerifyException();\n        }\n    }\n\n    /**\n     * Ensures that {@code expression} is {@code true}, throwing a {@code VerifyException} with a\n     * custom message otherwise.\n     *\n     * @param expression a boolean expression\n     * @param errorMessageTemplate a template for the exception message should the\n     *     check fail. The message is formed by replacing each {@code %s}\n     *     placeholder in the template with an argument. These are matched by\n     *     position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc.\n     *     Unmatched arguments will be appended to the formatted message in square\n     *     braces. Unmatched placeholders will be left as-is.\n     * @param errorMessageArgs the arguments to be substituted into the message\n     *     template. Arguments are converted to strings using\n     *     {@link String#valueOf(Object)}.\n     * @throws VerifyException if {@code expression} is {@code false}\n     */\n    public static void verify(boolean expression, @Nullable String errorMessageTemplate, @Nullable Object... errorMessageArgs) {\n        if (!expression) {\n            throw new VerifyException(format(errorMessageTemplate, errorMessageArgs));\n        }\n    }\n\n    /**\n     * Ensures that {@code reference} is non-null, throwing a {@code VerifyException} with a default\n     * message otherwise.\n     *\n     * @return {@code reference}, guaranteed to be non-null, for convenience\n     * @throws VerifyException if {@code reference} is {@code null}\n     */\n    public static <T> T verifyNotNull(@Nullable T reference) {\n        return verifyNotNull(reference, \"expected a non-null reference\");\n    }\n\n    /**\n     * Ensures that {@code reference} is non-null, throwing a {@code VerifyException} with a custom\n     * message otherwise.\n     *\n     * @param errorMessageTemplate a template for the exception message should the\n     *     check fail. The message is formed by replacing each {@code %s}\n     *     placeholder in the template with an argument. These are matched by\n     *     position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc.\n     *     Unmatched arguments will be appended to the formatted message in square\n     *     braces. Unmatched placeholders will be left as-is.\n     * @param errorMessageArgs the arguments to be substituted into the message\n     *     template. Arguments are converted to strings using\n     *     {@link String#valueOf(Object)}.\n     * @return {@code reference}, guaranteed to be non-null, for convenience\n     * @throws VerifyException if {@code reference} is {@code null}\n     */\n    public static <T> T verifyNotNull(@Nullable T reference, @Nullable String errorMessageTemplate, @Nullable Object... errorMessageArgs) {\n        verify(reference != null, errorMessageTemplate, errorMessageArgs);\n        return reference;\n    }\n\n    // TODO(kevinb): consider <T> T verifySingleton(Iterable<T>) to take over for\n    // Iterables.getOnlyElement()\n    private Verify() {\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "verify",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "expression"
+          }
+        ],
+        "javadoc": "/**\n * Ensures that {@code expression} is {@code true}, throwing a {@code VerifyException} with no\n * message otherwise.\n *\n * @throws VerifyException if {@code expression} is {@code false}\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "VerifyException",
+            "content": "if {@code expression} is {@code false}",
+            "assertion": "assert !args[0];",
+            "description": "if expression is false"
+          }
+        ],
+        "code": "/**\n * Ensures that {@code expression} is {@code true}, throwing a {@code VerifyException} with no\n * message otherwise.\n *\n * @throws VerifyException if {@code expression} is {@code false}\n */\npublic static void verify(boolean expression) {\n    if (!expression) {\n        throw new VerifyException();\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "verify",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "expression"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "errorMessageTemplate"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "errorMessageArgs"
+          }
+        ],
+        "javadoc": "/**\n * Ensures that {@code expression} is {@code true}, throwing a {@code VerifyException} with a\n * custom message otherwise.\n *\n * @param expression a boolean expression\n * @param errorMessageTemplate a template for the exception message should the\n *     check fail. The message is formed by replacing each {@code %s}\n *     placeholder in the template with an argument. These are matched by\n *     position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc.\n *     Unmatched arguments will be appended to the formatted message in square\n *     braces. Unmatched placeholders will be left as-is.\n * @param errorMessageArgs the arguments to be substituted into the message\n *     template. Arguments are converted to strings using\n *     {@link String#valueOf(Object)}.\n * @throws VerifyException if {@code expression} is {@code false}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "expression",
+            "content": "a boolean expression",
+            "assertion": "assert args[0];",
+            "description": "a boolean expression"
+          },
+          {
+            "tag": "param",
+            "name": "errorMessageTemplate",
+            "content": "a template for the exception message should the check fail. The message is formed by replacing each {@code %s} placeholder in the template with an argument. These are matched by position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc. Unmatched arguments will be appended to the formatted message in square braces. Unmatched placeholders will be left as-is.",
+            "assertion": "assert args[1] != null;",
+            "description": "a template for the exception message should the check fail."
+          },
+          {
+            "tag": "param",
+            "name": "errorMessageArgs",
+            "content": "the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.",
+            "assertion": "assert args[2] == null;",
+            "description": "the arguments to be substituted into the message template."
+          },
+          {
+            "tag": "throws",
+            "name": "VerifyException",
+            "content": "if {@code expression} is {@code false}",
+            "assertion": "assert !args[0];",
+            "description": "expression is false"
+          }
+        ],
+        "code": "/**\n * Ensures that {@code expression} is {@code true}, throwing a {@code VerifyException} with a\n * custom message otherwise.\n *\n * @param expression a boolean expression\n * @param errorMessageTemplate a template for the exception message should the\n *     check fail. The message is formed by replacing each {@code %s}\n *     placeholder in the template with an argument. These are matched by\n *     position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc.\n *     Unmatched arguments will be appended to the formatted message in square\n *     braces. Unmatched placeholders will be left as-is.\n * @param errorMessageArgs the arguments to be substituted into the message\n *     template. Arguments are converted to strings using\n *     {@link String#valueOf(Object)}.\n * @throws VerifyException if {@code expression} is {@code false}\n */\npublic static void verify(boolean expression, @Nullable String errorMessageTemplate, @Nullable Object... errorMessageArgs) {\n    if (!expression) {\n        throw new VerifyException(format(errorMessageTemplate, errorMessageArgs));\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "verifyNotNull",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "reference"
+          }
+        ],
+        "javadoc": "/**\n * Ensures that {@code reference} is non-null, throwing a {@code VerifyException} with a default\n * message otherwise.\n *\n * @return {@code reference}, guaranteed to be non-null, for convenience\n * @throws VerifyException if {@code reference} is {@code null}\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "reference}, guaranteed to be non-null, for convenience",
+            "assertion": "assert methodResultID != null;",
+            "description": "for convenience"
+          },
+          {
+            "tag": "throws",
+            "name": "VerifyException",
+            "content": "if {@code reference} is {@code null}",
+            "assertion": "assert args[0] != null;",
+            "description": "if reference is null."
+          }
+        ],
+        "code": "/**\n * Ensures that {@code reference} is non-null, throwing a {@code VerifyException} with a default\n * message otherwise.\n *\n * @return {@code reference}, guaranteed to be non-null, for convenience\n * @throws VerifyException if {@code reference} is {@code null}\n */\npublic static <T> T verifyNotNull(@Nullable T reference) {\n    return verifyNotNull(reference, \"expected a non-null reference\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "verifyNotNull",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "reference"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "errorMessageTemplate"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "errorMessageArgs"
+          }
+        ],
+        "javadoc": "/**\n * Ensures that {@code reference} is non-null, throwing a {@code VerifyException} with a custom\n * message otherwise.\n *\n * @param errorMessageTemplate a template for the exception message should the\n *     check fail. The message is formed by replacing each {@code %s}\n *     placeholder in the template with an argument. These are matched by\n *     position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc.\n *     Unmatched arguments will be appended to the formatted message in square\n *     braces. Unmatched placeholders will be left as-is.\n * @param errorMessageArgs the arguments to be substituted into the message\n *     template. Arguments are converted to strings using\n *     {@link String#valueOf(Object)}.\n * @return {@code reference}, guaranteed to be non-null, for convenience\n * @throws VerifyException if {@code reference} is {@code null}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "errorMessageTemplate",
+            "content": "a template for the exception message should the check fail. The message is formed by replacing each {@code %s} placeholder in the template with an argument. These are matched by position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc. Unmatched arguments will be appended to the formatted message in square braces. Unmatched placeholders will be left as-is.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "a template for the exception message should the check fail"
+          },
+          {
+            "tag": "param",
+            "name": "errorMessageArgs",
+            "content": "the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "the arguments to be substituted into the message template"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "reference}, guaranteed to be non-null, for convenience",
+            "assertion": "assert !methodResultID.equals(null);",
+            "description": "Ensures that reference is non-null, throwing a VerifyException with a custom message otherwise."
+          },
+          {
+            "tag": "throws",
+            "name": "VerifyException",
+            "content": "if {@code reference} is {@code null}",
+            "assertion": "",
+            "description": "if {@code reference} is {@code null}"
+          }
+        ],
+        "code": "/**\n * Ensures that {@code reference} is non-null, throwing a {@code VerifyException} with a custom\n * message otherwise.\n *\n * @param errorMessageTemplate a template for the exception message should the\n *     check fail. The message is formed by replacing each {@code %s}\n *     placeholder in the template with an argument. These are matched by\n *     position - the first {@code %s} gets {@code errorMessageArgs[0]}, etc.\n *     Unmatched arguments will be appended to the formatted message in square\n *     braces. Unmatched placeholders will be left as-is.\n * @param errorMessageArgs the arguments to be substituted into the message\n *     template. Arguments are converted to strings using\n *     {@link String#valueOf(Object)}.\n * @return {@code reference}, guaranteed to be non-null, for convenience\n * @throws VerifyException if {@code reference} is {@code null}\n */\npublic static <T> T verifyNotNull(@Nullable T reference, @Nullable String errorMessageTemplate, @Nullable Object... errorMessageArgs) {\n    verify(reference != null, errorMessageTemplate, errorMessageArgs);\n    return reference;\n}"
+      }
+    ]
+  }
+]

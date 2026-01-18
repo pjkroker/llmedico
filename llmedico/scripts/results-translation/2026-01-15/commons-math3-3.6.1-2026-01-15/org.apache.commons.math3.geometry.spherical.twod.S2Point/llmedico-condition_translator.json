@@ -1,0 +1,369 @@
+[
+  {
+    "name": "S2Point",
+    "package": "org.apache.commons.math3.geometry.spherical.twod",
+    "qualified_name": "org.apache.commons.math3.geometry.spherical.twod.S2Point",
+    "javadoc": "/**\n * This class represents a point on the 2-sphere.\n * <p>\n * We use the mathematical convention to use the azimuthal angle \\( \\theta \\)\n * in the x-y plane as the first coordinate, and the polar angle \\( \\varphi \\)\n * as the second coordinate (see <a\n * href=\"http://mathworld.wolfram.com/SphericalCoordinates.html\">Spherical\n * Coordinates</a> in MathWorld).\n * </p>\n * <p>Instances of this class are guaranteed to be immutable.</p>\n * @since 3.3\n */\n",
+    "code": "/**\n * This class represents a point on the 2-sphere.\n * <p>\n * We use the mathematical convention to use the azimuthal angle \\( \\theta \\)\n * in the x-y plane as the first coordinate, and the polar angle \\( \\varphi \\)\n * as the second coordinate (see <a\n * href=\"http://mathworld.wolfram.com/SphericalCoordinates.html\">Spherical\n * Coordinates</a> in MathWorld).\n * </p>\n * <p>Instances of this class are guaranteed to be immutable.</p>\n * @since 3.3\n */\npublic class S2Point implements Point<Sphere2D> {\n\n    /**\n     * +I (coordinates: \\( \\theta = 0, \\varphi = \\pi/2 \\)).\n     */\n    public static final S2Point PLUS_I = new S2Point(0, 0.5 * FastMath.PI, Vector3D.PLUS_I);\n\n    /**\n     * +J (coordinates: \\( \\theta = \\pi/2, \\varphi = \\pi/2 \\))).\n     */\n    public static final S2Point PLUS_J = new S2Point(0.5 * FastMath.PI, 0.5 * FastMath.PI, Vector3D.PLUS_J);\n\n    /**\n     * +K (coordinates: \\( \\theta = any angle, \\varphi = 0 \\)).\n     */\n    public static final S2Point PLUS_K = new S2Point(0, 0, Vector3D.PLUS_K);\n\n    /**\n     * -I (coordinates: \\( \\theta = \\pi, \\varphi = \\pi/2 \\)).\n     */\n    public static final S2Point MINUS_I = new S2Point(FastMath.PI, 0.5 * FastMath.PI, Vector3D.MINUS_I);\n\n    /**\n     * -J (coordinates: \\( \\theta = 3\\pi/2, \\varphi = \\pi/2 \\)).\n     */\n    public static final S2Point MINUS_J = new S2Point(1.5 * FastMath.PI, 0.5 * FastMath.PI, Vector3D.MINUS_J);\n\n    /**\n     * -K (coordinates: \\( \\theta = any angle, \\varphi = \\pi \\)).\n     */\n    public static final S2Point MINUS_K = new S2Point(0, FastMath.PI, Vector3D.MINUS_K);\n\n    // CHECKSTYLE: stop ConstantName\n    /**\n     * A vector with all coordinates set to NaN.\n     */\n    public static final S2Point NaN = new S2Point(Double.NaN, Double.NaN, Vector3D.NaN);\n\n    // CHECKSTYLE: resume ConstantName\n    /**\n     * Serializable UID.\n     */\n    private static final long serialVersionUID = 20131218L;\n\n    /**\n     * Azimuthal angle \\( \\theta \\) in the x-y plane.\n     */\n    private final double theta;\n\n    /**\n     * Polar angle \\( \\varphi \\).\n     */\n    private final double phi;\n\n    /**\n     * Corresponding 3D normalized vector.\n     */\n    private final Vector3D vector;\n\n    /**\n     * Simple constructor.\n     * Build a vector from its spherical coordinates\n     * @param theta azimuthal angle \\( \\theta \\) in the x-y plane\n     * @param phi polar angle \\( \\varphi \\)\n     * @see #getTheta()\n     * @see #getPhi()\n     * @exception OutOfRangeException if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range\n     */\n    public S2Point(final double theta, final double phi) throws OutOfRangeException {\n        this(theta, phi, vector(theta, phi));\n    }\n\n    /**\n     * Simple constructor.\n     * Build a vector from its underlying 3D vector\n     * @param vector 3D vector\n     * @exception MathArithmeticException if vector norm is zero\n     */\n    public S2Point(final Vector3D vector) throws MathArithmeticException {\n        this(FastMath.atan2(vector.getY(), vector.getX()), Vector3D.angle(Vector3D.PLUS_K, vector), vector.normalize());\n    }\n\n    /**\n     * Build a point from its internal components.\n     * @param theta azimuthal angle \\( \\theta \\) in the x-y plane\n     * @param phi polar angle \\( \\varphi \\)\n     * @param vector corresponding vector\n     */\n    private S2Point(final double theta, final double phi, final Vector3D vector) {\n        this.theta = theta;\n        this.phi = phi;\n        this.vector = vector;\n    }\n\n    /**\n     * Build the normalized vector corresponding to spherical coordinates.\n     * @param theta azimuthal angle \\( \\theta \\) in the x-y plane\n     * @param phi polar angle \\( \\varphi \\)\n     * @return normalized vector\n     * @exception OutOfRangeException if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range\n     */\n    private static Vector3D vector(final double theta, final double phi) throws OutOfRangeException {\n        if (phi < 0 || phi > FastMath.PI) {\n            throw new OutOfRangeException(phi, 0, FastMath.PI);\n        }\n        final double cosTheta = FastMath.cos(theta);\n        final double sinTheta = FastMath.sin(theta);\n        final double cosPhi = FastMath.cos(phi);\n        final double sinPhi = FastMath.sin(phi);\n        return new Vector3D(cosTheta * sinPhi, sinTheta * sinPhi, cosPhi);\n    }\n\n    /**\n     * Get the azimuthal angle \\( \\theta \\) in the x-y plane.\n     * @return azimuthal angle \\( \\theta \\) in the x-y plane\n     * @see #S2Point(double, double)\n     */\n    public double getTheta() {\n        return theta;\n    }\n\n    /**\n     * Get the polar angle \\( \\varphi \\).\n     * @return polar angle \\( \\varphi \\)\n     * @see #S2Point(double, double)\n     */\n    public double getPhi() {\n        return phi;\n    }\n\n    /**\n     * Get the corresponding normalized vector in the 3D euclidean space.\n     * @return normalized vector\n     */\n    public Vector3D getVector() {\n        return vector;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public Space getSpace() {\n        return Sphere2D.getInstance();\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public boolean isNaN() {\n        return Double.isNaN(theta) || Double.isNaN(phi);\n    }\n\n    /**\n     * Get the opposite of the instance.\n     * @return a new vector which is opposite to the instance\n     */\n    public S2Point negate() {\n        return new S2Point(-theta, FastMath.PI - phi, vector.negate());\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double distance(final Point<Sphere2D> point) {\n        return distance(this, (S2Point) point);\n    }\n\n    /**\n     * Compute the distance (angular separation) between two points.\n     * @param p1 first vector\n     * @param p2 second vector\n     * @return the angular separation between p1 and p2\n     */\n    public static double distance(S2Point p1, S2Point p2) {\n        return Vector3D.angle(p1.vector, p2.vector);\n    }\n\n    /**\n     * Test for the equality of two points on the 2-sphere.\n     * <p>\n     * If all coordinates of two points are exactly the same, and none are\n     * <code>Double.NaN</code>, the two points are considered to be equal.\n     * </p>\n     * <p>\n     * <code>NaN</code> coordinates are considered to affect globally the vector\n     * and be equals to each other - i.e, if either (or all) coordinates of the\n     * 2D vector are equal to <code>Double.NaN</code>, the 2D vector is equal to\n     * {@link #NaN}.\n     * </p>\n     *\n     * @param other Object to test for equality to this\n     * @return true if two points on the 2-sphere objects are equal, false if\n     *         object is null, not an instance of S2Point, or\n     *         not equal to this S2Point instance\n     */\n    @Override\n    public boolean equals(Object other) {\n        if (this == other) {\n            return true;\n        }\n        if (other instanceof S2Point) {\n            final S2Point rhs = (S2Point) other;\n            if (rhs.isNaN()) {\n                return this.isNaN();\n            }\n            return (theta == rhs.theta) && (phi == rhs.phi);\n        }\n        return false;\n    }\n\n    /**\n     * Get a hashCode for the 2D vector.\n     * <p>\n     * All NaN values have the same hash code.</p>\n     *\n     * @return a hash code value for this object\n     */\n    @Override\n    public int hashCode() {\n        if (isNaN()) {\n            return 542;\n        }\n        return 134 * (37 * MathUtils.hash(theta) + MathUtils.hash(phi));\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "S2Point",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "theta"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "phi"
+          }
+        ],
+        "javadoc": "/**\n * Simple constructor.\n * Build a vector from its spherical coordinates\n * @param theta azimuthal angle \\( \\theta \\) in the x-y plane\n * @param phi polar angle \\( \\varphi \\)\n * @see #getTheta()\n * @see #getPhi()\n * @exception OutOfRangeException if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "theta",
+            "content": "azimuthal angle \\( \\theta \\) in the x-y plane",
+            "assertion": "",
+            "description": "azimuthal angle \\( \\theta \\) in the x-y plane"
+          },
+          {
+            "tag": "param",
+            "name": "phi",
+            "content": "polar angle \\( \\varphi \\)",
+            "assertion": "",
+            "description": "polar angle \\( \\varphi \\)"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#getTheta()"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#getPhi()"
+          },
+          {
+            "tag": "throws",
+            "name": "OutOfRangeException",
+            "content": "if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range",
+            "assertion": "",
+            "description": "if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range"
+          }
+        ],
+        "code": "/**\n * Simple constructor.\n * Build a vector from its spherical coordinates\n * @param theta azimuthal angle \\( \\theta \\) in the x-y plane\n * @param phi polar angle \\( \\varphi \\)\n * @see #getTheta()\n * @see #getPhi()\n * @exception OutOfRangeException if \\( \\varphi \\) is not in the [\\( 0; \\pi \\)] range\n */\npublic S2Point(final double theta, final double phi) throws OutOfRangeException {\n    this(theta, phi, vector(theta, phi));\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "S2Point",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vector"
+          }
+        ],
+        "javadoc": "/**\n * Simple constructor.\n * Build a vector from its underlying 3D vector\n * @param vector 3D vector\n * @exception MathArithmeticException if vector norm is zero\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "vector",
+            "content": "3D vector",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "3D vector"
+          },
+          {
+            "tag": "throws",
+            "name": "MathArithmeticException",
+            "content": "if vector norm is zero",
+            "assertion": "assert args[0].getNorm() == 0;",
+            "description": "if vector norm is zero"
+          }
+        ],
+        "code": "/**\n * Simple constructor.\n * Build a vector from its underlying 3D vector\n * @param vector 3D vector\n * @exception MathArithmeticException if vector norm is zero\n */\npublic S2Point(final Vector3D vector) throws MathArithmeticException {\n    this(FastMath.atan2(vector.getY(), vector.getX()), Vector3D.angle(Vector3D.PLUS_K, vector), vector.normalize());\n}"
+      },
+      {
+        "type": "method",
+        "name": "getTheta",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the azimuthal angle \\( \\theta \\) in the x-y plane.\n * @return azimuthal angle \\( \\theta \\) in the x-y plane\n * @see #S2Point(double, double)\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "angle \\( \\theta \\) in the x-y plane",
+            "assertion": "assert methodResultID == 0.0; // theta is always 0.0 for getTheta method",
+            "description": "azimuthal angle θ in the x-y plane"
+          },
+          {
+            "tag": "see",
+            "name": "#S2Point(double,",
+            "content": "double)"
+          }
+        ],
+        "code": "/**\n * Get the azimuthal angle \\( \\theta \\) in the x-y plane.\n * @return azimuthal angle \\( \\theta \\) in the x-y plane\n * @see #S2Point(double, double)\n */\npublic double getTheta() {\n    return theta;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPhi",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the polar angle \\( \\varphi \\).\n * @return polar angle \\( \\varphi \\)\n * @see #S2Point(double, double)\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "angle \\( \\varphi \\)",
+            "assertion": "assert methodResultID == args[0];",
+            "description": "polar angle \\(\\varphi\\)"
+          },
+          {
+            "tag": "see",
+            "name": "#S2Point(double,",
+            "content": "double)"
+          }
+        ],
+        "code": "/**\n * Get the polar angle \\( \\varphi \\).\n * @return polar angle \\( \\varphi \\)\n * @see #S2Point(double, double)\n */\npublic double getPhi() {\n    return phi;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getVector",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the corresponding normalized vector in the 3D euclidean space.\n * @return normalized vector\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "vector",
+            "assertion": "assert methodResultID != null;",
+            "description": "normalized vector"
+          }
+        ],
+        "code": "/**\n * Get the corresponding normalized vector in the 3D euclidean space.\n * @return normalized vector\n */\npublic Vector3D getVector() {\n    return vector;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSpace",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Space",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic Space getSpace() {\n    return Sphere2D.getInstance();\n}"
+      },
+      {
+        "type": "method",
+        "name": "isNaN",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic boolean isNaN() {\n    return Double.isNaN(theta) || Double.isNaN(phi);\n}"
+      },
+      {
+        "type": "method",
+        "name": "negate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "S2Point",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the opposite of the instance.\n * @return a new vector which is opposite to the instance\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new vector which is opposite to the instance",
+            "assertion": "assert methodResultID.equals(receiverObjectID.getVector());",
+            "description": "a new vector which is opposite to the instance"
+          }
+        ],
+        "code": "/**\n * Get the opposite of the instance.\n * @return a new vector which is opposite to the instance\n */\npublic S2Point negate() {\n    return new S2Point(-theta, FastMath.PI - phi, vector.negate());\n}"
+      },
+      {
+        "type": "method",
+        "name": "distance",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Point",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "point"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double distance(final Point<Sphere2D> point) {\n    return distance(this, (S2Point) point);\n}"
+      },
+      {
+        "type": "method",
+        "name": "distance",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "S2Point",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "S2Point",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p2"
+          }
+        ],
+        "javadoc": "/**\n * Compute the distance (angular separation) between two points.\n * @param p1 first vector\n * @param p2 second vector\n * @return the angular separation between p1 and p2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p1",
+            "content": "first vector",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "first vector"
+          },
+          {
+            "tag": "param",
+            "name": "p2",
+            "content": "second vector",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "second vector"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "angular separation between p1 and p2",
+            "assertion": "assert methodResultID == receiverObjectID.distance(args[0], args[1]);",
+            "description": "the angular separation between p1 and p2"
+          }
+        ],
+        "code": "/**\n * Compute the distance (angular separation) between two points.\n * @param p1 first vector\n * @param p2 second vector\n * @return the angular separation between p1 and p2\n */\npublic static double distance(S2Point p1, S2Point p2) {\n    return Vector3D.angle(p1.vector, p2.vector);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * Test for the equality of two points on the 2-sphere.\n * <p>\n * If all coordinates of two points are exactly the same, and none are\n * <code>Double.NaN</code>, the two points are considered to be equal.\n * </p>\n * <p>\n * <code>NaN</code> coordinates are considered to affect globally the vector\n * and be equals to each other - i.e, if either (or all) coordinates of the\n * 2D vector are equal to <code>Double.NaN</code>, the 2D vector is equal to\n * {@link #NaN}.\n * </p>\n *\n * @param other Object to test for equality to this\n * @return true if two points on the 2-sphere objects are equal, false if\n *         object is null, not an instance of S2Point, or\n *         not equal to this S2Point instance\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "Object to test for equality to this",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "Object to test for equality to this"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if two points on the 2-sphere objects are equal, false if object is null, not an instance of S2Point, or not equal to this S2Point instance",
+            "assertion": "assert methodResultID == (args[0] == null || args[0].getClass() != receiverObjectID.getClass() || !receiverObjectID.equals(args[0]));",
+            "description": "true if two points on the 2-sphere objects are equal, false if object is null, not an instance of S2Point, or not equal to this S2Point instance"
+          }
+        ],
+        "code": "/**\n * Test for the equality of two points on the 2-sphere.\n * <p>\n * If all coordinates of two points are exactly the same, and none are\n * <code>Double.NaN</code>, the two points are considered to be equal.\n * </p>\n * <p>\n * <code>NaN</code> coordinates are considered to affect globally the vector\n * and be equals to each other - i.e, if either (or all) coordinates of the\n * 2D vector are equal to <code>Double.NaN</code>, the 2D vector is equal to\n * {@link #NaN}.\n * </p>\n *\n * @param other Object to test for equality to this\n * @return true if two points on the 2-sphere objects are equal, false if\n *         object is null, not an instance of S2Point, or\n *         not equal to this S2Point instance\n */\n@Override\npublic boolean equals(Object other) {\n    if (this == other) {\n        return true;\n    }\n    if (other instanceof S2Point) {\n        final S2Point rhs = (S2Point) other;\n        if (rhs.isNaN()) {\n            return this.isNaN();\n        }\n        return (theta == rhs.theta) && (phi == rhs.phi);\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get a hashCode for the 2D vector.\n * <p>\n * All NaN values have the same hash code.</p>\n *\n * @return a hash code value for this object\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "hash code value for this object",
+            "assertion": "assert methodResultID == 0; // All NaN values have the same hash code.",
+            "description": "a hash code value for this object"
+          }
+        ],
+        "code": "/**\n * Get a hashCode for the 2D vector.\n * <p>\n * All NaN values have the same hash code.</p>\n *\n * @return a hash code value for this object\n */\n@Override\npublic int hashCode() {\n    if (isNaN()) {\n        return 542;\n    }\n    return 134 * (37 * MathUtils.hash(theta) + MathUtils.hash(phi));\n}"
+      }
+    ]
+  }
+]

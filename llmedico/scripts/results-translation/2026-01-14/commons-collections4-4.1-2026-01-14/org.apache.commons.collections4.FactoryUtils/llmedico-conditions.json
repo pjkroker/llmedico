@@ -1,0 +1,276 @@
+[
+  {
+    "method": "exceptionFactory",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<T>",
+          "content": "the type that the factory creates",
+          "assertion": "",
+          "description": "the type that the factory creates"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "asserts that the factory is null",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "&lt;code&gt;\n\\t * This could be useful during testing as a placeholder.\n\\t *\n\\t * @see org.apache.commons.collections4.functors.ExceptionFactory\n\\t *\n\\t * @param <T\\u003e\\t the type that the factory creates\n\\t * @return the factory\n\\t */\\n\\tassert methodResultID == null;\n\\t\\n\\t// TODO: Replace with actual Factory creation\n\\n\\lt;/code&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nullFactory",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the factory should return null",
+          "assertion": "assert args[0] == null;",
+          "name": "factory",
+          "content": "this could be useful during testing as a placeholder"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the factory returns null.",
+          "assertion": "assert methodResultID == (receiverObjectID.getFactory() == null);",
+          "name": null,
+          "content": "the factory returns null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "constantFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "constantToReturn"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "constantToReturn must be an immutable object",
+          "assertion": "assert args[0] instanceof java.lang.Object;",
+          "name": "constantToReturn",
+          "content": "the constant object to return each time in the factory"
+        },
+        {
+          "description": "constantToReturn must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "constantToReturn",
+          "content": "the constant object to return each time in the factory"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "The constant factory returns the same object each time it is used.",
+          "assertion": "assert receiverObjectID.constantFactory().setConstant(constantToReturn) == null;",
+          "name": null,
+          "content": "The constant factory returns the same object each time it is used."
+        }
+      ]
+    }
+  },
+  {
+    "method": "prototypeFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "prototype"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the prototype must be an instance of org.apache.commons.collections4.functors.PrototypeFactory",
+          "assertion": "assert receiverObjectID instanceof org.apache.commons.collections4.functors.PrototypeFactory;",
+          "name": "prototype",
+          "content": "<code>prototype</code> must be an instance of <code>org.apache.commons.collections4.functors.PrototypeFactory</code>"
+        },
+        {
+          "description": "the prototype cannot be null",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "prototype",
+          "content": "<code>prototype</code> must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the prototype factory, or a ConstantFactory.NULL_INSTANCE if prototype is null",
+          "assertion": "assert methodResultID == (receiverObjectID.getPrototype() != null ? receiverObjectID : ConstantFactory.NULL_INSTANCE);",
+          "name": null,
+          "content": "the prototype factory, or a ConstantFactory.NULL_INSTANCE if prototype is null"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if prototype is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "IllegalArgumentException",
+          "content": "if the prototype cannot be cloned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "instantiateFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "classToInstantiate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "classToInstantiate cannot be null",
+          "assertion": "assert receiverObjectID.classToInstantiate != null;",
+          "name": "classToInstantiate",
+          "content": "&lt;code&gt;NullPointerException&lt;/code&gt; if the classToInstantiate is null&lt;/code&gt;"
+        },
+        {
+          "description": "the type parameter T must be specified",
+          "assertion": "assert args[0] != null;",
+          "name": "args[0]",
+          "content": "<code>the type parameter T must be specified&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "",
+          "assertion": "assert methodResultID == (receiverObjectID.classToInstantiate != null);",
+          "name": null,
+          "content": ""
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if classToInstantiate is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the classToInstantiate is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "instantiateFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "classToInstantiate"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "paramTypes"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "args"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "<T>",
+          "content": "the type that the factory creates",
+          "assertion": "",
+          "description": "the type that the factory creates"
+        },
+        {
+          "tag": "param",
+          "name": "classToInstantiate",
+          "content": "the Class to instantiate each time in the factory",
+          "assertion": "",
+          "description": "the Class to instantiate each time in the factory"
+        },
+        {
+          "tag": "param",
+          "name": "paramTypes",
+          "content": "parameter types for the constructor, can be null",
+          "assertion": "",
+          "description": "parameter types for the constructor, can be null"
+        },
+        {
+          "tag": "param",
+          "name": "args",
+          "content": "the arguments to pass to the constructor, can be null",
+          "assertion": "",
+          "description": "the arguments to pass to the constructor, can be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "<code>reflection</code> factory",
+          "assertion": "",
+          "description": "<code>reflection</code> factory"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if classToInstantiate is null.",
+          "assertion": "assert receiverObjectID==null;",
+          "name": "NullPointerException",
+          "content": "if the classToInstantiate is <code>null</code>."
+        },
+        {
+          "description": "if paramTypes and args don't match.",
+          "assertion": "assert receiverObjectID.paramTypes[0]==receiverObjectID.classToInstantiate && receiverObjectID.args[0].getClass()==receiverObjectID.paramTypes[0];",
+          "name": "IllegalArgumentException",
+          "content": "if the parameter types and arguments don't match."
+        },
+        {
+          "description": "if constructor doesn't exist.",
+          "assertion": "assert !receiverObjectID.classToInstantiate.isAccessible();",
+          "name": "IllegalArgumentException",
+          "content": "if the constructor doesn't exist."
+        }
+      ]
+    }
+  }
+]

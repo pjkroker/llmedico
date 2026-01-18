@@ -1,0 +1,331 @@
+[
+  {
+    "method": "ContinuousOutputModel",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ContinuousOutputModel",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "model"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "model to add at the end of the instance",
+          "assertion": "assert args[0] != null;",
+          "name": "model",
+          "content": "model to add at the end of the instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the model to append is not compatible with the instance (dimension of the state vector, propagation direction, hole between the dates)",
+          "assertion": "assert !args[0].getInterpolatedState().length == receiverObjectID.getInitialTime() || args[0].getInterpolatedDerivatives().length != receiverObjectID.getInterpolatedState().length || args[0].getInterpolatedSecondaryState(0) < receiverObjectID.getInterpolatedTime();",
+          "name": "MathIllegalArgumentException",
+          "content": "if the model to append is not compatible with the instance (dimension of the state vector, propagation direction, hole between the dates)"
+        },
+        {
+          "description": "if the number of functions evaluations is exceeded during step finalization",
+          "assertion": "assert false;",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded during step finalization"
+        }
+      ]
+    }
+  },
+  {
+    "method": "init",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t0"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y0"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "handleStep",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StepInterpolator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "interpolator"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "isLast"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "interpolator for the last accepted step.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "interpolator",
+          "content": "interpolator for the last accepted step."
+        },
+        {
+          "description": "true if the step is the last one",
+          "assertion": "assert (args[1]) == true;",
+          "name": "isLast",
+          "content": "true if the step is the last one"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded during step finalization",
+          "assertion": "",
+          "description": "if the number of functions evaluations is exceeded during step finalization"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInitialTime",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "initial integration time",
+          "assertion": "assert methodResultID == receiverObjectID.getInitialTime();",
+          "name": null,
+          "content": "initial integration time"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getFinalTime",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "final integration time",
+          "assertion": "assert methodResultID == receiverObjectID.getFinalTime();",
+          "name": null,
+          "content": "final integration time"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedTime",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "interpolation point time",
+          "assertion": "assert methodResultID == (receiverObjectID.getInterpolatedTime() != 0) ? receiverObjectID.getInterpolatedTime() : receiverObjectID.getFinalTime();",
+          "name": null,
+          "content": "interpolation point time"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setInterpolatedTime",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "time"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "time of the interpolated point",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "time",
+          "content": "time of the interpolated point"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedState",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "state vector at time getInterpolatedTime",
+          "assertion": "assert methodResultID == receiverObjectID.getInterpolatedState();",
+          "name": null,
+          "content": "state vector at time getInterpolatedTime"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded",
+          "assertion": "",
+          "description": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedDerivatives",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "derivatives of the state vector at time getInterpolatedTime",
+          "assertion": "assert methodResultID.length == 1 && Arrays.equals(methodResultID, new double[] {receiverObjectID.getInterpolatedDerivatives()});",
+          "name": null,
+          "content": "derivatives of the state vector at time getInterpolatedTime"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded",
+          "assertion": "",
+          "description": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedSecondaryState",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "secondaryStateIndex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "index of the secondary set, as returned by ExpandableStatefulODE.addSecondaryEquations(SecondaryEquations)",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "secondaryStateIndex",
+          "content": "index of the secondary set, as returned by ExpandableStatefulODE.addSecondaryEquations(SecondaryEquations)"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Get the interpolated secondary state corresponding to the secondary equations.",
+          "assertion": "assert methodResultID[0] == receiverObjectID.getInterpolatedSecondaryState(args[0]);",
+          "name": null,
+          "content": "Get the interpolated secondary state corresponding to the secondary equations."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the number of functions evaluations is exceeded",
+          "assertion": "assert args[0] > receiverObjectID.getMaxCount();",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedSecondaryDerivatives",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "secondaryStateIndex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "index of the secondary set, as returned by ExpandableStatefulODE.addSecondaryEquations(SecondaryEquations), not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "secondaryStateIndex",
+          "content": "index of the secondary set, as returned by ExpandableStatefulODE.addSecondaryEquations(SecondaryEquations)"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Get the interpolated secondary derivatives corresponding to the secondary equations.",
+          "assertion": "assert methodResultID.length == 1 && Arrays.equals(methodResultID, receiverObjectID.getInterpolatedSecondaryState(args[0]));",
+          "name": null,
+          "content": "Get the interpolated secondary derivatives corresponding to the secondary equations."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded",
+          "assertion": "",
+          "description": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  }
+]

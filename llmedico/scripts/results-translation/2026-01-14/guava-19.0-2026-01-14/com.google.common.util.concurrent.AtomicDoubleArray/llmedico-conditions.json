@@ -1,0 +1,476 @@
+[
+  {
+    "method": "AtomicDoubleArray",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "length"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the length must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "length",
+          "content": "the length of the array"
+        }
+      ]
+    }
+  },
+  {
+    "method": "AtomicDoubleArray",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "array cannot be null",
+          "assertion": "assert receiverObjectID == null || args[0] != null;",
+          "name": "array",
+          "content": "&lt;ul&gt;&lt;li&gt;The array is null.&lt;/li&gt;&lt;/ul&gt;"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if array is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if array is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "length",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the length of the array.",
+          "assertion": "assert receiverObjectID.length() == args[0];",
+          "name": null,
+          "content": "the length of the array."
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "i",
+          "content": "the index",
+          "assertion": "",
+          "description": "the index"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "&lt;code&gt;get&lt;/code&gt;(int)&#x20;returns&#x20;the&#x20;current&#x20;value&#x20;at&#x20;position&#x20;i.&lt;/p&gt;",
+          "assertion": "assert receiverObjectID.get(i) == methodResultID;",
+          "name": null,
+          "content": "&lt;code&gt;get&lt;/code&gt;(int)&#x20;returns&#x20;the&#x20;current&#x20;value&#x20;at&#x20;position&#x20;i.&lt;/p&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "set",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "newValue"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the index must be non-negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "i",
+          "content": "&lt;i&gt; must be non-negative"
+        },
+        {
+          "description": "the new value must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "newValue",
+          "content": "&lt;newvalue&gt; must not be null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "lazySet",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "newValue"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the index must be non-negative",
+          "assertion": "assert receiverObjectID.length() >= 0;",
+          "name": "i",
+          "content": "&lt;int&gt;"
+        },
+        {
+          "description": "the new value must be of type double",
+          "assertion": "assert receiverObjectID instanceof java.lang.Double;",
+          "name": "newValue",
+          "content": "&lt;double&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAndSet",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "newValue"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "i must be an integer",
+          "assertion": "assert (int)args[0] >= 0;",
+          "name": "i",
+          "content": "the index"
+        },
+        {
+          "description": "newValue must be a double",
+          "assertion": "assert (double)args[1] >= 0;",
+          "name": "newValue",
+          "content": "the new value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the previous value",
+          "assertion": "assert methodResultID == receiverObjectID.getAndSet(args[0], args[1]).doubleValue();",
+          "name": null,
+          "content": "the previous value"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compareAndSet",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "expect"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "update"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "i must be an index",
+          "assertion": "assert args[0] >= 0 && args[0] < receiverObjectID.length();",
+          "name": "i",
+          "content": "the index"
+        },
+        {
+          "description": "expect must be equal to the expected value",
+          "assertion": "assert args[1] == expect;",
+          "name": "expect",
+          "content": "<a href=\"#double\">the expected value</a>"
+        },
+        {
+          "description": "update must be equal to the new value",
+          "assertion": "assert args[2] == update;",
+          "name": "update",
+          "content": "<a href=\"#double\">the new value</a>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if successful. False return indicates that the actual value was not equal to the expected value.",
+          "assertion": "assert receiverObjectID.compareAndSet(args[0], args[1]) == !(receiverObjectID.length() < 0 || receiverObjectID.get(args[0]) == args[1]);",
+          "name": null,
+          "content": "true if successful. False return indicates that the actual value was not equal to the expected value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "weakCompareAndSet",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "expect"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "update"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "i must be an index",
+          "assertion": "assert args[0] >= 0 && args[0] < length();",
+          "name": "i",
+          "content": "the index"
+        },
+        {
+          "description": "expect must be a double value",
+          "assertion": "assert args[1] instanceof Double;",
+          "name": "expect",
+          "content": "the expected value"
+        },
+        {
+          "description": "update must be a double value",
+          "assertion": "assert args[2] instanceof Double;",
+          "name": "update",
+          "content": "the new value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this element was successfully updated.",
+          "assertion": "assert receiverObjectID.weakCompareAndSet(args[0], args[1], args[2]) == true;",
+          "name": null,
+          "content": "&lt;strong&gt;true if this element was successfully updated.&lt;/strong&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAndAdd",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "delta"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the index must be valid",
+          "assertion": "assert receiverObjectID.length() > 0 && args[0] >= 0 && args[0] < receiverObjectID.length();",
+          "name": "i",
+          "content": "the index"
+        },
+        {
+          "description": "delta must be a number",
+          "assertion": "assert args[1].getClass().equals(double.class);",
+          "name": "delta",
+          "content": "a double value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the previous value",
+          "assertion": "assert receiverObjectID.getAndAdd(args[0], args[1]) == receiverObjectID.addAndGet(args[0], args[1]);",
+          "name": null,
+          "content": "the previous value"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addAndGet",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "delta"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "i",
+          "content": "the index",
+          "assertion": "",
+          "description": "the index"
+        },
+        {
+          "tag": "param",
+          "name": "delta",
+          "content": "the value to add",
+          "assertion": "",
+          "description": "the value to add"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the updated value.",
+          "assertion": "assert methodResultID == (receiverObjectID.addAndGet(args[0], args[1]));",
+          "name": null,
+          "content": "&quot;the updated value.&lt;/p&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the String representation of the current values of array.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.toString());",
+          "name": null,
+          "content": "the String representation of the current values of array."
+        }
+      ]
+    }
+  }
+]

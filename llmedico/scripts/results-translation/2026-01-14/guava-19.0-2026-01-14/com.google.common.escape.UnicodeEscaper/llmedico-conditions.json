@@ -1,0 +1,282 @@
+[
+  {
+    "method": "UnicodeEscaper",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "escape",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "cp"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "&lt;code point&gt; (the Unicode code point to escape if necessary) must be in the range 0=&lt; cp &lt;= Character#MAX_CODE_POINT",
+          "assertion": "assert args[0] >= 0 && args[0] <= Character.MAX_CODE_POINT;",
+          "name": "cp",
+          "content": "&lt;code point&gt; (the Unicode code point to escape if necessary)"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "replacement characters, or {@code null} if no escaping was needed",
+          "assertion": "",
+          "description": "replacement characters, or {@code null} if no escaping was needed"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextEscapeIndex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "csq"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the sub-sequence must be a CharSequence",
+          "assertion": "assert receiverObjectID.csq instanceof CharSequence;",
+          "name": "csq",
+          "content": "<p><b>Note:</b> When implementing an escaper, it is a good idea to override this method for efficiency. The base class implementation determines successive Unicode code points and invokes <code>escape(int)</code> for each of them. If the semantics of your escaper are such that code points in the supplementary range are either all escaped or all unescaped, this method can be implemented more efficiently using <code> CharSequence#charAt(int)</code>.</p>"
+        },
+        {
+          "description": "the start index must be positive",
+          "assertion": "assert receiverObjectID.start > 0;",
+          "name": "start",
+          "content": "<b>Note:</b> If your escaper does not escape characters in the supplementary range, you should either continue to validate the correctness of any surrogate characters encountered or provide a clear warning to users that your escaper does not validate its input."
+        },
+        {
+          "description": "the end index must be positive",
+          "assertion": "assert receiverObjectID.end > 0;",
+          "name": "end",
+          "content": "<p>See <a href=\"https://google.github.io/gerrit/wiki/DocumentationInterfaceEscaper\">com.google.common.net.PercentEscaper</a> for an example.</p>"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if the scanned sub-sequence of {@code csq} contains invalid surrogate pairs",
+          "assertion": "",
+          "description": "if the scanned sub-sequence of {@code csq} contains invalid surrogate pairs"
+        }
+      ]
+    }
+  },
+  {
+    "method": "escape",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "string",
+          "content": "the literal string to be escaped",
+          "assertion": "",
+          "description": "the literal string to be escaped"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "The escaped form of the input string.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.escape((String)args[0]));",
+          "name": null,
+          "content": "The escaped form of the input string."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if {@code string} is null",
+          "assertion": "",
+          "description": "if {@code string} is null"
+        },
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if invalid surrogate characters are encountered",
+          "assertion": "",
+          "description": "if invalid surrogate characters are encountered"
+        }
+      ]
+    }
+  },
+  {
+    "method": "escapeSlow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "s must be not null",
+          "assertion": "assert s != null;",
+          "name": "s",
+          "content": "s must be not null"
+        },
+        {
+          "description": "index must be positive integer",
+          "assertion": "assert index >= 0;",
+          "name": "index",
+          "content": "the index to start escaping from"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the escaped form of a given literal string, starting at the given index.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.escapeSlow(s, index));",
+          "name": null,
+          "content": "the escaped form of a given literal string, starting at the given index."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if string is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if string is <code>null</code>"
+        },
+        {
+          "description": "if invalid surrogate characters are encountered",
+          "assertion": "assert false; // No direct assertion for this condition",
+          "name": "IllegalArgumentException",
+          "content": "if invalid surrogate characters are encountered"
+        }
+      ]
+    }
+  },
+  {
+    "method": "codePointAt",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "seq"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input sequence to search for the next escape index must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "seq",
+          "content": "the input sequence to search for the next escape index must not be null"
+        },
+        {
+          "description": "the start index of the search must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "index",
+          "content": "the start index of the search must be non-negative"
+        },
+        {
+          "description": "the end index beyond which to stop searching must be greater than or equal to the start index plus one",
+          "assertion": "assert args[2] > args[1];",
+          "name": "end",
+          "content": "the end index beyond which to stop searching must be greater than or equal to the start index plus one"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "the",
+          "content": "Unicode code point for the given index or the negated value of the trailing high surrogate character at the end of the sequence",
+          "assertion": "",
+          "description": "Unicode code point for the given index or the negated value of the trailing high surrogate character at the end of the sequence"
+        }
+      ]
+    }
+  }
+]

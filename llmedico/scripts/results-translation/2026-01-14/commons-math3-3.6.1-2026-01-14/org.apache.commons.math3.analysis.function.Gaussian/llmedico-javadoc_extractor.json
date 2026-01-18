@@ -1,0 +1,330 @@
+[
+  {
+    "name": "Gaussian",
+    "package": "org.apache.commons.math3.analysis.function",
+    "qualified_name": "org.apache.commons.math3.analysis.function.Gaussian",
+    "javadoc": "/**\n * <a href=\"http://en.wikipedia.org/wiki/Gaussian_function\">\n *  Gaussian</a> function.\n *\n * @since 3.0\n */\n",
+    "code": "/**\n * <a href=\"http://en.wikipedia.org/wiki/Gaussian_function\">\n *  Gaussian</a> function.\n *\n * @since 3.0\n */\npublic class Gaussian implements UnivariateDifferentiableFunction, DifferentiableUnivariateFunction {\n\n    /**\n     * Mean.\n     */\n    private final double mean;\n\n    /**\n     * Inverse of the standard deviation.\n     */\n    private final double is;\n\n    /**\n     * Inverse of twice the square of the standard deviation.\n     */\n    private final double i2s2;\n\n    /**\n     * Normalization factor.\n     */\n    private final double norm;\n\n    /**\n     * Gaussian with given normalization factor, mean and standard deviation.\n     *\n     * @param norm Normalization factor.\n     * @param mean Mean.\n     * @param sigma Standard deviation.\n     * @throws NotStrictlyPositiveException if {@code sigma <= 0}.\n     */\n    public Gaussian(double norm, double mean, double sigma) throws NotStrictlyPositiveException {\n        if (sigma <= 0) {\n            throw new NotStrictlyPositiveException(sigma);\n        }\n        this.norm = norm;\n        this.mean = mean;\n        this.is = 1 / sigma;\n        this.i2s2 = 0.5 * is * is;\n    }\n\n    /**\n     * Normalized gaussian with given mean and standard deviation.\n     *\n     * @param mean Mean.\n     * @param sigma Standard deviation.\n     * @throws NotStrictlyPositiveException if {@code sigma <= 0}.\n     */\n    public Gaussian(double mean, double sigma) throws NotStrictlyPositiveException {\n        this(1 / (sigma * FastMath.sqrt(2 * Math.PI)), mean, sigma);\n    }\n\n    /**\n     * Normalized gaussian with zero mean and unit standard deviation.\n     */\n    public Gaussian() {\n        this(0, 1);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double value(double x) {\n        return value(x - mean, norm, i2s2);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @deprecated as of 3.1, replaced by {@link #value(DerivativeStructure)}\n     */\n    @Deprecated\n    public UnivariateFunction derivative() {\n        return FunctionUtils.toDifferentiableUnivariateFunction(this).derivative();\n    }\n\n    /**\n     * Parametric function where the input array contains the parameters of\n     * the Gaussian, ordered as follows:\n     * <ul>\n     *  <li>Norm</li>\n     *  <li>Mean</li>\n     *  <li>Standard deviation</li>\n     * </ul>\n     */\n    public static class Parametric implements ParametricUnivariateFunction {\n\n        /**\n         * Computes the value of the Gaussian at {@code x}.\n         *\n         * @param x Value for which the function must be computed.\n         * @param param Values of norm, mean and standard deviation.\n         * @return the value of the function.\n         * @throws NullArgumentException if {@code param} is {@code null}.\n         * @throws DimensionMismatchException if the size of {@code param} is\n         * not 3.\n         * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n         */\n        public double value(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n            validateParameters(param);\n            final double diff = x - param[1];\n            final double i2s2 = 1 / (2 * param[2] * param[2]);\n            return Gaussian.value(diff, param[0], i2s2);\n        }\n\n        /**\n         * Computes the value of the gradient at {@code x}.\n         * The components of the gradient vector are the partial\n         * derivatives of the function with respect to each of the\n         * <em>parameters</em> (norm, mean and standard deviation).\n         *\n         * @param x Value at which the gradient must be computed.\n         * @param param Values of norm, mean and standard deviation.\n         * @return the gradient vector at {@code x}.\n         * @throws NullArgumentException if {@code param} is {@code null}.\n         * @throws DimensionMismatchException if the size of {@code param} is\n         * not 3.\n         * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n         */\n        public double[] gradient(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n            validateParameters(param);\n            final double norm = param[0];\n            final double diff = x - param[1];\n            final double sigma = param[2];\n            final double i2s2 = 1 / (2 * sigma * sigma);\n            final double n = Gaussian.value(diff, 1, i2s2);\n            final double m = norm * n * 2 * i2s2 * diff;\n            final double s = m * diff / sigma;\n            return new double[] { n, m, s };\n        }\n\n        /**\n         * Validates parameters to ensure they are appropriate for the evaluation of\n         * the {@link #value(double,double[])} and {@link #gradient(double,double[])}\n         * methods.\n         *\n         * @param param Values of norm, mean and standard deviation.\n         * @throws NullArgumentException if {@code param} is {@code null}.\n         * @throws DimensionMismatchException if the size of {@code param} is\n         * not 3.\n         * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n         */\n        private void validateParameters(double[] param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n            if (param == null) {\n                throw new NullArgumentException();\n            }\n            if (param.length != 3) {\n                throw new DimensionMismatchException(param.length, 3);\n            }\n            if (param[2] <= 0) {\n                throw new NotStrictlyPositiveException(param[2]);\n            }\n        }\n    }\n\n    /**\n     * @param xMinusMean {@code x - mean}.\n     * @param norm Normalization factor.\n     * @param i2s2 Inverse of twice the square of the standard deviation.\n     * @return the value of the Gaussian at {@code x}.\n     */\n    private static double value(double xMinusMean, double norm, double i2s2) {\n        return norm * FastMath.exp(-xMinusMean * xMinusMean * i2s2);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.1\n     */\n    public DerivativeStructure value(final DerivativeStructure t) throws DimensionMismatchException {\n        final double u = is * (t.getValue() - mean);\n        double[] f = new double[t.getOrder() + 1];\n        // the nth order derivative of the Gaussian has the form:\n        // dn(g(x)/dxn = (norm / s^n) P_n(u) exp(-u^2/2) with u=(x-m)/s\n        // where P_n(u) is a degree n polynomial with same parity as n\n        // P_0(u) = 1, P_1(u) = -u, P_2(u) = u^2 - 1, P_3(u) = -u^3 + 3 u...\n        // the general recurrence relation for P_n is:\n        // P_n(u) = P_(n-1)'(u) - u P_(n-1)(u)\n        // as per polynomial parity, we can store coefficients of both P_(n-1) and P_n in the same array\n        final double[] p = new double[f.length];\n        p[0] = 1;\n        final double u2 = u * u;\n        double coeff = norm * FastMath.exp(-0.5 * u2);\n        if (coeff <= Precision.SAFE_MIN) {\n            Arrays.fill(f, 0.0);\n        } else {\n            f[0] = coeff;\n            for (int n = 1; n < f.length; ++n) {\n                // update and evaluate polynomial P_n(x)\n                double v = 0;\n                p[n] = -p[n - 1];\n                for (int k = n; k >= 0; k -= 2) {\n                    v = v * u2 + p[k];\n                    if (k > 2) {\n                        p[k - 2] = (k - 1) * p[k - 1] - p[k - 3];\n                    } else if (k == 2) {\n                        p[0] = p[1];\n                    }\n                }\n                if ((n & 0x1) == 1) {\n                    v *= u;\n                }\n                coeff *= is;\n                f[n] = coeff * v;\n            }\n        }\n        return t.compose(f);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Gaussian",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "norm"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "mean"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sigma"
+          }
+        ],
+        "javadoc": "/**\n * Gaussian with given normalization factor, mean and standard deviation.\n *\n * @param norm Normalization factor.\n * @param mean Mean.\n * @param sigma Standard deviation.\n * @throws NotStrictlyPositiveException if {@code sigma <= 0}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "norm",
+            "content": "Normalization factor."
+          },
+          {
+            "tag": "param",
+            "name": "mean",
+            "content": "Mean."
+          },
+          {
+            "tag": "param",
+            "name": "sigma",
+            "content": "Standard deviation."
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code sigma <= 0}."
+          }
+        ],
+        "code": "/**\n * Gaussian with given normalization factor, mean and standard deviation.\n *\n * @param norm Normalization factor.\n * @param mean Mean.\n * @param sigma Standard deviation.\n * @throws NotStrictlyPositiveException if {@code sigma <= 0}.\n */\npublic Gaussian(double norm, double mean, double sigma) throws NotStrictlyPositiveException {\n    if (sigma <= 0) {\n        throw new NotStrictlyPositiveException(sigma);\n    }\n    this.norm = norm;\n    this.mean = mean;\n    this.is = 1 / sigma;\n    this.i2s2 = 0.5 * is * is;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "Gaussian",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "mean"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sigma"
+          }
+        ],
+        "javadoc": "/**\n * Normalized gaussian with given mean and standard deviation.\n *\n * @param mean Mean.\n * @param sigma Standard deviation.\n * @throws NotStrictlyPositiveException if {@code sigma <= 0}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "mean",
+            "content": "Mean."
+          },
+          {
+            "tag": "param",
+            "name": "sigma",
+            "content": "Standard deviation."
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code sigma <= 0}."
+          }
+        ],
+        "code": "/**\n * Normalized gaussian with given mean and standard deviation.\n *\n * @param mean Mean.\n * @param sigma Standard deviation.\n * @throws NotStrictlyPositiveException if {@code sigma <= 0}.\n */\npublic Gaussian(double mean, double sigma) throws NotStrictlyPositiveException {\n    this(1 / (sigma * FastMath.sqrt(2 * Math.PI)), mean, sigma);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "Gaussian",
+        "parameters": [],
+        "javadoc": "/**\n * Normalized gaussian with zero mean and unit standard deviation.\n */\n",
+        "tags": [],
+        "code": "/**\n * Normalized gaussian with zero mean and unit standard deviation.\n */\npublic Gaussian() {\n    this(0, 1);\n}"
+      },
+      {
+        "type": "method",
+        "name": "value",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double value(double x) {\n    return value(x - mean, norm, i2s2);\n}"
+      },
+      {
+        "type": "method",
+        "name": "derivative",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "UnivariateFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @deprecated as of 3.1, replaced by {@link #value(DerivativeStructure)}\n */\n",
+        "tags": [
+          {
+            "tag": "deprecated",
+            "name": "as",
+            "content": "of 3.1, replaced by {@link #value(DerivativeStructure)}"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @deprecated as of 3.1, replaced by {@link #value(DerivativeStructure)}\n */\n@Deprecated\npublic UnivariateFunction derivative() {\n    return FunctionUtils.toDifferentiableUnivariateFunction(this).derivative();\n}"
+      },
+      {
+        "type": "method",
+        "name": "value",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "t"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.1\n */\npublic DerivativeStructure value(final DerivativeStructure t) throws DimensionMismatchException {\n    final double u = is * (t.getValue() - mean);\n    double[] f = new double[t.getOrder() + 1];\n    // the nth order derivative of the Gaussian has the form:\n    // dn(g(x)/dxn = (norm / s^n) P_n(u) exp(-u^2/2) with u=(x-m)/s\n    // where P_n(u) is a degree n polynomial with same parity as n\n    // P_0(u) = 1, P_1(u) = -u, P_2(u) = u^2 - 1, P_3(u) = -u^3 + 3 u...\n    // the general recurrence relation for P_n is:\n    // P_n(u) = P_(n-1)'(u) - u P_(n-1)(u)\n    // as per polynomial parity, we can store coefficients of both P_(n-1) and P_n in the same array\n    final double[] p = new double[f.length];\n    p[0] = 1;\n    final double u2 = u * u;\n    double coeff = norm * FastMath.exp(-0.5 * u2);\n    if (coeff <= Precision.SAFE_MIN) {\n        Arrays.fill(f, 0.0);\n    } else {\n        f[0] = coeff;\n        for (int n = 1; n < f.length; ++n) {\n            // update and evaluate polynomial P_n(x)\n            double v = 0;\n            p[n] = -p[n - 1];\n            for (int k = n; k >= 0; k -= 2) {\n                v = v * u2 + p[k];\n                if (k > 2) {\n                    p[k - 2] = (k - 1) * p[k - 1] - p[k - 3];\n                } else if (k == 2) {\n                    p[0] = p[1];\n                }\n            }\n            if ((n & 0x1) == 1) {\n                v *= u;\n            }\n            coeff *= is;\n            f[n] = coeff * v;\n        }\n    }\n    return t.compose(f);\n}"
+      }
+    ]
+  },
+  {
+    "name": "Parametric",
+    "package": "org.apache.commons.math3.analysis.function",
+    "qualified_name": "org.apache.commons.math3.analysis.function.Parametric",
+    "javadoc": "/**\n * Parametric function where the input array contains the parameters of\n * the Gaussian, ordered as follows:\n * <ul>\n *  <li>Norm</li>\n *  <li>Mean</li>\n *  <li>Standard deviation</li>\n * </ul>\n */\n",
+    "code": "/**\n * Parametric function where the input array contains the parameters of\n * the Gaussian, ordered as follows:\n * <ul>\n *  <li>Norm</li>\n *  <li>Mean</li>\n *  <li>Standard deviation</li>\n * </ul>\n */\npublic static class Parametric implements ParametricUnivariateFunction {\n\n    /**\n     * Computes the value of the Gaussian at {@code x}.\n     *\n     * @param x Value for which the function must be computed.\n     * @param param Values of norm, mean and standard deviation.\n     * @return the value of the function.\n     * @throws NullArgumentException if {@code param} is {@code null}.\n     * @throws DimensionMismatchException if the size of {@code param} is\n     * not 3.\n     * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n     */\n    public double value(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n        validateParameters(param);\n        final double diff = x - param[1];\n        final double i2s2 = 1 / (2 * param[2] * param[2]);\n        return Gaussian.value(diff, param[0], i2s2);\n    }\n\n    /**\n     * Computes the value of the gradient at {@code x}.\n     * The components of the gradient vector are the partial\n     * derivatives of the function with respect to each of the\n     * <em>parameters</em> (norm, mean and standard deviation).\n     *\n     * @param x Value at which the gradient must be computed.\n     * @param param Values of norm, mean and standard deviation.\n     * @return the gradient vector at {@code x}.\n     * @throws NullArgumentException if {@code param} is {@code null}.\n     * @throws DimensionMismatchException if the size of {@code param} is\n     * not 3.\n     * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n     */\n    public double[] gradient(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n        validateParameters(param);\n        final double norm = param[0];\n        final double diff = x - param[1];\n        final double sigma = param[2];\n        final double i2s2 = 1 / (2 * sigma * sigma);\n        final double n = Gaussian.value(diff, 1, i2s2);\n        final double m = norm * n * 2 * i2s2 * diff;\n        final double s = m * diff / sigma;\n        return new double[] { n, m, s };\n    }\n\n    /**\n     * Validates parameters to ensure they are appropriate for the evaluation of\n     * the {@link #value(double,double[])} and {@link #gradient(double,double[])}\n     * methods.\n     *\n     * @param param Values of norm, mean and standard deviation.\n     * @throws NullArgumentException if {@code param} is {@code null}.\n     * @throws DimensionMismatchException if the size of {@code param} is\n     * not 3.\n     * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n     */\n    private void validateParameters(double[] param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n        if (param == null) {\n            throw new NullArgumentException();\n        }\n        if (param.length != 3) {\n            throw new DimensionMismatchException(param.length, 3);\n        }\n        if (param[2] <= 0) {\n            throw new NotStrictlyPositiveException(param[2]);\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "value",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "param"
+          }
+        ],
+        "javadoc": "/**\n * Computes the value of the Gaussian at {@code x}.\n *\n * @param x Value for which the function must be computed.\n * @param param Values of norm, mean and standard deviation.\n * @return the value of the function.\n * @throws NullArgumentException if {@code param} is {@code null}.\n * @throws DimensionMismatchException if the size of {@code param} is\n * not 3.\n * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "Value for which the function must be computed."
+          },
+          {
+            "tag": "param",
+            "name": "param",
+            "content": "Values of norm, mean and standard deviation."
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "value of the function."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code param} is {@code null}."
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if the size of {@code param} is not 3."
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code param[2]} is negative."
+          }
+        ],
+        "code": "/**\n * Computes the value of the Gaussian at {@code x}.\n *\n * @param x Value for which the function must be computed.\n * @param param Values of norm, mean and standard deviation.\n * @return the value of the function.\n * @throws NullArgumentException if {@code param} is {@code null}.\n * @throws DimensionMismatchException if the size of {@code param} is\n * not 3.\n * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n */\npublic double value(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n    validateParameters(param);\n    final double diff = x - param[1];\n    final double i2s2 = 1 / (2 * param[2] * param[2]);\n    return Gaussian.value(diff, param[0], i2s2);\n}"
+      },
+      {
+        "type": "method",
+        "name": "gradient",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "param"
+          }
+        ],
+        "javadoc": "/**\n * Computes the value of the gradient at {@code x}.\n * The components of the gradient vector are the partial\n * derivatives of the function with respect to each of the\n * <em>parameters</em> (norm, mean and standard deviation).\n *\n * @param x Value at which the gradient must be computed.\n * @param param Values of norm, mean and standard deviation.\n * @return the gradient vector at {@code x}.\n * @throws NullArgumentException if {@code param} is {@code null}.\n * @throws DimensionMismatchException if the size of {@code param} is\n * not 3.\n * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "Value at which the gradient must be computed."
+          },
+          {
+            "tag": "param",
+            "name": "param",
+            "content": "Values of norm, mean and standard deviation."
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "gradient vector at {@code x}."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code param} is {@code null}."
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if the size of {@code param} is not 3."
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code param[2]} is negative."
+          }
+        ],
+        "code": "/**\n * Computes the value of the gradient at {@code x}.\n * The components of the gradient vector are the partial\n * derivatives of the function with respect to each of the\n * <em>parameters</em> (norm, mean and standard deviation).\n *\n * @param x Value at which the gradient must be computed.\n * @param param Values of norm, mean and standard deviation.\n * @return the gradient vector at {@code x}.\n * @throws NullArgumentException if {@code param} is {@code null}.\n * @throws DimensionMismatchException if the size of {@code param} is\n * not 3.\n * @throws NotStrictlyPositiveException if {@code param[2]} is negative.\n */\npublic double[] gradient(double x, double... param) throws NullArgumentException, DimensionMismatchException, NotStrictlyPositiveException {\n    validateParameters(param);\n    final double norm = param[0];\n    final double diff = x - param[1];\n    final double sigma = param[2];\n    final double i2s2 = 1 / (2 * sigma * sigma);\n    final double n = Gaussian.value(diff, 1, i2s2);\n    final double m = norm * n * 2 * i2s2 * diff;\n    final double s = m * diff / sigma;\n    return new double[] { n, m, s };\n}"
+      }
+    ]
+  }
+]

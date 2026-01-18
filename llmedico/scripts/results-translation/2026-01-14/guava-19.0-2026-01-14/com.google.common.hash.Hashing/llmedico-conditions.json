@@ -1,0 +1,325 @@
+[
+  {
+    "method": "goodFastHash",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minimumBits"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "minimumBits must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "minimumBits",
+          "content": "<b>temporary-use</b>, non-cryptographic hash function. The algorithm the returned function implements is unspecified and subject to change without notice. <br />Warning: a new random seed for these functions is chosen each time the {@code Hashing} class is loaded. <b>Do not use this method</b> if hash codes may escape the current process in any way, for example being sent over RPC, or saved to disk. <br />Repeated calls to this method on the same loaded {@code Hashing} class, using the same value for {@code minimumBits}, will return identically-behaving {@link HashFunction} instances."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": "a",
+          "content": "hash function, described above, that produces hash codes of length {@code minimumBits} or greater",
+          "assertion": "",
+          "description": "hash function, described above, that produces hash codes of length {@code minimumBits} or greater"
+        }
+      ]
+    }
+  },
+  {
+    "method": "murmur3_32",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "seed"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "murmur3_32",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "murmur3_128",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "seed"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "murmur3_128",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sipHash24",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sipHash24",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k0"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "k1"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "md5",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sha1",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sha256",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sha384",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sha512",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "crc32c",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "crc32",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "adler32",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "consistentHash",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "HashCode",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashCode"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buckets"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "consistentHash",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "input"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buckets"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "combineOrdered",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashCodes"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if hashCodes is empty, or the hash codes do not all have the same bit length",
+          "assertion": "assert receiverObjectID.allHashCodeBitsEqual(args[0]) || (receiverObjectID.hashCodes().size() > 0 && ! receiverObjectID.allHashCodeBitsEqual(args[0]));",
+          "name": "IllegalArgumentException",
+          "content": "if hashCodes is empty, or the hash codes do not all have the same bit length"
+        }
+      ]
+    }
+  },
+  {
+    "method": "combineUnordered",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashCodes"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if {@code hashCodes} is empty, or the hash codes do not all have the same bit length",
+          "assertion": "assert (args[0].size() == 0 || !args[0].allElements().map(x -> Integer.bitLength(x)).distinct().contains(Integer.bitLength(args[0].iterator().next())));",
+          "name": "IllegalArgumentException",
+          "content": "if {@code hashCodes} is empty, or the hash codes do not all have the same bit length"
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkPositiveAndMakeMultipleOf32",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "bits"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "concatenating",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "HashFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "first"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "HashFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "second"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "HashFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rest"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "concatenating",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "hashFunctions"
+      }
+    ],
+    "conditions": {}
+  }
+]

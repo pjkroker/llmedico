@@ -1,0 +1,3075 @@
+[
+  {
+    "name": "DerivativeStructure",
+    "package": "org.apache.commons.math3.analysis.differentiation",
+    "qualified_name": "org.apache.commons.math3.analysis.differentiation.DerivativeStructure",
+    "javadoc": "/**\n * Class representing both the value and the differentials of a function.\n * <p>This class is the workhorse of the differentiation package.</p>\n * <p>This class is an implementation of the extension to Rall's\n * numbers described in Dan Kalman's paper <a\n * href=\"http://www1.american.edu/cas/mathstat/People/kalman/pdffiles/mmgautodiff.pdf\">Doubly\n * Recursive Multivariate Automatic Differentiation</a>, Mathematics Magazine, vol. 75,\n * no. 3, June 2002. Rall's numbers are an extension to the real numbers used\n * throughout mathematical expressions; they hold the derivative together with the\n * value of a function. Dan Kalman's derivative structures hold all partial derivatives\n * up to any specified order, with respect to any number of free parameters. Rall's\n * numbers therefore can be seen as derivative structures for order one derivative and\n * one free parameter, and real numbers can be seen as derivative structures with zero\n * order derivative and no free parameters.</p>\n * <p>{@link DerivativeStructure} instances can be used directly thanks to\n * the arithmetic operators to the mathematical functions provided as\n * methods by this class (+, -, *, /, %, sin, cos ...).</p>\n * <p>Implementing complex expressions by hand using these classes is\n * a tedious and error-prone task but has the advantage of having no limitation\n * on the derivation order despite no requiring users to compute the derivatives by\n * themselves. Implementing complex expression can also be done by developing computation\n * code using standard primitive double values and to use {@link\n * UnivariateFunctionDifferentiator differentiators} to create the {@link\n * DerivativeStructure}-based instances. This method is simpler but may be limited in\n * the accuracy and derivation orders and may be computationally intensive (this is\n * typically the case for {@link FiniteDifferencesDifferentiator finite differences\n * differentiator}.</p>\n * <p>Instances of this class are guaranteed to be immutable.</p>\n * @see DSCompiler\n * @since 3.1\n */\n",
+    "code": "/**\n * Class representing both the value and the differentials of a function.\n * <p>This class is the workhorse of the differentiation package.</p>\n * <p>This class is an implementation of the extension to Rall's\n * numbers described in Dan Kalman's paper <a\n * href=\"http://www1.american.edu/cas/mathstat/People/kalman/pdffiles/mmgautodiff.pdf\">Doubly\n * Recursive Multivariate Automatic Differentiation</a>, Mathematics Magazine, vol. 75,\n * no. 3, June 2002. Rall's numbers are an extension to the real numbers used\n * throughout mathematical expressions; they hold the derivative together with the\n * value of a function. Dan Kalman's derivative structures hold all partial derivatives\n * up to any specified order, with respect to any number of free parameters. Rall's\n * numbers therefore can be seen as derivative structures for order one derivative and\n * one free parameter, and real numbers can be seen as derivative structures with zero\n * order derivative and no free parameters.</p>\n * <p>{@link DerivativeStructure} instances can be used directly thanks to\n * the arithmetic operators to the mathematical functions provided as\n * methods by this class (+, -, *, /, %, sin, cos ...).</p>\n * <p>Implementing complex expressions by hand using these classes is\n * a tedious and error-prone task but has the advantage of having no limitation\n * on the derivation order despite no requiring users to compute the derivatives by\n * themselves. Implementing complex expression can also be done by developing computation\n * code using standard primitive double values and to use {@link\n * UnivariateFunctionDifferentiator differentiators} to create the {@link\n * DerivativeStructure}-based instances. This method is simpler but may be limited in\n * the accuracy and derivation orders and may be computationally intensive (this is\n * typically the case for {@link FiniteDifferencesDifferentiator finite differences\n * differentiator}.</p>\n * <p>Instances of this class are guaranteed to be immutable.</p>\n * @see DSCompiler\n * @since 3.1\n */\npublic class DerivativeStructure implements RealFieldElement<DerivativeStructure>, Serializable {\n\n    /**\n     * Serializable UID.\n     */\n    private static final long serialVersionUID = 20120730L;\n\n    /**\n     * Compiler for the current dimensions.\n     */\n    private transient DSCompiler compiler;\n\n    /**\n     * Combined array holding all values.\n     */\n    private final double[] data;\n\n    /**\n     * Build an instance with all values and derivatives set to 0.\n     * @param compiler compiler to use for computation\n     */\n    private DerivativeStructure(final DSCompiler compiler) {\n        this.compiler = compiler;\n        this.data = new double[compiler.getSize()];\n    }\n\n    /**\n     * Build an instance with all values and derivatives set to 0.\n     * @param parameters number of free parameters\n     * @param order derivation order\n     * @throws NumberIsTooLargeException if order is too large\n     */\n    public DerivativeStructure(final int parameters, final int order) throws NumberIsTooLargeException {\n        this(DSCompiler.getCompiler(parameters, order));\n    }\n\n    /**\n     * Build an instance representing a constant value.\n     * @param parameters number of free parameters\n     * @param order derivation order\n     * @param value value of the constant\n     * @throws NumberIsTooLargeException if order is too large\n     * @see #DerivativeStructure(int, int, int, double)\n     */\n    public DerivativeStructure(final int parameters, final int order, final double value) throws NumberIsTooLargeException {\n        this(parameters, order);\n        this.data[0] = value;\n    }\n\n    /**\n     * Build an instance representing a variable.\n     * <p>Instances built using this constructor are considered\n     * to be the free variables with respect to which differentials\n     * are computed. As such, their differential with respect to\n     * themselves is +1.</p>\n     * @param parameters number of free parameters\n     * @param order derivation order\n     * @param index index of the variable (from 0 to {@code parameters - 1})\n     * @param value value of the variable\n     * @exception NumberIsTooLargeException if {@code index >= parameters}.\n     * @see #DerivativeStructure(int, int, double)\n     */\n    public DerivativeStructure(final int parameters, final int order, final int index, final double value) throws NumberIsTooLargeException {\n        this(parameters, order, value);\n        if (index >= parameters) {\n            throw new NumberIsTooLargeException(index, parameters, false);\n        }\n        if (order > 0) {\n            // the derivative of the variable with respect to itself is 1.\n            data[DSCompiler.getCompiler(index, order).getSize()] = 1.0;\n        }\n    }\n\n    /**\n     * Linear combination constructor.\n     * The derivative structure built will be a1 * ds1 + a2 * ds2\n     * @param a1 first scale factor\n     * @param ds1 first base (unscaled) derivative structure\n     * @param a2 second scale factor\n     * @param ds2 second base (unscaled) derivative structure\n     * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n     */\n    public DerivativeStructure(final double a1, final DerivativeStructure ds1, final double a2, final DerivativeStructure ds2) throws DimensionMismatchException {\n        this(ds1.compiler);\n        compiler.checkCompatibility(ds2.compiler);\n        compiler.linearCombination(a1, ds1.data, 0, a2, ds2.data, 0, data, 0);\n    }\n\n    /**\n     * Linear combination constructor.\n     * The derivative structure built will be a1 * ds1 + a2 * ds2 + a3 * ds3\n     * @param a1 first scale factor\n     * @param ds1 first base (unscaled) derivative structure\n     * @param a2 second scale factor\n     * @param ds2 second base (unscaled) derivative structure\n     * @param a3 third scale factor\n     * @param ds3 third base (unscaled) derivative structure\n     * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n     */\n    public DerivativeStructure(final double a1, final DerivativeStructure ds1, final double a2, final DerivativeStructure ds2, final double a3, final DerivativeStructure ds3) throws DimensionMismatchException {\n        this(ds1.compiler);\n        compiler.checkCompatibility(ds2.compiler);\n        compiler.checkCompatibility(ds3.compiler);\n        compiler.linearCombination(a1, ds1.data, 0, a2, ds2.data, 0, a3, ds3.data, 0, data, 0);\n    }\n\n    /**\n     * Linear combination constructor.\n     * The derivative structure built will be a1 * ds1 + a2 * ds2 + a3 * ds3 + a4 * ds4\n     * @param a1 first scale factor\n     * @param ds1 first base (unscaled) derivative structure\n     * @param a2 second scale factor\n     * @param ds2 second base (unscaled) derivative structure\n     * @param a3 third scale factor\n     * @param ds3 third base (unscaled) derivative structure\n     * @param a4 fourth scale factor\n     * @param ds4 fourth base (unscaled) derivative structure\n     * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n     */\n    public DerivativeStructure(final double a1, final DerivativeStructure ds1, final double a2, final DerivativeStructure ds2, final double a3, final DerivativeStructure ds3, final double a4, final DerivativeStructure ds4) throws DimensionMismatchException {\n        this(ds1.compiler);\n        compiler.checkCompatibility(ds2.compiler);\n        compiler.checkCompatibility(ds3.compiler);\n        compiler.checkCompatibility(ds4.compiler);\n        compiler.linearCombination(a1, ds1.data, 0, a2, ds2.data, 0, a3, ds3.data, 0, a4, ds4.data, 0, data, 0);\n    }\n\n    /**\n     * Build an instance from all its derivatives.\n     * @param parameters number of free parameters\n     * @param order derivation order\n     * @param derivatives derivatives sorted according to\n     * {@link DSCompiler#getPartialDerivativeIndex(int...)}\n     * @exception DimensionMismatchException if derivatives array does not match the\n     * {@link DSCompiler#getSize() size} expected by the compiler\n     * @throws NumberIsTooLargeException if order is too large\n     * @see #getAllDerivatives()\n     */\n    public DerivativeStructure(final int parameters, final int order, final double... derivatives) throws DimensionMismatchException, NumberIsTooLargeException {\n        this(parameters, order);\n        if (derivatives.length != data.length) {\n            throw new DimensionMismatchException(derivatives.length, data.length);\n        }\n        System.arraycopy(derivatives, 0, data, 0, data.length);\n    }\n\n    /**\n     * Copy constructor.\n     * @param ds instance to copy\n     */\n    private DerivativeStructure(final DerivativeStructure ds) {\n        this.compiler = ds.compiler;\n        this.data = ds.data.clone();\n    }\n\n    /**\n     * Get the number of free parameters.\n     * @return number of free parameters\n     */\n    public int getFreeParameters() {\n        return compiler.getFreeParameters();\n    }\n\n    /**\n     * Get the derivation order.\n     * @return derivation order\n     */\n    public int getOrder() {\n        return compiler.getOrder();\n    }\n\n    /**\n     * Create a constant compatible with instance order and number of parameters.\n     * <p>\n     * This method is a convenience factory method, it simply calls\n     * {@code new DerivativeStructure(getFreeParameters(), getOrder(), c)}\n     * </p>\n     * @param c value of the constant\n     * @return a constant compatible with instance order and number of parameters\n     * @see #DerivativeStructure(int, int, double)\n     * @since 3.3\n     */\n    public DerivativeStructure createConstant(final double c) {\n        return new DerivativeStructure(getFreeParameters(), getOrder(), c);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public double getReal() {\n        return data[0];\n    }\n\n    /**\n     * Get the value part of the derivative structure.\n     * @return value part of the derivative structure\n     * @see #getPartialDerivative(int...)\n     */\n    public double getValue() {\n        return data[0];\n    }\n\n    /**\n     * Get a partial derivative.\n     * @param orders derivation orders with respect to each variable (if all orders are 0,\n     * the value is returned)\n     * @return partial derivative\n     * @see #getValue()\n     * @exception DimensionMismatchException if the numbers of variables does not\n     * match the instance\n     * @exception NumberIsTooLargeException if sum of derivation orders is larger\n     * than the instance limits\n     */\n    public double getPartialDerivative(final int... orders) throws DimensionMismatchException, NumberIsTooLargeException {\n        return data[compiler.getPartialDerivativeIndex(orders)];\n    }\n\n    /**\n     * Get all partial derivatives.\n     * @return a fresh copy of partial derivatives, in an array sorted according to\n     * {@link DSCompiler#getPartialDerivativeIndex(int...)}\n     */\n    public double[] getAllDerivatives() {\n        return data.clone();\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure add(final double a) {\n        final DerivativeStructure ds = new DerivativeStructure(this);\n        ds.data[0] += a;\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     */\n    public DerivativeStructure add(final DerivativeStructure a) throws DimensionMismatchException {\n        compiler.checkCompatibility(a.compiler);\n        final DerivativeStructure ds = new DerivativeStructure(this);\n        compiler.add(data, 0, a.data, 0, ds.data, 0);\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure subtract(final double a) {\n        return add(-a);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     */\n    public DerivativeStructure subtract(final DerivativeStructure a) throws DimensionMismatchException {\n        compiler.checkCompatibility(a.compiler);\n        final DerivativeStructure ds = new DerivativeStructure(this);\n        compiler.subtract(data, 0, a.data, 0, ds.data, 0);\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public DerivativeStructure multiply(final int n) {\n        return multiply((double) n);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure multiply(final double a) {\n        final DerivativeStructure ds = new DerivativeStructure(this);\n        for (int i = 0; i < ds.data.length; ++i) {\n            ds.data[i] *= a;\n        }\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     */\n    public DerivativeStructure multiply(final DerivativeStructure a) throws DimensionMismatchException {\n        compiler.checkCompatibility(a.compiler);\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.multiply(data, 0, a.data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure divide(final double a) {\n        final DerivativeStructure ds = new DerivativeStructure(this);\n        for (int i = 0; i < ds.data.length; ++i) {\n            ds.data[i] /= a;\n        }\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     */\n    public DerivativeStructure divide(final DerivativeStructure a) throws DimensionMismatchException {\n        compiler.checkCompatibility(a.compiler);\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.divide(data, 0, a.data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public DerivativeStructure remainder(final double a) {\n        final DerivativeStructure ds = new DerivativeStructure(this);\n        ds.data[0] = FastMath.IEEEremainder(ds.data[0], a);\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure remainder(final DerivativeStructure a) throws DimensionMismatchException {\n        compiler.checkCompatibility(a.compiler);\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.remainder(data, 0, a.data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public DerivativeStructure negate() {\n        final DerivativeStructure ds = new DerivativeStructure(compiler);\n        for (int i = 0; i < ds.data.length; ++i) {\n            ds.data[i] = -data[i];\n        }\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure abs() {\n        if (Double.doubleToLongBits(data[0]) < 0) {\n            // we use the bits representation to also handle -0.0\n            return negate();\n        } else {\n            return this;\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure ceil() {\n        return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.ceil(data[0]));\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure floor() {\n        return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.floor(data[0]));\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure rint() {\n        return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.rint(data[0]));\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public long round() {\n        return FastMath.round(data[0]);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure signum() {\n        return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.signum(data[0]));\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure copySign(final DerivativeStructure sign) {\n        long m = Double.doubleToLongBits(data[0]);\n        long s = Double.doubleToLongBits(sign.data[0]);\n        if ((m >= 0 && s >= 0) || (m < 0 && s < 0)) {\n            // Sign is currently OK\n            return this;\n        }\n        // flip sign\n        return negate();\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure copySign(final double sign) {\n        long m = Double.doubleToLongBits(data[0]);\n        long s = Double.doubleToLongBits(sign);\n        if ((m >= 0 && s >= 0) || (m < 0 && s < 0)) {\n            // Sign is currently OK\n            return this;\n        }\n        // flip sign\n        return negate();\n    }\n\n    /**\n     * Return the exponent of the instance value, removing the bias.\n     * <p>\n     * For double numbers of the form 2<sup>x</sup>, the unbiased\n     * exponent is exactly x.\n     * </p>\n     * @return exponent for instance in IEEE754 representation, without bias\n     */\n    public int getExponent() {\n        return FastMath.getExponent(data[0]);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure scalb(final int n) {\n        final DerivativeStructure ds = new DerivativeStructure(compiler);\n        for (int i = 0; i < ds.data.length; ++i) {\n            ds.data[i] = FastMath.scalb(data[i], n);\n        }\n        return ds;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure hypot(final DerivativeStructure y) throws DimensionMismatchException {\n        compiler.checkCompatibility(y.compiler);\n        if (Double.isInfinite(data[0]) || Double.isInfinite(y.data[0])) {\n            return new DerivativeStructure(compiler.getFreeParameters(), compiler.getFreeParameters(), Double.POSITIVE_INFINITY);\n        } else if (Double.isNaN(data[0]) || Double.isNaN(y.data[0])) {\n            return new DerivativeStructure(compiler.getFreeParameters(), compiler.getFreeParameters(), Double.NaN);\n        } else {\n            final int expX = getExponent();\n            final int expY = y.getExponent();\n            if (expX > expY + 27) {\n                // y is neglectible with respect to x\n                return abs();\n            } else if (expY > expX + 27) {\n                // x is neglectible with respect to y\n                return y.abs();\n            } else {\n                // find an intermediate scale to avoid both overflow and underflow\n                final int middleExp = (expX + expY) / 2;\n                // scale parameters without losing precision\n                final DerivativeStructure scaledX = scalb(-middleExp);\n                final DerivativeStructure scaledY = y.scalb(-middleExp);\n                // compute scaled hypotenuse\n                final DerivativeStructure scaledH = scaledX.multiply(scaledX).add(scaledY.multiply(scaledY)).sqrt();\n                // remove scaling\n                return scaledH.scalb(middleExp);\n            }\n        }\n    }\n\n    /**\n     * Returns the hypotenuse of a triangle with sides {@code x} and {@code y}\n     * - sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)\n     * avoiding intermediate overflow or underflow.\n     *\n     * <ul>\n     * <li> If either argument is infinite, then the result is positive infinity.</li>\n     * <li> else, if either argument is NaN then the result is NaN.</li>\n     * </ul>\n     *\n     * @param x a value\n     * @param y a value\n     * @return sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public static DerivativeStructure hypot(final DerivativeStructure x, final DerivativeStructure y) throws DimensionMismatchException {\n        return x.hypot(y);\n    }\n\n    /**\n     * Compute composition of the instance by a univariate function.\n     * @param f array of value and derivatives of the function at\n     * the current point (i.e. [f({@link #getValue()}),\n     * f'({@link #getValue()}), f''({@link #getValue()})...]).\n     * @return f(this)\n     * @exception DimensionMismatchException if the number of derivatives\n     * in the array is not equal to {@link #getOrder() order} + 1\n     */\n    public DerivativeStructure compose(final double... f) throws DimensionMismatchException {\n        if (f.length != getOrder() + 1) {\n            throw new DimensionMismatchException(f.length, getOrder() + 1);\n        }\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.compose(data, 0, f, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public DerivativeStructure reciprocal() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.pow(data, 0, -1, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure sqrt() {\n        return rootN(2);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure cbrt() {\n        return rootN(3);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure rootN(final int n) {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.rootN(data, 0, n, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public Field<DerivativeStructure> getField() {\n        return new Field<DerivativeStructure>() {\n\n            /**\n             * {@inheritDoc}\n             */\n            public DerivativeStructure getZero() {\n                return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), 0.0);\n            }\n\n            /**\n             * {@inheritDoc}\n             */\n            public DerivativeStructure getOne() {\n                return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), 1.0);\n            }\n\n            /**\n             * {@inheritDoc}\n             */\n            public Class<? extends FieldElement<DerivativeStructure>> getRuntimeClass() {\n                return DerivativeStructure.class;\n            }\n        };\n    }\n\n    /**\n     * Compute a<sup>x</sup> where a is a double and x a {@link DerivativeStructure}\n     * @param a number to exponentiate\n     * @param x power to apply\n     * @return a<sup>x</sup>\n     * @since 3.3\n     */\n    public static DerivativeStructure pow(final double a, final DerivativeStructure x) {\n        final DerivativeStructure result = new DerivativeStructure(x.compiler);\n        x.compiler.pow(a, x.data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure pow(final double p) {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.pow(data, 0, p, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure pow(final int n) {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.pow(data, 0, n, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure pow(final DerivativeStructure e) throws DimensionMismatchException {\n        compiler.checkCompatibility(e.compiler);\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.pow(data, 0, e.data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure exp() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.exp(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure expm1() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.expm1(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure log() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.log(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure log1p() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.log1p(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * Base 10 logarithm.\n     * @return base 10 logarithm of the instance\n     */\n    public DerivativeStructure log10() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.log10(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure cos() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.cos(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure sin() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.sin(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure tan() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.tan(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure acos() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.acos(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure asin() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.asin(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure atan() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.atan(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure atan2(final DerivativeStructure x) throws DimensionMismatchException {\n        compiler.checkCompatibility(x.compiler);\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.atan2(data, 0, x.data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * Two arguments arc tangent operation.\n     * @param y first argument of the arc tangent\n     * @param x second argument of the arc tangent\n     * @return atan2(y, x)\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public static DerivativeStructure atan2(final DerivativeStructure y, final DerivativeStructure x) throws DimensionMismatchException {\n        return y.atan2(x);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure cosh() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.cosh(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure sinh() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.sinh(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure tanh() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.tanh(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure acosh() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.acosh(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure asinh() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.asinh(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     * @since 3.2\n     */\n    public DerivativeStructure atanh() {\n        final DerivativeStructure result = new DerivativeStructure(compiler);\n        compiler.atanh(data, 0, result.data, 0);\n        return result;\n    }\n\n    /**\n     * Convert radians to degrees, with error of less than 0.5 ULP\n     *  @return instance converted into degrees\n     */\n    public DerivativeStructure toDegrees() {\n        final DerivativeStructure ds = new DerivativeStructure(compiler);\n        for (int i = 0; i < ds.data.length; ++i) {\n            ds.data[i] = FastMath.toDegrees(data[i]);\n        }\n        return ds;\n    }\n\n    /**\n     * Convert degrees to radians, with error of less than 0.5 ULP\n     *  @return instance converted into radians\n     */\n    public DerivativeStructure toRadians() {\n        final DerivativeStructure ds = new DerivativeStructure(compiler);\n        for (int i = 0; i < ds.data.length; ++i) {\n            ds.data[i] = FastMath.toRadians(data[i]);\n        }\n        return ds;\n    }\n\n    /**\n     * Evaluate Taylor expansion a derivative structure.\n     * @param delta parameters offsets (&Delta;x, &Delta;y, ...)\n     * @return value of the Taylor expansion at x + &Delta;x, y + &Delta;y, ...\n     * @throws MathArithmeticException if factorials becomes too large\n     */\n    public double taylor(final double... delta) throws MathArithmeticException {\n        return compiler.taylor(data, 0, delta);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final DerivativeStructure[] a, final DerivativeStructure[] b) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double[] aDouble = new double[a.length];\n        for (int i = 0; i < a.length; ++i) {\n            aDouble[i] = a[i].getValue();\n        }\n        final double[] bDouble = new double[b.length];\n        for (int i = 0; i < b.length; ++i) {\n            bDouble[i] = b[i].getValue();\n        }\n        final double accurateValue = MathArrays.linearCombination(aDouble, bDouble);\n        // compute a simple value, with all partial derivatives\n        DerivativeStructure simpleValue = a[0].getField().getZero();\n        for (int i = 0; i < a.length; ++i) {\n            simpleValue = simpleValue.add(a[i].multiply(b[i]));\n        }\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(simpleValue.getFreeParameters(), simpleValue.getOrder(), all);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final double[] a, final DerivativeStructure[] b) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double[] bDouble = new double[b.length];\n        for (int i = 0; i < b.length; ++i) {\n            bDouble[i] = b[i].getValue();\n        }\n        final double accurateValue = MathArrays.linearCombination(a, bDouble);\n        // compute a simple value, with all partial derivatives\n        DerivativeStructure simpleValue = b[0].getField().getZero();\n        for (int i = 0; i < a.length; ++i) {\n            simpleValue = simpleValue.add(b[i].multiply(a[i]));\n        }\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(simpleValue.getFreeParameters(), simpleValue.getOrder(), all);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final DerivativeStructure a1, final DerivativeStructure b1, final DerivativeStructure a2, final DerivativeStructure b2) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double accurateValue = MathArrays.linearCombination(a1.getValue(), b1.getValue(), a2.getValue(), b2.getValue());\n        // compute a simple value, with all partial derivatives\n        final DerivativeStructure simpleValue = a1.multiply(b1).add(a2.multiply(b2));\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final double a1, final DerivativeStructure b1, final double a2, final DerivativeStructure b2) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double accurateValue = MathArrays.linearCombination(a1, b1.getValue(), a2, b2.getValue());\n        // compute a simple value, with all partial derivatives\n        final DerivativeStructure simpleValue = b1.multiply(a1).add(b2.multiply(a2));\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final DerivativeStructure a1, final DerivativeStructure b1, final DerivativeStructure a2, final DerivativeStructure b2, final DerivativeStructure a3, final DerivativeStructure b3) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double accurateValue = MathArrays.linearCombination(a1.getValue(), b1.getValue(), a2.getValue(), b2.getValue(), a3.getValue(), b3.getValue());\n        // compute a simple value, with all partial derivatives\n        final DerivativeStructure simpleValue = a1.multiply(b1).add(a2.multiply(b2)).add(a3.multiply(b3));\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final double a1, final DerivativeStructure b1, final double a2, final DerivativeStructure b2, final double a3, final DerivativeStructure b3) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double accurateValue = MathArrays.linearCombination(a1, b1.getValue(), a2, b2.getValue(), a3, b3.getValue());\n        // compute a simple value, with all partial derivatives\n        final DerivativeStructure simpleValue = b1.multiply(a1).add(b2.multiply(a2)).add(b3.multiply(a3));\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final DerivativeStructure a1, final DerivativeStructure b1, final DerivativeStructure a2, final DerivativeStructure b2, final DerivativeStructure a3, final DerivativeStructure b3, final DerivativeStructure a4, final DerivativeStructure b4) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double accurateValue = MathArrays.linearCombination(a1.getValue(), b1.getValue(), a2.getValue(), b2.getValue(), a3.getValue(), b3.getValue(), a4.getValue(), b4.getValue());\n        // compute a simple value, with all partial derivatives\n        final DerivativeStructure simpleValue = a1.multiply(b1).add(a2.multiply(b2)).add(a3.multiply(b3)).add(a4.multiply(b4));\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @exception DimensionMismatchException if number of free parameters\n     * or orders do not match\n     * @since 3.2\n     */\n    public DerivativeStructure linearCombination(final double a1, final DerivativeStructure b1, final double a2, final DerivativeStructure b2, final double a3, final DerivativeStructure b3, final double a4, final DerivativeStructure b4) throws DimensionMismatchException {\n        // compute an accurate value, taking care of cancellations\n        final double accurateValue = MathArrays.linearCombination(a1, b1.getValue(), a2, b2.getValue(), a3, b3.getValue(), a4, b4.getValue());\n        // compute a simple value, with all partial derivatives\n        final DerivativeStructure simpleValue = b1.multiply(a1).add(b2.multiply(a2)).add(b3.multiply(a3)).add(b4.multiply(a4));\n        // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n        final double[] all = simpleValue.getAllDerivatives();\n        all[0] = accurateValue;\n        return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n    }\n\n    /**\n     * Test for the equality of two derivative structures.\n     * <p>\n     * Derivative structures are considered equal if they have the same number\n     * of free parameters, the same derivation order, and the same derivatives.\n     * </p>\n     * @param other Object to test for equality to this\n     * @return true if two derivative structures are equal\n     * @since 3.2\n     */\n    @Override\n    public boolean equals(Object other) {\n        if (this == other) {\n            return true;\n        }\n        if (other instanceof DerivativeStructure) {\n            final DerivativeStructure rhs = (DerivativeStructure) other;\n            return (getFreeParameters() == rhs.getFreeParameters()) && (getOrder() == rhs.getOrder()) && MathArrays.equals(data, rhs.data);\n        }\n        return false;\n    }\n\n    /**\n     * Get a hashCode for the derivative structure.\n     * @return a hash code value for this object\n     * @since 3.2\n     */\n    @Override\n    public int hashCode() {\n        return 227 + 229 * getFreeParameters() + 233 * getOrder() + 239 * MathUtils.hash(data);\n    }\n\n    /**\n     * Replace the instance with a data transfer object for serialization.\n     * @return data transfer object that will be serialized\n     */\n    private Object writeReplace() {\n        return new DataTransferObject(compiler.getFreeParameters(), compiler.getOrder(), data);\n    }\n\n    /**\n     * Internal class used only for serialization.\n     */\n    private static class DataTransferObject implements Serializable {\n\n        /**\n         * Serializable UID.\n         */\n        private static final long serialVersionUID = 20120730L;\n\n        /**\n         * Number of variables.\n         * @serial\n         */\n        private final int variables;\n\n        /**\n         * Derivation order.\n         * @serial\n         */\n        private final int order;\n\n        /**\n         * Partial derivatives.\n         * @serial\n         */\n        private final double[] data;\n\n        /**\n         * Simple constructor.\n         * @param variables number of variables\n         * @param order derivation order\n         * @param data partial derivatives\n         */\n        DataTransferObject(final int variables, final int order, final double[] data) {\n            this.variables = variables;\n            this.order = order;\n            this.data = data;\n        }\n\n        /**\n         * Replace the deserialized data transfer object with a {@link DerivativeStructure}.\n         * @return replacement {@link DerivativeStructure}\n         */\n        private Object readResolve() {\n            return new DerivativeStructure(variables, order, data);\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "DerivativeStructure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "parameters"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "order"
+          }
+        ],
+        "javadoc": "/**\n * Build an instance with all values and derivatives set to 0.\n * @param parameters number of free parameters\n * @param order derivation order\n * @throws NumberIsTooLargeException if order is too large\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "parameters",
+            "content": "number of free parameters",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "number of free parameters"
+          },
+          {
+            "tag": "param",
+            "name": "order",
+            "content": "derivation order",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "derivation order"
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooLargeException",
+            "content": "if order is too large",
+            "assertion": "",
+            "description": "if order is too large"
+          }
+        ],
+        "code": "/**\n * Build an instance with all values and derivatives set to 0.\n * @param parameters number of free parameters\n * @param order derivation order\n * @throws NumberIsTooLargeException if order is too large\n */\npublic DerivativeStructure(final int parameters, final int order) throws NumberIsTooLargeException {\n    this(DSCompiler.getCompiler(parameters, order));\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "DerivativeStructure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "parameters"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "order"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Build an instance representing a constant value.\n * @param parameters number of free parameters\n * @param order derivation order\n * @param value value of the constant\n * @throws NumberIsTooLargeException if order is too large\n * @see #DerivativeStructure(int, int, int, double)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "parameters",
+            "content": "number of free parameters",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "number of free parameters"
+          },
+          {
+            "tag": "param",
+            "name": "order",
+            "content": "derivation order",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "derivation order"
+          },
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "value of the constant",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "value of the constant"
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooLargeException",
+            "content": "if order is too large",
+            "assertion": "",
+            "description": "if order is too large"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#DerivativeStructure(int, int, int, double)"
+          }
+        ],
+        "code": "/**\n * Build an instance representing a constant value.\n * @param parameters number of free parameters\n * @param order derivation order\n * @param value value of the constant\n * @throws NumberIsTooLargeException if order is too large\n * @see #DerivativeStructure(int, int, int, double)\n */\npublic DerivativeStructure(final int parameters, final int order, final double value) throws NumberIsTooLargeException {\n    this(parameters, order);\n    this.data[0] = value;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "DerivativeStructure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "parameters"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "order"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Build an instance representing a variable.\n * <p>Instances built using this constructor are considered\n * to be the free variables with respect to which differentials\n * are computed. As such, their differential with respect to\n * themselves is +1.</p>\n * @param parameters number of free parameters\n * @param order derivation order\n * @param index index of the variable (from 0 to {@code parameters - 1})\n * @param value value of the variable\n * @exception NumberIsTooLargeException if {@code index >= parameters}.\n * @see #DerivativeStructure(int, int, double)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "parameters",
+            "content": "number of free parameters",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "number of free parameters"
+          },
+          {
+            "tag": "param",
+            "name": "order",
+            "content": "derivation order",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "derivation order"
+          },
+          {
+            "tag": "param",
+            "name": "index",
+            "content": "index of the variable (from 0 to {@code parameters - 1})",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "index of the variable (from 0 to parameters - 1)"
+          },
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "value of the variable",
+            "assertion": "assert (args[3] == null) == false;",
+            "description": "value of the variable"
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooLargeException",
+            "content": "if {@code index >= parameters}.",
+            "assertion": "assert args[2] >= args[0];",
+            "description": "if index >= parameters."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#DerivativeStructure(int, int, double)"
+          }
+        ],
+        "code": "/**\n * Build an instance representing a variable.\n * <p>Instances built using this constructor are considered\n * to be the free variables with respect to which differentials\n * are computed. As such, their differential with respect to\n * themselves is +1.</p>\n * @param parameters number of free parameters\n * @param order derivation order\n * @param index index of the variable (from 0 to {@code parameters - 1})\n * @param value value of the variable\n * @exception NumberIsTooLargeException if {@code index >= parameters}.\n * @see #DerivativeStructure(int, int, double)\n */\npublic DerivativeStructure(final int parameters, final int order, final int index, final double value) throws NumberIsTooLargeException {\n    this(parameters, order, value);\n    if (index >= parameters) {\n        throw new NumberIsTooLargeException(index, parameters, false);\n    }\n    if (order > 0) {\n        // the derivative of the variable with respect to itself is 1.\n        data[DSCompiler.getCompiler(index, order).getSize()] = 1.0;\n    }\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "DerivativeStructure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds1"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds2"
+          }
+        ],
+        "javadoc": "/**\n * Linear combination constructor.\n * The derivative structure built will be a1 * ds1 + a2 * ds2\n * @param a1 first scale factor\n * @param ds1 first base (unscaled) derivative structure\n * @param a2 second scale factor\n * @param ds2 second base (unscaled) derivative structure\n * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a1",
+            "content": "first scale factor",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "first scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds1",
+            "content": "first base (unscaled) derivative structure",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "first base (unscaled) derivative structure, not null"
+          },
+          {
+            "tag": "param",
+            "name": "a2",
+            "content": "second scale factor",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "second scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds2",
+            "content": "second base (unscaled) derivative structure",
+            "assertion": "assert (args[3] == null) == false;",
+            "description": "second base (unscaled) derivative structure, not null"
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders are inconsistent",
+            "assertion": "",
+            "description": "if number of free parameters or orders are inconsistent"
+          }
+        ],
+        "code": "/**\n * Linear combination constructor.\n * The derivative structure built will be a1 * ds1 + a2 * ds2\n * @param a1 first scale factor\n * @param ds1 first base (unscaled) derivative structure\n * @param a2 second scale factor\n * @param ds2 second base (unscaled) derivative structure\n * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n */\npublic DerivativeStructure(final double a1, final DerivativeStructure ds1, final double a2, final DerivativeStructure ds2) throws DimensionMismatchException {\n    this(ds1.compiler);\n    compiler.checkCompatibility(ds2.compiler);\n    compiler.linearCombination(a1, ds1.data, 0, a2, ds2.data, 0, data, 0);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "DerivativeStructure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds1"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds2"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a3"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds3"
+          }
+        ],
+        "javadoc": "/**\n * Linear combination constructor.\n * The derivative structure built will be a1 * ds1 + a2 * ds2 + a3 * ds3\n * @param a1 first scale factor\n * @param ds1 first base (unscaled) derivative structure\n * @param a2 second scale factor\n * @param ds2 second base (unscaled) derivative structure\n * @param a3 third scale factor\n * @param ds3 third base (unscaled) derivative structure\n * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a1",
+            "content": "first scale factor",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "first scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds1",
+            "content": "first base (unscaled) derivative structure",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "first base (unscaled) derivative structure, not null"
+          },
+          {
+            "tag": "param",
+            "name": "a2",
+            "content": "second scale factor",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "second scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds2",
+            "content": "second base (unscaled) derivative structure",
+            "assertion": "assert (args[3] == null) == false;",
+            "description": "second base (unscaled) derivative structure, not null"
+          },
+          {
+            "tag": "param",
+            "name": "a3",
+            "content": "third scale factor",
+            "assertion": "assert (args[4] == null) == false;",
+            "description": "third scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds3",
+            "content": "third base (unscaled) derivative structure",
+            "assertion": "assert (args[5] == null) == false;",
+            "description": "third base (unscaled) derivative structure, not null"
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders are inconsistent",
+            "assertion": "",
+            "description": "if number of free parameters or orders are inconsistent"
+          }
+        ],
+        "code": "/**\n * Linear combination constructor.\n * The derivative structure built will be a1 * ds1 + a2 * ds2 + a3 * ds3\n * @param a1 first scale factor\n * @param ds1 first base (unscaled) derivative structure\n * @param a2 second scale factor\n * @param ds2 second base (unscaled) derivative structure\n * @param a3 third scale factor\n * @param ds3 third base (unscaled) derivative structure\n * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n */\npublic DerivativeStructure(final double a1, final DerivativeStructure ds1, final double a2, final DerivativeStructure ds2, final double a3, final DerivativeStructure ds3) throws DimensionMismatchException {\n    this(ds1.compiler);\n    compiler.checkCompatibility(ds2.compiler);\n    compiler.checkCompatibility(ds3.compiler);\n    compiler.linearCombination(a1, ds1.data, 0, a2, ds2.data, 0, a3, ds3.data, 0, data, 0);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "DerivativeStructure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds1"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds2"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a3"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds3"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a4"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ds4"
+          }
+        ],
+        "javadoc": "/**\n * Linear combination constructor.\n * The derivative structure built will be a1 * ds1 + a2 * ds2 + a3 * ds3 + a4 * ds4\n * @param a1 first scale factor\n * @param ds1 first base (unscaled) derivative structure\n * @param a2 second scale factor\n * @param ds2 second base (unscaled) derivative structure\n * @param a3 third scale factor\n * @param ds3 third base (unscaled) derivative structure\n * @param a4 fourth scale factor\n * @param ds4 fourth base (unscaled) derivative structure\n * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a1",
+            "content": "first scale factor",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "first scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds1",
+            "content": "first base (unscaled) derivative structure",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "first base (unscaled) derivative structure"
+          },
+          {
+            "tag": "param",
+            "name": "a2",
+            "content": "second scale factor",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "second scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds2",
+            "content": "second base (unscaled) derivative structure",
+            "assertion": "assert (args[3] == null) == false;",
+            "description": "second base (unscaled) derivative structure"
+          },
+          {
+            "tag": "param",
+            "name": "a3",
+            "content": "third scale factor",
+            "assertion": "assert (args[4] == null) == false;",
+            "description": "third scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds3",
+            "content": "third base (unscaled) derivative structure",
+            "assertion": "assert (args[5] == null) == false;",
+            "description": "third base (unscaled) derivative structure"
+          },
+          {
+            "tag": "param",
+            "name": "a4",
+            "content": "fourth scale factor",
+            "assertion": "assert (args[6] == null) == false;",
+            "description": "fourth scale factor"
+          },
+          {
+            "tag": "param",
+            "name": "ds4",
+            "content": "fourth base (unscaled) derivative structure",
+            "assertion": "assert (args[7] == null) == false;",
+            "description": "fourth base (unscaled) derivative structure"
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders are inconsistent",
+            "assertion": "",
+            "description": "if number of free parameters or orders are inconsistent"
+          }
+        ],
+        "code": "/**\n * Linear combination constructor.\n * The derivative structure built will be a1 * ds1 + a2 * ds2 + a3 * ds3 + a4 * ds4\n * @param a1 first scale factor\n * @param ds1 first base (unscaled) derivative structure\n * @param a2 second scale factor\n * @param ds2 second base (unscaled) derivative structure\n * @param a3 third scale factor\n * @param ds3 third base (unscaled) derivative structure\n * @param a4 fourth scale factor\n * @param ds4 fourth base (unscaled) derivative structure\n * @exception DimensionMismatchException if number of free parameters or orders are inconsistent\n */\npublic DerivativeStructure(final double a1, final DerivativeStructure ds1, final double a2, final DerivativeStructure ds2, final double a3, final DerivativeStructure ds3, final double a4, final DerivativeStructure ds4) throws DimensionMismatchException {\n    this(ds1.compiler);\n    compiler.checkCompatibility(ds2.compiler);\n    compiler.checkCompatibility(ds3.compiler);\n    compiler.checkCompatibility(ds4.compiler);\n    compiler.linearCombination(a1, ds1.data, 0, a2, ds2.data, 0, a3, ds3.data, 0, a4, ds4.data, 0, data, 0);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "DerivativeStructure",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "parameters"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "order"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "derivatives"
+          }
+        ],
+        "javadoc": "/**\n * Build an instance from all its derivatives.\n * @param parameters number of free parameters\n * @param order derivation order\n * @param derivatives derivatives sorted according to\n * {@link DSCompiler#getPartialDerivativeIndex(int...)}\n * @exception DimensionMismatchException if derivatives array does not match the\n * {@link DSCompiler#getSize() size} expected by the compiler\n * @throws NumberIsTooLargeException if order is too large\n * @see #getAllDerivatives()\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "parameters",
+            "content": "number of free parameters",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "number of free parameters"
+          },
+          {
+            "tag": "param",
+            "name": "order",
+            "content": "derivation order",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "derivation order"
+          },
+          {
+            "tag": "param",
+            "name": "derivatives",
+            "content": "derivatives sorted according to\n{@link DSCompiler#getPartialDerivativeIndex(int...)}",
+            "assertion": "assert receiverObjectID.getPartialDerivativeIndex((int[]) args[2]);",
+            "description": "derivatives sorted according to"
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if derivatives array does not match the\n{@link DSCompiler#getSize() size} expected by the compiler",
+            "assertion": "",
+            "description": "if derivatives array does not match the\n{@link DSCompiler#getSize() size} expected by the compiler"
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooLargeException",
+            "content": "if order is too large",
+            "assertion": "",
+            "description": "if order is too large"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#getAllDerivatives()"
+          }
+        ],
+        "code": "/**\n * Build an instance from all its derivatives.\n * @param parameters number of free parameters\n * @param order derivation order\n * @param derivatives derivatives sorted according to\n * {@link DSCompiler#getPartialDerivativeIndex(int...)}\n * @exception DimensionMismatchException if derivatives array does not match the\n * {@link DSCompiler#getSize() size} expected by the compiler\n * @throws NumberIsTooLargeException if order is too large\n * @see #getAllDerivatives()\n */\npublic DerivativeStructure(final int parameters, final int order, final double... derivatives) throws DimensionMismatchException, NumberIsTooLargeException {\n    this(parameters, order);\n    if (derivatives.length != data.length) {\n        throw new DimensionMismatchException(derivatives.length, data.length);\n    }\n    System.arraycopy(derivatives, 0, data, 0, data.length);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getFreeParameters",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the number of free parameters.\n * @return number of free parameters\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of free parameters",
+            "assertion": "assert methodResultID == receiverObjectID.getFreeParameters();",
+            "description": "number of free parameters"
+          }
+        ],
+        "code": "/**\n * Get the number of free parameters.\n * @return number of free parameters\n */\npublic int getFreeParameters() {\n    return compiler.getFreeParameters();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getOrder",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the derivation order.\n * @return derivation order\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "order",
+            "assertion": "assert methodResultID == receiverObjectID.getOrder();",
+            "description": "derivation order"
+          }
+        ],
+        "code": "/**\n * Get the derivation order.\n * @return derivation order\n */\npublic int getOrder() {\n    return compiler.getOrder();\n}"
+      },
+      {
+        "type": "method",
+        "name": "createConstant",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "c"
+          }
+        ],
+        "javadoc": "/**\n * Create a constant compatible with instance order and number of parameters.\n * <p>\n * This method is a convenience factory method, it simply calls\n * {@code new DerivativeStructure(getFreeParameters(), getOrder(), c)}\n * </p>\n * @param c value of the constant\n * @return a constant compatible with instance order and number of parameters\n * @see #DerivativeStructure(int, int, double)\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "c",
+            "content": "value of the constant",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "value of the constant"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "constant compatible with instance order and number of parameters",
+            "assertion": "assert methodResultID instanceof DerivativeStructure;",
+            "description": "a constant compatible with instance order and number of parameters"
+          },
+          {
+            "tag": "see",
+            "name": "#DerivativeStructure(int,",
+            "content": "int, double)"
+          },
+          {
+            "tag": "since",
+            "name": "3.3",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Create a constant compatible with instance order and number of parameters.\n * <p>\n * This method is a convenience factory method, it simply calls\n * {@code new DerivativeStructure(getFreeParameters(), getOrder(), c)}\n * </p>\n * @param c value of the constant\n * @return a constant compatible with instance order and number of parameters\n * @see #DerivativeStructure(int, int, double)\n * @since 3.3\n */\npublic DerivativeStructure createConstant(final double c) {\n    return new DerivativeStructure(getFreeParameters(), getOrder(), c);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getReal",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic double getReal() {\n    return data[0];\n}"
+      },
+      {
+        "type": "method",
+        "name": "getValue",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the value part of the derivative structure.\n * @return value part of the derivative structure\n * @see #getPartialDerivative(int...)\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "part of the derivative structure",
+            "assertion": "assert methodResultID == receiverObjectID.getPartialDerivative(0);",
+            "description": "value part of the derivative structure"
+          },
+          {
+            "tag": "see",
+            "name": "#getPartialDerivative(int...)",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Get the value part of the derivative structure.\n * @return value part of the derivative structure\n * @see #getPartialDerivative(int...)\n */\npublic double getValue() {\n    return data[0];\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPartialDerivative",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "orders"
+          }
+        ],
+        "javadoc": "/**\n * Get a partial derivative.\n * @param orders derivation orders with respect to each variable (if all orders are 0,\n * the value is returned)\n * @return partial derivative\n * @see #getValue()\n * @exception DimensionMismatchException if the numbers of variables does not\n * match the instance\n * @exception NumberIsTooLargeException if sum of derivation orders is larger\n * than the instance limits\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "orders",
+            "content": "derivation orders with respect to each variable (if all orders are 0, the value is returned)",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "derivation orders with respect to each variable (if all orders are 0, the value is returned)"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "derivative",
+            "assertion": "assert methodResultID == receiverObjectID.getPartialDerivative(args[0]);",
+            "description": "partial derivative"
+          },
+          {
+            "tag": "see",
+            "name": "#getValue()",
+            "content": ""
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if the numbers of variables does not match the instance",
+            "assertion": "assert args[0].length != receiverObjectID.getOrder();",
+            "description": "if the numbers of variables does not match the instance"
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooLargeException",
+            "content": "if sum of derivation orders is larger than the instance limits",
+            "assertion": "assert args[0] > receiverObjectID.getOrder();",
+            "description": "if sum of derivation orders is larger than the instance limits"
+          }
+        ],
+        "code": "/**\n * Get a partial derivative.\n * @param orders derivation orders with respect to each variable (if all orders are 0,\n * the value is returned)\n * @return partial derivative\n * @see #getValue()\n * @exception DimensionMismatchException if the numbers of variables does not\n * match the instance\n * @exception NumberIsTooLargeException if sum of derivation orders is larger\n * than the instance limits\n */\npublic double getPartialDerivative(final int... orders) throws DimensionMismatchException, NumberIsTooLargeException {\n    return data[compiler.getPartialDerivativeIndex(orders)];\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAllDerivatives",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get all partial derivatives.\n * @return a fresh copy of partial derivatives, in an array sorted according to\n * {@link DSCompiler#getPartialDerivativeIndex(int...)}\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "fresh copy of partial derivatives, in an array sorted according to {@link DSCompiler#getPartialDerivativeIndex(int...)}",
+            "assertion": "assert methodResultID.length == 1 && Arrays.equals(methodResultID, new double[] {receiverObjectID.getPartialDerivative(0)});",
+            "description": "a fresh copy of partial derivatives, in an array sorted according to DSCompiler#getPartialDerivativeIndex(int...)"
+          }
+        ],
+        "code": "/**\n * Get all partial derivatives.\n * @return a fresh copy of partial derivatives, in an array sorted according to\n * {@link DSCompiler#getPartialDerivativeIndex(int...)}\n */\npublic double[] getAllDerivatives() {\n    return data.clone();\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure add(final double a) {\n    final DerivativeStructure ds = new DerivativeStructure(this);\n    ds.data[0] += a;\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\npublic DerivativeStructure add(final DerivativeStructure a) throws DimensionMismatchException {\n    compiler.checkCompatibility(a.compiler);\n    final DerivativeStructure ds = new DerivativeStructure(this);\n    compiler.add(data, 0, a.data, 0, ds.data, 0);\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure subtract(final double a) {\n    return add(-a);\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\npublic DerivativeStructure subtract(final DerivativeStructure a) throws DimensionMismatchException {\n    compiler.checkCompatibility(a.compiler);\n    final DerivativeStructure ds = new DerivativeStructure(this);\n    compiler.subtract(data, 0, a.data, 0, ds.data, 0);\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic DerivativeStructure multiply(final int n) {\n    return multiply((double) n);\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure multiply(final double a) {\n    final DerivativeStructure ds = new DerivativeStructure(this);\n    for (int i = 0; i < ds.data.length; ++i) {\n        ds.data[i] *= a;\n    }\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\npublic DerivativeStructure multiply(final DerivativeStructure a) throws DimensionMismatchException {\n    compiler.checkCompatibility(a.compiler);\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.multiply(data, 0, a.data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure divide(final double a) {\n    final DerivativeStructure ds = new DerivativeStructure(this);\n    for (int i = 0; i < ds.data.length; ++i) {\n        ds.data[i] /= a;\n    }\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n */\npublic DerivativeStructure divide(final DerivativeStructure a) throws DimensionMismatchException {\n    compiler.checkCompatibility(a.compiler);\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.divide(data, 0, a.data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "remainder",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic DerivativeStructure remainder(final double a) {\n    final DerivativeStructure ds = new DerivativeStructure(this);\n    ds.data[0] = FastMath.IEEEremainder(ds.data[0], a);\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "remainder",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure remainder(final DerivativeStructure a) throws DimensionMismatchException {\n    compiler.checkCompatibility(a.compiler);\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.remainder(data, 0, a.data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "negate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic DerivativeStructure negate() {\n    final DerivativeStructure ds = new DerivativeStructure(compiler);\n    for (int i = 0; i < ds.data.length; ++i) {\n        ds.data[i] = -data[i];\n    }\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "abs",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure abs() {\n    if (Double.doubleToLongBits(data[0]) < 0) {\n        // we use the bits representation to also handle -0.0\n        return negate();\n    } else {\n        return this;\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "ceil",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure ceil() {\n    return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.ceil(data[0]));\n}"
+      },
+      {
+        "type": "method",
+        "name": "floor",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure floor() {\n    return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.floor(data[0]));\n}"
+      },
+      {
+        "type": "method",
+        "name": "rint",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure rint() {\n    return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.rint(data[0]));\n}"
+      },
+      {
+        "type": "method",
+        "name": "round",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic long round() {\n    return FastMath.round(data[0]);\n}"
+      },
+      {
+        "type": "method",
+        "name": "signum",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure signum() {\n    return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), FastMath.signum(data[0]));\n}"
+      },
+      {
+        "type": "method",
+        "name": "copySign",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sign"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure copySign(final DerivativeStructure sign) {\n    long m = Double.doubleToLongBits(data[0]);\n    long s = Double.doubleToLongBits(sign.data[0]);\n    if ((m >= 0 && s >= 0) || (m < 0 && s < 0)) {\n        // Sign is currently OK\n        return this;\n    }\n    // flip sign\n    return negate();\n}"
+      },
+      {
+        "type": "method",
+        "name": "copySign",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sign"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure copySign(final double sign) {\n    long m = Double.doubleToLongBits(data[0]);\n    long s = Double.doubleToLongBits(sign);\n    if ((m >= 0 && s >= 0) || (m < 0 && s < 0)) {\n        // Sign is currently OK\n        return this;\n    }\n    // flip sign\n    return negate();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getExponent",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Return the exponent of the instance value, removing the bias.\n * <p>\n * For double numbers of the form 2<sup>x</sup>, the unbiased\n * exponent is exactly x.\n * </p>\n * @return exponent for instance in IEEE754 representation, without bias\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "for instance in IEEE754 representation, without bias",
+            "assertion": "assert methodResultID == receiverObjectID.getOrder();",
+            "description": "exponent for instance in IEEE754 representation, without bias"
+          }
+        ],
+        "code": "/**\n * Return the exponent of the instance value, removing the bias.\n * <p>\n * For double numbers of the form 2<sup>x</sup>, the unbiased\n * exponent is exactly x.\n * </p>\n * @return exponent for instance in IEEE754 representation, without bias\n */\npublic int getExponent() {\n    return FastMath.getExponent(data[0]);\n}"
+      },
+      {
+        "type": "method",
+        "name": "scalb",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure scalb(final int n) {\n    final DerivativeStructure ds = new DerivativeStructure(compiler);\n    for (int i = 0; i < ds.data.length; ++i) {\n        ds.data[i] = FastMath.scalb(data[i], n);\n    }\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hypot",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure hypot(final DerivativeStructure y) throws DimensionMismatchException {\n    compiler.checkCompatibility(y.compiler);\n    if (Double.isInfinite(data[0]) || Double.isInfinite(y.data[0])) {\n        return new DerivativeStructure(compiler.getFreeParameters(), compiler.getFreeParameters(), Double.POSITIVE_INFINITY);\n    } else if (Double.isNaN(data[0]) || Double.isNaN(y.data[0])) {\n        return new DerivativeStructure(compiler.getFreeParameters(), compiler.getFreeParameters(), Double.NaN);\n    } else {\n        final int expX = getExponent();\n        final int expY = y.getExponent();\n        if (expX > expY + 27) {\n            // y is neglectible with respect to x\n            return abs();\n        } else if (expY > expX + 27) {\n            // x is neglectible with respect to y\n            return y.abs();\n        } else {\n            // find an intermediate scale to avoid both overflow and underflow\n            final int middleExp = (expX + expY) / 2;\n            // scale parameters without losing precision\n            final DerivativeStructure scaledX = scalb(-middleExp);\n            final DerivativeStructure scaledY = y.scalb(-middleExp);\n            // compute scaled hypotenuse\n            final DerivativeStructure scaledH = scaledX.multiply(scaledX).add(scaledY.multiply(scaledY)).sqrt();\n            // remove scaling\n            return scaledH.scalb(middleExp);\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "hypot",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          }
+        ],
+        "javadoc": "/**\n * Returns the hypotenuse of a triangle with sides {@code x} and {@code y}\n * - sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)\n * avoiding intermediate overflow or underflow.\n *\n * <ul>\n * <li> If either argument is infinite, then the result is positive infinity.</li>\n * <li> else, if either argument is NaN then the result is NaN.</li>\n * </ul>\n *\n * @param x a value\n * @param y a value\n * @return sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "a value",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "a value"
+          },
+          {
+            "tag": "param",
+            "name": "y",
+            "content": "a value",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "a value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID == !Double.isInfinite(args[0].getReal()) && !Double.isNaN(args[0].getReal()) && !Double.isInfinite(args[1].getReal()) && !Double.isNaN(args[1].getReal());",
+            "description": "Returns the hypotenuse of a triangle with sides x and y - sqrt(x^2 + y^2) avoiding intermediate overflow or underflow."
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns the hypotenuse of a triangle with sides {@code x} and {@code y}\n * - sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)\n * avoiding intermediate overflow or underflow.\n *\n * <ul>\n * <li> If either argument is infinite, then the result is positive infinity.</li>\n * <li> else, if either argument is NaN then the result is NaN.</li>\n * </ul>\n *\n * @param x a value\n * @param y a value\n * @return sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic static DerivativeStructure hypot(final DerivativeStructure x, final DerivativeStructure y) throws DimensionMismatchException {\n    return x.hypot(y);\n}"
+      },
+      {
+        "type": "method",
+        "name": "compose",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "f"
+          }
+        ],
+        "javadoc": "/**\n * Compute composition of the instance by a univariate function.\n * @param f array of value and derivatives of the function at\n * the current point (i.e. [f({@link #getValue()}),\n * f'({@link #getValue()}), f''({@link #getValue()})...]).\n * @return f(this)\n * @exception DimensionMismatchException if the number of derivatives\n * in the array is not equal to {@link #getOrder() order} + 1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "f",
+            "content": "array of value and derivatives of the function at the current point (i.e. [f({@link #getValue()}), f'({@link #getValue()}), f''({@link #getValue()})...]).",
+            "assertion": "assert args[0] != null;",
+            "description": "array of value and derivatives of the function at the current point (i.e. [f({@link #getValue()}), f'({@link #getValue()}), f''({@link #getValue()})...])."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID instanceof DerivativeStructure;",
+            "description": "f(this)"
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if the number of derivatives in the array is not equal to {@link #getOrder() order} + 1",
+            "assertion": "",
+            "description": "if the number of derivatives in the array is not equal to {@link #getOrder() order} + 1"
+          }
+        ],
+        "code": "/**\n * Compute composition of the instance by a univariate function.\n * @param f array of value and derivatives of the function at\n * the current point (i.e. [f({@link #getValue()}),\n * f'({@link #getValue()}), f''({@link #getValue()})...]).\n * @return f(this)\n * @exception DimensionMismatchException if the number of derivatives\n * in the array is not equal to {@link #getOrder() order} + 1\n */\npublic DerivativeStructure compose(final double... f) throws DimensionMismatchException {\n    if (f.length != getOrder() + 1) {\n        throw new DimensionMismatchException(f.length, getOrder() + 1);\n    }\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.compose(data, 0, f, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "reciprocal",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic DerivativeStructure reciprocal() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.pow(data, 0, -1, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "sqrt",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure sqrt() {\n    return rootN(2);\n}"
+      },
+      {
+        "type": "method",
+        "name": "cbrt",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure cbrt() {\n    return rootN(3);\n}"
+      },
+      {
+        "type": "method",
+        "name": "rootN",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure rootN(final int n) {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.rootN(data, 0, n, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getField",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Field",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic Field<DerivativeStructure> getField() {\n    return new Field<DerivativeStructure>() {\n\n        /**\n         * {@inheritDoc}\n         */\n        public DerivativeStructure getZero() {\n            return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), 0.0);\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        public DerivativeStructure getOne() {\n            return new DerivativeStructure(compiler.getFreeParameters(), compiler.getOrder(), 1.0);\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        public Class<? extends FieldElement<DerivativeStructure>> getRuntimeClass() {\n            return DerivativeStructure.class;\n        }\n    };\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * Compute a<sup>x</sup> where a is a double and x a {@link DerivativeStructure}\n * @param a number to exponentiate\n * @param x power to apply\n * @return a<sup>x</sup>\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a",
+            "content": "number to exponentiate",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "number to exponentiate"
+          },
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "power to apply",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "power to apply"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID.equals(receiverObjectID.pow(args[0]));",
+            "description": "a^x where a is a double and x a DerivativeStructure"
+          },
+          {
+            "tag": "since",
+            "name": "3.3",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Compute a<sup>x</sup> where a is a double and x a {@link DerivativeStructure}\n * @param a number to exponentiate\n * @param x power to apply\n * @return a<sup>x</sup>\n * @since 3.3\n */\npublic static DerivativeStructure pow(final double a, final DerivativeStructure x) {\n    final DerivativeStructure result = new DerivativeStructure(x.compiler);\n    x.compiler.pow(a, x.data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure pow(final double p) {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.pow(data, 0, p, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure pow(final int n) {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.pow(data, 0, n, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure pow(final DerivativeStructure e) throws DimensionMismatchException {\n    compiler.checkCompatibility(e.compiler);\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.pow(data, 0, e.data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "exp",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure exp() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.exp(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "expm1",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure expm1() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.expm1(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "log",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure log() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.log(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "log1p",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure log1p() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.log1p(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "log10",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Base 10 logarithm.\n * @return base 10 logarithm of the instance\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "10 logarithm of the instance",
+            "assertion": "assert methodResultID instanceof DerivativeStructure;",
+            "description": "Base 10 logarithm of the instance"
+          }
+        ],
+        "code": "/**\n * Base 10 logarithm.\n * @return base 10 logarithm of the instance\n */\npublic DerivativeStructure log10() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.log10(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "cos",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure cos() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.cos(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "sin",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure sin() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.sin(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "tan",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure tan() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.tan(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "acos",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure acos() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.acos(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "asin",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure asin() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.asin(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "atan",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure atan() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.atan(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "atan2",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure atan2(final DerivativeStructure x) throws DimensionMismatchException {\n    compiler.checkCompatibility(x.compiler);\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.atan2(data, 0, x.data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "atan2",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * Two arguments arc tangent operation.\n * @param y first argument of the arc tangent\n * @param x second argument of the arc tangent\n * @return atan2(y, x)\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "y",
+            "content": "first argument of the arc tangent",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "first argument of the arc tangent"
+          },
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "second argument of the arc tangent",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "second argument of the arc tangent"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "x)",
+            "assertion": "assert methodResultID.equals(receiverObjectID.atan2(args[0], args[1]));",
+            "description": "atan2(y, x) operation."
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Two arguments arc tangent operation.\n * @param y first argument of the arc tangent\n * @param x second argument of the arc tangent\n * @return atan2(y, x)\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic static DerivativeStructure atan2(final DerivativeStructure y, final DerivativeStructure x) throws DimensionMismatchException {\n    return y.atan2(x);\n}"
+      },
+      {
+        "type": "method",
+        "name": "cosh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure cosh() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.cosh(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "sinh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure sinh() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.sinh(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "tanh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure tanh() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.tanh(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "acosh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure acosh() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.acosh(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "asinh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure asinh() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.asinh(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "atanh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @since 3.2\n */\npublic DerivativeStructure atanh() {\n    final DerivativeStructure result = new DerivativeStructure(compiler);\n    compiler.atanh(data, 0, result.data, 0);\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toDegrees",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Convert radians to degrees, with error of less than 0.5 ULP\n *  @return instance converted into degrees\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "converted into degrees",
+            "assertion": "assert methodResultID instanceof DerivativeStructure;",
+            "description": "instance converted into degrees"
+          }
+        ],
+        "code": "/**\n * Convert radians to degrees, with error of less than 0.5 ULP\n *  @return instance converted into degrees\n */\npublic DerivativeStructure toDegrees() {\n    final DerivativeStructure ds = new DerivativeStructure(compiler);\n    for (int i = 0; i < ds.data.length; ++i) {\n        ds.data[i] = FastMath.toDegrees(data[i]);\n    }\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toRadians",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Convert degrees to radians, with error of less than 0.5 ULP\n *  @return instance converted into radians\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "converted into radians",
+            "assertion": "assert methodResultID instanceof DerivativeStructure;",
+            "description": "instance converted into radians"
+          }
+        ],
+        "code": "/**\n * Convert degrees to radians, with error of less than 0.5 ULP\n *  @return instance converted into radians\n */\npublic DerivativeStructure toRadians() {\n    final DerivativeStructure ds = new DerivativeStructure(compiler);\n    for (int i = 0; i < ds.data.length; ++i) {\n        ds.data[i] = FastMath.toRadians(data[i]);\n    }\n    return ds;\n}"
+      },
+      {
+        "type": "method",
+        "name": "taylor",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "delta"
+          }
+        ],
+        "javadoc": "/**\n * Evaluate Taylor expansion a derivative structure.\n * @param delta parameters offsets (&Delta;x, &Delta;y, ...)\n * @return value of the Taylor expansion at x + &Delta;x, y + &Delta;y, ...\n * @throws MathArithmeticException if factorials becomes too large\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "delta",
+            "content": "parameters offsets (&Delta;x, &Delta;y, ...)",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "parameters offsets (&Delta;x, &Delta;y, ...), not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of the Taylor expansion at x + &Delta;x, y + &Delta;y, ...",
+            "assertion": "assert methodResultID == receiverObjectID.taylor(args[0]);",
+            "description": "value of the Taylor expansion at x + &Delta;x, y + &Delta;y, ..."
+          },
+          {
+            "tag": "throws",
+            "name": "MathArithmeticException",
+            "content": "if factorials becomes too large",
+            "assertion": "",
+            "description": "if factorials becomes too large"
+          }
+        ],
+        "code": "/**\n * Evaluate Taylor expansion a derivative structure.\n * @param delta parameters offsets (&Delta;x, &Delta;y, ...)\n * @return value of the Taylor expansion at x + &Delta;x, y + &Delta;y, ...\n * @throws MathArithmeticException if factorials becomes too large\n */\npublic double taylor(final double... delta) throws MathArithmeticException {\n    return compiler.taylor(data, 0, delta);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "a"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final DerivativeStructure[] a, final DerivativeStructure[] b) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double[] aDouble = new double[a.length];\n    for (int i = 0; i < a.length; ++i) {\n        aDouble[i] = a[i].getValue();\n    }\n    final double[] bDouble = new double[b.length];\n    for (int i = 0; i < b.length; ++i) {\n        bDouble[i] = b[i].getValue();\n    }\n    final double accurateValue = MathArrays.linearCombination(aDouble, bDouble);\n    // compute a simple value, with all partial derivatives\n    DerivativeStructure simpleValue = a[0].getField().getZero();\n    for (int i = 0; i < a.length; ++i) {\n        simpleValue = simpleValue.add(a[i].multiply(b[i]));\n    }\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(simpleValue.getFreeParameters(), simpleValue.getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "a"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final double[] a, final DerivativeStructure[] b) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double[] bDouble = new double[b.length];\n    for (int i = 0; i < b.length; ++i) {\n        bDouble[i] = b[i].getValue();\n    }\n    final double accurateValue = MathArrays.linearCombination(a, bDouble);\n    // compute a simple value, with all partial derivatives\n    DerivativeStructure simpleValue = b[0].getField().getZero();\n    for (int i = 0; i < a.length; ++i) {\n        simpleValue = simpleValue.add(b[i].multiply(a[i]));\n    }\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(simpleValue.getFreeParameters(), simpleValue.getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b2"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final DerivativeStructure a1, final DerivativeStructure b1, final DerivativeStructure a2, final DerivativeStructure b2) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double accurateValue = MathArrays.linearCombination(a1.getValue(), b1.getValue(), a2.getValue(), b2.getValue());\n    // compute a simple value, with all partial derivatives\n    final DerivativeStructure simpleValue = a1.multiply(b1).add(a2.multiply(b2));\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b1"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b2"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "assert args[0].getOrder() != args[1].getOrder() || args[2].getOrder() != args[3].getOrder();",
+            "description": "number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final double a1, final DerivativeStructure b1, final double a2, final DerivativeStructure b2) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double accurateValue = MathArrays.linearCombination(a1, b1.getValue(), a2, b2.getValue());\n    // compute a simple value, with all partial derivatives\n    final DerivativeStructure simpleValue = b1.multiply(a1).add(b2.multiply(a2));\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a3"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b3"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "",
+            "description": "if number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final DerivativeStructure a1, final DerivativeStructure b1, final DerivativeStructure a2, final DerivativeStructure b2, final DerivativeStructure a3, final DerivativeStructure b3) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double accurateValue = MathArrays.linearCombination(a1.getValue(), b1.getValue(), a2.getValue(), b2.getValue(), a3.getValue(), b3.getValue());\n    // compute a simple value, with all partial derivatives\n    final DerivativeStructure simpleValue = a1.multiply(b1).add(a2.multiply(b2)).add(a3.multiply(b3));\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b1"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b2"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a3"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b3"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "assert args[0].getOrder() != args[1].getOrder() || args[2].getOrder() != args[3].getOrder();",
+            "description": "number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final double a1, final DerivativeStructure b1, final double a2, final DerivativeStructure b2, final double a3, final DerivativeStructure b3) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double accurateValue = MathArrays.linearCombination(a1, b1.getValue(), a2, b2.getValue(), a3, b3.getValue());\n    // compute a simple value, with all partial derivatives\n    final DerivativeStructure simpleValue = b1.multiply(a1).add(b2.multiply(a2)).add(b3.multiply(a3));\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a3"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b3"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a4"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b4"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "assert args[0].getOrder() != args[1].getOrder() || args[2].getOrder() != args[3].getOrder() || args[4].getOrder() != args[5].getOrder() || args[6].getOrder() != args[7].getOrder();",
+            "description": "number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final DerivativeStructure a1, final DerivativeStructure b1, final DerivativeStructure a2, final DerivativeStructure b2, final DerivativeStructure a3, final DerivativeStructure b3, final DerivativeStructure a4, final DerivativeStructure b4) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double accurateValue = MathArrays.linearCombination(a1.getValue(), b1.getValue(), a2.getValue(), b2.getValue(), a3.getValue(), b3.getValue(), a4.getValue(), b4.getValue());\n    // compute a simple value, with all partial derivatives\n    final DerivativeStructure simpleValue = a1.multiply(b1).add(a2.multiply(b2)).add(a3.multiply(b3)).add(a4.multiply(b4));\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "linearCombination",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b1"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b2"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a3"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b3"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a4"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "DerivativeStructure",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b4"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if number of free parameters or orders do not match",
+            "assertion": "assert args[0].getOrder() != args[1].getOrder() || args[2].getOrder() != args[3].getOrder() || args[4].getOrder() != args[5].getOrder();",
+            "description": "number of free parameters or orders do not match"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @exception DimensionMismatchException if number of free parameters\n * or orders do not match\n * @since 3.2\n */\npublic DerivativeStructure linearCombination(final double a1, final DerivativeStructure b1, final double a2, final DerivativeStructure b2, final double a3, final DerivativeStructure b3, final double a4, final DerivativeStructure b4) throws DimensionMismatchException {\n    // compute an accurate value, taking care of cancellations\n    final double accurateValue = MathArrays.linearCombination(a1, b1.getValue(), a2, b2.getValue(), a3, b3.getValue(), a4, b4.getValue());\n    // compute a simple value, with all partial derivatives\n    final DerivativeStructure simpleValue = b1.multiply(a1).add(b2.multiply(a2)).add(b3.multiply(a3)).add(b4.multiply(a4));\n    // create a result with accurate value and all derivatives (not necessarily as accurate as the value)\n    final double[] all = simpleValue.getAllDerivatives();\n    all[0] = accurateValue;\n    return new DerivativeStructure(getFreeParameters(), getOrder(), all);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * Test for the equality of two derivative structures.\n * <p>\n * Derivative structures are considered equal if they have the same number\n * of free parameters, the same derivation order, and the same derivatives.\n * </p>\n * @param other Object to test for equality to this\n * @return true if two derivative structures are equal\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "Object to test for equality to this",
+            "assertion": "assert args[0] != null;",
+            "description": "Object to test for equality to this"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if two derivative structures are equal",
+            "assertion": "assert methodResultID == receiverObjectID.getOrder() == args[0].getOrder() && receiverObjectID.getPartialDerivative(args[0].getOrder()).equals(args[0].getPartialDerivative(args[0].getOrder()));",
+            "description": "true if two derivative structures are equal."
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Test for the equality of two derivative structures.\n * <p>\n * Derivative structures are considered equal if they have the same number\n * of free parameters, the same derivation order, and the same derivatives.\n * </p>\n * @param other Object to test for equality to this\n * @return true if two derivative structures are equal\n * @since 3.2\n */\n@Override\npublic boolean equals(Object other) {\n    if (this == other) {\n        return true;\n    }\n    if (other instanceof DerivativeStructure) {\n        final DerivativeStructure rhs = (DerivativeStructure) other;\n        return (getFreeParameters() == rhs.getFreeParameters()) && (getOrder() == rhs.getOrder()) && MathArrays.equals(data, rhs.data);\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get a hashCode for the derivative structure.\n * @return a hash code value for this object\n * @since 3.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "hash code value for this object",
+            "assertion": "assert methodResultID == receiverObjectID.hashCode();",
+            "description": "a hash code value for this object"
+          },
+          {
+            "tag": "since",
+            "name": "3.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Get a hashCode for the derivative structure.\n * @return a hash code value for this object\n * @since 3.2\n */\n@Override\npublic int hashCode() {\n    return 227 + 229 * getFreeParameters() + 233 * getOrder() + 239 * MathUtils.hash(data);\n}"
+      }
+    ]
+  },
+  {
+    "name": "DataTransferObject",
+    "package": "org.apache.commons.math3.analysis.differentiation",
+    "qualified_name": "org.apache.commons.math3.analysis.differentiation.DataTransferObject",
+    "javadoc": "/**\n * Internal class used only for serialization.\n */\n",
+    "code": "/**\n * Internal class used only for serialization.\n */\nprivate static class DataTransferObject implements Serializable {\n\n    /**\n     * Serializable UID.\n     */\n    private static final long serialVersionUID = 20120730L;\n\n    /**\n     * Number of variables.\n     * @serial\n     */\n    private final int variables;\n\n    /**\n     * Derivation order.\n     * @serial\n     */\n    private final int order;\n\n    /**\n     * Partial derivatives.\n     * @serial\n     */\n    private final double[] data;\n\n    /**\n     * Simple constructor.\n     * @param variables number of variables\n     * @param order derivation order\n     * @param data partial derivatives\n     */\n    DataTransferObject(final int variables, final int order, final double[] data) {\n        this.variables = variables;\n        this.order = order;\n        this.data = data;\n    }\n\n    /**\n     * Replace the deserialized data transfer object with a {@link DerivativeStructure}.\n     * @return replacement {@link DerivativeStructure}\n     */\n    private Object readResolve() {\n        return new DerivativeStructure(variables, order, data);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "DataTransferObject",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "variables"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "order"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "data"
+          }
+        ],
+        "javadoc": "/**\n * Simple constructor.\n * @param variables number of variables\n * @param order derivation order\n * @param data partial derivatives\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "variables",
+            "content": "number of variables"
+          },
+          {
+            "tag": "param",
+            "name": "order",
+            "content": "derivation order"
+          },
+          {
+            "tag": "param",
+            "name": "data",
+            "content": "partial derivatives"
+          }
+        ],
+        "code": "/**\n * Simple constructor.\n * @param variables number of variables\n * @param order derivation order\n * @param data partial derivatives\n */\nDataTransferObject(final int variables, final int order, final double[] data) {\n    this.variables = variables;\n    this.order = order;\n    this.data = data;\n}"
+      }
+    ]
+  }
+]

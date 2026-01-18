@@ -1,0 +1,95 @@
+[
+  {
+    "method": "interpolate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "xval"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "yval"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 2
+        },
+        "name": "fval"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "All the x-coordinates of the interpolation points, sorted in increasing order",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "xval",
+          "content": "All the x-coordinates of the interpolation points, sorted in increasing order"
+        },
+        {
+          "description": "All the y-coordinates of the interpolation points, sorted in increasing order",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "yval",
+          "content": "All the y-coordinates of the interpolation points, sorted in increasing order"
+        },
+        {
+          "description": "The values of the interpolation points on all the grid knots: f(xval[i], yval[j])",
+          "assertion": "assert (args[2] == null) == false;",
+          "name": "fval",
+          "content": "The values of the interpolation points on all the grid knots: f(xval[i], yval[j])"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a function which interpolates the dataset.",
+          "assertion": "assert methodResultID instanceof BivariateFunction;",
+          "name": null,
+          "content": "a function which interpolates the dataset."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NoDataException",
+          "content": "if any of the arrays has zero length.",
+          "assertion": "",
+          "description": "if any of the arrays has zero length."
+        },
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if the array lengths are inconsistent.",
+          "assertion": "",
+          "description": "if the array lengths are inconsistent."
+        },
+        {
+          "tag": "throws",
+          "name": "NonMonotonicSequenceException",
+          "content": "if the array is not sorted.",
+          "assertion": "",
+          "description": "if the array is not sorted."
+        },
+        {
+          "tag": "throws",
+          "name": "NumberIsTooSmallException",
+          "content": "if the number of points is too small for the order of the interpolation",
+          "assertion": "",
+          "description": "if the number of points is too small for the order of the interpolation"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,317 @@
+[
+  {
+    "method": "RandomKey",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "representation"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "list of [0,1] values representing the permutation",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "representation",
+          "content": "list of [0,1] values representing the permutation"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "iff the representation can not represent a valid chromosome",
+          "assertion": "assert !receiverObjectID.checkValidity(args[0]);",
+          "name": "InvalidRepresentationException",
+          "content": "iff the <code>representation</code> can not represent a valid chromosome"
+        }
+      ]
+    }
+  },
+  {
+    "method": "RandomKey",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "representation"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "array of [0,1] values representing the permutation",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "representation",
+          "content": "array of [0,1] values representing the permutation"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "iff the representation can not represent a valid chromosome.",
+          "assertion": "assert !receiverObjectID.checkValidity(args[0]);",
+          "name": "InvalidRepresentationException",
+          "content": "iff the <code>representation</code> can not represent a valid chromosome."
+        }
+      ]
+    }
+  },
+  {
+    "method": "decode",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sequence"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "isSame",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Chromosome",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "another"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "chromosome to compare",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "another",
+          "content": "chromosome to compare"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true iff another is a RandomKey and encodes the same permutation.",
+          "assertion": "assert methodResultID == receiverObjectID.isSame(args[0]);",
+          "name": null,
+          "content": "true iff another is a RandomKey and encodes the same permutation."
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkValidity",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "chromosomeRepresentation"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "randomPermutation",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "l"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "length of the permutation",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "l",
+          "content": "length of the permutation"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "representation of a random permutation",
+          "assertion": "assert methodResultID instanceof java.util.List;",
+          "name": null,
+          "content": "representation of a random permutation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "identityPermutation",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "l"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "length of the permutation",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "l",
+          "content": "length of the permutation"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "representation of an identity permutation",
+          "assertion": "assert methodResultID.equals(receiverObjectID.randomPermutation(args[0]));",
+          "name": null,
+          "content": "representation of an identity permutation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "comparatorPermutation",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "data"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comparator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "list of data determining the order, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "data",
+          "content": "list of data determining the order"
+        },
+        {
+          "description": "how the data will be compared, not null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "comparator",
+          "content": "how the data will be compared"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "list representation of the permutation corresponding to the parameters",
+          "assertion": "assert methodResultID.equals(args[1].comparatorPermutation(args[0]));",
+          "name": null,
+          "content": "list representation of the permutation corresponding to the parameters"
+        }
+      ]
+    }
+  },
+  {
+    "method": "inducedPermutation",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "originalData"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "permutedData"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the original data",
+          "assertion": "assert args[0] != null;",
+          "name": "originalData",
+          "content": "the original, unpermuted data"
+        },
+        {
+          "description": "the permuted data",
+          "assertion": "assert args[1] != null;",
+          "name": "permutedData",
+          "content": "the data, somehow permuted"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this permutation corresponds to the permutation originalData -> permutedData",
+          "assertion": "assert !originalData.equals(permutedData);",
+          "name": null,
+          "content": "true if this permutation corresponds to the permutation originalData -> permutedData"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "iff the length of <code>originalData</code> and <code>permutedData</code> lists are not equal",
+          "assertion": "",
+          "description": "iff the length of <code>originalData</code> and <code>permutedData</code> lists are not equal"
+        },
+        {
+          "tag": "throws",
+          "name": "MathIllegalArgumentException",
+          "content": "iff the <code>permutedData</code> and <code>originalData</code> lists contain different data",
+          "assertion": "",
+          "description": "iff the <code>permutedData</code> and <code>originalData</code> lists contain different data"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  }
+]
