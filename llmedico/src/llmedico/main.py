@@ -32,6 +32,7 @@ def _normalize_text(text: str) -> str:
     text = re.sub(r"<[^>]+>", "", text)
 
     # 3. Normalize whitespace (newlines, multiple spaces, dots, hyphen)
+    text = text.replace("\\n", " ")
     text = text.replace("\n", " ")
     text = re.sub(r"\s+", " ", text)
     text = text.replace(".", " ")
@@ -180,7 +181,7 @@ def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, pa
 
 
 if __name__ == '__main__':
-    FQ_CLASS_NAME = "org.apache.commons.math3.genetics.RandomKey"  # --target-class java class to be analyzed
+    FQ_CLASS_NAME = "org.apache.commons.math3.analysis.function.StepFunction"  # --target-class java class to be analyzed
     TARGET_METHOD = "dummy"  # --target-method#
     PATH_SOURCE_DIR = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-math3-3.6.1-src/src/main/java")
     PATH_JAR = Path(

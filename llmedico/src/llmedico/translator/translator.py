@@ -117,7 +117,8 @@ class Translator():
 
             current_tags = [tag for tag in tags if tag["tag"] == mode.lower()]
             template = [{"description": "", "assertion": "", "name": condition["name"], "content": condition["content"]} for condition in current_tags]
-            template = str(template).replace("{", "{{").replace("}", "}}")
+            template = (str(template).replace("{'", "{{'").replace("'}", "'}}").replace('{"', '{{"').replace('"}', '"}}').
+                        replace("None", "null").replace(r"\n", r"\\n"))
             logger.debug(f"translating for current mode: {mode} with the following tags: \n{tags}")
             expected_len = modes[mode]
             result = self._translate_once(javadoc, method_name, template, parameters, return_type, method_selection, mode, [], "")
