@@ -1,0 +1,366 @@
+[
+  {
+    "method": "FixedOrderComparator",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "FixedOrderComparator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "items"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "items must not be null",
+          "assertion": "assert receiverObjectID.items != null;",
+          "name": "items",
+          "content": "the items that the comparator can compare in order"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "items is not found in the comparator.",
+          "assertion": "assert !receiverObjectID.add(args[0]);",
+          "name": "IllegalArgumentException",
+          "content": "the items that the comparator can compare in order"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FixedOrderComparator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "items"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the list must not be null",
+          "assertion": "assert receiverObjectID.items == null;",
+          "name": "items",
+          "content": "&lt;ul&gt;&lt;li&gt;The list must not be null&lt;/li&gt;&lt;/ul&gt;"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the list is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the list is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isLocked",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if attempts to change the FixedOrderComparator yield an UnsupportedOperationException, false if it can be changed.",
+          "assertion": "assert methodResultID == !receiverObjectID.isLocked();",
+          "name": null,
+          "content": "true if attempts to change the FixedOrderComparator yield an UnsupportedOperationException, false if it can be changed."
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkLocked",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if the comparator is locked",
+          "assertion": "assert !receiverObjectID.isLocked();",
+          "name": "UnsupportedOperationException",
+          "content": "if the comparator is locked"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getUnknownObjectBehavior",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the behavior for comparing unknown objects",
+          "assertion": "assert methodResultID == null; // receiverObjectID.getUnknownObjectBehavior() == null",
+          "name": null,
+          "content": "the behavior for comparing unknown objects"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setUnknownObjectBehavior",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "UnknownObjectBehavior",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "unknownObjectBehavior"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "unknownObjectBehavior",
+          "content": "the flag for unknown behaviour - UNKNOWN_AFTER, UNKNOWN_BEFORE or UNKNOWN_THROW_EXCEPTION",
+          "assertion": "",
+          "description": "the flag for unknown behaviour - UNKNOWN_AFTER, UNKNOWN_BEFORE or UNKNOWN_THROW_EXCEPTION"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if unknownObjectBehavior is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if unknownObjectBehavior is <code>null</code>."
+        },
+        {
+          "description": "if a comparison has been performed or if unknownObjectBehavior is UNKNOWN_AFTER, UNKNOWN_BEFORE or UNKNOWN_THROW_EXCEPTION.",
+          "assertion": "assert !receiverObjectID.isLocked() && receiverObjectID.getUnknownObjectBehavior()==None;",
+          "name": "UnsupportedOperationException",
+          "content": "if a comparison has been performed or if unknownObjectBehavior is <code>UNKNOWN_AFTER</code>, <code>UNKNOWN_BEFORE</code> or <code>UNKNOWN_THROW_EXCEPTION</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "obj must be of type java.lang.Object",
+          "assertion": "assert receiverObjectID instanceof java.lang.Object;",
+          "name": "obj",
+          "content": "<code>obj must be of type java.lang.Object</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if obj has been added for the first time, false if it was already known to the Comparator.",
+          "assertion": "assert methodResultID == !receiverObjectID.add(args[0]);",
+          "name": null,
+          "content": "true if obj has been added for the first time, false if it was already known to the Comparator."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if obj is already known to the Comparator",
+          "assertion": "assert !receiverObjectID.equals(args[0]);",
+          "name": "UnsupportedOperationException",
+          "content": "if obj is already known to the Comparator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addAsEqual",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "existingObj"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "newObj"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "existingObj must be non-null",
+          "assertion": "assert existingObj != null;",
+          "name": "existingObj",
+          "content": "an item already in the Comparator"
+        },
+        {
+          "description": "newObj must be non-null",
+          "assertion": "assert newObj != null;",
+          "name": "newObj",
+          "content": "an item to be added to the Comparator"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if newObj has been added for the first time, false if it was already known to the Comparator.",
+          "assertion": "assert methodResultID == receiverObjectID.addAsEqual(args[0], args[1]);",
+          "name": null,
+          "content": "true if newObj has been added for the first time, false if it was already known to the Comparator."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if existingObject is not in the Comparator's set of known objects.",
+          "assertion": "assert !receiverObjectID.addAsEqual(args[0], args[1]).booleanValue();",
+          "name": "IllegalArgumentException",
+          "content": "if existingObject is not in the Comparator's set of known objects."
+        },
+        {
+          "description": "",
+          "assertion": "assert false;",
+          "name": "UnsupportedOperationException",
+          "content": ""
+        }
+      ]
+    }
+  },
+  {
+    "method": "compare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj1"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "obj1 must be known to this Comparator",
+          "assertion": "assert (receiverObjectID != null && receiverObjectID.isKnownToComparator(args[0]));",
+          "name": "obj1",
+          "content": "the first object to compare"
+        },
+        {
+          "description": "obj2 must be known to this Comparator",
+          "assertion": "assert (receiverObjectID != null && receiverObjectID.isKnownToComparator(args[1]));",
+          "name": "obj2",
+          "content": "the second object to compare"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "negative if obj1 is less, positive if greater, zero if equal",
+          "assertion": "assert methodResultID == (args[0].equals(args[1]) ? 0 : ((args[0] instanceof None && args[1] instanceof None) ? args[0].hashCode() - args[1].hashCode() : Integer.MIN_VALUE));",
+          "name": null,
+          "content": "negative if obj1 is less, positive if greater, zero if equal"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if obj1 or obj2 are not known to this Comparator and an alternative behavior has not been set via {@link #setUnknownObjectBehavior(UnknownObjectBehavior)}.",
+          "assertion": "assert !receiverObjectID.addAsEqual(args[0], args[1]);",
+          "name": "IllegalArgumentException",
+          "content": "if obj1 or obj2 are not known to this Comparator and an alternative behavior has not been set via {@link #setUnknownObjectBehavior(UnknownObjectBehavior)}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a hash code for this comparator.",
+          "assertion": "assert methodResultID == receiverObjectID.hashCode();",
+          "name": null,
+          "content": "a hash code for this comparator."
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "<i>that</i> Object is a {@link Comparator} whose ordering is known to be equivalent to mine.",
+          "assertion": "assert receiverObjectID instanceof java.util.Comparator && receiverObjectID.equals(this) && args[0] == null;",
+          "name": "object",
+          "content": "<code>true</code> iff <i>that</i> Object is a {@link Comparator} whose ordering is known to be equivalent to mine."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if equal",
+          "assertion": "assert receiverObjectID.equals(object) == (receiverObjectID instanceof FixedOrderComparator && ((FixedOrderComparator) receiverObjectID).getAttributes().equals(((FixedOrderComparator) object).getAttributes()));",
+          "name": null,
+          "content": "true if equal"
+        }
+      ]
+    }
+  }
+]

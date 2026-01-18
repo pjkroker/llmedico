@@ -1,0 +1,15 @@
+class,method,kind_exp,name_exp,kind_gen,name_gen,expected,generated,relation,reason
+ArrayStack,ArrayStack(initialSize),ConditionKind.PARAM,initialSize,ConditionKind.PARAM,initialSize,,assert args[0] >= 0;,AssertionRelation.UNEXPECTED,
+ArrayStack,ArrayStack(initialSize),ConditionKind.THROWS,IllegalArgumentException,ConditionKind.THROWS,IllegalArgumentException,assert args[0]<0;,assert args[0] < 0;,AssertionRelation.IDENTICAL,
+ArrayStack,empty(),ConditionKind.RETURN,,ConditionKind.RETURN,,assert receiverObjectID.isEmpty() ? methodResultID==true:methodResultID==false;,assert methodResultID == receiverObjectID.empty();,AssertionRelation.UNSUPPORTED,Variable 'methodResultID' used as both Type.REF and Type.BOOL
+ArrayStack,peek(),ConditionKind.THROWS,EmptyStackException,ConditionKind.THROWS,EmptyStackException,assert receiverObjectID.isEmpty();,assert !receiverObjectID.empty();,AssertionRelation.UNSUPPORTED,Value cannot be converted into a Z3 Boolean value
+ArrayStack,peek(),ConditionKind.RETURN,,ConditionKind.RETURN,,assert true ? methodResultID.equals(receiverObjectID.peek());,assert methodResultID != null;,AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected end
+ArrayStack,peek(n),ConditionKind.PARAM,n,ConditionKind.PARAM,n,,assert (args[0] < 0) == false;,AssertionRelation.UNEXPECTED,
+ArrayStack,peek(n),ConditionKind.THROWS,EmptyStackException,ConditionKind.THROWS,EmptyStackException,assert receiverObjectID.size()<args[0];,assert !receiverObjectID.empty();,AssertionRelation.UNSUPPORTED,Value cannot be converted into a Z3 Boolean value
+ArrayStack,peek(n),ConditionKind.RETURN,,ConditionKind.RETURN,,assert true ? methodResultID.equals(receiverObjectID.get(receiverObjectID.size() - args[0])-1);,assert methodResultID == receiverObjectID.peek() == args[0];,AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected end
+ArrayStack,pop(),ConditionKind.THROWS,EmptyStackException,ConditionKind.THROWS,EmptyStackException,assert receiverObjectID.isEmpty();,assert !receiverObjectID.empty();,AssertionRelation.UNSUPPORTED,Value cannot be converted into a Z3 Boolean value
+ArrayStack,pop(),ConditionKind.RETURN,,ConditionKind.RETURN,,,assert methodResultID == !receiverObjectID.empty();,AssertionRelation.UNEXPECTED,
+ArrayStack,push(item),ConditionKind.PARAM,item,ConditionKind.PARAM,item,,assert args[0] != null;,AssertionRelation.UNEXPECTED,
+ArrayStack,push(item),ConditionKind.RETURN,,ConditionKind.RETURN,,assert true ? methodResultID.equals(args[0]);,assert methodResultID.equals(args[0]);,AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected end
+ArrayStack,search(object),ConditionKind.PARAM,object,ConditionKind.PARAM,object,,assert args[0] != null;,AssertionRelation.UNEXPECTED,
+ArrayStack,search(object),ConditionKind.RETURN,,ConditionKind.RETURN,,assert receiverObjectID.contains(args[0]) ? methodResultID==receiverObjectID.indexOf(args[0])+1 : methodResultID==-1;,assert methodResultID == (args[0] >= 0) ? (receiverObjectID.search(args[0]) > -1 ? receiverObjectID.search(args[0]) : -1) : -1;,AssertionRelation.UNSUPPORTED,Both branches of ?: must have same type

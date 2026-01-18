@@ -1,0 +1,210 @@
+[
+  {
+    "method": "ArrayStack",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "ArrayStack",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "initialSize"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the initial size to use",
+          "assertion": "assert args[0] >= 0;",
+          "name": "initialSize",
+          "content": "the initial size to use"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the specified initial size is negative",
+          "assertion": "assert args[0] < 0;",
+          "name": "IllegalArgumentException",
+          "content": " if the specified initial size is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "empty",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if this stack is currently empty.",
+          "assertion": "assert methodResultID == receiverObjectID.empty();",
+          "name": null,
+          "content": "true if this stack is currently empty."
+        }
+      ]
+    }
+  },
+  {
+    "method": "peek",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the top item on the stack",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the top item on the stack"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the stack is empty.",
+          "assertion": "assert !receiverObjectID.empty();",
+          "name": "EmptyStackException",
+          "content": " if the stack is empty."
+        }
+      ]
+    }
+  },
+  {
+    "method": "peek",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the number of items down to go",
+          "assertion": "assert (args[0] < 0) == false;",
+          "name": "n",
+          "content": "the number of items down to go"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the n'th item on the stack, zero relative",
+          "assertion": "assert methodResultID == receiverObjectID.peek() == args[0];",
+          "name": null,
+          "content": "the n'th item on the stack, zero relative"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there are not enough items on the stack to satisfy this request",
+          "assertion": "assert !receiverObjectID.empty();",
+          "name": "EmptyStackException",
+          "content": " if there are not enough items on the stack to satisfy this request"
+        }
+      ]
+    }
+  },
+  {
+    "method": "pop",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the top item on the stack",
+          "assertion": "assert methodResultID == !receiverObjectID.empty();",
+          "name": null,
+          "content": "the top item on the stack"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the stack is empty.",
+          "assertion": "assert !receiverObjectID.empty();",
+          "name": "EmptyStackException",
+          "content": " if the stack is empty."
+        }
+      ]
+    }
+  },
+  {
+    "method": "push",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "item"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the item to be added",
+          "assertion": "assert args[0] != null;",
+          "name": "item",
+          "content": "the item to be added"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "item just pushed",
+          "assertion": "",
+          "description": "item just pushed"
+        }
+      ]
+    }
+  },
+  {
+    "method": "search",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to be searched for",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "object",
+          "content": "the object to be searched for"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns the one-based position of the distance from the top that the specified object exists on this stack, where the top-most element is considered to be at distance <code>1</code>.  If the object is not present on the stack, return <code>-1</code> instead.",
+          "assertion": "assert methodResultID == (args[0] >= 0) ? (receiverObjectID.search(args[0]) > -1 ? receiverObjectID.search(args[0]) : -1) : -1;",
+          "name": null,
+          "content": "Returns the one-based position of the distance from the top that the specified object exists on this stack, where the top-most element is considered to be at distance <code>1</code>.  If the object is not present on the stack, return <code>-1</code> instead."
+        }
+      ]
+    }
+  }
+]

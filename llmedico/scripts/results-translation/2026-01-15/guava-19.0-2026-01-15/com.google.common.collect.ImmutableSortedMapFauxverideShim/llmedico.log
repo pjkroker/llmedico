@@ -1,0 +1,1641 @@
+2026-01-15 16:31:02,463 - DEBUG - llmedico.main - ---Starting LLMedico---
+2026-01-15 16:31:02,463 - DEBUG - llmedico.config.config - Loaded config from /vol/fob-vol3/mi20/krokerpa/ba/llmedico/llmedico/config.toml
+2026-01-15 16:31:02,463 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2026-01-15 16:31:02,474 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2026-01-15 16:31:02,474 - DEBUG - llmedico.main - translating every method of the class
+2026-01-15 16:31:02,475 - DEBUG - llmedico.main - current method name: builder
+2026-01-15 16:31:02,475 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Not supported. Use {@link ImmutableSortedMap#naturalOrder}, which offers
+ * better type-safety, instead. This method exists only to hide
+ * {@link ImmutableMap#builder} from consumers of {@code ImmutableSortedMap}.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated Use {@link ImmutableSortedMap#naturalOrder}, which offers
+ *     better type-safety.
+ */
+
+2026-01-15 16:31:02,475 - DEBUG - llmedico.main - unsupported tag: {'tag': 'deprecated', 'name': 'Use', 'content': '{@link ImmutableSortedMap#naturalOrder}, which offers better type-safety.'}
+2026-01-15 16:31:02,475 - DEBUG - llmedico.main - found modes and their frequencies: {'THROWS': 1}
+2026-01-15 16:31:02,475 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'throws', 'name': 'UnsupportedOperationException', 'content': 'always'}, {'tag': 'deprecated', 'name': 'Use', 'content': '{@link ImmutableSortedMap#naturalOrder}, which offers better type-safety.'}]
+2026-01-15 16:31:02,475 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-15 16:31:02,475 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Not supported. Use {@link ImmutableSortedMap#naturalOrder}, which offers
+ * better type-safety, instead. This method exists only to hide
+ * {@link ImmutableMap#builder} from consumers of {@code ImmutableSortedMap}.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated Use {@link ImmutableSortedMap#naturalOrder}, which offers
+ *     better type-safety.
+ */
+"
+    For the Method:
+    "builder"
+    With the following Parameters:
+    "[]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ImmutableSortedMap.Builder', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None builder()
+None of(java.lang.Object k1,java.lang.Object v1)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4,java.lang.Object k5,java.lang.Object v5)
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+2026-01-15 16:31:08,501 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Based on the provided Javadoc, I will generate Java assertion statements that represent the exception conditions described by the @throws tags.
+
+Input Javadoc:
+/**
+ * Not supported. Use {@link ImmutableSortedMap#naturalOrder}, which offers
+ * better type-safety, instead. This method exists only to hide
+ * {@link ImmutableMap#builder} from consumers of {@code ImmutableSortedMap}.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated Use {@link ImmutableSortedMap#naturalOrder}, which offers
+ *     better type-safety.
+ */
+Input Method Name:
+"builder"
+Input Parameters:
+"[]"
+Input Return Type:
+{"qualified_name": None, 'simple_name': 'ImmutableSortedMap.Builder', 'is_array': False, 'array_dimensions': 0}
+Input available Instance Methods:
+"None builder()
+None of(java.lang.Object k1,java.lang.Object v1)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4,java.lang.Object k5,java.lang.Object v5)"
+Output Java assertions:
+```json
+[
+  {
+    "description": "always",
+    "assertion": "assert true;",
+    "name": "UnsupportedOperationException",
+    "content": "always"
+  }
+]
+```
+Note that the @throws UnsupportedOperationException always condition does not depend on any specific method parameters or receiver state, so the assertion simply asserts `true`.
+2026-01-15 16:31:08,502 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'always', 'assertion': 'assert true;', 'name': 'UnsupportedOperationException', 'content': 'always'}]
+2026-01-15 16:31:08,502 - DEBUG - llmedico.main - the following java assertion have been generated for {'THROWS': 1} for builder:
+ {'THROWS': [{'description': 'always', 'assertion': 'assert true;', 'name': 'UnsupportedOperationException', 'content': 'always'}]}
+2026-01-15 16:31:08,502 - DEBUG - llmedico.main - current method name: of
+2026-01-15 16:31:08,502 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Not supported. <b>You are attempting to create a map that may contain a
+ * non-{@code Comparable} key.</b> Proper calls will resolve to the version in
+ * {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass a key of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object)}.</b>
+ */
+
+2026-01-15 16:31:08,502 - DEBUG - llmedico.main - unsupported tag: {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'a key of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object)}.</b>'}
+2026-01-15 16:31:08,502 - DEBUG - llmedico.main - found modes and their frequencies: {'THROWS': 1}
+2026-01-15 16:31:08,502 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'throws', 'name': 'UnsupportedOperationException', 'content': 'always'}, {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'a key of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object)}.</b>'}]
+2026-01-15 16:31:08,502 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-15 16:31:08,502 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Not supported. <b>You are attempting to create a map that may contain a
+ * non-{@code Comparable} key.</b> Proper calls will resolve to the version in
+ * {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass a key of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object)}.</b>
+ */
+"
+    For the Method:
+    "of"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ImmutableSortedMap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None builder()
+None of(java.lang.Object k1,java.lang.Object v1)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4,java.lang.Object k5,java.lang.Object v5)
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+2026-01-15 16:31:10,321 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here are the Java assertions generated from the given Javadoc:
+
+```json
+[
+  {
+    "description": "You are attempting to create a map that may contain a non-{@code Comparable} key.",
+    "assertion": "assert false;",
+    "name": "UnsupportedOperationException",
+    "content": "<b>You are attempting to create a map that may contain a non-{@code Comparable} key.</b>"
+  }
+]
+```
+
+Note: The condition is always true, so the assertion will always throw an exception.
+2026-01-15 16:31:10,322 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'You are attempting to create a map that may contain a non-{@code Comparable} key.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain a non-{@code Comparable} key.</b>'}]
+2026-01-15 16:31:10,322 - DEBUG - llmedico.main - the following java assertion have been generated for {'THROWS': 1} for of:
+ {'THROWS': [{'description': 'You are attempting to create a map that may contain a non-{@code Comparable} key.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain a non-{@code Comparable} key.</b>'}]}
+2026-01-15 16:31:10,322 - DEBUG - llmedico.main - current method name: of
+2026-01-15 16:31:10,322 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls will resolve to the version
+ * in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>
+ */
+
+2026-01-15 16:31:10,323 - DEBUG - llmedico.main - unsupported tag: {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>'}
+2026-01-15 16:31:10,323 - DEBUG - llmedico.main - found modes and their frequencies: {'THROWS': 1}
+2026-01-15 16:31:10,323 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'throws', 'name': 'UnsupportedOperationException', 'content': 'always'}, {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>'}]
+2026-01-15 16:31:10,323 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-15 16:31:10,323 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls will resolve to the version
+ * in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>
+ */
+"
+    For the Method:
+    "of"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ImmutableSortedMap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None builder()
+None of(java.lang.Object k1,java.lang.Object v1)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4,java.lang.Object k5,java.lang.Object v5)
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+2026-01-15 16:31:12,188 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here are the Java assertions for the given Javadoc:
+
+```json
+[
+  {
+    "description": "You are attempting to create a map that may contain non-{@code Comparable} keys.",
+    "assertion": "assert true;",
+    "name": "UnsupportedOperationException",
+    "content": "<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>"
+  }
+]
+```
+
+The condition is always true, as the method throws an `UnsupportedOperationException` regardless of the input.
+2026-01-15 16:31:12,189 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert true;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]
+2026-01-15 16:31:12,189 - DEBUG - llmedico.main - the following java assertion have been generated for {'THROWS': 1} for of:
+ {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert true;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]}
+2026-01-15 16:31:12,189 - DEBUG - llmedico.main - current method name: of
+2026-01-15 16:31:12,189 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls to will resolve to the
+ * version in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
+ *     Comparable, Object)}.</b>
+ */
+
+2026-01-15 16:31:12,189 - DEBUG - llmedico.main - unsupported tag: {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object)}.</b>'}
+2026-01-15 16:31:12,189 - DEBUG - llmedico.main - found modes and their frequencies: {'THROWS': 1}
+2026-01-15 16:31:12,189 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'throws', 'name': 'UnsupportedOperationException', 'content': 'always'}, {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object)}.</b>'}]
+2026-01-15 16:31:12,189 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-15 16:31:12,189 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls to will resolve to the
+ * version in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
+ *     Comparable, Object)}.</b>
+ */
+"
+    For the Method:
+    "of"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v3'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ImmutableSortedMap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None builder()
+None of(java.lang.Object k1,java.lang.Object v1)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4,java.lang.Object k5,java.lang.Object v5)
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+2026-01-15 16:31:14,041 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here is the generated Java assertion statement:
+
+```json
+[
+  {
+    "description": "You are attempting to create a map that may contain non-{@code Comparable} keys.",
+    "assertion": "assert false;",
+    "name": "UnsupportedOperationException",
+    "content": "<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>"
+  }
+]
+```
+
+Note: The condition is always true, so the assertion will always pass.
+2026-01-15 16:31:14,042 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]
+2026-01-15 16:31:14,042 - DEBUG - llmedico.main - the following java assertion have been generated for {'THROWS': 1} for of:
+ {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]}
+2026-01-15 16:31:14,042 - DEBUG - llmedico.main - current method name: of
+2026-01-15 16:31:14,042 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls will resolve to the version
+ * in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
+ *     Comparable, Object, Comparable, Object)}.</b>
+ */
+
+2026-01-15 16:31:14,042 - DEBUG - llmedico.main - unsupported tag: {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object)}.</b>'}
+2026-01-15 16:31:14,042 - DEBUG - llmedico.main - found modes and their frequencies: {'THROWS': 1}
+2026-01-15 16:31:14,043 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'throws', 'name': 'UnsupportedOperationException', 'content': 'always'}, {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object)}.</b>'}]
+2026-01-15 16:31:14,043 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-15 16:31:14,043 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls will resolve to the version
+ * in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
+ *     Comparable, Object, Comparable, Object)}.</b>
+ */
+"
+    For the Method:
+    "of"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k4'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v4'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ImmutableSortedMap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None builder()
+None of(java.lang.Object k1,java.lang.Object v1)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4,java.lang.Object k5,java.lang.Object v5)
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+2026-01-15 16:31:16,615 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here are the Java assertions for the given Javadoc:
+
+```json
+[
+  {
+    "description": "You are attempting to create a map that may contain non-{@code Comparable} keys.",
+    "assertion": "assert false;",
+    "name": "UnsupportedOperationException",
+    "content": "<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>"
+  }
+]
+```
+
+The condition is expressed as "You are attempting to create a map that may contain non-{@code Comparable} keys." which can be verified by checking if the keys passed are not comparable. Since this condition cannot be expressed using `args[i]` alone, we use `receiverObjectID` in the assertion statement.
+2026-01-15 16:31:16,616 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]
+2026-01-15 16:31:16,616 - DEBUG - llmedico.main - the following java assertion have been generated for {'THROWS': 1} for of:
+ {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]}
+2026-01-15 16:31:16,616 - DEBUG - llmedico.main - current method name: of
+2026-01-15 16:31:16,616 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls will resolve to the version
+ * in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
+ *     Comparable, Object, Comparable, Object, Comparable, Object)}.</b>
+ */
+
+2026-01-15 16:31:16,617 - DEBUG - llmedico.main - unsupported tag: {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object)}.</b>'}
+2026-01-15 16:31:16,617 - DEBUG - llmedico.main - found modes and their frequencies: {'THROWS': 1}
+2026-01-15 16:31:16,617 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'throws', 'name': 'UnsupportedOperationException', 'content': 'always'}, {'tag': 'deprecated', 'name': '<b>Pass', 'content': 'keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object)}.</b>'}]
+2026-01-15 16:31:16,617 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    I. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    X: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-15 16:31:16,617 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Not supported. <b>You are attempting to create a map that may contain
+ * non-{@code Comparable} keys.</b> Proper calls will resolve to the version
+ * in {@code ImmutableSortedMap}, not this dummy version.
+ *
+ * @throws UnsupportedOperationException always
+ * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
+ *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
+ *     Comparable, Object, Comparable, Object, Comparable, Object)}.</b>
+ */
+"
+    For the Method:
+    "of"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k4'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v4'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k5'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v5'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'ImmutableSortedMap', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None builder()
+None of(java.lang.Object k1,java.lang.Object v1)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4)
+None of(java.lang.Object k1,java.lang.Object v1,java.lang.Object k2,java.lang.Object v2,java.lang.Object k3,java.lang.Object v3,java.lang.Object k4,java.lang.Object v4,java.lang.Object k5,java.lang.Object v5)
+"
+    
+Before outputting the assertion, verify:
+“Could this condition be expressed using args[i] alone?”
+If yes, do not use receiverObjectID
+2026-01-15 16:31:18,857 - DEBUG - llm_caller.models.ollama - raw response from llama3:8b: Here is the generated Java assertion statement:
+
+```json
+[
+  {
+    "description": "You are attempting to create a map that may contain non-{@code Comparable} keys.",
+    "assertion": "assert false;",
+    "name": "UnsupportedOperationException",
+    "content": "Not supported. <b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b> Proper calls will resolve to the version in {@code ImmutableSortedMap}, not this dummy version."
+  }
+]
+```
+
+Note: The condition is always true, so the assertion is simply `assert false;`.
+2026-01-15 16:31:18,858 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': 'Not supported. <b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b> Proper calls will resolve to the version in {@code ImmutableSortedMap}, not this dummy version.'}]
+2026-01-15 16:31:18,858 - DEBUG - llmedico.main - the following java assertion have been generated for {'THROWS': 1} for of:
+ {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': 'Not supported. <b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b> Proper calls will resolve to the version in {@code ImmutableSortedMap}, not this dummy version.'}]}
+2026-01-15 16:31:18,861 - DEBUG - llmedico.main - the following java assertions have been generated for com.google.common.collect.ImmutableSortedMapFauxverideShim: 
+ [{'method': 'builder', 'type': 'method', 'parameters': [], 'conditions': {'THROWS': [{'description': 'always', 'assertion': 'assert true;', 'name': 'UnsupportedOperationException', 'content': 'always'}]}}, {'method': 'of', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}], 'conditions': {'THROWS': [{'description': 'You are attempting to create a map that may contain a non-{@code Comparable} key.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain a non-{@code Comparable} key.</b>'}]}}, {'method': 'of', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}], 'conditions': {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert true;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]}}, {'method': 'of', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v3'}], 'conditions': {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]}}, {'method': 'of', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k4'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v4'}], 'conditions': {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': '<b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b>'}]}}, {'method': 'of', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v1'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v2'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v3'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k4'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v4'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'k5'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False, 'array_dimensions': 0}, 'name': 'v5'}], 'conditions': {'THROWS': [{'description': 'You are attempting to create a map that may contain non-{@code Comparable} keys.', 'assertion': 'assert false;', 'name': 'UnsupportedOperationException', 'content': 'Not supported. <b>You are attempting to create a map that may contain non-{@code Comparable} keys.</b> Proper calls will resolve to the version in {@code ImmutableSortedMap}, not this dummy version.'}]}}]
+2026-01-15 16:31:18,861 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2026-01-15 16:31:18,863 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "ImmutableSortedMapFauxverideShim",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.ImmutableSortedMapFauxverideShim",
+    "javadoc": "/**\n * \"Overrides\" the {@link ImmutableMap} static methods that lack\n * {@link ImmutableSortedMap} equivalents with deprecated, exception-throwing\n * versions. See {@link ImmutableSortedSetFauxverideShim} for details.\n *\n * @author Chris Povirk\n */\n",
+    "code": "/**\n * \"Overrides\" the {@link ImmutableMap} static methods that lack\n * {@link ImmutableSortedMap} equivalents with deprecated, exception-throwing\n * versions. See {@link ImmutableSortedSetFauxverideShim} for details.\n *\n * @author Chris Povirk\n */\nabstract class ImmutableSortedMapFauxverideShim<K, V> extends ImmutableMap<K, V> {\n\n    /**\n     * Not supported. Use {@link ImmutableSortedMap#naturalOrder}, which offers\n     * better type-safety, instead. This method exists only to hide\n     * {@link ImmutableMap#builder} from consumers of {@code ImmutableSortedMap}.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated Use {@link ImmutableSortedMap#naturalOrder}, which offers\n     *     better type-safety.\n     */\n    @Deprecated\n    public static <K, V> ImmutableSortedMap.Builder<K, V> builder() {\n        throw new UnsupportedOperationException();\n    }\n\n    /**\n     * Not supported. <b>You are attempting to create a map that may contain a\n     * non-{@code Comparable} key.</b> Proper calls will resolve to the version in\n     * {@code ImmutableSortedMap}, not this dummy version.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated <b>Pass a key of type {@code Comparable} to use {@link\n     *     ImmutableSortedMap#of(Comparable, Object)}.</b>\n     */\n    @Deprecated\n    public static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1) {\n        throw new UnsupportedOperationException();\n    }\n\n    /**\n     * Not supported. <b>You are attempting to create a map that may contain\n     * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n     * in {@code ImmutableSortedMap}, not this dummy version.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n     *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>\n     */\n    @Deprecated\n    public static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2) {\n        throw new UnsupportedOperationException();\n    }\n\n    /**\n     * Not supported. <b>You are attempting to create a map that may contain\n     * non-{@code Comparable} keys.</b> Proper calls to will resolve to the\n     * version in {@code ImmutableSortedMap}, not this dummy version.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n     *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n     *     Comparable, Object)}.</b>\n     */\n    @Deprecated\n    public static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {\n        throw new UnsupportedOperationException();\n    }\n\n    /**\n     * Not supported. <b>You are attempting to create a map that may contain\n     * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n     * in {@code ImmutableSortedMap}, not this dummy version.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n     *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n     *     Comparable, Object, Comparable, Object)}.</b>\n     */\n    @Deprecated\n    public static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {\n        throw new UnsupportedOperationException();\n    }\n\n    /**\n     * Not supported. <b>You are attempting to create a map that may contain\n     * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n     * in {@code ImmutableSortedMap}, not this dummy version.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n     *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n     *     Comparable, Object, Comparable, Object, Comparable, Object)}.</b>\n     */\n    @Deprecated\n    public static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {\n        throw new UnsupportedOperationException();\n    }\n    // No copyOf() fauxveride; see ImmutableSortedSetFauxverideShim.\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "builder",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap.Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Not supported. Use {@link ImmutableSortedMap#naturalOrder}, which offers\n * better type-safety, instead. This method exists only to hide\n * {@link ImmutableMap#builder} from consumers of {@code ImmutableSortedMap}.\n *\n * @throws UnsupportedOperationException always\n * @deprecated Use {@link ImmutableSortedMap#naturalOrder}, which offers\n *     better type-safety.\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert true;",
+            "description": "always"
+          },
+          {
+            "tag": "deprecated",
+            "name": "Use",
+            "content": "{@link ImmutableSortedMap#naturalOrder}, which offers better type-safety."
+          }
+        ],
+        "code": "/**\n * Not supported. Use {@link ImmutableSortedMap#naturalOrder}, which offers\n * better type-safety, instead. This method exists only to hide\n * {@link ImmutableMap#builder} from consumers of {@code ImmutableSortedMap}.\n *\n * @throws UnsupportedOperationException always\n * @deprecated Use {@link ImmutableSortedMap#naturalOrder}, which offers\n *     better type-safety.\n */\n@Deprecated\npublic static <K, V> ImmutableSortedMap.Builder<K, V> builder() {\n    throw new UnsupportedOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          }
+        ],
+        "javadoc": "/**\n * Not supported. <b>You are attempting to create a map that may contain a\n * non-{@code Comparable} key.</b> Proper calls will resolve to the version in\n * {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass a key of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object)}.</b>\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert false;",
+            "description": "You are attempting to create a map that may contain a non-{@code Comparable} key."
+          },
+          {
+            "tag": "deprecated",
+            "name": "<b>Pass",
+            "content": "a key of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object)}.</b>"
+          }
+        ],
+        "code": "/**\n * Not supported. <b>You are attempting to create a map that may contain a\n * non-{@code Comparable} key.</b> Proper calls will resolve to the version in\n * {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass a key of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object)}.</b>\n */\n@Deprecated\npublic static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1) {\n    throw new UnsupportedOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          }
+        ],
+        "javadoc": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n * in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert true;",
+            "description": "You are attempting to create a map that may contain non-{@code Comparable} keys."
+          },
+          {
+            "tag": "deprecated",
+            "name": "<b>Pass",
+            "content": "keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>"
+          }
+        ],
+        "code": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n * in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>\n */\n@Deprecated\npublic static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2) {\n    throw new UnsupportedOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v3"
+          }
+        ],
+        "javadoc": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls to will resolve to the\n * version in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n *     Comparable, Object)}.</b>\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert false;",
+            "description": "You are attempting to create a map that may contain non-{@code Comparable} keys."
+          },
+          {
+            "tag": "deprecated",
+            "name": "<b>Pass",
+            "content": "keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object)}.</b>"
+          }
+        ],
+        "code": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls to will resolve to the\n * version in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n *     Comparable, Object)}.</b>\n */\n@Deprecated\npublic static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {\n    throw new UnsupportedOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k4"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v4"
+          }
+        ],
+        "javadoc": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n * in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n *     Comparable, Object, Comparable, Object)}.</b>\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert false;",
+            "description": "You are attempting to create a map that may contain non-{@code Comparable} keys."
+          },
+          {
+            "tag": "deprecated",
+            "name": "<b>Pass",
+            "content": "keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object)}.</b>"
+          }
+        ],
+        "code": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n * in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n *     Comparable, Object, Comparable, Object)}.</b>\n */\n@Deprecated\npublic static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {\n    throw new UnsupportedOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k4"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v4"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k5"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v5"
+          }
+        ],
+        "javadoc": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n * in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n *     Comparable, Object, Comparable, Object, Comparable, Object)}.</b>\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert false;",
+            "description": "You are attempting to create a map that may contain non-{@code Comparable} keys."
+          },
+          {
+            "tag": "deprecated",
+            "name": "<b>Pass",
+            "content": "keys of type {@code Comparable} to use {@link ImmutableSortedMap#of(Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object, Comparable, Object)}.</b>"
+          }
+        ],
+        "code": "/**\n * Not supported. <b>You are attempting to create a map that may contain\n * non-{@code Comparable} keys.</b> Proper calls will resolve to the version\n * in {@code ImmutableSortedMap}, not this dummy version.\n *\n * @throws UnsupportedOperationException always\n * @deprecated <b>Pass keys of type {@code Comparable} to use {@link\n *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,\n *     Comparable, Object, Comparable, Object, Comparable, Object)}.</b>\n */\n@Deprecated\npublic static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {\n    throw new UnsupportedOperationException();\n}"
+      }
+    ]
+  }
+]
+2026-01-15 16:31:18,866 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2026-01-15 16:31:18,867 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2026-01-15 16:31:18,869 - DEBUG - llmedico.main - ---Ending LLMedico---

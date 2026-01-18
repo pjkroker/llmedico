@@ -1,0 +1,235 @@
+[
+  {
+    "method": "exceptionFactory",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the factory",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "the factory"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nullFactory",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the factory",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "Gets a Factory that will return null each time the factory is used."
+        }
+      ]
+    }
+  },
+  {
+    "method": "constantFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "constantToReturn"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the constant object to return each time in the factory",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "constantToReturn",
+          "content": "the constant object to return each time in the factory"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the constant factory.",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "the constant factory."
+        }
+      ]
+    }
+  },
+  {
+    "method": "prototypeFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "prototype"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to clone each time in the factory",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "prototype",
+          "content": "the object to clone each time in the factory"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the prototype factory, or a ConstantFactory#NULL_INSTANCE if the prototype is null",
+          "assertion": "assert methodResultID == (args[0] != null) || receiverObjectID instanceof org.apache.commons.collections4.functors.ConstantFactory;",
+          "name": null,
+          "content": "the prototype factory, or a ConstantFactory#NULL_INSTANCE if the prototype is null"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if the prototype cannot be cloned",
+          "assertion": "",
+          "description": "if the prototype cannot be cloned"
+        }
+      ]
+    }
+  },
+  {
+    "method": "instantiateFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "classToInstantiate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the Class to instantiate each time in the factory, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "classToInstantiate",
+          "content": "the Class to instantiate each time in the factory"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the Class to instantiate each time in the factory.",
+          "assertion": "assert methodResultID == !args[0].isInstance(null);",
+          "name": null,
+          "content": "the Class to instantiate each time in the factory."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if the classToInstantiate is null",
+          "assertion": "",
+          "description": "if the classToInstantiate is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "instantiateFactory",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "classToInstantiate"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "paramTypes"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "args"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the Class to instantiate each time in the factory",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "classToInstantiate",
+          "content": "the Class to instantiate each time in the factory"
+        },
+        {
+          "description": "parameter types for the constructor, can be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "paramTypes",
+          "content": "parameter types for the constructor, can be null"
+        },
+        {
+          "description": "the arguments to pass to the constructor, can be null",
+          "assertion": "assert (args[2] == null) == false;",
+          "name": "args",
+          "content": "the arguments to pass to the constructor, can be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the Factory that can create objects of a specific type using the arguments specified to this method.",
+          "assertion": "assert !methodResultID == null || (args[0] != null && args[1] != null);",
+          "name": null,
+          "content": "the Factory that can create objects of a specific type using the arguments specified to this method."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if the classToInstantiate is null",
+          "assertion": "",
+          "description": "if the classToInstantiate is null"
+        },
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if the paramTypes and args don't match",
+          "assertion": "",
+          "description": "if the paramTypes and args don't match"
+        },
+        {
+          "tag": "throws",
+          "name": "IllegalArgumentException",
+          "content": "if the constructor doesn't exist",
+          "assertion": "",
+          "description": "if the constructor doesn't exist"
+        }
+      ]
+    }
+  }
+]

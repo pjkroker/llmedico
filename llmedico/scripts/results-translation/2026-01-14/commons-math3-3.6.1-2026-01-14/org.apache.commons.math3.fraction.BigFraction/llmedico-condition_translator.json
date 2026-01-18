@@ -1,0 +1,1895 @@
+[
+  {
+    "name": "BigFraction",
+    "package": "org.apache.commons.math3.fraction",
+    "qualified_name": "org.apache.commons.math3.fraction.BigFraction",
+    "javadoc": "/**\n * Representation of a rational number without any overflow. This class is\n * immutable.\n *\n * @since 2.0\n */\n",
+    "code": "/**\n * Representation of a rational number without any overflow. This class is\n * immutable.\n *\n * @since 2.0\n */\npublic class BigFraction extends Number implements FieldElement<BigFraction>, Comparable<BigFraction>, Serializable {\n\n    /**\n     * A fraction representing \"2 / 1\".\n     */\n    public static final BigFraction TWO = new BigFraction(2);\n\n    /**\n     * A fraction representing \"1\".\n     */\n    public static final BigFraction ONE = new BigFraction(1);\n\n    /**\n     * A fraction representing \"0\".\n     */\n    public static final BigFraction ZERO = new BigFraction(0);\n\n    /**\n     * A fraction representing \"-1 / 1\".\n     */\n    public static final BigFraction MINUS_ONE = new BigFraction(-1);\n\n    /**\n     * A fraction representing \"4/5\".\n     */\n    public static final BigFraction FOUR_FIFTHS = new BigFraction(4, 5);\n\n    /**\n     * A fraction representing \"1/5\".\n     */\n    public static final BigFraction ONE_FIFTH = new BigFraction(1, 5);\n\n    /**\n     * A fraction representing \"1/2\".\n     */\n    public static final BigFraction ONE_HALF = new BigFraction(1, 2);\n\n    /**\n     * A fraction representing \"1/4\".\n     */\n    public static final BigFraction ONE_QUARTER = new BigFraction(1, 4);\n\n    /**\n     * A fraction representing \"1/3\".\n     */\n    public static final BigFraction ONE_THIRD = new BigFraction(1, 3);\n\n    /**\n     * A fraction representing \"3/5\".\n     */\n    public static final BigFraction THREE_FIFTHS = new BigFraction(3, 5);\n\n    /**\n     * A fraction representing \"3/4\".\n     */\n    public static final BigFraction THREE_QUARTERS = new BigFraction(3, 4);\n\n    /**\n     * A fraction representing \"2/5\".\n     */\n    public static final BigFraction TWO_FIFTHS = new BigFraction(2, 5);\n\n    /**\n     * A fraction representing \"2/4\".\n     */\n    public static final BigFraction TWO_QUARTERS = new BigFraction(2, 4);\n\n    /**\n     * A fraction representing \"2/3\".\n     */\n    public static final BigFraction TWO_THIRDS = new BigFraction(2, 3);\n\n    /**\n     * Serializable version identifier.\n     */\n    private static final long serialVersionUID = -5630213147331578515L;\n\n    /**\n     * <code>BigInteger</code> representation of 100.\n     */\n    private static final BigInteger ONE_HUNDRED = BigInteger.valueOf(100);\n\n    /**\n     * The numerator.\n     */\n    private final BigInteger numerator;\n\n    /**\n     * The denominator.\n     */\n    private final BigInteger denominator;\n\n    /**\n     * <p>\n     * Create a {@link BigFraction} equivalent to the passed {@code BigInteger}, ie\n     * \"num / 1\".\n     * </p>\n     *\n     * @param num\n     *            the numerator.\n     */\n    public BigFraction(final BigInteger num) {\n        this(num, BigInteger.ONE);\n    }\n\n    /**\n     * Create a {@link BigFraction} given the numerator and denominator as\n     * {@code BigInteger}. The {@link BigFraction} is reduced to lowest terms.\n     *\n     * @param num the numerator, must not be {@code null}.\n     * @param den the denominator, must not be {@code null}.\n     * @throws ZeroException if the denominator is zero.\n     * @throws NullArgumentException if either of the arguments is null\n     */\n    public BigFraction(BigInteger num, BigInteger den) {\n        MathUtils.checkNotNull(num, LocalizedFormats.NUMERATOR);\n        MathUtils.checkNotNull(den, LocalizedFormats.DENOMINATOR);\n        if (den.signum() == 0) {\n            throw new ZeroException(LocalizedFormats.ZERO_DENOMINATOR);\n        }\n        if (num.signum() == 0) {\n            numerator = BigInteger.ZERO;\n            denominator = BigInteger.ONE;\n        } else {\n            // reduce numerator and denominator by greatest common denominator\n            final BigInteger gcd = num.gcd(den);\n            if (BigInteger.ONE.compareTo(gcd) < 0) {\n                num = num.divide(gcd);\n                den = den.divide(gcd);\n            }\n            // move sign to numerator\n            if (den.signum() == -1) {\n                num = num.negate();\n                den = den.negate();\n            }\n            // store the values in the final fields\n            numerator = num;\n            denominator = den;\n        }\n    }\n\n    /**\n     * Create a fraction given the double value.\n     * <p>\n     * This constructor behaves <em>differently</em> from\n     * {@link #BigFraction(double, double, int)}. It converts the double value\n     * exactly, considering its internal bits representation. This works for all\n     * values except NaN and infinities and does not requires any loop or\n     * convergence threshold.\n     * </p>\n     * <p>\n     * Since this conversion is exact and since double numbers are sometimes\n     * approximated, the fraction created may seem strange in some cases. For example,\n     * calling <code>new BigFraction(1.0 / 3.0)</code> does <em>not</em> create\n     * the fraction 1/3, but the fraction 6004799503160661 / 18014398509481984\n     * because the double number passed to the constructor is not exactly 1/3\n     * (this number cannot be stored exactly in IEEE754).\n     * </p>\n     * @see #BigFraction(double, double, int)\n     * @param value the double value to convert to a fraction.\n     * @exception MathIllegalArgumentException if value is NaN or infinite\n     */\n    public BigFraction(final double value) throws MathIllegalArgumentException {\n        if (Double.isNaN(value)) {\n            throw new MathIllegalArgumentException(LocalizedFormats.NAN_VALUE_CONVERSION);\n        }\n        if (Double.isInfinite(value)) {\n            throw new MathIllegalArgumentException(LocalizedFormats.INFINITE_VALUE_CONVERSION);\n        }\n        // compute m and k such that value = m * 2^k\n        final long bits = Double.doubleToLongBits(value);\n        final long sign = bits & 0x8000000000000000L;\n        final long exponent = bits & 0x7ff0000000000000L;\n        long m = bits & 0x000fffffffffffffL;\n        if (exponent != 0) {\n            // this was a normalized number, add the implicit most significant bit\n            m |= 0x0010000000000000L;\n        }\n        if (sign != 0) {\n            m = -m;\n        }\n        int k = ((int) (exponent >> 52)) - 1075;\n        while (((m & 0x001ffffffffffffeL) != 0) && ((m & 0x1) == 0)) {\n            m >>= 1;\n            ++k;\n        }\n        if (k < 0) {\n            numerator = BigInteger.valueOf(m);\n            denominator = BigInteger.ZERO.flipBit(-k);\n        } else {\n            numerator = BigInteger.valueOf(m).multiply(BigInteger.ZERO.flipBit(k));\n            denominator = BigInteger.ONE;\n        }\n    }\n\n    /**\n     * Create a fraction given the double value and maximum error allowed.\n     * <p>\n     * References:\n     * <ul>\n     * <li><a href=\"http://mathworld.wolfram.com/ContinuedFraction.html\">\n     * Continued Fraction</a> equations (11) and (22)-(26)</li>\n     * </ul>\n     * </p>\n     *\n     * @param value\n     *            the double value to convert to a fraction.\n     * @param epsilon\n     *            maximum error allowed. The resulting fraction is within\n     *            <code>epsilon</code> of <code>value</code>, in absolute terms.\n     * @param maxIterations\n     *            maximum number of convergents.\n     * @throws FractionConversionException\n     *             if the continued fraction failed to converge.\n     * @see #BigFraction(double)\n     */\n    public BigFraction(final double value, final double epsilon, final int maxIterations) throws FractionConversionException {\n        this(value, epsilon, Integer.MAX_VALUE, maxIterations);\n    }\n\n    /**\n     * Create a fraction given the double value and either the maximum error\n     * allowed or the maximum number of denominator digits.\n     * <p>\n     *\n     * NOTE: This constructor is called with EITHER - a valid epsilon value and\n     * the maxDenominator set to Integer.MAX_VALUE (that way the maxDenominator\n     * has no effect). OR - a valid maxDenominator value and the epsilon value\n     * set to zero (that way epsilon only has effect if there is an exact match\n     * before the maxDenominator value is reached).\n     * </p>\n     * <p>\n     *\n     * It has been done this way so that the same code can be (re)used for both\n     * scenarios. However this could be confusing to users if it were part of\n     * the public API and this constructor should therefore remain PRIVATE.\n     * </p>\n     *\n     * See JIRA issue ticket MATH-181 for more details:\n     *\n     * https://issues.apache.org/jira/browse/MATH-181\n     *\n     * @param value\n     *            the double value to convert to a fraction.\n     * @param epsilon\n     *            maximum error allowed. The resulting fraction is within\n     *            <code>epsilon</code> of <code>value</code>, in absolute terms.\n     * @param maxDenominator\n     *            maximum denominator value allowed.\n     * @param maxIterations\n     *            maximum number of convergents.\n     * @throws FractionConversionException\n     *             if the continued fraction failed to converge.\n     */\n    private BigFraction(final double value, final double epsilon, final int maxDenominator, int maxIterations) throws FractionConversionException {\n        long overflow = Integer.MAX_VALUE;\n        double r0 = value;\n        long a0 = (long) FastMath.floor(r0);\n        if (FastMath.abs(a0) > overflow) {\n            throw new FractionConversionException(value, a0, 1l);\n        }\n        // check for (almost) integer arguments, which should not go\n        // to iterations.\n        if (FastMath.abs(a0 - value) < epsilon) {\n            numerator = BigInteger.valueOf(a0);\n            denominator = BigInteger.ONE;\n            return;\n        }\n        long p0 = 1;\n        long q0 = 0;\n        long p1 = a0;\n        long q1 = 1;\n        long p2 = 0;\n        long q2 = 1;\n        int n = 0;\n        boolean stop = false;\n        do {\n            ++n;\n            final double r1 = 1.0 / (r0 - a0);\n            final long a1 = (long) FastMath.floor(r1);\n            p2 = (a1 * p1) + p0;\n            q2 = (a1 * q1) + q0;\n            if ((p2 > overflow) || (q2 > overflow)) {\n                // in maxDenominator mode, if the last fraction was very close to the actual value\n                // q2 may overflow in the next iteration; in this case return the last one.\n                if (epsilon == 0.0 && FastMath.abs(q1) < maxDenominator) {\n                    break;\n                }\n                throw new FractionConversionException(value, p2, q2);\n            }\n            final double convergent = (double) p2 / (double) q2;\n            if ((n < maxIterations) && (FastMath.abs(convergent - value) > epsilon) && (q2 < maxDenominator)) {\n                p0 = p1;\n                p1 = p2;\n                q0 = q1;\n                q1 = q2;\n                a0 = a1;\n                r0 = r1;\n            } else {\n                stop = true;\n            }\n        } while (!stop);\n        if (n >= maxIterations) {\n            throw new FractionConversionException(value, maxIterations);\n        }\n        if (q2 < maxDenominator) {\n            numerator = BigInteger.valueOf(p2);\n            denominator = BigInteger.valueOf(q2);\n        } else {\n            numerator = BigInteger.valueOf(p1);\n            denominator = BigInteger.valueOf(q1);\n        }\n    }\n\n    /**\n     * Create a fraction given the double value and maximum denominator.\n     * <p>\n     * References:\n     * <ul>\n     * <li><a href=\"http://mathworld.wolfram.com/ContinuedFraction.html\">\n     * Continued Fraction</a> equations (11) and (22)-(26)</li>\n     * </ul>\n     * </p>\n     *\n     * @param value\n     *            the double value to convert to a fraction.\n     * @param maxDenominator\n     *            The maximum allowed value for denominator.\n     * @throws FractionConversionException\n     *             if the continued fraction failed to converge.\n     */\n    public BigFraction(final double value, final int maxDenominator) throws FractionConversionException {\n        this(value, 0, maxDenominator, 100);\n    }\n\n    /**\n     * <p>\n     * Create a {@link BigFraction} equivalent to the passed {@code int}, ie\n     * \"num / 1\".\n     * </p>\n     *\n     * @param num\n     *            the numerator.\n     */\n    public BigFraction(final int num) {\n        this(BigInteger.valueOf(num), BigInteger.ONE);\n    }\n\n    /**\n     * <p>\n     * Create a {@link BigFraction} given the numerator and denominator as simple\n     * {@code int}. The {@link BigFraction} is reduced to lowest terms.\n     * </p>\n     *\n     * @param num\n     *            the numerator.\n     * @param den\n     *            the denominator.\n     */\n    public BigFraction(final int num, final int den) {\n        this(BigInteger.valueOf(num), BigInteger.valueOf(den));\n    }\n\n    /**\n     * <p>\n     * Create a {@link BigFraction} equivalent to the passed long, ie \"num / 1\".\n     * </p>\n     *\n     * @param num\n     *            the numerator.\n     */\n    public BigFraction(final long num) {\n        this(BigInteger.valueOf(num), BigInteger.ONE);\n    }\n\n    /**\n     * <p>\n     * Create a {@link BigFraction} given the numerator and denominator as simple\n     * {@code long}. The {@link BigFraction} is reduced to lowest terms.\n     * </p>\n     *\n     * @param num\n     *            the numerator.\n     * @param den\n     *            the denominator.\n     */\n    public BigFraction(final long num, final long den) {\n        this(BigInteger.valueOf(num), BigInteger.valueOf(den));\n    }\n\n    /**\n     * <p>\n     * Creates a <code>BigFraction</code> instance with the 2 parts of a fraction\n     * Y/Z.\n     * </p>\n     *\n     * <p>\n     * Any negative signs are resolved to be on the numerator.\n     * </p>\n     *\n     * @param numerator\n     *            the numerator, for example the three in 'three sevenths'.\n     * @param denominator\n     *            the denominator, for example the seven in 'three sevenths'.\n     * @return a new fraction instance, with the numerator and denominator\n     *         reduced.\n     * @throws ArithmeticException\n     *             if the denominator is <code>zero</code>.\n     */\n    public static BigFraction getReducedFraction(final int numerator, final int denominator) {\n        if (numerator == 0) {\n            // normalize zero.\n            return ZERO;\n        }\n        return new BigFraction(numerator, denominator);\n    }\n\n    /**\n     * <p>\n     * Returns the absolute value of this {@link BigFraction}.\n     * </p>\n     *\n     * @return the absolute value as a {@link BigFraction}.\n     */\n    public BigFraction abs() {\n        return (numerator.signum() == 1) ? this : negate();\n    }\n\n    /**\n     * <p>\n     * Adds the value of this fraction to the passed {@link BigInteger},\n     * returning the result in reduced form.\n     * </p>\n     *\n     * @param bg\n     *            the {@link BigInteger} to add, must'nt be <code>null</code>.\n     * @return a <code>BigFraction</code> instance with the resulting values.\n     * @throws NullArgumentException\n     *             if the {@link BigInteger} is <code>null</code>.\n     */\n    public BigFraction add(final BigInteger bg) throws NullArgumentException {\n        MathUtils.checkNotNull(bg);\n        if (numerator.signum() == 0) {\n            return new BigFraction(bg);\n        }\n        if (bg.signum() == 0) {\n            return this;\n        }\n        return new BigFraction(numerator.add(denominator.multiply(bg)), denominator);\n    }\n\n    /**\n     * <p>\n     * Adds the value of this fraction to the passed {@code integer}, returning\n     * the result in reduced form.\n     * </p>\n     *\n     * @param i\n     *            the {@code integer} to add.\n     * @return a <code>BigFraction</code> instance with the resulting values.\n     */\n    public BigFraction add(final int i) {\n        return add(BigInteger.valueOf(i));\n    }\n\n    /**\n     * <p>\n     * Adds the value of this fraction to the passed {@code long}, returning\n     * the result in reduced form.\n     * </p>\n     *\n     * @param l\n     *            the {@code long} to add.\n     * @return a <code>BigFraction</code> instance with the resulting values.\n     */\n    public BigFraction add(final long l) {\n        return add(BigInteger.valueOf(l));\n    }\n\n    /**\n     * <p>\n     * Adds the value of this fraction to another, returning the result in\n     * reduced form.\n     * </p>\n     *\n     * @param fraction\n     *            the {@link BigFraction} to add, must not be <code>null</code>.\n     * @return a {@link BigFraction} instance with the resulting values.\n     * @throws NullArgumentException if the {@link BigFraction} is {@code null}.\n     */\n    public BigFraction add(final BigFraction fraction) {\n        if (fraction == null) {\n            throw new NullArgumentException(LocalizedFormats.FRACTION);\n        }\n        if (fraction.numerator.signum() == 0) {\n            return this;\n        }\n        if (numerator.signum() == 0) {\n            return fraction;\n        }\n        BigInteger num = null;\n        BigInteger den = null;\n        if (denominator.equals(fraction.denominator)) {\n            num = numerator.add(fraction.numerator);\n            den = denominator;\n        } else {\n            num = (numerator.multiply(fraction.denominator)).add((fraction.numerator).multiply(denominator));\n            den = denominator.multiply(fraction.denominator);\n        }\n        if (num.signum() == 0) {\n            return ZERO;\n        }\n        return new BigFraction(num, den);\n    }\n\n    /**\n     * <p>\n     * Gets the fraction as a <code>BigDecimal</code>. This calculates the\n     * fraction as the numerator divided by denominator.\n     * </p>\n     *\n     * @return the fraction as a <code>BigDecimal</code>.\n     * @throws ArithmeticException\n     *             if the exact quotient does not have a terminating decimal\n     *             expansion.\n     * @see BigDecimal\n     */\n    public BigDecimal bigDecimalValue() {\n        return new BigDecimal(numerator).divide(new BigDecimal(denominator));\n    }\n\n    /**\n     * <p>\n     * Gets the fraction as a <code>BigDecimal</code> following the passed\n     * rounding mode. This calculates the fraction as the numerator divided by\n     * denominator.\n     * </p>\n     *\n     * @param roundingMode\n     *            rounding mode to apply. see {@link BigDecimal} constants.\n     * @return the fraction as a <code>BigDecimal</code>.\n     * @throws IllegalArgumentException\n     *             if {@code roundingMode} does not represent a valid rounding\n     *             mode.\n     * @see BigDecimal\n     */\n    public BigDecimal bigDecimalValue(final int roundingMode) {\n        return new BigDecimal(numerator).divide(new BigDecimal(denominator), roundingMode);\n    }\n\n    /**\n     * <p>\n     * Gets the fraction as a <code>BigDecimal</code> following the passed scale\n     * and rounding mode. This calculates the fraction as the numerator divided\n     * by denominator.\n     * </p>\n     *\n     * @param scale\n     *            scale of the <code>BigDecimal</code> quotient to be returned.\n     *            see {@link BigDecimal} for more information.\n     * @param roundingMode\n     *            rounding mode to apply. see {@link BigDecimal} constants.\n     * @return the fraction as a <code>BigDecimal</code>.\n     * @see BigDecimal\n     */\n    public BigDecimal bigDecimalValue(final int scale, final int roundingMode) {\n        return new BigDecimal(numerator).divide(new BigDecimal(denominator), scale, roundingMode);\n    }\n\n    /**\n     * <p>\n     * Compares this object to another based on size.\n     * </p>\n     *\n     * @param object\n     *            the object to compare to, must not be <code>null</code>.\n     * @return -1 if this is less than {@code object}, +1 if this is greater\n     *         than {@code object}, 0 if they are equal.\n     * @see java.lang.Comparable#compareTo(java.lang.Object)\n     */\n    public int compareTo(final BigFraction object) {\n        int lhsSigNum = numerator.signum();\n        int rhsSigNum = object.numerator.signum();\n        if (lhsSigNum != rhsSigNum) {\n            return (lhsSigNum > rhsSigNum) ? 1 : -1;\n        }\n        if (lhsSigNum == 0) {\n            return 0;\n        }\n        BigInteger nOd = numerator.multiply(object.denominator);\n        BigInteger dOn = denominator.multiply(object.numerator);\n        return nOd.compareTo(dOn);\n    }\n\n    /**\n     * <p>\n     * Divide the value of this fraction by the passed {@code BigInteger},\n     * ie {@code this * 1 / bg}, returning the result in reduced form.\n     * </p>\n     *\n     * @param bg the {@code BigInteger} to divide by, must not be {@code null}\n     * @return a {@link BigFraction} instance with the resulting values\n     * @throws NullArgumentException if the {@code BigInteger} is {@code null}\n     * @throws MathArithmeticException if the fraction to divide by is zero\n     */\n    public BigFraction divide(final BigInteger bg) {\n        if (bg == null) {\n            throw new NullArgumentException(LocalizedFormats.FRACTION);\n        }\n        if (bg.signum() == 0) {\n            throw new MathArithmeticException(LocalizedFormats.ZERO_DENOMINATOR);\n        }\n        if (numerator.signum() == 0) {\n            return ZERO;\n        }\n        return new BigFraction(numerator, denominator.multiply(bg));\n    }\n\n    /**\n     * <p>\n     * Divide the value of this fraction by the passed {@code int}, ie\n     * {@code this * 1 / i}, returning the result in reduced form.\n     * </p>\n     *\n     * @param i the {@code int} to divide by\n     * @return a {@link BigFraction} instance with the resulting values\n     * @throws MathArithmeticException if the fraction to divide by is zero\n     */\n    public BigFraction divide(final int i) {\n        return divide(BigInteger.valueOf(i));\n    }\n\n    /**\n     * <p>\n     * Divide the value of this fraction by the passed {@code long}, ie\n     * {@code this * 1 / l}, returning the result in reduced form.\n     * </p>\n     *\n     * @param l the {@code long} to divide by\n     * @return a {@link BigFraction} instance with the resulting values\n     * @throws MathArithmeticException if the fraction to divide by is zero\n     */\n    public BigFraction divide(final long l) {\n        return divide(BigInteger.valueOf(l));\n    }\n\n    /**\n     * <p>\n     * Divide the value of this fraction by another, returning the result in\n     * reduced form.\n     * </p>\n     *\n     * @param fraction Fraction to divide by, must not be {@code null}.\n     * @return a {@link BigFraction} instance with the resulting values.\n     * @throws NullArgumentException if the {@code fraction} is {@code null}.\n     * @throws MathArithmeticException if the fraction to divide by is zero\n     */\n    public BigFraction divide(final BigFraction fraction) {\n        if (fraction == null) {\n            throw new NullArgumentException(LocalizedFormats.FRACTION);\n        }\n        if (fraction.numerator.signum() == 0) {\n            throw new MathArithmeticException(LocalizedFormats.ZERO_DENOMINATOR);\n        }\n        if (numerator.signum() == 0) {\n            return ZERO;\n        }\n        return multiply(fraction.reciprocal());\n    }\n\n    /**\n     * <p>\n     * Gets the fraction as a {@code double}. This calculates the fraction as\n     * the numerator divided by denominator.\n     * </p>\n     *\n     * @return the fraction as a {@code double}\n     * @see java.lang.Number#doubleValue()\n     */\n    @Override\n    public double doubleValue() {\n        double result = numerator.doubleValue() / denominator.doubleValue();\n        if (Double.isNaN(result)) {\n            // Numerator and/or denominator must be out of range:\n            // Calculate how far to shift them to put them in range.\n            int shift = FastMath.max(numerator.bitLength(), denominator.bitLength()) - FastMath.getExponent(Double.MAX_VALUE);\n            result = numerator.shiftRight(shift).doubleValue() / denominator.shiftRight(shift).doubleValue();\n        }\n        return result;\n    }\n\n    /**\n     * <p>\n     * Test for the equality of two fractions. If the lowest term numerator and\n     * denominators are the same for both fractions, the two fractions are\n     * considered to be equal.\n     * </p>\n     *\n     * @param other\n     *            fraction to test for equality to this fraction, can be\n     *            <code>null</code>.\n     * @return true if two fractions are equal, false if object is\n     *         <code>null</code>, not an instance of {@link BigFraction}, or not\n     *         equal to this fraction instance.\n     * @see java.lang.Object#equals(java.lang.Object)\n     */\n    @Override\n    public boolean equals(final Object other) {\n        boolean ret = false;\n        if (this == other) {\n            ret = true;\n        } else if (other instanceof BigFraction) {\n            BigFraction rhs = ((BigFraction) other).reduce();\n            BigFraction thisOne = this.reduce();\n            ret = thisOne.numerator.equals(rhs.numerator) && thisOne.denominator.equals(rhs.denominator);\n        }\n        return ret;\n    }\n\n    /**\n     * <p>\n     * Gets the fraction as a {@code float}. This calculates the fraction as\n     * the numerator divided by denominator.\n     * </p>\n     *\n     * @return the fraction as a {@code float}.\n     * @see java.lang.Number#floatValue()\n     */\n    @Override\n    public float floatValue() {\n        float result = numerator.floatValue() / denominator.floatValue();\n        if (Double.isNaN(result)) {\n            // Numerator and/or denominator must be out of range:\n            // Calculate how far to shift them to put them in range.\n            int shift = FastMath.max(numerator.bitLength(), denominator.bitLength()) - FastMath.getExponent(Float.MAX_VALUE);\n            result = numerator.shiftRight(shift).floatValue() / denominator.shiftRight(shift).floatValue();\n        }\n        return result;\n    }\n\n    /**\n     * <p>\n     * Access the denominator as a <code>BigInteger</code>.\n     * </p>\n     *\n     * @return the denominator as a <code>BigInteger</code>.\n     */\n    public BigInteger getDenominator() {\n        return denominator;\n    }\n\n    /**\n     * <p>\n     * Access the denominator as a {@code int}.\n     * </p>\n     *\n     * @return the denominator as a {@code int}.\n     */\n    public int getDenominatorAsInt() {\n        return denominator.intValue();\n    }\n\n    /**\n     * <p>\n     * Access the denominator as a {@code long}.\n     * </p>\n     *\n     * @return the denominator as a {@code long}.\n     */\n    public long getDenominatorAsLong() {\n        return denominator.longValue();\n    }\n\n    /**\n     * <p>\n     * Access the numerator as a <code>BigInteger</code>.\n     * </p>\n     *\n     * @return the numerator as a <code>BigInteger</code>.\n     */\n    public BigInteger getNumerator() {\n        return numerator;\n    }\n\n    /**\n     * <p>\n     * Access the numerator as a {@code int}.\n     * </p>\n     *\n     * @return the numerator as a {@code int}.\n     */\n    public int getNumeratorAsInt() {\n        return numerator.intValue();\n    }\n\n    /**\n     * <p>\n     * Access the numerator as a {@code long}.\n     * </p>\n     *\n     * @return the numerator as a {@code long}.\n     */\n    public long getNumeratorAsLong() {\n        return numerator.longValue();\n    }\n\n    /**\n     * <p>\n     * Gets a hashCode for the fraction.\n     * </p>\n     *\n     * @return a hash code value for this object.\n     * @see java.lang.Object#hashCode()\n     */\n    @Override\n    public int hashCode() {\n        return 37 * (37 * 17 + numerator.hashCode()) + denominator.hashCode();\n    }\n\n    /**\n     * <p>\n     * Gets the fraction as an {@code int}. This returns the whole number part\n     * of the fraction.\n     * </p>\n     *\n     * @return the whole number fraction part.\n     * @see java.lang.Number#intValue()\n     */\n    @Override\n    public int intValue() {\n        return numerator.divide(denominator).intValue();\n    }\n\n    /**\n     * <p>\n     * Gets the fraction as a {@code long}. This returns the whole number part\n     * of the fraction.\n     * </p>\n     *\n     * @return the whole number fraction part.\n     * @see java.lang.Number#longValue()\n     */\n    @Override\n    public long longValue() {\n        return numerator.divide(denominator).longValue();\n    }\n\n    /**\n     * <p>\n     * Multiplies the value of this fraction by the passed\n     * <code>BigInteger</code>, returning the result in reduced form.\n     * </p>\n     *\n     * @param bg the {@code BigInteger} to multiply by.\n     * @return a {@code BigFraction} instance with the resulting values.\n     * @throws NullArgumentException if {@code bg} is {@code null}.\n     */\n    public BigFraction multiply(final BigInteger bg) {\n        if (bg == null) {\n            throw new NullArgumentException();\n        }\n        if (numerator.signum() == 0 || bg.signum() == 0) {\n            return ZERO;\n        }\n        return new BigFraction(bg.multiply(numerator), denominator);\n    }\n\n    /**\n     * <p>\n     * Multiply the value of this fraction by the passed {@code int}, returning\n     * the result in reduced form.\n     * </p>\n     *\n     * @param i\n     *            the {@code int} to multiply by.\n     * @return a {@link BigFraction} instance with the resulting values.\n     */\n    public BigFraction multiply(final int i) {\n        if (i == 0 || numerator.signum() == 0) {\n            return ZERO;\n        }\n        return multiply(BigInteger.valueOf(i));\n    }\n\n    /**\n     * <p>\n     * Multiply the value of this fraction by the passed {@code long},\n     * returning the result in reduced form.\n     * </p>\n     *\n     * @param l\n     *            the {@code long} to multiply by.\n     * @return a {@link BigFraction} instance with the resulting values.\n     */\n    public BigFraction multiply(final long l) {\n        if (l == 0 || numerator.signum() == 0) {\n            return ZERO;\n        }\n        return multiply(BigInteger.valueOf(l));\n    }\n\n    /**\n     * <p>\n     * Multiplies the value of this fraction by another, returning the result in\n     * reduced form.\n     * </p>\n     *\n     * @param fraction Fraction to multiply by, must not be {@code null}.\n     * @return a {@link BigFraction} instance with the resulting values.\n     * @throws NullArgumentException if {@code fraction} is {@code null}.\n     */\n    public BigFraction multiply(final BigFraction fraction) {\n        if (fraction == null) {\n            throw new NullArgumentException(LocalizedFormats.FRACTION);\n        }\n        if (numerator.signum() == 0 || fraction.numerator.signum() == 0) {\n            return ZERO;\n        }\n        return new BigFraction(numerator.multiply(fraction.numerator), denominator.multiply(fraction.denominator));\n    }\n\n    /**\n     * <p>\n     * Return the additive inverse of this fraction, returning the result in\n     * reduced form.\n     * </p>\n     *\n     * @return the negation of this fraction.\n     */\n    public BigFraction negate() {\n        return new BigFraction(numerator.negate(), denominator);\n    }\n\n    /**\n     * <p>\n     * Gets the fraction percentage as a {@code double}. This calculates the\n     * fraction as the numerator divided by denominator multiplied by 100.\n     * </p>\n     *\n     * @return the fraction percentage as a {@code double}.\n     */\n    public double percentageValue() {\n        return multiply(ONE_HUNDRED).doubleValue();\n    }\n\n    /**\n     * <p>\n     * Returns a {@code BigFraction} whose value is\n     * {@code (this<sup>exponent</sup>)}, returning the result in reduced form.\n     * </p>\n     *\n     * @param exponent\n     *            exponent to which this {@code BigFraction} is to be\n     *            raised.\n     * @return <tt>this<sup>exponent</sup></tt>.\n     */\n    public BigFraction pow(final int exponent) {\n        if (exponent == 0) {\n            return ONE;\n        }\n        if (numerator.signum() == 0) {\n            return this;\n        }\n        if (exponent < 0) {\n            return new BigFraction(denominator.pow(-exponent), numerator.pow(-exponent));\n        }\n        return new BigFraction(numerator.pow(exponent), denominator.pow(exponent));\n    }\n\n    /**\n     * <p>\n     * Returns a <code>BigFraction</code> whose value is\n     * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n     * </p>\n     *\n     * @param exponent\n     *            exponent to which this <code>BigFraction</code> is to be raised.\n     * @return <tt>this<sup>exponent</sup></tt> as a <code>BigFraction</code>.\n     */\n    public BigFraction pow(final long exponent) {\n        if (exponent == 0) {\n            return ONE;\n        }\n        if (numerator.signum() == 0) {\n            return this;\n        }\n        if (exponent < 0) {\n            return new BigFraction(ArithmeticUtils.pow(denominator, -exponent), ArithmeticUtils.pow(numerator, -exponent));\n        }\n        return new BigFraction(ArithmeticUtils.pow(numerator, exponent), ArithmeticUtils.pow(denominator, exponent));\n    }\n\n    /**\n     * <p>\n     * Returns a <code>BigFraction</code> whose value is\n     * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n     * </p>\n     *\n     * @param exponent\n     *            exponent to which this <code>BigFraction</code> is to be raised.\n     * @return <tt>this<sup>exponent</sup></tt> as a <code>BigFraction</code>.\n     */\n    public BigFraction pow(final BigInteger exponent) {\n        if (exponent.signum() == 0) {\n            return ONE;\n        }\n        if (numerator.signum() == 0) {\n            return this;\n        }\n        if (exponent.signum() == -1) {\n            final BigInteger eNeg = exponent.negate();\n            return new BigFraction(ArithmeticUtils.pow(denominator, eNeg), ArithmeticUtils.pow(numerator, eNeg));\n        }\n        return new BigFraction(ArithmeticUtils.pow(numerator, exponent), ArithmeticUtils.pow(denominator, exponent));\n    }\n\n    /**\n     * <p>\n     * Returns a <code>double</code> whose value is\n     * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n     * </p>\n     *\n     * @param exponent\n     *            exponent to which this <code>BigFraction</code> is to be raised.\n     * @return <tt>this<sup>exponent</sup></tt>.\n     */\n    public double pow(final double exponent) {\n        return FastMath.pow(numerator.doubleValue(), exponent) / FastMath.pow(denominator.doubleValue(), exponent);\n    }\n\n    /**\n     * <p>\n     * Return the multiplicative inverse of this fraction.\n     * </p>\n     *\n     * @return the reciprocal fraction.\n     */\n    public BigFraction reciprocal() {\n        return new BigFraction(denominator, numerator);\n    }\n\n    /**\n     * <p>\n     * Reduce this <code>BigFraction</code> to its lowest terms.\n     * </p>\n     *\n     * @return the reduced <code>BigFraction</code>. It doesn't change anything if\n     *         the fraction can be reduced.\n     */\n    public BigFraction reduce() {\n        final BigInteger gcd = numerator.gcd(denominator);\n        if (BigInteger.ONE.compareTo(gcd) < 0) {\n            return new BigFraction(numerator.divide(gcd), denominator.divide(gcd));\n        } else {\n            return this;\n        }\n    }\n\n    /**\n     * <p>\n     * Subtracts the value of an {@link BigInteger} from the value of this\n     * {@code BigFraction}, returning the result in reduced form.\n     * </p>\n     *\n     * @param bg the {@link BigInteger} to subtract, cannot be {@code null}.\n     * @return a {@code BigFraction} instance with the resulting values.\n     * @throws NullArgumentException if the {@link BigInteger} is {@code null}.\n     */\n    public BigFraction subtract(final BigInteger bg) {\n        if (bg == null) {\n            throw new NullArgumentException();\n        }\n        if (bg.signum() == 0) {\n            return this;\n        }\n        if (numerator.signum() == 0) {\n            return new BigFraction(bg.negate());\n        }\n        return new BigFraction(numerator.subtract(denominator.multiply(bg)), denominator);\n    }\n\n    /**\n     * <p>\n     * Subtracts the value of an {@code integer} from the value of this\n     * {@code BigFraction}, returning the result in reduced form.\n     * </p>\n     *\n     * @param i the {@code integer} to subtract.\n     * @return a {@code BigFraction} instance with the resulting values.\n     */\n    public BigFraction subtract(final int i) {\n        return subtract(BigInteger.valueOf(i));\n    }\n\n    /**\n     * <p>\n     * Subtracts the value of a {@code long} from the value of this\n     * {@code BigFraction}, returning the result in reduced form.\n     * </p>\n     *\n     * @param l the {@code long} to subtract.\n     * @return a {@code BigFraction} instance with the resulting values.\n     */\n    public BigFraction subtract(final long l) {\n        return subtract(BigInteger.valueOf(l));\n    }\n\n    /**\n     * <p>\n     * Subtracts the value of another fraction from the value of this one,\n     * returning the result in reduced form.\n     * </p>\n     *\n     * @param fraction {@link BigFraction} to subtract, must not be {@code null}.\n     * @return a {@link BigFraction} instance with the resulting values\n     * @throws NullArgumentException if the {@code fraction} is {@code null}.\n     */\n    public BigFraction subtract(final BigFraction fraction) {\n        if (fraction == null) {\n            throw new NullArgumentException(LocalizedFormats.FRACTION);\n        }\n        if (fraction.numerator.signum() == 0) {\n            return this;\n        }\n        if (numerator.signum() == 0) {\n            return fraction.negate();\n        }\n        BigInteger num = null;\n        BigInteger den = null;\n        if (denominator.equals(fraction.denominator)) {\n            num = numerator.subtract(fraction.numerator);\n            den = denominator;\n        } else {\n            num = (numerator.multiply(fraction.denominator)).subtract((fraction.numerator).multiply(denominator));\n            den = denominator.multiply(fraction.denominator);\n        }\n        return new BigFraction(num, den);\n    }\n\n    /**\n     * <p>\n     * Returns the <code>String</code> representing this fraction, ie\n     * \"num / dem\" or just \"num\" if the denominator is one.\n     * </p>\n     *\n     * @return a string representation of the fraction.\n     * @see java.lang.Object#toString()\n     */\n    @Override\n    public String toString() {\n        String str = null;\n        if (BigInteger.ONE.equals(denominator)) {\n            str = numerator.toString();\n        } else if (BigInteger.ZERO.equals(numerator)) {\n            str = \"0\";\n        } else {\n            str = numerator + \" / \" + denominator;\n        }\n        return str;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public BigFractionField getField() {\n        return BigFractionField.getInstance();\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "num"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Create a {@link BigFraction} equivalent to the passed {@code BigInteger}, ie\n * \"num / 1\".\n * </p>\n *\n * @param num\n *            the numerator.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "num",
+            "content": "the numerator.",
+            "assertion": "assert args[0] instanceof java.math.BigInteger;",
+            "description": "the code must be a BigInteger"
+          }
+        ],
+        "code": "/**\n * <p>\n * Create a {@link BigFraction} equivalent to the passed {@code BigInteger}, ie\n * \"num / 1\".\n * </p>\n *\n * @param num\n *            the numerator.\n */\npublic BigFraction(final BigInteger num) {\n    this(num, BigInteger.ONE);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "num"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "den"
+          }
+        ],
+        "javadoc": "/**\n * Create a {@link BigFraction} given the numerator and denominator as\n * {@code BigInteger}. The {@link BigFraction} is reduced to lowest terms.\n *\n * @param num the numerator, must not be {@code null}.\n * @param den the denominator, must not be {@code null}.\n * @throws ZeroException if the denominator is zero.\n * @throws NullArgumentException if either of the arguments is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "num",
+            "content": "the numerator, must not be {@code null}.",
+            "assertion": "assert args[0] != null;",
+            "description": "num must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "den",
+            "content": "the denominator, must not be {@code null}.",
+            "assertion": "assert args[1] != null;",
+            "description": "den must not be null"
+          },
+          {
+            "tag": "throws",
+            "name": "ZeroException",
+            "content": "if the denominator is zero.",
+            "assertion": "assert args[1] == 0;",
+            "description": "if the denominator is zero."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if either of the arguments is null",
+            "assertion": "assert args[0]==null || args[1]==null;",
+            "description": "if either of the arguments is null."
+          }
+        ],
+        "code": "/**\n * Create a {@link BigFraction} given the numerator and denominator as\n * {@code BigInteger}. The {@link BigFraction} is reduced to lowest terms.\n *\n * @param num the numerator, must not be {@code null}.\n * @param den the denominator, must not be {@code null}.\n * @throws ZeroException if the denominator is zero.\n * @throws NullArgumentException if either of the arguments is null\n */\npublic BigFraction(BigInteger num, BigInteger den) {\n    MathUtils.checkNotNull(num, LocalizedFormats.NUMERATOR);\n    MathUtils.checkNotNull(den, LocalizedFormats.DENOMINATOR);\n    if (den.signum() == 0) {\n        throw new ZeroException(LocalizedFormats.ZERO_DENOMINATOR);\n    }\n    if (num.signum() == 0) {\n        numerator = BigInteger.ZERO;\n        denominator = BigInteger.ONE;\n    } else {\n        // reduce numerator and denominator by greatest common denominator\n        final BigInteger gcd = num.gcd(den);\n        if (BigInteger.ONE.compareTo(gcd) < 0) {\n            num = num.divide(gcd);\n            den = den.divide(gcd);\n        }\n        // move sign to numerator\n        if (den.signum() == -1) {\n            num = num.negate();\n            den = den.negate();\n        }\n        // store the values in the final fields\n        numerator = num;\n        denominator = den;\n    }\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Create a fraction given the double value.\n * <p>\n * This constructor behaves <em>differently</em> from\n * {@link #BigFraction(double, double, int)}. It converts the double value\n * exactly, considering its internal bits representation. This works for all\n * values except NaN and infinities and does not requires any loop or\n * convergence threshold.\n * </p>\n * <p>\n * Since this conversion is exact and since double numbers are sometimes\n * approximated, the fraction created may seem strange in some cases. For example,\n * calling <code>new BigFraction(1.0 / 3.0)</code> does <em>not</em> create\n * the fraction 1/3, but the fraction 6004799503160661 / 18014398509481984\n * because the double number passed to the constructor is not exactly 1/3\n * (this number cannot be stored exactly in IEEE754).\n * </p>\n * @see #BigFraction(double, double, int)\n * @param value the double value to convert to a fraction.\n * @exception MathIllegalArgumentException if value is NaN or infinite\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#BigFraction(double, double, int)"
+          },
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "the double value to convert to a fraction.",
+            "assertion": "assert args[0] instanceof java.lang.MathException;",
+            "description": "value must be NaN or infinite"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if value is NaN or infinite",
+            "assertion": "assert receiverObjectID.doubleValue() == Double.NaN || receiverObjectID.doubleValue() == Double.POSITIVE_INFINITY || receiverObjectID.doubleValue() == Double.NEGATIVE_INFINITY;",
+            "description": "if value is NaN or infinite"
+          }
+        ],
+        "code": "/**\n * Create a fraction given the double value.\n * <p>\n * This constructor behaves <em>differently</em> from\n * {@link #BigFraction(double, double, int)}. It converts the double value\n * exactly, considering its internal bits representation. This works for all\n * values except NaN and infinities and does not requires any loop or\n * convergence threshold.\n * </p>\n * <p>\n * Since this conversion is exact and since double numbers are sometimes\n * approximated, the fraction created may seem strange in some cases. For example,\n * calling <code>new BigFraction(1.0 / 3.0)</code> does <em>not</em> create\n * the fraction 1/3, but the fraction 6004799503160661 / 18014398509481984\n * because the double number passed to the constructor is not exactly 1/3\n * (this number cannot be stored exactly in IEEE754).\n * </p>\n * @see #BigFraction(double, double, int)\n * @param value the double value to convert to a fraction.\n * @exception MathIllegalArgumentException if value is NaN or infinite\n */\npublic BigFraction(final double value) throws MathIllegalArgumentException {\n    if (Double.isNaN(value)) {\n        throw new MathIllegalArgumentException(LocalizedFormats.NAN_VALUE_CONVERSION);\n    }\n    if (Double.isInfinite(value)) {\n        throw new MathIllegalArgumentException(LocalizedFormats.INFINITE_VALUE_CONVERSION);\n    }\n    // compute m and k such that value = m * 2^k\n    final long bits = Double.doubleToLongBits(value);\n    final long sign = bits & 0x8000000000000000L;\n    final long exponent = bits & 0x7ff0000000000000L;\n    long m = bits & 0x000fffffffffffffL;\n    if (exponent != 0) {\n        // this was a normalized number, add the implicit most significant bit\n        m |= 0x0010000000000000L;\n    }\n    if (sign != 0) {\n        m = -m;\n    }\n    int k = ((int) (exponent >> 52)) - 1075;\n    while (((m & 0x001ffffffffffffeL) != 0) && ((m & 0x1) == 0)) {\n        m >>= 1;\n        ++k;\n    }\n    if (k < 0) {\n        numerator = BigInteger.valueOf(m);\n        denominator = BigInteger.ZERO.flipBit(-k);\n    } else {\n        numerator = BigInteger.valueOf(m).multiply(BigInteger.ZERO.flipBit(k));\n        denominator = BigInteger.ONE;\n    }\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "epsilon"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxIterations"
+          }
+        ],
+        "javadoc": "/**\n * Create a fraction given the double value and maximum error allowed.\n * <p>\n * References:\n * <ul>\n * <li><a href=\"http://mathworld.wolfram.com/ContinuedFraction.html\">\n * Continued Fraction</a> equations (11) and (22)-(26)</li>\n * </ul>\n * </p>\n *\n * @param value\n *            the double value to convert to a fraction.\n * @param epsilon\n *            maximum error allowed. The resulting fraction is within\n *            <code>epsilon</code> of <code>value</code>, in absolute terms.\n * @param maxIterations\n *            maximum number of convergents.\n * @throws FractionConversionException\n *             if the continued fraction failed to converge.\n * @see #BigFraction(double)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "the double value to convert to a fraction.",
+            "assertion": "",
+            "description": "the double value to convert to a fraction."
+          },
+          {
+            "tag": "param",
+            "name": "epsilon",
+            "content": "maximum error allowed. The resulting fraction is within\n           <code>epsilon</code> of <code>value</code>, in absolute terms.",
+            "assertion": "",
+            "description": "maximum error allowed. The resulting fraction is within\n           <code>epsilon</code> of <code>value</code>, in absolute terms."
+          },
+          {
+            "tag": "param",
+            "name": "maxIterations",
+            "content": "maximum number of convergents.",
+            "assertion": "",
+            "description": "maximum number of convergents."
+          },
+          {
+            "tag": "throws",
+            "name": "FractionConversionException",
+            "content": "if the continued fraction failed to converge.",
+            "assertion": "",
+            "description": "if the continued fraction failed to converge."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#BigFraction(double)"
+          }
+        ],
+        "code": "/**\n * Create a fraction given the double value and maximum error allowed.\n * <p>\n * References:\n * <ul>\n * <li><a href=\"http://mathworld.wolfram.com/ContinuedFraction.html\">\n * Continued Fraction</a> equations (11) and (22)-(26)</li>\n * </ul>\n * </p>\n *\n * @param value\n *            the double value to convert to a fraction.\n * @param epsilon\n *            maximum error allowed. The resulting fraction is within\n *            <code>epsilon</code> of <code>value</code>, in absolute terms.\n * @param maxIterations\n *            maximum number of convergents.\n * @throws FractionConversionException\n *             if the continued fraction failed to converge.\n * @see #BigFraction(double)\n */\npublic BigFraction(final double value, final double epsilon, final int maxIterations) throws FractionConversionException {\n    this(value, epsilon, Integer.MAX_VALUE, maxIterations);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxDenominator"
+          }
+        ],
+        "javadoc": "/**\n * Create a fraction given the double value and maximum denominator.\n * <p>\n * References:\n * <ul>\n * <li><a href=\"http://mathworld.wolfram.com/ContinuedFraction.html\">\n * Continued Fraction</a> equations (11) and (22)-(26)</li>\n * </ul>\n * </p>\n *\n * @param value\n *            the double value to convert to a fraction.\n * @param maxDenominator\n *            The maximum allowed value for denominator.\n * @throws FractionConversionException\n *             if the continued fraction failed to converge.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "the double value to convert to a fraction.",
+            "assertion": "assert args[0] > 0;",
+            "description": "the double value must be positive"
+          },
+          {
+            "tag": "param",
+            "name": "maxDenominator",
+            "content": "The maximum allowed value for denominator.",
+            "assertion": "assert args[1] > 0;",
+            "description": "The maximum allowed value for denominator must be positive"
+          },
+          {
+            "tag": "throws",
+            "name": "FractionConversionException",
+            "content": "if the continued fraction failed to converge.",
+            "assertion": "",
+            "description": "if the continued fraction failed to converge."
+          }
+        ],
+        "code": "/**\n * Create a fraction given the double value and maximum denominator.\n * <p>\n * References:\n * <ul>\n * <li><a href=\"http://mathworld.wolfram.com/ContinuedFraction.html\">\n * Continued Fraction</a> equations (11) and (22)-(26)</li>\n * </ul>\n * </p>\n *\n * @param value\n *            the double value to convert to a fraction.\n * @param maxDenominator\n *            The maximum allowed value for denominator.\n * @throws FractionConversionException\n *             if the continued fraction failed to converge.\n */\npublic BigFraction(final double value, final int maxDenominator) throws FractionConversionException {\n    this(value, 0, maxDenominator, 100);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "num"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Create a {@link BigFraction} equivalent to the passed {@code int}, ie\n * \"num / 1\".\n * </p>\n *\n * @param num\n *            the numerator.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "num",
+            "content": "the numerator.",
+            "assertion": "assert args[0].equals(1) && args[0] >= 0;",
+            "description": "num must be equivalent to an int"
+          }
+        ],
+        "code": "/**\n * <p>\n * Create a {@link BigFraction} equivalent to the passed {@code int}, ie\n * \"num / 1\".\n * </p>\n *\n * @param num\n *            the numerator.\n */\npublic BigFraction(final int num) {\n    this(BigInteger.valueOf(num), BigInteger.ONE);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "num"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "den"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Create a {@link BigFraction} given the numerator and denominator as simple\n * {@code int}. The {@link BigFraction} is reduced to lowest terms.\n * </p>\n *\n * @param num\n *            the numerator.\n * @param den\n *            the denominator.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "num",
+            "content": "the numerator.",
+            "assertion": "assert args[0].type.simple_name.equals(\"int\") && args[0].type.array_dimensions == 0;",
+            "description": "num must be simple int"
+          },
+          {
+            "tag": "param",
+            "name": "den",
+            "content": "the denominator.",
+            "assertion": "assert args[1].type.simple_name.equals(\"int\") && args[1].type.array_dimensions == 0;",
+            "description": "den must be simple int"
+          }
+        ],
+        "code": "/**\n * <p>\n * Create a {@link BigFraction} given the numerator and denominator as simple\n * {@code int}. The {@link BigFraction} is reduced to lowest terms.\n * </p>\n *\n * @param num\n *            the numerator.\n * @param den\n *            the denominator.\n */\npublic BigFraction(final int num, final int den) {\n    this(BigInteger.valueOf(num), BigInteger.valueOf(den));\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "num"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Create a {@link BigFraction} equivalent to the passed long, ie \"num / 1\".\n * </p>\n *\n * @param num\n *            the numerator.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "num",
+            "content": "the numerator.",
+            "assertion": "assert args[0] >= 0 && args[0] % 1 == 0;",
+            "description": "the numerator must be a non-negative integer"
+          }
+        ],
+        "code": "/**\n * <p>\n * Create a {@link BigFraction} equivalent to the passed long, ie \"num / 1\".\n * </p>\n *\n * @param num\n *            the numerator.\n */\npublic BigFraction(final long num) {\n    this(BigInteger.valueOf(num), BigInteger.ONE);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "BigFraction",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "num"
+          },
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "den"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Create a {@link BigFraction} given the numerator and denominator as simple\n * {@code long}. The {@link BigFraction} is reduced to lowest terms.\n * </p>\n *\n * @param num\n *            the numerator.\n * @param den\n *            the denominator.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "num",
+            "content": "the numerator.",
+            "assertion": "assert (long) args[0] >= 0;",
+            "description": "num must be a simple long"
+          },
+          {
+            "tag": "param",
+            "name": "den",
+            "content": "the denominator.",
+            "assertion": "assert args[1] > 0 && (int)args[1] != 0;",
+            "description": "den must be a positive integer greater than zero"
+          }
+        ],
+        "code": "/**\n * <p>\n * Create a {@link BigFraction} given the numerator and denominator as simple\n * {@code long}. The {@link BigFraction} is reduced to lowest terms.\n * </p>\n *\n * @param num\n *            the numerator.\n * @param den\n *            the denominator.\n */\npublic BigFraction(final long num, final long den) {\n    this(BigInteger.valueOf(num), BigInteger.valueOf(den));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getReducedFraction",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "numerator"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "denominator"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Creates a <code>BigFraction</code> instance with the 2 parts of a fraction\n * Y/Z.\n * </p>\n *\n * <p>\n * Any negative signs are resolved to be on the numerator.\n * </p>\n *\n * @param numerator\n *            the numerator, for example the three in 'three sevenths'.\n * @param denominator\n *            the denominator, for example the seven in 'three sevenths'.\n * @return a new fraction instance, with the numerator and denominator\n *         reduced.\n * @throws ArithmeticException\n *             if the denominator is <code>zero</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "numerator",
+            "content": " the numerator, for example the three in 'three sevenths'.",
+            "assertion": "assert (args[0] instanceof Integer);",
+            "description": "the numerator must be an integer"
+          },
+          {
+            "tag": "param",
+            "name": "denominator",
+            "content": " the denominator, for example the seven in 'three sevenths'.",
+            "assertion": "assert (args[1] > 0 && args[1] instanceof Integer);",
+            "description": "the denominator must be a positive integer"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "new fraction instance, with the numerator and denominator reduced.",
+            "assertion": "",
+            "description": "new fraction instance, with the numerator and denominator reduced."
+          },
+          {
+            "tag": "throws",
+            "name": "ArithmeticException",
+            "content": " if the denominator is <code>zero</code>.",
+            "assertion": "assert receiverObjectID.getDenominatorAsLong() == 0;",
+            "description": "if denominator is zero."
+          }
+        ],
+        "code": "/**\n * <p>\n * Creates a <code>BigFraction</code> instance with the 2 parts of a fraction\n * Y/Z.\n * </p>\n *\n * <p>\n * Any negative signs are resolved to be on the numerator.\n * </p>\n *\n * @param numerator\n *            the numerator, for example the three in 'three sevenths'.\n * @param denominator\n *            the denominator, for example the seven in 'three sevenths'.\n * @return a new fraction instance, with the numerator and denominator\n *         reduced.\n * @throws ArithmeticException\n *             if the denominator is <code>zero</code>.\n */\npublic static BigFraction getReducedFraction(final int numerator, final int denominator) {\n    if (numerator == 0) {\n        // normalize zero.\n        return ZERO;\n    }\n    return new BigFraction(numerator, denominator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "abs",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Returns the absolute value of this {@link BigFraction}.\n * </p>\n *\n * @return the absolute value as a {@link BigFraction}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "absolute value as a {@link BigFraction}."
+          }
+        ],
+        "code": "/**\n * <p>\n * Returns the absolute value of this {@link BigFraction}.\n * </p>\n *\n * @return the absolute value as a {@link BigFraction}.\n */\npublic BigFraction abs() {\n    return (numerator.signum() == 1) ? this : negate();\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bg"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Adds the value of this fraction to the passed {@link BigInteger},\n * returning the result in reduced form.\n * </p>\n *\n * @param bg\n *            the {@link BigInteger} to add, must'nt be <code>null</code>.\n * @return a <code>BigFraction</code> instance with the resulting values.\n * @throws NullArgumentException\n *             if the {@link BigInteger} is <code>null</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "bg",
+            "content": " the {@link BigInteger} to add, must'nt be <code>null</code>.",
+            "assertion": "assert args[0] != null;",
+            "description": "bg mustn't be null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "<code>BigFraction</code> instance with the resulting values.",
+            "assertion": "",
+            "description": "<code>BigFraction</code> instance with the resulting values."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": " if the {@link BigInteger} is <code>null</code>.",
+            "assertion": "assert args[0]==null;",
+            "description": "if bg is null."
+          }
+        ],
+        "code": "/**\n * <p>\n * Adds the value of this fraction to the passed {@link BigInteger},\n * returning the result in reduced form.\n * </p>\n *\n * @param bg\n *            the {@link BigInteger} to add, must'nt be <code>null</code>.\n * @return a <code>BigFraction</code> instance with the resulting values.\n * @throws NullArgumentException\n *             if the {@link BigInteger} is <code>null</code>.\n */\npublic BigFraction add(final BigInteger bg) throws NullArgumentException {\n    MathUtils.checkNotNull(bg);\n    if (numerator.signum() == 0) {\n        return new BigFraction(bg);\n    }\n    if (bg.signum() == 0) {\n        return this;\n    }\n    return new BigFraction(numerator.add(denominator.multiply(bg)), denominator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Adds the value of this fraction to the passed {@code integer}, returning\n * the result in reduced form.\n * </p>\n *\n * @param i\n *            the {@code integer} to add.\n * @return a <code>BigFraction</code> instance with the resulting values.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": " the {@code integer} to add.",
+            "assertion": "assert args[0] > 0;",
+            "description": "the i must be positive"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "<code>BigFraction</code> instance with the resulting values."
+          }
+        ],
+        "code": "/**\n * <p>\n * Adds the value of this fraction to the passed {@code integer}, returning\n * the result in reduced form.\n * </p>\n *\n * @param i\n *            the {@code integer} to add.\n * @return a <code>BigFraction</code> instance with the resulting values.\n */\npublic BigFraction add(final int i) {\n    return add(BigInteger.valueOf(i));\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "l"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Adds the value of this fraction to the passed {@code long}, returning\n * the result in reduced form.\n * </p>\n *\n * @param l\n *            the {@code long} to add.\n * @return a <code>BigFraction</code> instance with the resulting values.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "l",
+            "content": " the {@code long} to add.",
+            "assertion": "assert (args[0] > 0) && (receiverObjectID != null);",
+            "description": "l must be a positive number"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "<code>BigFraction</code> instance with the resulting values."
+          }
+        ],
+        "code": "/**\n * <p>\n * Adds the value of this fraction to the passed {@code long}, returning\n * the result in reduced form.\n * </p>\n *\n * @param l\n *            the {@code long} to add.\n * @return a <code>BigFraction</code> instance with the resulting values.\n */\npublic BigFraction add(final long l) {\n    return add(BigInteger.valueOf(l));\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigFraction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fraction"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Adds the value of this fraction to another, returning the result in\n * reduced form.\n * </p>\n *\n * @param fraction\n *            the {@link BigFraction} to add, must not be <code>null</code>.\n * @return a {@link BigFraction} instance with the resulting values.\n * @throws NullArgumentException if the {@link BigFraction} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "fraction",
+            "content": " the {@link BigFraction} to add, must not be <code>null</code>.",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "the fraction must not be null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if the {@link BigFraction} is {@code null}.",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "if fraction is null."
+          }
+        ],
+        "code": "/**\n * <p>\n * Adds the value of this fraction to another, returning the result in\n * reduced form.\n * </p>\n *\n * @param fraction\n *            the {@link BigFraction} to add, must not be <code>null</code>.\n * @return a {@link BigFraction} instance with the resulting values.\n * @throws NullArgumentException if the {@link BigFraction} is {@code null}.\n */\npublic BigFraction add(final BigFraction fraction) {\n    if (fraction == null) {\n        throw new NullArgumentException(LocalizedFormats.FRACTION);\n    }\n    if (fraction.numerator.signum() == 0) {\n        return this;\n    }\n    if (numerator.signum() == 0) {\n        return fraction;\n    }\n    BigInteger num = null;\n    BigInteger den = null;\n    if (denominator.equals(fraction.denominator)) {\n        num = numerator.add(fraction.numerator);\n        den = denominator;\n    } else {\n        num = (numerator.multiply(fraction.denominator)).add((fraction.numerator).multiply(denominator));\n        den = denominator.multiply(fraction.denominator);\n    }\n    if (num.signum() == 0) {\n        return ZERO;\n    }\n    return new BigFraction(num, den);\n}"
+      },
+      {
+        "type": "method",
+        "name": "bigDecimalValue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigDecimal",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Gets the fraction as a <code>BigDecimal</code>. This calculates the\n * fraction as the numerator divided by denominator.\n * </p>\n *\n * @return the fraction as a <code>BigDecimal</code>.\n * @throws ArithmeticException\n *             if the exact quotient does not have a terminating decimal\n *             expansion.\n * @see BigDecimal\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "fraction as a <code>BigDecimal</code>."
+          },
+          {
+            "tag": "throws",
+            "name": "ArithmeticException",
+            "content": " if the exact quotient does not have a terminating decimal expansion.",
+            "assertion": "assert !receiverObjectID.divide(args[0], args[1]).abs().equals(BigDecimal.ZERO);",
+            "description": "if exact quotient does not have a terminating decimal expansion."
+          },
+          {
+            "tag": "see",
+            "name": "BigDecimal",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction as a <code>BigDecimal</code>. This calculates the\n * fraction as the numerator divided by denominator.\n * </p>\n *\n * @return the fraction as a <code>BigDecimal</code>.\n * @throws ArithmeticException\n *             if the exact quotient does not have a terminating decimal\n *             expansion.\n * @see BigDecimal\n */\npublic BigDecimal bigDecimalValue() {\n    return new BigDecimal(numerator).divide(new BigDecimal(denominator));\n}"
+      },
+      {
+        "type": "method",
+        "name": "bigDecimalValue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigDecimal",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "roundingMode"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Gets the fraction as a <code>BigDecimal</code> following the passed\n * rounding mode. This calculates the fraction as the numerator divided by\n * denominator.\n * </p>\n *\n * @param roundingMode\n *            rounding mode to apply. see {@link BigDecimal} constants.\n * @return the fraction as a <code>BigDecimal</code>.\n * @throws IllegalArgumentException\n *             if {@code roundingMode} does not represent a valid rounding\n *             mode.\n * @see BigDecimal\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "roundingMode",
+            "content": " rounding mode to apply. see {@link BigDecimal} constants.",
+            "assertion": "",
+            "description": " rounding mode to apply. see {@link BigDecimal} constants."
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "fraction as a <code>BigDecimal</code>.",
+            "assertion": "",
+            "description": "fraction as a <code>BigDecimal</code>."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": " if {@code roundingMode} does not represent a valid rounding mode.",
+            "assertion": "",
+            "description": " if {@code roundingMode} does not represent a valid rounding mode."
+          },
+          {
+            "tag": "see",
+            "name": "BigDecimal",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction as a <code>BigDecimal</code> following the passed\n * rounding mode. This calculates the fraction as the numerator divided by\n * denominator.\n * </p>\n *\n * @param roundingMode\n *            rounding mode to apply. see {@link BigDecimal} constants.\n * @return the fraction as a <code>BigDecimal</code>.\n * @throws IllegalArgumentException\n *             if {@code roundingMode} does not represent a valid rounding\n *             mode.\n * @see BigDecimal\n */\npublic BigDecimal bigDecimalValue(final int roundingMode) {\n    return new BigDecimal(numerator).divide(new BigDecimal(denominator), roundingMode);\n}"
+      },
+      {
+        "type": "method",
+        "name": "bigDecimalValue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigDecimal",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "scale"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "roundingMode"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Gets the fraction as a <code>BigDecimal</code> following the passed scale\n * and rounding mode. This calculates the fraction as the numerator divided\n * by denominator.\n * </p>\n *\n * @param scale\n *            scale of the <code>BigDecimal</code> quotient to be returned.\n *            see {@link BigDecimal} for more information.\n * @param roundingMode\n *            rounding mode to apply. see {@link BigDecimal} constants.\n * @return the fraction as a <code>BigDecimal</code>.\n * @see BigDecimal\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "scale",
+            "content": " scale of the <code>BigDecimal</code> quotient to be returned. see {@link BigDecimal} for more information.",
+            "assertion": "",
+            "description": " scale of the <code>BigDecimal</code> quotient to be returned. see {@link BigDecimal} for more information."
+          },
+          {
+            "tag": "param",
+            "name": "roundingMode",
+            "content": " rounding mode to apply. see {@link BigDecimal} constants.",
+            "assertion": "",
+            "description": " rounding mode to apply. see {@link BigDecimal} constants."
+          },
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "fraction as a <code>BigDecimal</code>.",
+            "assertion": "",
+            "description": "fraction as a <code>BigDecimal</code>."
+          },
+          {
+            "tag": "see",
+            "name": "BigDecimal",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction as a <code>BigDecimal</code> following the passed scale\n * and rounding mode. This calculates the fraction as the numerator divided\n * by denominator.\n * </p>\n *\n * @param scale\n *            scale of the <code>BigDecimal</code> quotient to be returned.\n *            see {@link BigDecimal} for more information.\n * @param roundingMode\n *            rounding mode to apply. see {@link BigDecimal} constants.\n * @return the fraction as a <code>BigDecimal</code>.\n * @see BigDecimal\n */\npublic BigDecimal bigDecimalValue(final int scale, final int roundingMode) {\n    return new BigDecimal(numerator).divide(new BigDecimal(denominator), scale, roundingMode);\n}"
+      },
+      {
+        "type": "method",
+        "name": "compareTo",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigFraction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Compares this object to another based on size.\n * </p>\n *\n * @param object\n *            the object to compare to, must not be <code>null</code>.\n * @return -1 if this is less than {@code object}, +1 if this is greater\n *         than {@code object}, 0 if they are equal.\n * @see java.lang.Comparable#compareTo(java.lang.Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "object",
+            "content": " the object to compare to, must not be <code>null</code>.",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "the object must not be <code>null</code>"
+          },
+          {
+            "tag": "return",
+            "name": "-1",
+            "content": "if this is less than {@code object}, +1 if this is greater than {@code object}, 0 if they are equal."
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Comparable#compareTo(java.lang.Object)",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Compares this object to another based on size.\n * </p>\n *\n * @param object\n *            the object to compare to, must not be <code>null</code>.\n * @return -1 if this is less than {@code object}, +1 if this is greater\n *         than {@code object}, 0 if they are equal.\n * @see java.lang.Comparable#compareTo(java.lang.Object)\n */\npublic int compareTo(final BigFraction object) {\n    int lhsSigNum = numerator.signum();\n    int rhsSigNum = object.numerator.signum();\n    if (lhsSigNum != rhsSigNum) {\n        return (lhsSigNum > rhsSigNum) ? 1 : -1;\n    }\n    if (lhsSigNum == 0) {\n        return 0;\n    }\n    BigInteger nOd = numerator.multiply(object.denominator);\n    BigInteger dOn = denominator.multiply(object.numerator);\n    return nOd.compareTo(dOn);\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bg"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Divide the value of this fraction by the passed {@code BigInteger},\n * ie {@code this * 1 / bg}, returning the result in reduced form.\n * </p>\n *\n * @param bg the {@code BigInteger} to divide by, must not be {@code null}\n * @return a {@link BigFraction} instance with the resulting values\n * @throws NullArgumentException if the {@code BigInteger} is {@code null}\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "bg",
+            "content": "the {@code BigInteger} to divide by, must not be {@code null}",
+            "assertion": "assert args[0] != null;",
+            "description": "bg must not be null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values"
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if the {@code BigInteger} is {@code null}"
+          },
+          {
+            "tag": "throws",
+            "name": "MathArithmeticException",
+            "content": "if the fraction to divide by is zero"
+          }
+        ],
+        "code": "/**\n * <p>\n * Divide the value of this fraction by the passed {@code BigInteger},\n * ie {@code this * 1 / bg}, returning the result in reduced form.\n * </p>\n *\n * @param bg the {@code BigInteger} to divide by, must not be {@code null}\n * @return a {@link BigFraction} instance with the resulting values\n * @throws NullArgumentException if the {@code BigInteger} is {@code null}\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\npublic BigFraction divide(final BigInteger bg) {\n    if (bg == null) {\n        throw new NullArgumentException(LocalizedFormats.FRACTION);\n    }\n    if (bg.signum() == 0) {\n        throw new MathArithmeticException(LocalizedFormats.ZERO_DENOMINATOR);\n    }\n    if (numerator.signum() == 0) {\n        return ZERO;\n    }\n    return new BigFraction(numerator, denominator.multiply(bg));\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Divide the value of this fraction by the passed {@code int}, ie\n * {@code this * 1 / i}, returning the result in reduced form.\n * </p>\n *\n * @param i the {@code int} to divide by\n * @return a {@link BigFraction} instance with the resulting values\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the {@code int} to divide by",
+            "assertion": "",
+            "description": "the {@code int} to divide by"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values",
+            "assertion": "",
+            "description": "{@link BigFraction} instance with the resulting values"
+          },
+          {
+            "tag": "throws",
+            "name": "MathArithmeticException",
+            "content": "if the fraction to divide by is zero",
+            "assertion": "assert args[0]==0;",
+            "description": "if the fraction to divide by is zero."
+          }
+        ],
+        "code": "/**\n * <p>\n * Divide the value of this fraction by the passed {@code int}, ie\n * {@code this * 1 / i}, returning the result in reduced form.\n * </p>\n *\n * @param i the {@code int} to divide by\n * @return a {@link BigFraction} instance with the resulting values\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\npublic BigFraction divide(final int i) {\n    return divide(BigInteger.valueOf(i));\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "l"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Divide the value of this fraction by the passed {@code long}, ie\n * {@code this * 1 / l}, returning the result in reduced form.\n * </p>\n *\n * @param l the {@code long} to divide by\n * @return a {@link BigFraction} instance with the resulting values\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "l",
+            "content": "the {@code long} to divide by",
+            "assertion": "assert args[0] > 0 && (args[0] instanceof java.lang.Long && ((java.lang.Long)args[0]).longValue() > 0);",
+            "description": "l must be a positive long"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values"
+          },
+          {
+            "tag": "throws",
+            "name": "MathArithmeticException",
+            "content": "if the fraction to divide by is zero",
+            "assertion": "assert receiverObjectID.getDenominatorAsLong() == 0;",
+            "description": "if the fraction to divide by is zero"
+          }
+        ],
+        "code": "/**\n * <p>\n * Divide the value of this fraction by the passed {@code long}, ie\n * {@code this * 1 / l}, returning the result in reduced form.\n * </p>\n *\n * @param l the {@code long} to divide by\n * @return a {@link BigFraction} instance with the resulting values\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\npublic BigFraction divide(final long l) {\n    return divide(BigInteger.valueOf(l));\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigFraction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fraction"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Divide the value of this fraction by another, returning the result in\n * reduced form.\n * </p>\n *\n * @param fraction Fraction to divide by, must not be {@code null}.\n * @return a {@link BigFraction} instance with the resulting values.\n * @throws NullArgumentException if the {@code fraction} is {@code null}.\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "fraction",
+            "content": "Fraction to divide by, must not be {@code null}.",
+            "assertion": "",
+            "description": "Fraction to divide by, must not be {@code null}."
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if the {@code fraction} is {@code null}."
+          },
+          {
+            "tag": "throws",
+            "name": "MathArithmeticException",
+            "content": "if the fraction to divide by is zero",
+            "assertion": "assert !receiverObjectID.divide(args[0]).getDenominatorAsInt()==0;",
+            "description": "if the fraction to divide by is zero."
+          }
+        ],
+        "code": "/**\n * <p>\n * Divide the value of this fraction by another, returning the result in\n * reduced form.\n * </p>\n *\n * @param fraction Fraction to divide by, must not be {@code null}.\n * @return a {@link BigFraction} instance with the resulting values.\n * @throws NullArgumentException if the {@code fraction} is {@code null}.\n * @throws MathArithmeticException if the fraction to divide by is zero\n */\npublic BigFraction divide(final BigFraction fraction) {\n    if (fraction == null) {\n        throw new NullArgumentException(LocalizedFormats.FRACTION);\n    }\n    if (fraction.numerator.signum() == 0) {\n        throw new MathArithmeticException(LocalizedFormats.ZERO_DENOMINATOR);\n    }\n    if (numerator.signum() == 0) {\n        return ZERO;\n    }\n    return multiply(fraction.reciprocal());\n}"
+      },
+      {
+        "type": "method",
+        "name": "doubleValue",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Gets the fraction as a {@code double}. This calculates the fraction as\n * the numerator divided by denominator.\n * </p>\n *\n * @return the fraction as a {@code double}\n * @see java.lang.Number#doubleValue()\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "fraction as a {@code double}"
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Number#doubleValue()",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction as a {@code double}. This calculates the fraction as\n * the numerator divided by denominator.\n * </p>\n *\n * @return the fraction as a {@code double}\n * @see java.lang.Number#doubleValue()\n */\n@Override\npublic double doubleValue() {\n    double result = numerator.doubleValue() / denominator.doubleValue();\n    if (Double.isNaN(result)) {\n        // Numerator and/or denominator must be out of range:\n        // Calculate how far to shift them to put them in range.\n        int shift = FastMath.max(numerator.bitLength(), denominator.bitLength()) - FastMath.getExponent(Double.MAX_VALUE);\n        result = numerator.shiftRight(shift).doubleValue() / denominator.shiftRight(shift).doubleValue();\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Test for the equality of two fractions. If the lowest term numerator and\n * denominators are the same for both fractions, the two fractions are\n * considered to be equal.\n * </p>\n *\n * @param other\n *            fraction to test for equality to this fraction, can be\n *            <code>null</code>.\n * @return true if two fractions are equal, false if object is\n *         <code>null</code>, not an instance of {@link BigFraction}, or not\n *         equal to this fraction instance.\n * @see java.lang.Object#equals(java.lang.Object)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "other",
+            "content": " fraction to test for equality to this fraction, can be <code>null</code>.",
+            "assertion": "",
+            "description": " fraction to test for equality to this fraction, can be <code>null</code>."
+          },
+          {
+            "tag": "return",
+            "name": "true",
+            "content": "if two fractions are equal, false if object is <code>null</code>, not an instance of {@link BigFraction}, or not equal to this fraction instance."
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Object#equals(java.lang.Object)",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Test for the equality of two fractions. If the lowest term numerator and\n * denominators are the same for both fractions, the two fractions are\n * considered to be equal.\n * </p>\n *\n * @param other\n *            fraction to test for equality to this fraction, can be\n *            <code>null</code>.\n * @return true if two fractions are equal, false if object is\n *         <code>null</code>, not an instance of {@link BigFraction}, or not\n *         equal to this fraction instance.\n * @see java.lang.Object#equals(java.lang.Object)\n */\n@Override\npublic boolean equals(final Object other) {\n    boolean ret = false;\n    if (this == other) {\n        ret = true;\n    } else if (other instanceof BigFraction) {\n        BigFraction rhs = ((BigFraction) other).reduce();\n        BigFraction thisOne = this.reduce();\n        ret = thisOne.numerator.equals(rhs.numerator) && thisOne.denominator.equals(rhs.denominator);\n    }\n    return ret;\n}"
+      },
+      {
+        "type": "method",
+        "name": "floatValue",
+        "return_type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Gets the fraction as a {@code float}. This calculates the fraction as\n * the numerator divided by denominator.\n * </p>\n *\n * @return the fraction as a {@code float}.\n * @see java.lang.Number#floatValue()\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "fraction as a {@code float}."
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Number#floatValue()",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction as a {@code float}. This calculates the fraction as\n * the numerator divided by denominator.\n * </p>\n *\n * @return the fraction as a {@code float}.\n * @see java.lang.Number#floatValue()\n */\n@Override\npublic float floatValue() {\n    float result = numerator.floatValue() / denominator.floatValue();\n    if (Double.isNaN(result)) {\n        // Numerator and/or denominator must be out of range:\n        // Calculate how far to shift them to put them in range.\n        int shift = FastMath.max(numerator.bitLength(), denominator.bitLength()) - FastMath.getExponent(Float.MAX_VALUE);\n        result = numerator.shiftRight(shift).floatValue() / denominator.shiftRight(shift).floatValue();\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getDenominator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Access the denominator as a <code>BigInteger</code>.\n * </p>\n *\n * @return the denominator as a <code>BigInteger</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "denominator as a <code>BigInteger</code>."
+          }
+        ],
+        "code": "/**\n * <p>\n * Access the denominator as a <code>BigInteger</code>.\n * </p>\n *\n * @return the denominator as a <code>BigInteger</code>.\n */\npublic BigInteger getDenominator() {\n    return denominator;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getDenominatorAsInt",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Access the denominator as a {@code int}.\n * </p>\n *\n * @return the denominator as a {@code int}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "denominator as a {@code int}."
+          }
+        ],
+        "code": "/**\n * <p>\n * Access the denominator as a {@code int}.\n * </p>\n *\n * @return the denominator as a {@code int}.\n */\npublic int getDenominatorAsInt() {\n    return denominator.intValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getDenominatorAsLong",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Access the denominator as a {@code long}.\n * </p>\n *\n * @return the denominator as a {@code long}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "denominator as a {@code long}."
+          }
+        ],
+        "code": "/**\n * <p>\n * Access the denominator as a {@code long}.\n * </p>\n *\n * @return the denominator as a {@code long}.\n */\npublic long getDenominatorAsLong() {\n    return denominator.longValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNumerator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigInteger",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Access the numerator as a <code>BigInteger</code>.\n * </p>\n *\n * @return the numerator as a <code>BigInteger</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "numerator as a <code>BigInteger</code>."
+          }
+        ],
+        "code": "/**\n * <p>\n * Access the numerator as a <code>BigInteger</code>.\n * </p>\n *\n * @return the numerator as a <code>BigInteger</code>.\n */\npublic BigInteger getNumerator() {\n    return numerator;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNumeratorAsInt",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Access the numerator as a {@code int}.\n * </p>\n *\n * @return the numerator as a {@code int}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "numerator as a {@code int}."
+          }
+        ],
+        "code": "/**\n * <p>\n * Access the numerator as a {@code int}.\n * </p>\n *\n * @return the numerator as a {@code int}.\n */\npublic int getNumeratorAsInt() {\n    return numerator.intValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNumeratorAsLong",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Access the numerator as a {@code long}.\n * </p>\n *\n * @return the numerator as a {@code long}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "numerator as a {@code long}."
+          }
+        ],
+        "code": "/**\n * <p>\n * Access the numerator as a {@code long}.\n * </p>\n *\n * @return the numerator as a {@code long}.\n */\npublic long getNumeratorAsLong() {\n    return numerator.longValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Gets a hashCode for the fraction.\n * </p>\n *\n * @return a hash code value for this object.\n * @see java.lang.Object#hashCode()\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "hash code value for this object."
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Object#hashCode()",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets a hashCode for the fraction.\n * </p>\n *\n * @return a hash code value for this object.\n * @see java.lang.Object#hashCode()\n */\n@Override\npublic int hashCode() {\n    return 37 * (37 * 17 + numerator.hashCode()) + denominator.hashCode();\n}"
+      },
+      {
+        "type": "method",
+        "name": "intValue",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Gets the fraction as an {@code int}. This returns the whole number part\n * of the fraction.\n * </p>\n *\n * @return the whole number fraction part.\n * @see java.lang.Number#intValue()\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "whole number fraction part."
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Number#intValue()",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction as an {@code int}. This returns the whole number part\n * of the fraction.\n * </p>\n *\n * @return the whole number fraction part.\n * @see java.lang.Number#intValue()\n */\n@Override\npublic int intValue() {\n    return numerator.divide(denominator).intValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "longValue",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Gets the fraction as a {@code long}. This returns the whole number part\n * of the fraction.\n * </p>\n *\n * @return the whole number fraction part.\n * @see java.lang.Number#longValue()\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "whole number fraction part."
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Number#longValue()",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction as a {@code long}. This returns the whole number part\n * of the fraction.\n * </p>\n *\n * @return the whole number fraction part.\n * @see java.lang.Number#longValue()\n */\n@Override\npublic long longValue() {\n    return numerator.divide(denominator).longValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bg"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Multiplies the value of this fraction by the passed\n * <code>BigInteger</code>, returning the result in reduced form.\n * </p>\n *\n * @param bg the {@code BigInteger} to multiply by.\n * @return a {@code BigFraction} instance with the resulting values.\n * @throws NullArgumentException if {@code bg} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "bg",
+            "content": "the {@code BigInteger} to multiply by.",
+            "assertion": "assert args[0] != null;",
+            "description": "bg must be non-null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@code BigFraction} instance with the resulting values."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code bg} is {@code null}.",
+            "assertion": "assert receiverObjectID==null;",
+            "description": "if bg is null."
+          }
+        ],
+        "code": "/**\n * <p>\n * Multiplies the value of this fraction by the passed\n * <code>BigInteger</code>, returning the result in reduced form.\n * </p>\n *\n * @param bg the {@code BigInteger} to multiply by.\n * @return a {@code BigFraction} instance with the resulting values.\n * @throws NullArgumentException if {@code bg} is {@code null}.\n */\npublic BigFraction multiply(final BigInteger bg) {\n    if (bg == null) {\n        throw new NullArgumentException();\n    }\n    if (numerator.signum() == 0 || bg.signum() == 0) {\n        return ZERO;\n    }\n    return new BigFraction(bg.multiply(numerator), denominator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Multiply the value of this fraction by the passed {@code int}, returning\n * the result in reduced form.\n * </p>\n *\n * @param i\n *            the {@code int} to multiply by.\n * @return a {@link BigFraction} instance with the resulting values.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": " the {@code int} to multiply by.",
+            "assertion": "assert args[0] instanceof Integer;",
+            "description": "i must be an integer"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values.",
+            "assertion": "",
+            "description": "{@link BigFraction} instance with the resulting values."
+          }
+        ],
+        "code": "/**\n * <p>\n * Multiply the value of this fraction by the passed {@code int}, returning\n * the result in reduced form.\n * </p>\n *\n * @param i\n *            the {@code int} to multiply by.\n * @return a {@link BigFraction} instance with the resulting values.\n */\npublic BigFraction multiply(final int i) {\n    if (i == 0 || numerator.signum() == 0) {\n        return ZERO;\n    }\n    return multiply(BigInteger.valueOf(i));\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "l"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Multiply the value of this fraction by the passed {@code long},\n * returning the result in reduced form.\n * </p>\n *\n * @param l\n *            the {@code long} to multiply by.\n * @return a {@link BigFraction} instance with the resulting values.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "l",
+            "content": " the {@code long} to multiply by.",
+            "assertion": "assert args[0] instanceof java.lang.Long;",
+            "description": "l must be a long"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values.",
+            "assertion": "",
+            "description": "{@link BigFraction} instance with the resulting values."
+          }
+        ],
+        "code": "/**\n * <p>\n * Multiply the value of this fraction by the passed {@code long},\n * returning the result in reduced form.\n * </p>\n *\n * @param l\n *            the {@code long} to multiply by.\n * @return a {@link BigFraction} instance with the resulting values.\n */\npublic BigFraction multiply(final long l) {\n    if (l == 0 || numerator.signum() == 0) {\n        return ZERO;\n    }\n    return multiply(BigInteger.valueOf(l));\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigFraction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fraction"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Multiplies the value of this fraction by another, returning the result in\n * reduced form.\n * </p>\n *\n * @param fraction Fraction to multiply by, must not be {@code null}.\n * @return a {@link BigFraction} instance with the resulting values.\n * @throws NullArgumentException if {@code fraction} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "fraction",
+            "content": "Fraction to multiply by, must not be {@code null}.",
+            "assertion": "assert args[0] != null;",
+            "description": "fraction must not be null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values.",
+            "assertion": "",
+            "description": "{@link BigFraction} instance with the resulting values."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code fraction} is {@code null}.",
+            "assertion": "assert args[0]==null;",
+            "description": "if fraction is null."
+          }
+        ],
+        "code": "/**\n * <p>\n * Multiplies the value of this fraction by another, returning the result in\n * reduced form.\n * </p>\n *\n * @param fraction Fraction to multiply by, must not be {@code null}.\n * @return a {@link BigFraction} instance with the resulting values.\n * @throws NullArgumentException if {@code fraction} is {@code null}.\n */\npublic BigFraction multiply(final BigFraction fraction) {\n    if (fraction == null) {\n        throw new NullArgumentException(LocalizedFormats.FRACTION);\n    }\n    if (numerator.signum() == 0 || fraction.numerator.signum() == 0) {\n        return ZERO;\n    }\n    return new BigFraction(numerator.multiply(fraction.numerator), denominator.multiply(fraction.denominator));\n}"
+      },
+      {
+        "type": "method",
+        "name": "negate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Return the additive inverse of this fraction, returning the result in\n * reduced form.\n * </p>\n *\n * @return the negation of this fraction.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "negation of this fraction."
+          }
+        ],
+        "code": "/**\n * <p>\n * Return the additive inverse of this fraction, returning the result in\n * reduced form.\n * </p>\n *\n * @return the negation of this fraction.\n */\npublic BigFraction negate() {\n    return new BigFraction(numerator.negate(), denominator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "percentageValue",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Gets the fraction percentage as a {@code double}. This calculates the\n * fraction as the numerator divided by denominator multiplied by 100.\n * </p>\n *\n * @return the fraction percentage as a {@code double}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "fraction percentage as a {@code double}."
+          }
+        ],
+        "code": "/**\n * <p>\n * Gets the fraction percentage as a {@code double}. This calculates the\n * fraction as the numerator divided by denominator multiplied by 100.\n * </p>\n *\n * @return the fraction percentage as a {@code double}.\n */\npublic double percentageValue() {\n    return multiply(ONE_HUNDRED).doubleValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "exponent"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Returns a {@code BigFraction} whose value is\n * {@code (this<sup>exponent</sup>)}, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this {@code BigFraction} is to be\n *            raised.\n * @return <tt>this<sup>exponent</sup></tt>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "exponent",
+            "content": " exponent to which this {@code BigFraction} is to be raised.",
+            "assertion": "assert args[0] > 0;",
+            "description": "<p>the code must be positive</p>"
+          },
+          {
+            "tag": "return",
+            "name": "<tt>this<sup>exponent</sup></tt>.",
+            "content": "",
+            "assertion": "",
+            "description": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Returns a {@code BigFraction} whose value is\n * {@code (this<sup>exponent</sup>)}, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this {@code BigFraction} is to be\n *            raised.\n * @return <tt>this<sup>exponent</sup></tt>.\n */\npublic BigFraction pow(final int exponent) {\n    if (exponent == 0) {\n        return ONE;\n    }\n    if (numerator.signum() == 0) {\n        return this;\n    }\n    if (exponent < 0) {\n        return new BigFraction(denominator.pow(-exponent), numerator.pow(-exponent));\n    }\n    return new BigFraction(numerator.pow(exponent), denominator.pow(exponent));\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "exponent"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Returns a <code>BigFraction</code> whose value is\n * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this <code>BigFraction</code> is to be raised.\n * @return <tt>this<sup>exponent</sup></tt> as a <code>BigFraction</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "exponent",
+            "content": " exponent to which this <code>BigFraction</code> is to be raised.",
+            "assertion": "assert args[0] instanceof java.lang.Long && (java.lang.Long)args[0] >= 0;",
+            "description": "exponent must be a long"
+          },
+          {
+            "tag": "return",
+            "name": "<tt>this<sup>exponent</sup></tt>",
+            "content": "as a <code>BigFraction</code>."
+          }
+        ],
+        "code": "/**\n * <p>\n * Returns a <code>BigFraction</code> whose value is\n * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this <code>BigFraction</code> is to be raised.\n * @return <tt>this<sup>exponent</sup></tt> as a <code>BigFraction</code>.\n */\npublic BigFraction pow(final long exponent) {\n    if (exponent == 0) {\n        return ONE;\n    }\n    if (numerator.signum() == 0) {\n        return this;\n    }\n    if (exponent < 0) {\n        return new BigFraction(ArithmeticUtils.pow(denominator, -exponent), ArithmeticUtils.pow(numerator, -exponent));\n    }\n    return new BigFraction(ArithmeticUtils.pow(numerator, exponent), ArithmeticUtils.pow(denominator, exponent));\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "exponent"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Returns a <code>BigFraction</code> whose value is\n * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this <code>BigFraction</code> is to be raised.\n * @return <tt>this<sup>exponent</sup></tt> as a <code>BigFraction</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "exponent",
+            "content": " exponent to which this <code>BigFraction</code> is to be raised.",
+            "assertion": "assert args[0] instanceof java.math.BigInteger;",
+            "description": "exponent must be a BigInteger"
+          },
+          {
+            "tag": "return",
+            "name": "<tt>this<sup>exponent</sup></tt>",
+            "content": "as a <code>BigFraction</code>."
+          }
+        ],
+        "code": "/**\n * <p>\n * Returns a <code>BigFraction</code> whose value is\n * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this <code>BigFraction</code> is to be raised.\n * @return <tt>this<sup>exponent</sup></tt> as a <code>BigFraction</code>.\n */\npublic BigFraction pow(final BigInteger exponent) {\n    if (exponent.signum() == 0) {\n        return ONE;\n    }\n    if (numerator.signum() == 0) {\n        return this;\n    }\n    if (exponent.signum() == -1) {\n        final BigInteger eNeg = exponent.negate();\n        return new BigFraction(ArithmeticUtils.pow(denominator, eNeg), ArithmeticUtils.pow(numerator, eNeg));\n    }\n    return new BigFraction(ArithmeticUtils.pow(numerator, exponent), ArithmeticUtils.pow(denominator, exponent));\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "exponent"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Returns a <code>double</code> whose value is\n * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this <code>BigFraction</code> is to be raised.\n * @return <tt>this<sup>exponent</sup></tt>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "exponent",
+            "content": " exponent to which this <code>BigFraction</code> is to be raised.",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "the code must be a double"
+          },
+          {
+            "tag": "return",
+            "name": "<tt>this<sup>exponent</sup></tt>.",
+            "content": "",
+            "assertion": "",
+            "description": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Returns a <code>double</code> whose value is\n * <tt>(this<sup>exponent</sup>)</tt>, returning the result in reduced form.\n * </p>\n *\n * @param exponent\n *            exponent to which this <code>BigFraction</code> is to be raised.\n * @return <tt>this<sup>exponent</sup></tt>.\n */\npublic double pow(final double exponent) {\n    return FastMath.pow(numerator.doubleValue(), exponent) / FastMath.pow(denominator.doubleValue(), exponent);\n}"
+      },
+      {
+        "type": "method",
+        "name": "reciprocal",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Return the multiplicative inverse of this fraction.\n * </p>\n *\n * @return the reciprocal fraction.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "reciprocal fraction."
+          }
+        ],
+        "code": "/**\n * <p>\n * Return the multiplicative inverse of this fraction.\n * </p>\n *\n * @return the reciprocal fraction.\n */\npublic BigFraction reciprocal() {\n    return new BigFraction(denominator, numerator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "reduce",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Reduce this <code>BigFraction</code> to its lowest terms.\n * </p>\n *\n * @return the reduced <code>BigFraction</code>. It doesn't change anything if\n *         the fraction can be reduced.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "the",
+            "content": "reduced <code>BigFraction</code>. It doesn't change anything if the fraction can be reduced."
+          }
+        ],
+        "code": "/**\n * <p>\n * Reduce this <code>BigFraction</code> to its lowest terms.\n * </p>\n *\n * @return the reduced <code>BigFraction</code>. It doesn't change anything if\n *         the fraction can be reduced.\n */\npublic BigFraction reduce() {\n    final BigInteger gcd = numerator.gcd(denominator);\n    if (BigInteger.ONE.compareTo(gcd) < 0) {\n        return new BigFraction(numerator.divide(gcd), denominator.divide(gcd));\n    } else {\n        return this;\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigInteger",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bg"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Subtracts the value of an {@link BigInteger} from the value of this\n * {@code BigFraction}, returning the result in reduced form.\n * </p>\n *\n * @param bg the {@link BigInteger} to subtract, cannot be {@code null}.\n * @return a {@code BigFraction} instance with the resulting values.\n * @throws NullArgumentException if the {@link BigInteger} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "bg",
+            "content": "the {@link BigInteger} to subtract, cannot be {@code null}.",
+            "assertion": "assert args[0] != null;",
+            "description": "bg must not be null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@code BigFraction} instance with the resulting values."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if the {@link BigInteger} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": "if bg is null."
+          }
+        ],
+        "code": "/**\n * <p>\n * Subtracts the value of an {@link BigInteger} from the value of this\n * {@code BigFraction}, returning the result in reduced form.\n * </p>\n *\n * @param bg the {@link BigInteger} to subtract, cannot be {@code null}.\n * @return a {@code BigFraction} instance with the resulting values.\n * @throws NullArgumentException if the {@link BigInteger} is {@code null}.\n */\npublic BigFraction subtract(final BigInteger bg) {\n    if (bg == null) {\n        throw new NullArgumentException();\n    }\n    if (bg.signum() == 0) {\n        return this;\n    }\n    if (numerator.signum() == 0) {\n        return new BigFraction(bg.negate());\n    }\n    return new BigFraction(numerator.subtract(denominator.multiply(bg)), denominator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Subtracts the value of an {@code integer} from the value of this\n * {@code BigFraction}, returning the result in reduced form.\n * </p>\n *\n * @param i the {@code integer} to subtract.\n * @return a {@code BigFraction} instance with the resulting values.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the {@code integer} to subtract.",
+            "assertion": "",
+            "description": "the {@code integer} to subtract."
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@code BigFraction} instance with the resulting values.",
+            "assertion": "",
+            "description": "{@code BigFraction} instance with the resulting values."
+          }
+        ],
+        "code": "/**\n * <p>\n * Subtracts the value of an {@code integer} from the value of this\n * {@code BigFraction}, returning the result in reduced form.\n * </p>\n *\n * @param i the {@code integer} to subtract.\n * @return a {@code BigFraction} instance with the resulting values.\n */\npublic BigFraction subtract(final int i) {\n    return subtract(BigInteger.valueOf(i));\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "l"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Subtracts the value of a {@code long} from the value of this\n * {@code BigFraction}, returning the result in reduced form.\n * </p>\n *\n * @param l the {@code long} to subtract.\n * @return a {@code BigFraction} instance with the resulting values.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "l",
+            "content": "the {@code long} to subtract.",
+            "assertion": "",
+            "description": "the {@code long} to subtract."
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@code BigFraction} instance with the resulting values.",
+            "assertion": "",
+            "description": "{@code BigFraction} instance with the resulting values."
+          }
+        ],
+        "code": "/**\n * <p>\n * Subtracts the value of a {@code long} from the value of this\n * {@code BigFraction}, returning the result in reduced form.\n * </p>\n *\n * @param l the {@code long} to subtract.\n * @return a {@code BigFraction} instance with the resulting values.\n */\npublic BigFraction subtract(final long l) {\n    return subtract(BigInteger.valueOf(l));\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BigFraction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fraction"
+          }
+        ],
+        "javadoc": "/**\n * <p>\n * Subtracts the value of another fraction from the value of this one,\n * returning the result in reduced form.\n * </p>\n *\n * @param fraction {@link BigFraction} to subtract, must not be {@code null}.\n * @return a {@link BigFraction} instance with the resulting values\n * @throws NullArgumentException if the {@code fraction} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "fraction",
+            "content": "{@link BigFraction} to subtract, must not be {@code null}.",
+            "assertion": "assert args[0] != null;",
+            "description": "fraction must not be null"
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "{@link BigFraction} instance with the resulting values"
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if the {@code fraction} is {@code null}.",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "if fraction is null."
+          }
+        ],
+        "code": "/**\n * <p>\n * Subtracts the value of another fraction from the value of this one,\n * returning the result in reduced form.\n * </p>\n *\n * @param fraction {@link BigFraction} to subtract, must not be {@code null}.\n * @return a {@link BigFraction} instance with the resulting values\n * @throws NullArgumentException if the {@code fraction} is {@code null}.\n */\npublic BigFraction subtract(final BigFraction fraction) {\n    if (fraction == null) {\n        throw new NullArgumentException(LocalizedFormats.FRACTION);\n    }\n    if (fraction.numerator.signum() == 0) {\n        return this;\n    }\n    if (numerator.signum() == 0) {\n        return fraction.negate();\n    }\n    BigInteger num = null;\n    BigInteger den = null;\n    if (denominator.equals(fraction.denominator)) {\n        num = numerator.subtract(fraction.numerator);\n        den = denominator;\n    } else {\n        num = (numerator.multiply(fraction.denominator)).subtract((fraction.numerator).multiply(denominator));\n        den = denominator.multiply(fraction.denominator);\n    }\n    return new BigFraction(num, den);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * <p>\n * Returns the <code>String</code> representing this fraction, ie\n * \"num / dem\" or just \"num\" if the denominator is one.\n * </p>\n *\n * @return a string representation of the fraction.\n * @see java.lang.Object#toString()\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "string representation of the fraction."
+          },
+          {
+            "tag": "see",
+            "name": "java.lang.Object#toString()",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * <p>\n * Returns the <code>String</code> representing this fraction, ie\n * \"num / dem\" or just \"num\" if the denominator is one.\n * </p>\n *\n * @return a string representation of the fraction.\n * @see java.lang.Object#toString()\n */\n@Override\npublic String toString() {\n    String str = null;\n    if (BigInteger.ONE.equals(denominator)) {\n        str = numerator.toString();\n    } else if (BigInteger.ZERO.equals(numerator)) {\n        str = \"0\";\n    } else {\n        str = numerator + \" / \" + denominator;\n    }\n    return str;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getField",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BigFractionField",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic BigFractionField getField() {\n    return BigFractionField.getInstance();\n}"
+      }
+    ]
+  }
+]

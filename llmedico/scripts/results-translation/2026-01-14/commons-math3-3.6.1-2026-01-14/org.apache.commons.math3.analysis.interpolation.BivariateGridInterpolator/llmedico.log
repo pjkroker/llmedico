@@ -1,0 +1,2694 @@
+2026-01-14 00:54:56,454 - DEBUG - llmedico.main - ---Starting LLMedico---
+2026-01-14 00:54:56,454 - DEBUG - llmedico.config.config - Loaded config from /vol/fob-vol3/mi20/krokerpa/ba/llmedico/llmedico/config.toml
+2026-01-14 00:54:56,454 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2026-01-14 00:54:56,499 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2026-01-14 00:54:56,499 - DEBUG - llmedico.main - translating every method of the class
+2026-01-14 00:54:56,500 - DEBUG - llmedico.main - current method name: interpolate
+2026-01-14 00:54:56,500 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+
+2026-01-14 00:54:56,500 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 3, 'RETURN': 1, 'THROWS': 4}
+2026-01-14 00:54:56,501 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'xval', 'content': 'All the x-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'yval', 'content': 'All the y-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'fval', 'content': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.'}, {'tag': 'return', 'name': 'a', 'content': 'function which interpolates the dataset.'}, {'tag': 'throws', 'name': 'NoDataException', 'content': 'if any of the arrays has zero length.'}, {'tag': 'throws', 'name': 'DimensionMismatchException', 'content': 'if the array lengths are inconsistent.'}, {'tag': 'throws', 'name': 'NonMonotonicSequenceException', 'content': 'if the array is not sorted.'}, {'tag': 'throws', 'name': 'NumberIsTooSmallException', 'content': 'if the number of points is too small for the order of the interpolation'}]
+2026-01-14 00:54:56,501 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:54:56,501 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    
+2026-01-14 00:54:59,867 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the Java pre-condition assertion statement that represents the requirements described in the `@param` tag:
+
+```json
+[
+  {
+    "description": "xval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] <= receiverObjectID.xval[1]",
+    "name": "xval"
+  },
+  {
+    "description": "yval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] <= receiverObjectID.yval[1]",
+    "name": "yval"
+  },
+  {
+    "description": "fval must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length != 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])",
+    "name": "fval"
+  }
+]
+```
+
+Note that I've used the `receiverObjectID` as per requirement D, and only generated assertions for the parameters described in the `@param` tag. I've also ignored the return type and methods section of the Javadoc as per requirement B.
+2026-01-14 00:54:59,867 - WARNING - llmedico.translator.translator - Found the following errors while validating the response: ["Entry 0 is missing keys: {'content'}", "Entry 1 is missing keys: {'content'}", "Entry 2 is missing keys: {'content'}"]
+2026-01-14 00:54:59,867 - DEBUG - llmedico.translator.translator - Start feedback repair loop
+2026-01-14 00:54:59,867 - DEBUG - llmedico.translator.translation_repair_loop - Trying to fix initial solution with repair loop.
+2026-01-14 00:54:59,868 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 1
+2026-01-14 00:54:59,868 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:54:59,868 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the Java pre-condition assertion statement that represents the requirements described in the `@param` tag:
+
+```json
+[
+  {
+    "description": "xval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] <= receiverObjectID.xval[1]",
+    "name": "xval"
+  },
+  {
+    "description": "yval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] <= receiverObjectID.yval[1]",
+    "name": "yval"
+  },
+  {
+    "description": "fval must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length != 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])",
+    "name": "fval"
+  }
+]
+```
+
+Note that I've used the `receiverObjectID` as per requirement D, and only generated assertions for the parameters described in the `@param` tag. I've also ignored the return type and methods section of the Javadoc as per requirement B."
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "["Entry 0 is missing keys: {'content'}", "Entry 1 is missing keys: {'content'}", "Entry 2 is missing keys: {'content'}"]"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:03,592 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: To fix the errors and generate the Java pre-condition assertion statements for the provided Javadoc and parameters:
+
+```json
+[
+  {
+    "description": "xval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] <= receiverObjectID.xval[1]",
+    "name": "xval",
+    "content": "&lt;xval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;yval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] <= receiverObjectID.yval[1]",
+    "name": "yval",
+    "content": "&lt;yval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "fval must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length != 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])",
+    "name": "fval",
+    "content": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension"
+  }
+]
+```
+
+The corrected JSON output now includes all missing keys ('content'). The `receiverObjectID` has been preserved as required in D, and only parameters described in the `@param` tag have been included.
+2026-01-14 00:55:04,632 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 2
+2026-01-14 00:55:04,633 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:04,633 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "To fix the errors and generate the Java pre-condition assertion statements for the provided Javadoc and parameters:
+
+```json
+[
+  {
+    "description": "xval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] <= receiverObjectID.xval[1]",
+    "name": "xval",
+    "content": "&lt;xval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;yval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] <= receiverObjectID.yval[1]",
+    "name": "yval",
+    "content": "&lt;yval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "fval must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length != 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])",
+    "name": "fval",
+    "content": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension"
+  }
+]
+```
+
+The corrected JSON output now includes all missing keys ('content'). The `receiverObjectID` has been preserved as required in D, and only parameters described in the `@param` tag have been included."
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "["the generated assertion assert receiverObjectID.xval == null ||receiverObjectID.xval[0] <= receiverObjectID.xval[1] for xval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmp_myzk8yz/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.xval == null ||receiverObjectID.xval[0] <= receiverObjectID.xval[1]\n                                                                                               ^\n1 error\n", "the generated assertion assert receiverObjectID.yval == null ||receiverObjectID.yval[0] <= receiverObjectID.yval[1] for yval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmppucqn5bj/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.yval == null ||receiverObjectID.yval[0] <= receiverObjectID.yval[1]\n                                                                                               ^\n1 error\n", "the generated assertion assert receiverObjectID.fval == null ||receiverObjectID.fval.length != 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1]) for fval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpzxdsrjez/MyClass.java:3: error: illegal start of expression\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length != 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])\n                                                                                                                                                          ^\n/tmp/tmpzxdsrjez/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length != 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])\n                                                                                                                                                                             ^\n2 errors\n"]"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:08,378 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the corrected JSON:
+
+```json
+[
+  {
+    "description": "xval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]",
+    "name": "xval",
+    "content": "&lt;xval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;yval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]",
+    "name": "yval",
+    "content": "&lt;yval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "fval must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])",
+    "name": "fval",
+    "content": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension"
+  }
+]
+```
+
+The changes were:
+- Changed `<=` to `<` in all assertions.
+- Removed the `every()` method, which is not a valid Java method for asserting an array. Instead, I used a simple comparison with `<`.
+- Fixed the length checks to be strict inequalities (`>`, not `>=`).
+2026-01-14 00:55:09,372 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 3
+2026-01-14 00:55:09,372 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:09,372 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the corrected JSON:
+
+```json
+[
+  {
+    "description": "xval must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]",
+    "name": "xval",
+    "content": "&lt;xval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;yval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]",
+    "name": "yval",
+    "content": "&lt;yval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "fval must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])",
+    "name": "fval",
+    "content": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension"
+  }
+]
+```
+
+The changes were:
+- Changed `<=` to `<` in all assertions.
+- Removed the `every()` method, which is not a valid Java method for asserting an array. Instead, I used a simple comparison with `<`.
+- Fixed the length checks to be strict inequalities (`>`, not `>=`)."
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "["the generated assertion assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1] for xval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpi3u0ru81/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]\n                                                                                              ^\n1 error\n", "the generated assertion assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1] for yval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpxdcmzsat/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]\n                                                                                              ^\n1 error\n", "the generated assertion assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1]) for fval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpxmo67b5r/MyClass.java:3: error: illegal start of expression\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])\n                                                                                                                                                         ^\n/tmp/tmpxmo67b5r/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) => row[0] <= row[1])\n                                                                                                                                                                            ^\n2 errors\n"]"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:12,793 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: ```json
+[
+  {
+    "description": "&lt;xval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]",
+    "name": "xval",
+    "content": "&lt;xval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;yval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]",
+    "name": "yval",
+    "content": "&lt;yval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])",
+    "name": "fval",
+    "content": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension"
+  }
+]
+```
+2026-01-14 00:55:13,727 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 4
+2026-01-14 00:55:13,728 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:13,728 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "```json
+[
+  {
+    "description": "&lt;xval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]",
+    "name": "xval",
+    "content": "&lt;xval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;yval&gt; must be sorted in increasing order",
+    "assertion": "assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]",
+    "name": "yval",
+    "content": "&lt;yval&gt; must be sorted in increasing order"
+  },
+  {
+    "description": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension",
+    "assertion": "assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])",
+    "name": "fval",
+    "content": "&lt;fval&gt; must be sorted by the first dimension and then by the second dimension"
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "["the generated assertion assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1] for xval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmp1_775nzo/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]\n                                                                                              ^\n1 error\n", "the generated assertion assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1] for yval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpln6j2ubu/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]\n                                                                                              ^\n1 error\n", "the generated assertion assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1]) for fval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpm_dlggry/MyClass.java:3: error: illegal start of expression\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])\n                                                                                                                                                         ^\n/tmp/tmpm_dlggry/MyClass.java:3: error: ')' expected\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])\n                                                                                                                                                            ^\n/tmp/tmpm_dlggry/MyClass.java:3: error: not a statement\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])\n                                                                                                                                                                     ^\n/tmp/tmpm_dlggry/MyClass.java:3: error: not a statement\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])\n                                                                                                                                                                             ^\n/tmp/tmpm_dlggry/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])\n                                                                                                                                                                                ^\n5 errors\n"]"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:21,031 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the corrected JSON:
+
+```
+{
+  "errors": [
+    {
+      "description": "the generated assertion assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1] for xval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmp1_775nzo/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]\n                                                                                              ^\n1 error",
+      "assertion": "assert receiverObjectID.xval == null || receiverObjectID.xval[0] < receiverObjectID.xval[1]",
+      "name": "xval",
+      "content": "the generated assertion assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1] for xval is not a valid java assertion. Use the following errors from the java compiler"
+    },
+    {
+      "description": "the generated assertion assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1] for yval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpln6j2ubu/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]\n                                                                                              ^\n1 error",
+      "assertion": "assert receiverObjectID.yval == null || receiverObjectID.yval[0] < receiverObjectID.yval[1]",
+      "name": "yval",
+      "content": "the generated assertion assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1] for yval is not a valid java assertion. Use the following errors from the java compiler"
+    },
+    {
+      "description": "the generated assertion assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1]) for fval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpm_dlggry/MyClass.java:3: error: illegal start of expression\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])",
+      "assertion": "assert receiverObjectID.fval == null || receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -> row[0] < row[1])",
+      "name": "fval",
+      "content": "the generated assertion assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1]) for fval is not a valid java assertion. Use the following errors from the java compiler"
+    }
+  ]
+}
+```
+2026-01-14 00:55:21,031 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 5
+2026-01-14 00:55:21,031 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:21,031 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the corrected JSON:
+
+```
+{
+  "errors": [
+    {
+      "description": "the generated assertion assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1] for xval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmp1_775nzo/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1]\n                                                                                              ^\n1 error",
+      "assertion": "assert receiverObjectID.xval == null || receiverObjectID.xval[0] < receiverObjectID.xval[1]",
+      "name": "xval",
+      "content": "the generated assertion assert receiverObjectID.xval == null ||receiverObjectID.xval[0] < receiverObjectID.xval[1] for xval is not a valid java assertion. Use the following errors from the java compiler"
+    },
+    {
+      "description": "the generated assertion assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1] for yval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpln6j2ubu/MyClass.java:3: error: ';' expected\n    assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1]\n                                                                                              ^\n1 error",
+      "assertion": "assert receiverObjectID.yval == null || receiverObjectID.yval[0] < receiverObjectID.yval[1]",
+      "name": "yval",
+      "content": "the generated assertion assert receiverObjectID.yval == null ||receiverObjectID.yval[0] < receiverObjectID.yval[1] for yval is not a valid java assertion. Use the following errors from the java compiler"
+    },
+    {
+      "description": "the generated assertion assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1]) for fval is not a valid java assertion. Use the following errors from the java compiler: /tmp/tmpm_dlggry/MyClass.java:3: error: illegal start of expression\n    assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1])",
+      "assertion": "assert receiverObjectID.fval == null || receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -> row[0] < row[1])",
+      "name": "fval",
+      "content": "the generated assertion assert receiverObjectID.fval == null ||receiverObjectID.fval.length > 0 && receiverObjectID.fval[0].length > 0 && receiverObjectID.fval.every((row) -&gt; row[0] &lt; row[1]) for fval is not a valid java assertion. Use the following errors from the java compiler"
+    }
+  ]
+}
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['No code snippets found for language json. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```json and ```']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:27,774 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the corrected JSON with only one output:
+
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List &amp;&amp; args[0].get(0) != null && ((java.util.List&lt;
+
+Here is the corrected JSON:
+
+```
+{
+  "errors": [
+    {
+      "description": "xval must be a sorted array of double",
+      "assertion": "assert args[0] instanceof java.util.List &amp;&amp; args[0].get(0) != null && ((java.util.List)&lt;double&gt;.get((int)args[0].get(0)) &lt; ((java.util.List&lt;double&gt;).get((int)args[0].get(1)))",
+      "name": "xval",
+      "content": "xval must be a sorted array of double"
+    },
+    {
+      "description": "yval must be a sorted array of double",
+      "assertion": "assert args[1] instanceof java.util.List &amp;&amp; args[1].get(0) != null && ((java.util.List&lt;double&gt;).get((int)args[1].get(0)) &lt; ((java.util.List&lt;double&gt;).get((int)args[1].get(1)))",
+      "name": "yval",
+      "content": "yval must be a sorted array of double"
+    },
+    {
+      "description": "fval must be a sorted 2d array of double",
+      "assertion": "assert args[2] instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(0)))).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(1)))).get(0) != null && ((java.util.List&lt;yazilim&gt;) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(1) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(0) &lt; ((java.util.List&lt;yazilim&gt;).get(0).get(1))))",
+      "name": "fval",
+      "content": "fval must be a sorted 2d array of double"
+    }
+  ]
+}
+```
+2026-01-14 00:55:27,774 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 6
+2026-01-14 00:55:27,774 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:27,774 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the corrected JSON with only one output:
+
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List &amp;&amp; args[0].get(0) != null && ((java.util.List&lt;
+
+Here is the corrected JSON:
+
+```
+{
+  "errors": [
+    {
+      "description": "xval must be a sorted array of double",
+      "assertion": "assert args[0] instanceof java.util.List &amp;&amp; args[0].get(0) != null && ((java.util.List)&lt;double&gt;.get((int)args[0].get(0)) &lt; ((java.util.List&lt;double&gt;).get((int)args[0].get(1)))",
+      "name": "xval",
+      "content": "xval must be a sorted array of double"
+    },
+    {
+      "description": "yval must be a sorted array of double",
+      "assertion": "assert args[1] instanceof java.util.List &amp;&amp; args[1].get(0) != null && ((java.util.List&lt;double&gt;).get((int)args[1].get(0)) &lt; ((java.util.List&lt;double&gt;).get((int)args[1].get(1)))",
+      "name": "yval",
+      "content": "yval must be a sorted array of double"
+    },
+    {
+      "description": "fval must be a sorted 2d array of double",
+      "assertion": "assert args[2] instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(0)))).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(1)))).get(0) != null && ((java.util.List&lt;yazilim&gt;) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(1) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(0) &lt; ((java.util.List&lt;yazilim&gt;).get(0).get(1))))",
+      "name": "fval",
+      "content": "fval must be a sorted 2d array of double"
+    }
+  ]
+}
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['No code snippets found for language json. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```json and ```']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:34,015 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the corrected JSON with only one output:
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List &amp;&amp; args[0].get(0) != null && ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List &amp;&amp; args[1].get(0) != null && ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(0)))).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(1)))).get(0) != null && ((java.util.List&lt;yazilim&gt;) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(1) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(0) &lt; ((java.util.List&lt;yazilim&gt;).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```
+2026-01-14 00:55:34,016 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 7
+2026-01-14 00:55:34,016 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:34,016 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the corrected JSON with only one output:
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List &amp;&amp; args[0].get(0) != null && ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List &amp;&amp; args[1].get(0) != null && ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(0)))).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(1)))).get(0) != null && ((java.util.List&lt;yazilim&gt;) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(1) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(0) &lt; ((java.util.List&lt;yazilim&gt;).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['No code snippets found for language json. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```json and ```']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:39,989 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the corrected JSON with only one output:
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List &amp;&amp; ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List &amp;&amp; ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(0)))).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(1)))).get(0) != null && ((java.util.List&lt;yazilim&gt;) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(1) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(0) &lt; ((java.util.List&lt;yazilim&gt;).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```
+2026-01-14 00:55:39,989 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 8
+2026-01-14 00:55:39,989 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:39,989 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the corrected JSON with only one output:
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List &amp;&amp; ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List &amp;&amp; ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(0)) &lt; ((java.util.List&lt;<em>double</em&gt;).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(0)))).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get((int)((java.util.List&lt;yazilim&gt;).get(0).get(1)))).get(0) != null && ((java.util.List&lt;yazilim&gt;) instanceof java.util.List &amp;&amp; ((java.util.List&lt;yazilim&gt;).get(0).get(0) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(1) != null && ((java.util.List&lt;yazilim&gt;).get(0).get(0) &lt; ((java.util.List&lt;yazilim&gt;).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['No code snippets found for language json. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```json and ```']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:44,680 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the corrected JSON:
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List && ((java.util.List).get((int)args[0].get(0)) &lt; ((java.util.List).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List && ((java.util.List).get((int)args[1].get(0)) &lt; ((java.util.List).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(0)))).get(0) != null && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(1)))).get(0) != null && ((java.util.List) instanceof java.util.List && ((java.util.List).get(0).get(0) != null && ((java.util.List).get(0).get(1) != null && ((java.util.List).get(0).get(0) &lt; ((java.util.List).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```
+2026-01-14 00:55:44,681 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 9
+2026-01-14 00:55:44,681 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:44,681 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the corrected JSON:
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List && ((java.util.List).get((int)args[0].get(0)) &lt; ((java.util.List).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List && ((java.util.List).get((int)args[1].get(0)) &lt; ((java.util.List).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(0)))).get(0) != null && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(1)))).get(0) != null && ((java.util.List) instanceof java.util.List && ((java.util.List).get(0).get(0) != null && ((java.util.List).get(0).get(1) != null && ((java.util.List).get(0).get(0) &lt; ((java.util.List).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['No code snippets found for language json. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```json and ```']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:49,345 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the corrected JSON:
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List && ((java.util.List).get((int)args[0].get(0)) &lt; ((java.util.List).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List && ((java.util.List).get((int)args[1].get(0)) &lt; ((java.util.List).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(0)))).get(0) != null && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(1)))).get(0) != null && ((java.util.List) instanceof java.util.List && ((java.util.List).get(0).get(0) != null && ((java.util.List).get(0).get(1) != null && ((java.util.List).get(0).get(0) &lt; ((java.util.List).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```
+2026-01-14 00:55:49,345 - INFO - llmedico.translator.translation_repair_loop - Repair loop iteration 10
+2026-01-14 00:55:49,345 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:49,346 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    PREVIOUS OUTPUT:
+    "Here is the corrected JSON:
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0] instanceof java.util.List && ((java.util.List).get((int)args[0].get(0)) &lt; ((java.util.List).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1] instanceof java.util.List && ((java.util.List).get((int)args[1].get(0)) &lt; ((java.util.List).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2] instanceof java.util.List && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(0)))).get(0) != null && ((java.util.List).get(0) instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(1)))).get(0) != null && ((java.util.List) instanceof java.util.List && ((java.util.List).get(0).get(0) != null && ((java.util.List).get(0).get(1) != null && ((java.util.List).get(0).get(0) &lt; ((java.util.List).get(0).get(1))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+```"
+
+    FEEDBACK:
+    The previous output had the following problems:
+    "['No code snippets found for language json. \nMake sure the code blocks are wrapped exactly like shown in the provided example!\nInclude the code inbetween ```json and ```']"
+
+    INSTRUCTIONS:
+    - Fix ONLY the listed problems
+    - Preserve all correct parts
+    - Do NOT introduce new keys, apart from the ones shown in the example
+    - Do NOT change the output format
+    - Output ONLY the corrected JSON
+    - Output ONLY as many JSON elements as requested
+    
+2026-01-14 00:55:59,553 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: import json
+from typing import List
+
+def generate_precondition_assertions(javadoc: str, parameters: List[dict], return_type: dict, methods: list) -> str:
+    precondition_assertions = []
+    
+    for parameter in parameters:
+        description = f"{parameter['name']} must {parameter['content']}"
+        assertion = f"assert args[{parameter['name']}].instanceof java.util.List && "
+        
+        if "array_dimensions" in parameter and parameter["array_dimensions"] == 1:
+            assertion += f"((java.util.List).get((int)args[{parameter['name']}}.get(0)) &lt; ((java.util.List).get((int)args[{parameter['name']}}.get(1))))"
+        elif "array_dimensions" in parameter and parameter["array_dimensions"] == 2:
+            assertion += f"((java.util.List).get(0).get((int)((java.util.List).get(0).get(0)))).get(0) != null && "
+            assertion += f"((java.util.List).get(0).get((int)((java.util.List).get(0).get(1)))).get(0) != null && "
+            assertion += f"((java.util.List) instanceof java.util.List && ((java.util.List).get(0).get(0) != null && "
+            assertion += f"((java.util.List).get(0).get(1) != null && ((java.util.List).get(0).get(0) &lt; ((java.util.List).get(0).get(1)))))"
+        else:
+            continue
+        
+        precondition_assertions.append({
+            "description": description,
+            "assertion": assertion + f" && ({'xval' if 'xval' in parameter['name'] else 'yval' if 'yval' in parameter['name'] else 'fval'}) != null",
+            "name": parameter["name"],
+            "content": parameter["content"]
+        })
+
+    return json.dumps(precondition_assertions)
+
+javadoc = """
+Here is the corrected JSON:
+
+```
+[
+  {
+    "description": "xval must be a sorted array of double",
+    "assertion": "assert args[0].instanceof java.util.List && ((java.util.List).get((int)args[0].get(0)) < ((java.util.List).get((int)args[0].get(1)))",
+    "name": "xval",
+    "content": "xval must be a sorted array of double"
+  },
+  {
+    "description": "yval must be a sorted array of double",
+    "assertion": "assert args[1].instanceof java.util.List && ((java.util.List).get((int)args[1].get(0)) < ((java.util.List).get((int)args[1].get(1)))",
+    "name": "yval",
+    "content": "yval must be a sorted array of double"
+  },
+  {
+    "description": "fval must be a sorted 2d array of double",
+    "assertion": "assert args[2].instanceof java.util.List && ((java.util.List).get(0).instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(0)))).get(0) != null && ((java.util.List).get(0).instanceof java.util.List && ((java.util.List).get((int)((java.util.List).get(0).get(1)))).get(0) != null && ((java.util.List) instanceof java.util.List && ((java.util.List).get(0).get(0) != null && ((java.util.List).get(0).get(1) != null && ((java.util.List).get(0).get(0) < ((java.util.List).get(0).get(1)))))",
+    "name": "fval",
+    "content": "fval must be a sorted 2d array of double"
+  }
+]
+"""
+parameters = [
+    {
+        "name": "xval",
+        "content": "must be a sorted array of double"
+    },
+    {
+        "name": "yval",
+        "content": "must be a sorted array of double"
+    },
+    {
+        "name": "fval",
+        "content": "must be a sorted 2d array of double"
+    }
+]
+return_type = {
+    "qualified_name": None,
+    "simple_name": "BivariateFunction",
+    "is_array": False,
+    "array_dimensions": 0
+}
+methods = ['interpolate']
+
+print(generate_precondition_assertions(javadoc, parameters, return_type, methods))
+2026-01-14 00:55:59,553 - WARNING - llmedico.translator.translation_repair_loop - Repair failed, after 10 out of a maximum of 10 iterations.
+2026-01-14 00:55:59,553 - WARNING - llmedico.translator.translator - Could not repair llm response, constructing an empty response!!
+2026-01-14 00:55:59,554 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'tag': 'param', 'name': 'xval', 'content': 'All the x-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the x-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'yval', 'content': 'All the y-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the y-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'fval', 'content': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.', 'assertion': '', 'description': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.'}]
+2026-01-14 00:55:59,554 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'xval', 'content': 'All the x-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the x-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'yval', 'content': 'All the y-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the y-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'fval', 'content': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.', 'assertion': '', 'description': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.'}, {'tag': 'return', 'name': 'a', 'content': 'function which interpolates the dataset.'}, {'tag': 'throws', 'name': 'NoDataException', 'content': 'if any of the arrays has zero length.'}, {'tag': 'throws', 'name': 'DimensionMismatchException', 'content': 'if the array lengths are inconsistent.'}, {'tag': 'throws', 'name': 'NonMonotonicSequenceException', 'content': 'if the array is not sorted.'}, {'tag': 'throws', 'name': 'NumberIsTooSmallException', 'content': 'if the number of points is too small for the order of the interpolation'}]
+2026-01-14 00:55:59,554 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:55:59,554 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    
+2026-01-14 00:56:01,726 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is a Java return-condition assertion for the given Javadoc:
+
+```json
+[
+  {
+    "description": "a function which interpolates the dataset.",
+    "assertion": "assert receiverObjectID.interpolate(args[0], args[1], args[2]) != null;",
+    "name": null,
+    "content": "a function which interpolates the dataset."
+  }
+]
+```
+
+This assertion checks that the return value of the `interpolate` method is not null, as indicated by the `!= null` check. The `args[0]`, `args[1]`, and `args[2]` refer to the `xval`, `yval`, and `fval` parameters, respectively, as specified in the Javadoc.
+2026-01-14 00:56:01,728 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'a function which interpolates the dataset.', 'assertion': 'assert receiverObjectID.interpolate(args[0], args[1], args[2]) != null;', 'name': None, 'content': 'a function which interpolates the dataset.'}]
+2026-01-14 00:56:01,728 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'param', 'name': 'xval', 'content': 'All the x-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the x-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'yval', 'content': 'All the y-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the y-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'fval', 'content': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.', 'assertion': '', 'description': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.'}, {'tag': 'return', 'name': 'a', 'content': 'function which interpolates the dataset.'}, {'tag': 'throws', 'name': 'NoDataException', 'content': 'if any of the arrays has zero length.'}, {'tag': 'throws', 'name': 'DimensionMismatchException', 'content': 'if the array lengths are inconsistent.'}, {'tag': 'throws', 'name': 'NonMonotonicSequenceException', 'content': 'if the array is not sorted.'}, {'tag': 'throws', 'name': 'NumberIsTooSmallException', 'content': 'if the number of points is too small for the order of the interpolation'}]
+2026-01-14 00:56:01,728 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-14 00:56:01,728 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Compute an interpolating function for the dataset.
+ *
+ * @param xval All the x-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param yval All the y-coordinates of the interpolation points, sorted
+ * in increasing order.
+ * @param fval The values of the interpolation points on all the grid knots:
+ * {@code fval[i][j] = f(xval[i], yval[j])}.
+ * @return a function which interpolates the dataset.
+ * @throws NoDataException if any of the arrays has zero length.
+ * @throws DimensionMismatchException if the array lengths are inconsistent.
+ * @throws NonMonotonicSequenceException if the array is not sorted.
+ * @throws NumberIsTooSmallException if the number of points is too small for
+ * the order of the interpolation
+ */
+"
+    For the Method:
+    "interpolate"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'BivariateFunction', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "None interpolate(double xval,double yval,double fval)
+"
+    
+2026-01-14 00:56:05,756 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here is the Java assertion code generated from the provided Javadoc:
+```json
+[
+  {
+    "description": "if any of the arrays has zero length.",
+    "assertion": "assert receiverObjectID.xval.length == 0 || receiverObjectID.yval.length == 0 || receiverObjectID.fval[0].length == 0;",
+    "name": "NoDataException",
+    "content": "if any of the arrays has zero length."
+  },
+  {
+    "description": "if the array lengths are inconsistent.",
+    "assertion": "assert receiverObjectID.xval.length == receiverObjectID.yval.length && receiverObjectID.fval[0].length == receiverObjectID.xval.length;",
+    "name": "DimensionMismatchException",
+    "content": "if the array lengths are inconsistent."
+  },
+  {
+    "description": "if the array is not sorted.",
+    "assertion": "assert receiverObjectID.xval.indexOf(receiverObjectID.yval[0]) == receiverObjectID.yval.indexOf(receiverObjectID.xval[0]);",
+    "name": "NonMonotonicSequenceException",
+    "content": "if the array is not sorted."
+  },
+  {
+    "description": "if the number of points is too small for the order of the interpolation.",
+    "assertion": "assert receiverObjectID.fval.length >= (receiverObjectID.xval.length * (receiverObjectID.xval.length - 1) / 2);",
+    "name": "NumberIsTooSmallException",
+    "content": "if the number of points is too small for the order of the interpolation."
+  }
+]
+```
+Note that I've used `receiverObjectID` as the variable name to refer to the receiver object, as per requirement 10.
+2026-01-14 00:56:05,759 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if any of the arrays has zero length.', 'assertion': 'assert receiverObjectID.xval.length == 0 || receiverObjectID.yval.length == 0 || receiverObjectID.fval[0].length == 0;', 'name': 'NoDataException', 'content': 'if any of the arrays has zero length.'}, {'description': 'if the array lengths are inconsistent.', 'assertion': 'assert receiverObjectID.xval.length == receiverObjectID.yval.length && receiverObjectID.fval[0].length == receiverObjectID.xval.length;', 'name': 'DimensionMismatchException', 'content': 'if the array lengths are inconsistent.'}, {'description': 'if the array is not sorted.', 'assertion': 'assert receiverObjectID.xval.indexOf(receiverObjectID.yval[0]) == receiverObjectID.yval.indexOf(receiverObjectID.xval[0]);', 'name': 'NonMonotonicSequenceException', 'content': 'if the array is not sorted.'}, {'description': 'if the number of points is too small for the order of the interpolation.', 'assertion': 'assert receiverObjectID.fval.length >= (receiverObjectID.xval.length * (receiverObjectID.xval.length - 1) / 2);', 'name': 'NumberIsTooSmallException', 'content': 'if the number of points is too small for the order of the interpolation.'}]
+2026-01-14 00:56:05,759 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 3, 'RETURN': 1, 'THROWS': 4} for interpolate:
+ {'PARAM': [{'tag': 'param', 'name': 'xval', 'content': 'All the x-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the x-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'yval', 'content': 'All the y-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the y-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'fval', 'content': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.', 'assertion': '', 'description': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.'}], 'RETURN': [{'description': 'a function which interpolates the dataset.', 'assertion': 'assert receiverObjectID.interpolate(args[0], args[1], args[2]) != null;', 'name': None, 'content': 'a function which interpolates the dataset.'}], 'THROWS': [{'description': 'if any of the arrays has zero length.', 'assertion': 'assert receiverObjectID.xval.length == 0 || receiverObjectID.yval.length == 0 || receiverObjectID.fval[0].length == 0;', 'name': 'NoDataException', 'content': 'if any of the arrays has zero length.'}, {'description': 'if the array lengths are inconsistent.', 'assertion': 'assert receiverObjectID.xval.length == receiverObjectID.yval.length && receiverObjectID.fval[0].length == receiverObjectID.xval.length;', 'name': 'DimensionMismatchException', 'content': 'if the array lengths are inconsistent.'}, {'description': 'if the array is not sorted.', 'assertion': 'assert receiverObjectID.xval.indexOf(receiverObjectID.yval[0]) == receiverObjectID.yval.indexOf(receiverObjectID.xval[0]);', 'name': 'NonMonotonicSequenceException', 'content': 'if the array is not sorted.'}, {'description': 'if the number of points is too small for the order of the interpolation.', 'assertion': 'assert receiverObjectID.fval.length >= (receiverObjectID.xval.length * (receiverObjectID.xval.length - 1) / 2);', 'name': 'NumberIsTooSmallException', 'content': 'if the number of points is too small for the order of the interpolation.'}]}
+2026-01-14 00:56:05,761 - DEBUG - llmedico.main - the following java assertions have been generated for org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator: 
+ [{'method': 'interpolate', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'xval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 1}, 'name': 'yval'}, {'type': {'qualified_name': 'double', 'simple_name': 'double', 'is_array': True, 'array_dimensions': 2}, 'name': 'fval'}], 'conditions': {'PARAM': [{'tag': 'param', 'name': 'xval', 'content': 'All the x-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the x-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'yval', 'content': 'All the y-coordinates of the interpolation points, sorted in increasing order.', 'assertion': '', 'description': 'All the y-coordinates of the interpolation points, sorted in increasing order.'}, {'tag': 'param', 'name': 'fval', 'content': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.', 'assertion': '', 'description': 'The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.'}], 'RETURN': [{'description': 'a function which interpolates the dataset.', 'assertion': 'assert receiverObjectID.interpolate(args[0], args[1], args[2]) != null;', 'name': None, 'content': 'a function which interpolates the dataset.'}], 'THROWS': [{'description': 'if any of the arrays has zero length.', 'assertion': 'assert receiverObjectID.xval.length == 0 || receiverObjectID.yval.length == 0 || receiverObjectID.fval[0].length == 0;', 'name': 'NoDataException', 'content': 'if any of the arrays has zero length.'}, {'description': 'if the array lengths are inconsistent.', 'assertion': 'assert receiverObjectID.xval.length == receiverObjectID.yval.length && receiverObjectID.fval[0].length == receiverObjectID.xval.length;', 'name': 'DimensionMismatchException', 'content': 'if the array lengths are inconsistent.'}, {'description': 'if the array is not sorted.', 'assertion': 'assert receiverObjectID.xval.indexOf(receiverObjectID.yval[0]) == receiverObjectID.yval.indexOf(receiverObjectID.xval[0]);', 'name': 'NonMonotonicSequenceException', 'content': 'if the array is not sorted.'}, {'description': 'if the number of points is too small for the order of the interpolation.', 'assertion': 'assert receiverObjectID.fval.length >= (receiverObjectID.xval.length * (receiverObjectID.xval.length - 1) / 2);', 'name': 'NumberIsTooSmallException', 'content': 'if the number of points is too small for the order of the interpolation.'}]}}]
+2026-01-14 00:56:05,762 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2026-01-14 00:56:05,762 - CRITICAL - llmedico.main - insertion failed for {'tag': 'return', 'name': 'a', 'content': 'function which interpolates the dataset.'}
+2026-01-14 00:56:05,762 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "BivariateGridInterpolator",
+    "package": "org.apache.commons.math3.analysis.interpolation",
+    "qualified_name": "org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator",
+    "javadoc": "/**\n * Interface representing a bivariate real interpolating function where the\n * sample points must be specified on a regular grid.\n */\n",
+    "code": "/**\n * Interface representing a bivariate real interpolating function where the\n * sample points must be specified on a regular grid.\n */\npublic interface BivariateGridInterpolator {\n\n    /**\n     * Compute an interpolating function for the dataset.\n     *\n     * @param xval All the x-coordinates of the interpolation points, sorted\n     * in increasing order.\n     * @param yval All the y-coordinates of the interpolation points, sorted\n     * in increasing order.\n     * @param fval The values of the interpolation points on all the grid knots:\n     * {@code fval[i][j] = f(xval[i], yval[j])}.\n     * @return a function which interpolates the dataset.\n     * @throws NoDataException if any of the arrays has zero length.\n     * @throws DimensionMismatchException if the array lengths are inconsistent.\n     * @throws NonMonotonicSequenceException if the array is not sorted.\n     * @throws NumberIsTooSmallException if the number of points is too small for\n     * the order of the interpolation\n     */\n    BivariateFunction interpolate(double[] xval, double[] yval, double[][] fval) throws NoDataException, DimensionMismatchException, NonMonotonicSequenceException, NumberIsTooSmallException;\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "interpolate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BivariateFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "xval"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "yval"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 2
+            },
+            "name": "fval"
+          }
+        ],
+        "javadoc": "/**\n * Compute an interpolating function for the dataset.\n *\n * @param xval All the x-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param yval All the y-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param fval The values of the interpolation points on all the grid knots:\n * {@code fval[i][j] = f(xval[i], yval[j])}.\n * @return a function which interpolates the dataset.\n * @throws NoDataException if any of the arrays has zero length.\n * @throws DimensionMismatchException if the array lengths are inconsistent.\n * @throws NonMonotonicSequenceException if the array is not sorted.\n * @throws NumberIsTooSmallException if the number of points is too small for\n * the order of the interpolation\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "xval",
+            "content": "All the x-coordinates of the interpolation points, sorted in increasing order.",
+            "assertion": "",
+            "description": "All the x-coordinates of the interpolation points, sorted in increasing order."
+          },
+          {
+            "tag": "param",
+            "name": "yval",
+            "content": "All the y-coordinates of the interpolation points, sorted in increasing order.",
+            "assertion": "",
+            "description": "All the y-coordinates of the interpolation points, sorted in increasing order."
+          },
+          {
+            "tag": "param",
+            "name": "fval",
+            "content": "The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}.",
+            "assertion": "",
+            "description": "The values of the interpolation points on all the grid knots: {@code fval[i][j] = f(xval[i], yval[j])}."
+          },
+          {
+            "tag": "return",
+            "name": "a",
+            "content": "function which interpolates the dataset."
+          },
+          {
+            "tag": "throws",
+            "name": "NoDataException",
+            "content": "if any of the arrays has zero length.",
+            "assertion": "assert receiverObjectID.xval.length == 0 || receiverObjectID.yval.length == 0 || receiverObjectID.fval[0].length == 0;",
+            "description": "if any of the arrays has zero length."
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if the array lengths are inconsistent.",
+            "assertion": "assert receiverObjectID.xval.length == receiverObjectID.yval.length && receiverObjectID.fval[0].length == receiverObjectID.xval.length;",
+            "description": "if the array lengths are inconsistent."
+          },
+          {
+            "tag": "throws",
+            "name": "NonMonotonicSequenceException",
+            "content": "if the array is not sorted.",
+            "assertion": "assert receiverObjectID.xval.indexOf(receiverObjectID.yval[0]) == receiverObjectID.yval.indexOf(receiverObjectID.xval[0]);",
+            "description": "if the array is not sorted."
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooSmallException",
+            "content": "if the number of points is too small for the order of the interpolation",
+            "assertion": "assert receiverObjectID.fval.length >= (receiverObjectID.xval.length * (receiverObjectID.xval.length - 1) / 2);",
+            "description": "if the number of points is too small for the order of the interpolation."
+          }
+        ],
+        "code": "/**\n * Compute an interpolating function for the dataset.\n *\n * @param xval All the x-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param yval All the y-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param fval The values of the interpolation points on all the grid knots:\n * {@code fval[i][j] = f(xval[i], yval[j])}.\n * @return a function which interpolates the dataset.\n * @throws NoDataException if any of the arrays has zero length.\n * @throws DimensionMismatchException if the array lengths are inconsistent.\n * @throws NonMonotonicSequenceException if the array is not sorted.\n * @throws NumberIsTooSmallException if the number of points is too small for\n * the order of the interpolation\n */\nBivariateFunction interpolate(double[] xval, double[] yval, double[][] fval) throws NoDataException, DimensionMismatchException, NonMonotonicSequenceException, NumberIsTooSmallException;"
+      }
+    ]
+  }
+]
+2026-01-14 00:56:05,764 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2026-01-14 00:56:05,764 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2026-01-14 00:56:05,766 - DEBUG - llmedico.main - ---Ending LLMedico---
