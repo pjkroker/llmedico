@@ -1,0 +1,546 @@
+[
+  {
+    "name": "AtomicDoubleArray",
+    "package": "com.google.common.util.concurrent",
+    "qualified_name": "com.google.common.util.concurrent.AtomicDoubleArray",
+    "javadoc": "/**\n * A {@code double} array in which elements may be updated atomically.\n * See the {@link java.util.concurrent.atomic} package specification\n * for description of the properties of atomic variables.\n *\n * <p><a name=\"bitEquals\">This class compares primitive {@code double}\n * values in methods such as {@link #compareAndSet} by comparing their\n * bitwise representation using {@link Double#doubleToRawLongBits},\n * which differs from both the primitive double {@code ==} operator\n * and from {@link Double#equals}, as if implemented by:\n *  <pre> {@code\n * static boolean bitEquals(double x, double y) {\n *   long xBits = Double.doubleToRawLongBits(x);\n *   long yBits = Double.doubleToRawLongBits(y);\n *   return xBits == yBits;\n * }}</pre>\n *\n * @author Doug Lea\n * @author Martin Buchholz\n * @since 11.0\n */\n",
+    "code": "/**\n * A {@code double} array in which elements may be updated atomically.\n * See the {@link java.util.concurrent.atomic} package specification\n * for description of the properties of atomic variables.\n *\n * <p><a name=\"bitEquals\">This class compares primitive {@code double}\n * values in methods such as {@link #compareAndSet} by comparing their\n * bitwise representation using {@link Double#doubleToRawLongBits},\n * which differs from both the primitive double {@code ==} operator\n * and from {@link Double#equals}, as if implemented by:\n *  <pre> {@code\n * static boolean bitEquals(double x, double y) {\n *   long xBits = Double.doubleToRawLongBits(x);\n *   long yBits = Double.doubleToRawLongBits(y);\n *   return xBits == yBits;\n * }}</pre>\n *\n * @author Doug Lea\n * @author Martin Buchholz\n * @since 11.0\n */\npublic class AtomicDoubleArray implements java.io.Serializable {\n\n    private static final long serialVersionUID = 0L;\n\n    // Making this non-final is the lesser evil according to Effective\n    // Java 2nd Edition Item 76: Write readObject methods defensively.\n    private transient AtomicLongArray longs;\n\n    /**\n     * Creates a new {@code AtomicDoubleArray} of the given length,\n     * with all elements initially zero.\n     *\n     * @param length the length of the array\n     */\n    public AtomicDoubleArray(int length) {\n        this.longs = new AtomicLongArray(length);\n    }\n\n    /**\n     * Creates a new {@code AtomicDoubleArray} with the same length\n     * as, and all elements copied from, the given array.\n     *\n     * @param array the array to copy elements from\n     * @throws NullPointerException if array is null\n     */\n    public AtomicDoubleArray(double[] array) {\n        final int len = array.length;\n        long[] longArray = new long[len];\n        for (int i = 0; i < len; i++) {\n            longArray[i] = doubleToRawLongBits(array[i]);\n        }\n        this.longs = new AtomicLongArray(longArray);\n    }\n\n    /**\n     * Returns the length of the array.\n     *\n     * @return the length of the array\n     */\n    public final int length() {\n        return longs.length();\n    }\n\n    /**\n     * Gets the current value at position {@code i}.\n     *\n     * @param i the index\n     * @return the current value\n     */\n    public final double get(int i) {\n        return longBitsToDouble(longs.get(i));\n    }\n\n    /**\n     * Sets the element at position {@code i} to the given value.\n     *\n     * @param i the index\n     * @param newValue the new value\n     */\n    public final void set(int i, double newValue) {\n        long next = doubleToRawLongBits(newValue);\n        longs.set(i, next);\n    }\n\n    /**\n     * Eventually sets the element at position {@code i} to the given value.\n     *\n     * @param i the index\n     * @param newValue the new value\n     */\n    public final void lazySet(int i, double newValue) {\n        set(i, newValue);\n        // TODO(user): replace with code below when jdk5 support is dropped.\n        // long next = doubleToRawLongBits(newValue);\n        // longs.lazySet(i, next);\n    }\n\n    /**\n     * Atomically sets the element at position {@code i} to the given value\n     * and returns the old value.\n     *\n     * @param i the index\n     * @param newValue the new value\n     * @return the previous value\n     */\n    public final double getAndSet(int i, double newValue) {\n        long next = doubleToRawLongBits(newValue);\n        return longBitsToDouble(longs.getAndSet(i, next));\n    }\n\n    /**\n     * Atomically sets the element at position {@code i} to the given\n     * updated value\n     * if the current value is <a href=\"#bitEquals\">bitwise equal</a>\n     * to the expected value.\n     *\n     * @param i the index\n     * @param expect the expected value\n     * @param update the new value\n     * @return true if successful. False return indicates that\n     * the actual value was not equal to the expected value.\n     */\n    public final boolean compareAndSet(int i, double expect, double update) {\n        return longs.compareAndSet(i, doubleToRawLongBits(expect), doubleToRawLongBits(update));\n    }\n\n    /**\n     * Atomically sets the element at position {@code i} to the given\n     * updated value\n     * if the current value is <a href=\"#bitEquals\">bitwise equal</a>\n     * to the expected value.\n     *\n     * <p>May <a\n     * href=\"http://download.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/package-summary.html#Spurious\">\n     * fail spuriously</a>\n     * and does not provide ordering guarantees, so is only rarely an\n     * appropriate alternative to {@code compareAndSet}.\n     *\n     * @param i the index\n     * @param expect the expected value\n     * @param update the new value\n     * @return true if successful\n     */\n    public final boolean weakCompareAndSet(int i, double expect, double update) {\n        return longs.weakCompareAndSet(i, doubleToRawLongBits(expect), doubleToRawLongBits(update));\n    }\n\n    /**\n     * Atomically adds the given value to the element at index {@code i}.\n     *\n     * @param i the index\n     * @param delta the value to add\n     * @return the previous value\n     */\n    public final double getAndAdd(int i, double delta) {\n        while (true) {\n            long current = longs.get(i);\n            double currentVal = longBitsToDouble(current);\n            double nextVal = currentVal + delta;\n            long next = doubleToRawLongBits(nextVal);\n            if (longs.compareAndSet(i, current, next)) {\n                return currentVal;\n            }\n        }\n    }\n\n    /**\n     * Atomically adds the given value to the element at index {@code i}.\n     *\n     * @param i the index\n     * @param delta the value to add\n     * @return the updated value\n     */\n    public double addAndGet(int i, double delta) {\n        while (true) {\n            long current = longs.get(i);\n            double currentVal = longBitsToDouble(current);\n            double nextVal = currentVal + delta;\n            long next = doubleToRawLongBits(nextVal);\n            if (longs.compareAndSet(i, current, next)) {\n                return nextVal;\n            }\n        }\n    }\n\n    /**\n     * Returns the String representation of the current values of array.\n     * @return the String representation of the current values of array\n     */\n    public String toString() {\n        int iMax = length() - 1;\n        if (iMax == -1) {\n            return \"[]\";\n        }\n        // Double.toString(Math.PI).length() == 17\n        StringBuilder b = new StringBuilder((17 + 2) * (iMax + 1));\n        b.append('[');\n        for (int i = 0; ; i++) {\n            b.append(longBitsToDouble(longs.get(i)));\n            if (i == iMax) {\n                return b.append(']').toString();\n            }\n            b.append(',').append(' ');\n        }\n    }\n\n    /**\n     * Saves the state to a stream (that is, serializes it).\n     *\n     * @serialData The length of the array is emitted (int), followed by all\n     *             of its elements (each a {@code double}) in the proper order.\n     */\n    private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException {\n        s.defaultWriteObject();\n        // Write out array length\n        int length = length();\n        s.writeInt(length);\n        // Write out all elements in the proper order.\n        for (int i = 0; i < length; i++) {\n            s.writeDouble(get(i));\n        }\n    }\n\n    /**\n     * Reconstitutes the instance from a stream (that is, deserializes it).\n     */\n    private void readObject(java.io.ObjectInputStream s) throws java.io.IOException, ClassNotFoundException {\n        s.defaultReadObject();\n        // Read in array length and allocate array\n        int length = s.readInt();\n        this.longs = new AtomicLongArray(length);\n        // Read in all elements in the proper order.\n        for (int i = 0; i < length; i++) {\n            set(i, s.readDouble());\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "AtomicDoubleArray",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "length"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new {@code AtomicDoubleArray} of the given length,\n * with all elements initially zero.\n *\n * @param length the length of the array\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "length",
+            "content": "the length of the array",
+            "assertion": "assert args[0] >= 0 && args[0] % 1 == 0;",
+            "description": "length must be a non-negative integer"
+          }
+        ],
+        "code": "/**\n * Creates a new {@code AtomicDoubleArray} of the given length,\n * with all elements initially zero.\n *\n * @param length the length of the array\n */\npublic AtomicDoubleArray(int length) {\n    this.longs = new AtomicLongArray(length);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "AtomicDoubleArray",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new {@code AtomicDoubleArray} with the same length\n * as, and all elements copied from, the given array.\n *\n * @param array the array to copy elements from\n * @throws NullPointerException if array is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "array",
+            "content": "the array to copy elements from",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "array must not be null"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if array is null",
+            "assertion": "assert args[0]==null;",
+            "description": "if array is null."
+          }
+        ],
+        "code": "/**\n * Creates a new {@code AtomicDoubleArray} with the same length\n * as, and all elements copied from, the given array.\n *\n * @param array the array to copy elements from\n * @throws NullPointerException if array is null\n */\npublic AtomicDoubleArray(double[] array) {\n    final int len = array.length;\n    long[] longArray = new long[len];\n    for (int i = 0; i < len; i++) {\n        longArray[i] = doubleToRawLongBits(array[i]);\n    }\n    this.longs = new AtomicLongArray(longArray);\n}"
+      },
+      {
+        "type": "method",
+        "name": "length",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the length of the array.\n *\n * @return the length of the array\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the length of the array",
+            "assertion": "assert receiverObjectID.length() == args[0].array_dimensions;",
+            "description": "the length of the array."
+          }
+        ],
+        "code": "/**\n * Returns the length of the array.\n *\n * @return the length of the array\n */\npublic final int length() {\n    return longs.length();\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * Gets the current value at position {@code i}.\n *\n * @param i the index\n * @return the current value\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "",
+            "description": "the index"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the current value",
+            "assertion": "assert methodResultID == receiverObjectID.get(args[0]);",
+            "description": "the current value at position i."
+          }
+        ],
+        "code": "/**\n * Gets the current value at position {@code i}.\n *\n * @param i the index\n * @return the current value\n */\npublic final double get(int i) {\n    return longBitsToDouble(longs.get(i));\n}"
+      },
+      {
+        "type": "method",
+        "name": "set",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newValue"
+          }
+        ],
+        "javadoc": "/**\n * Sets the element at position {@code i} to the given value.\n *\n * @param i the index\n * @param newValue the new value\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "assert args[0] >= 0 && (Boolean)args[0].getClass().equals(java.lang.Integer.class);",
+            "description": "the index must be a non-negative int"
+          },
+          {
+            "tag": "param",
+            "name": "newValue",
+            "content": "the new value",
+            "assertion": "assert args[1] instanceof java.lang.Double;",
+            "description": "the new value must be a double"
+          }
+        ],
+        "code": "/**\n * Sets the element at position {@code i} to the given value.\n *\n * @param i the index\n * @param newValue the new value\n */\npublic final void set(int i, double newValue) {\n    long next = doubleToRawLongBits(newValue);\n    longs.set(i, next);\n}"
+      },
+      {
+        "type": "method",
+        "name": "lazySet",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newValue"
+          }
+        ],
+        "javadoc": "/**\n * Eventually sets the element at position {@code i} to the given value.\n *\n * @param i the index\n * @param newValue the new value\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "assert (args[0] instanceof Integer) && args[0] >= 0;",
+            "description": "the index must be an integer"
+          },
+          {
+            "tag": "param",
+            "name": "newValue",
+            "content": "the new value",
+            "assertion": "assert (args[1] instanceof Double) && args[1] > 0.0;",
+            "description": "the new value must be a double and greater than zero"
+          }
+        ],
+        "code": "/**\n * Eventually sets the element at position {@code i} to the given value.\n *\n * @param i the index\n * @param newValue the new value\n */\npublic final void lazySet(int i, double newValue) {\n    set(i, newValue);\n    // TODO(user): replace with code below when jdk5 support is dropped.\n    // long next = doubleToRawLongBits(newValue);\n    // longs.lazySet(i, next);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAndSet",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newValue"
+          }
+        ],
+        "javadoc": "/**\n * Atomically sets the element at position {@code i} to the given value\n * and returns the old value.\n *\n * @param i the index\n * @param newValue the new value\n * @return the previous value\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "assert args[0] instanceof Integer && (args[0] != null || args[0] == 0);",
+            "description": "&lt;i&gt; must be an integer"
+          },
+          {
+            "tag": "param",
+            "name": "newValue",
+            "content": "the new value",
+            "assertion": "assert args[1] instanceof Double && (args[1] != null || args[1] == 0.0);",
+            "description": "&lt;new_value&gt; must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the previous value",
+            "assertion": "assert methodResultID == receiverObjectID.getAndSet(args[0], args[1]);",
+            "description": "&quot;the previous value&quot;"
+          }
+        ],
+        "code": "/**\n * Atomically sets the element at position {@code i} to the given value\n * and returns the old value.\n *\n * @param i the index\n * @param newValue the new value\n * @return the previous value\n */\npublic final double getAndSet(int i, double newValue) {\n    long next = doubleToRawLongBits(newValue);\n    return longBitsToDouble(longs.getAndSet(i, next));\n}"
+      },
+      {
+        "type": "method",
+        "name": "compareAndSet",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "expect"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "update"
+          }
+        ],
+        "javadoc": "/**\n * Atomically sets the element at position {@code i} to the given\n * updated value\n * if the current value is <a href=\"#bitEquals\">bitwise equal</a>\n * to the expected value.\n *\n * @param i the index\n * @param expect the expected value\n * @param update the new value\n * @return true if successful. False return indicates that\n * the actual value was not equal to the expected value.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "assert args[0] >= 0;",
+            "description": "i must be non-negative"
+          },
+          {
+            "tag": "param",
+            "name": "expect",
+            "content": "the expected value",
+            "assertion": "assert args[1] instanceof java.lang.Double && args[1] != null;",
+            "description": "expect must be of type double and not null"
+          },
+          {
+            "tag": "param",
+            "name": "update",
+            "content": "the new value",
+            "assertion": "assert args[2] instanceof java.lang.Double && args[2] != null;",
+            "description": "update must be of type double and not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if successful. False return indicates that\nthe actual value was not equal to the expected value.",
+            "assertion": "assert methodResultID == (receiverObjectID.compareAndSet(args[0], args[1]) && receiverObjectID.get(args[0]) == args[2]);",
+            "description": "true if successful. False return indicates that the actual value was not equal to the expected value."
+          }
+        ],
+        "code": "/**\n * Atomically sets the element at position {@code i} to the given\n * updated value\n * if the current value is <a href=\"#bitEquals\">bitwise equal</a>\n * to the expected value.\n *\n * @param i the index\n * @param expect the expected value\n * @param update the new value\n * @return true if successful. False return indicates that\n * the actual value was not equal to the expected value.\n */\npublic final boolean compareAndSet(int i, double expect, double update) {\n    return longs.compareAndSet(i, doubleToRawLongBits(expect), doubleToRawLongBits(update));\n}"
+      },
+      {
+        "type": "method",
+        "name": "weakCompareAndSet",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "expect"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "update"
+          }
+        ],
+        "javadoc": "/**\n * Atomically sets the element at position {@code i} to the given\n * updated value\n * if the current value is <a href=\"#bitEquals\">bitwise equal</a>\n * to the expected value.\n *\n * <p>May <a\n * href=\"http://download.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/package-summary.html#Spurious\">\n * fail spuriously</a>\n * and does not provide ordering guarantees, so is only rarely an\n * appropriate alternative to {@code compareAndSet}.\n *\n * @param i the index\n * @param expect the expected value\n * @param update the new value\n * @return true if successful\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "",
+            "description": "the index"
+          },
+          {
+            "tag": "param",
+            "name": "expect",
+            "content": "the expected value",
+            "assertion": "",
+            "description": "the expected value"
+          },
+          {
+            "tag": "param",
+            "name": "update",
+            "content": "the new value",
+            "assertion": "",
+            "description": "the new value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if successful",
+            "assertion": "",
+            "description": "true if successful"
+          }
+        ],
+        "code": "/**\n * Atomically sets the element at position {@code i} to the given\n * updated value\n * if the current value is <a href=\"#bitEquals\">bitwise equal</a>\n * to the expected value.\n *\n * <p>May <a\n * href=\"http://download.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/package-summary.html#Spurious\">\n * fail spuriously</a>\n * and does not provide ordering guarantees, so is only rarely an\n * appropriate alternative to {@code compareAndSet}.\n *\n * @param i the index\n * @param expect the expected value\n * @param update the new value\n * @return true if successful\n */\npublic final boolean weakCompareAndSet(int i, double expect, double update) {\n    return longs.weakCompareAndSet(i, doubleToRawLongBits(expect), doubleToRawLongBits(update));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAndAdd",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "delta"
+          }
+        ],
+        "javadoc": "/**\n * Atomically adds the given value to the element at index {@code i}.\n *\n * @param i the index\n * @param delta the value to add\n * @return the previous value\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "assert (receiverObjectID.length() > 0) && receiverObjectID.get(args[0]) >= 0;",
+            "description": "i must be valid"
+          },
+          {
+            "tag": "param",
+            "name": "delta",
+            "content": "the value to add",
+            "assertion": "assert args[1] > 0;",
+            "description": "delta must be positive double value"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the previous value",
+            "assertion": "assert methodResultID == receiverObjectID.get(i) + delta;",
+            "description": "true if the previous value was equal to the sum of the current element and the delta."
+          }
+        ],
+        "code": "/**\n * Atomically adds the given value to the element at index {@code i}.\n *\n * @param i the index\n * @param delta the value to add\n * @return the previous value\n */\npublic final double getAndAdd(int i, double delta) {\n    while (true) {\n        long current = longs.get(i);\n        double currentVal = longBitsToDouble(current);\n        double nextVal = currentVal + delta;\n        long next = doubleToRawLongBits(nextVal);\n        if (longs.compareAndSet(i, current, next)) {\n            return currentVal;\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "addAndGet",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "delta"
+          }
+        ],
+        "javadoc": "/**\n * Atomically adds the given value to the element at index {@code i}.\n *\n * @param i the index\n * @param delta the value to add\n * @return the updated value\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "the index",
+            "assertion": "assert receiverObjectID.length() >= 0 && receiverObjectID.length() <= 1 && receiverObjectID.get(0) == null;",
+            "description": "the index must be valid"
+          },
+          {
+            "tag": "param",
+            "name": "delta",
+            "content": "the value to add",
+            "assertion": "assert args[0] >= 0;",
+            "description": "delta must be non-negative"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the updated value",
+            "assertion": "assert methodResultID == receiverObjectID.addAndGet(args[0], args[1]);",
+            "description": "the updated value"
+          }
+        ],
+        "code": "/**\n * Atomically adds the given value to the element at index {@code i}.\n *\n * @param i the index\n * @param delta the value to add\n * @return the updated value\n */\npublic double addAndGet(int i, double delta) {\n    while (true) {\n        long current = longs.get(i);\n        double currentVal = longBitsToDouble(current);\n        double nextVal = currentVal + delta;\n        long next = doubleToRawLongBits(nextVal);\n        if (longs.compareAndSet(i, current, next)) {\n            return nextVal;\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the String representation of the current values of array.\n * @return the String representation of the current values of array\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the String representation of the current values of array",
+            "assertion": "assert receiverObjectID.toString().equals(\"[]\");",
+            "description": "the String representation of the current values of array"
+          }
+        ],
+        "code": "/**\n * Returns the String representation of the current values of array.\n * @return the String representation of the current values of array\n */\npublic String toString() {\n    int iMax = length() - 1;\n    if (iMax == -1) {\n        return \"[]\";\n    }\n    // Double.toString(Math.PI).length() == 17\n    StringBuilder b = new StringBuilder((17 + 2) * (iMax + 1));\n    b.append('[');\n    for (int i = 0; ; i++) {\n        b.append(longBitsToDouble(longs.get(i)));\n        if (i == iMax) {\n            return b.append(']').toString();\n        }\n        b.append(',').append(' ');\n    }\n}"
+      }
+    ]
+  }
+]

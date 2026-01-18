@@ -1,0 +1,253 @@
+[
+  {
+    "method": "HaltonSequenceGenerator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "dimension"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the space dimension must be within the allowed range of [1, 40]",
+          "assertion": "assert (args[0] >= 1 && args[0] <= 40) && !receiverObjectID.getNextIndex().equals(0);",
+          "name": "dimension",
+          "content": "the space dimension must be within the allowed range of [1, 40]"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if dimension is outside the allowed range of [1, 40]",
+          "assertion": "assert receiverObjectID.getScramble(0, 0, 0, args[0]) == 0 || receiverObjectID.getScramble(0, 0, 0, args[0]) == 41;",
+          "name": "OutOfRangeException",
+          "content": "if the space dimension is outside the allowed range of [1, 40]"
+        }
+      ]
+    }
+  },
+  {
+    "method": "HaltonSequenceGenerator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "dimension"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "bases"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "weights"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "dimension",
+          "content": "the space dimension",
+          "assertion": "",
+          "description": "the space dimension"
+        },
+        {
+          "tag": "param",
+          "name": "bases",
+          "content": "the base number for each dimension, entries should be (pairwise) prime, may not be null",
+          "assertion": "",
+          "description": "the base number for each dimension, entries should be (pairwise) prime, may not be null"
+        },
+        {
+          "tag": "param",
+          "name": "weights",
+          "content": "the weights used during scrambling, may be null in which case no scrambling will be performed",
+          "assertion": "",
+          "description": "the weights used during scrambling, may be null in which case no scrambling will be performed"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if base is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullArgumentException",
+          "content": "if base is null."
+        },
+        {
+          "description": "the space dimension is outside the range [1, len], where len refers to the length of the bases array",
+          "assertion": "assert receiverObjectID.dimension < 1 || receiverObjectID.dimension > args[0].length;",
+          "name": "OutOfRangeException",
+          "content": "the space dimension is outside the range [1, len]"
+        },
+        {
+          "description": "weights is non-null and the length of the input arrays differ",
+          "assertion": "assert (args[2]==null || args[0].length != args[2].length) && receiverObjectID.weights!=null;",
+          "name": "DimensionMismatchException",
+          "content": "weights is non-null and the length of the input arrays differ"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextVector",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "scramble",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "i"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "j"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "digit"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "i must be an integer",
+          "assertion": "assert ((int)args[0] >= 0);",
+          "name": "i",
+          "content": "the dimension index"
+        },
+        {
+          "description": "j must be an integer",
+          "assertion": "assert ((int)args[1] >= 0);",
+          "name": "j",
+          "content": "the digit index"
+        },
+        {
+          "description": "b must be a positive integer",
+          "assertion": "assert (args[2] > 0 && (Number)args[2].intValue() instanceof Integer);",
+          "name": "b",
+          "content": "the base for this dimension"
+        },
+        {
+          "description": "digit must be an integer",
+          "assertion": "assert ((int)args[3] >= 0);",
+          "name": "digit",
+          "content": "the j-th digit"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "( weight_i * d_j ) mod base == ( weight_i * digit ) mod base",
+          "assertion": "assert methodResultID == ((args[0] * args[3]) % args[2]);",
+          "name": null,
+          "content": "( weight_i * d_j ) mod base == ( weight_i * digit ) mod base"
+        }
+      ]
+    }
+  },
+  {
+    "method": "skipTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "index must be not negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "index",
+          "content": "the index in the sequence to skip to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the i-th point in the Halton sequence",
+          "assertion": "assert methodResultID == receiverObjectID.nextVector();",
+          "name": null,
+          "content": "the i-th point in the Halton sequence"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if index < 0",
+          "assertion": "assert args[0] < 0;",
+          "name": "NotPositiveException",
+          "content": "if index &lt; 0"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNextIndex",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the index of the next point",
+          "assertion": "assert methodResultID == receiverObjectID.getNextIndex();",
+          "name": null,
+          "content": "the index of the next point in the Halton sequence that will be returned by calling nextVector()."
+        }
+      ]
+    }
+  }
+]

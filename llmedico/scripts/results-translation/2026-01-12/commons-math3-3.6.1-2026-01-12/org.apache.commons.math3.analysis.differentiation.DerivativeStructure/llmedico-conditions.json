@@ -1,0 +1,2152 @@
+[
+  {
+    "method": "DerivativeStructure",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameters"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "parameters must be equal to 0",
+          "assertion": "assert args[0] == 0;",
+          "name": "parameters",
+          "content": "number of free parameters"
+        },
+        {
+          "description": "order must be equal to 0",
+          "assertion": "assert args[1] == 0;",
+          "name": "order",
+          "content": "derivation order"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if order is too large",
+          "assertion": "assert receiverObjectID.getOrder() > Integer.MAX_VALUE;",
+          "name": "NumberIsTooLargeException",
+          "content": "if order is too large"
+        }
+      ]
+    }
+  },
+  {
+    "method": "DerivativeStructure",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameters"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "parameters must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "parameters",
+          "content": "number of free parameters"
+        },
+        {
+          "description": "order must be positive",
+          "assertion": "assert args[1] > 0;",
+          "name": "order",
+          "content": "derivation order"
+        },
+        {
+          "description": "value must not be null",
+          "assertion": "assert value != null;",
+          "name": "value",
+          "content": "value of the constant"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if order is too large",
+          "assertion": "assert receiverObjectID.getExponent() > order;",
+          "name": "NumberIsTooLargeException",
+          "content": "if order is too large"
+        }
+      ]
+    }
+  },
+  {
+    "method": "DerivativeStructure",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameters"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the number of free parameters must be non-negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "parameters",
+          "content": "number of free parameters"
+        },
+        {
+          "description": "the derivation order must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "order",
+          "content": "derivation order"
+        },
+        {
+          "description": "the index must be less than the number of free parameters",
+          "assertion": "assert args[2] < parameters;",
+          "name": "index",
+          "content": "index of the variable (from 0 to {@code parameters - 1})"
+        },
+        {
+          "description": "the value must not be too large",
+          "assertion": "assert !NumberIsTooLargeException.isThrown(args[3]) && args[3] != null;",
+          "name": "value",
+          "content": "value of the variable"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if index >= parameters",
+          "assertion": "assert receiverObjectID.getExponent() < 0;",
+          "name": "NumberIsTooLargeException",
+          "content": "if index >= parameters."
+        }
+      ]
+    }
+  },
+  {
+    "method": "DerivativeStructure",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds1"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a1",
+          "content": "first scale factor",
+          "assertion": "",
+          "description": "first scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds1",
+          "content": "first base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "first base (unscaled) derivative structure"
+        },
+        {
+          "tag": "param",
+          "name": "a2",
+          "content": "second scale factor",
+          "assertion": "",
+          "description": "second scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds2",
+          "content": "second base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "second base (unscaled) derivative structure"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders are inconsistent",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders are inconsistent"
+        }
+      ]
+    }
+  },
+  {
+    "method": "DerivativeStructure",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds1"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds2"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a3"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds3"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a1",
+          "content": "first scale factor",
+          "assertion": "",
+          "description": "first scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds1",
+          "content": "first base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "first base (unscaled) derivative structure"
+        },
+        {
+          "tag": "param",
+          "name": "a2",
+          "content": "second scale factor",
+          "assertion": "",
+          "description": "second scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds2",
+          "content": "second base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "second base (unscaled) derivative structure"
+        },
+        {
+          "tag": "param",
+          "name": "a3",
+          "content": "third scale factor",
+          "assertion": "",
+          "description": "third scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds3",
+          "content": "third base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "third base (unscaled) derivative structure"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the number of free parameters or orders are inconsistent",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "the number of free parameters or orders are inconsistent"
+        }
+      ]
+    }
+  },
+  {
+    "method": "DerivativeStructure",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds1"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds2"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a3"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds3"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a4"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "ds4"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a1",
+          "content": "first scale factor",
+          "assertion": "",
+          "description": "first scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds1",
+          "content": "first base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "first base (unscaled) derivative structure"
+        },
+        {
+          "tag": "param",
+          "name": "a2",
+          "content": "second scale factor",
+          "assertion": "",
+          "description": "second scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds2",
+          "content": "second base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "second base (unscaled) derivative structure"
+        },
+        {
+          "tag": "param",
+          "name": "a3",
+          "content": "third scale factor",
+          "assertion": "",
+          "description": "third scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds3",
+          "content": "third base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "third base (unscaled) derivative structure"
+        },
+        {
+          "tag": "param",
+          "name": "a4",
+          "content": "fourth scale factor",
+          "assertion": "",
+          "description": "fourth scale factor"
+        },
+        {
+          "tag": "param",
+          "name": "ds4",
+          "content": "fourth base (unscaled) derivative structure",
+          "assertion": "",
+          "description": "fourth base (unscaled) derivative structure"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders are inconsistent",
+          "assertion": "",
+          "description": "if number of free parameters or orders are inconsistent"
+        }
+      ]
+    }
+  },
+  {
+    "method": "DerivativeStructure",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameters"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "derivatives"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "parameters must be non-negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "parameters",
+          "content": "number of free parameters"
+        },
+        {
+          "description": "order must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "order",
+          "content": "derivation order"
+        },
+        {
+          "description": "derivatives array must match the size expected by the compiler",
+          "assertion": "assert args[2].length == DSCompiler.getSize();",
+          "name": "derivatives",
+          "content": "derivatives sorted according to {@link DSCompiler#getPartialDerivativeIndex(int...)}"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "derivatives array does not match the size expected by the compiler",
+          "assertion": "assert receiverObjectID.getDerivatives().length != DSCompiler.getSize();",
+          "name": "DimensionMismatchException",
+          "content": "if derivatives array does not match the size expected by the compiler"
+        },
+        {
+          "description": "order is too large",
+          "assertion": "assert receiverObjectID.getOrder() > DSCompiler.getMaxOrder();",
+          "name": "NumberIsTooLargeException",
+          "content": "if order is too large"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getFreeParameters",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "number of free parameters",
+          "assertion": "",
+          "description": "number of free parameters"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getOrder",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "derivation order",
+          "assertion": "",
+          "description": "derivation order"
+        }
+      ]
+    }
+  },
+  {
+    "method": "createConstant",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "c"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "c must be compatible with instance order and number of parameters",
+          "assertion": "assert new DerivativeStructure(getFreeParameters(), getOrder(), args[0]) instanceof DerivativeStructure;",
+          "name": "c",
+          "content": "value of the constant"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this graph did not already contain the specified edge.",
+          "assertion": "assert new DerivativeStructure(getFreeParameters(), getOrder(), c) instanceof DerivativeStructure;",
+          "name": null,
+          "content": "true if this graph did not already contain the specified edge."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getReal",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "getValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "value part of the derivative structure",
+          "assertion": "",
+          "description": "value part of the derivative structure"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getPartialDerivative",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "orders"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "orders",
+          "content": "derivation orders with respect to each variable (if all orders are 0,\nthe value is returned)",
+          "assertion": "",
+          "description": "derivation orders with respect to each variable (if all orders are 0,\nthe value is returned)"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "partial derivative",
+          "assertion": "",
+          "description": "partial derivative"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the numbers of variables does not match the instance",
+          "assertion": "assert args[0].getOrder() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if the numbers of variables does not match the instance"
+        },
+        {
+          "description": "sum of derivation orders is larger than the instance limits",
+          "assertion": "assert Math.log(receiverObjectID.getReal()) / Math.log(10.0) - receiverObjectID.getExponent() > args[0].getOrder();",
+          "name": "NumberIsTooLargeException",
+          "content": "if sum of derivation orders is larger than the instance limits"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAllDerivatives",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a fresh copy of partial derivatives, in an array sorted according to\n{@link DSCompiler#getPartialDerivativeIndex(int...)}",
+          "assertion": "",
+          "description": "a fresh copy of partial derivatives, in an array sorted according to\n{@link DSCompiler#getPartialDerivativeIndex(int...)}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "multiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "divide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "remainder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "remainder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "negate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "abs",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "ceil",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "floor",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "rint",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "round",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "signum",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "copySign",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sign"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "copySign",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "sign"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "getExponent",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Return the exponent of the instance value, removing the bias.",
+          "assertion": "assert result == Math.exact((double) getReal()) / 2;",
+          "name": null,
+          "content": "exponent for instance in IEEE754 representation, without bias"
+        }
+      ]
+    }
+  },
+  {
+    "method": "scalb",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "hypot",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters\nor orders do not match",
+          "assertion": "",
+          "description": "if number of free parameters\nor orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hypot",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "x",
+          "content": "a value",
+          "assertion": "",
+          "description": "a value"
+        },
+        {
+          "tag": "param",
+          "name": "y",
+          "content": "a value",
+          "assertion": "",
+          "description": "a value"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)",
+          "assertion": "",
+          "description": "sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either argument is infinite, then the result is positive infinity.",
+          "assertion": "assert Math.hypot(args[0].getReal(), args[1].getReal()) == Double.POSITIVE_INFINITY;",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compose",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "f"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "array of value and derivatives of the function at the current point (i.e. [f({@link #getValue()}), f'({@link #getValue()}), f''({@link #getValue()})...]) must be defined",
+          "assertion": "assert args[0] != null;",
+          "name": "f",
+          "content": "array of value and derivatives of the function at the current point (i.e. [f({@link #getValue()}), f'({@link #getValue()}), f''({@link #getValue()})...])"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "f(this)",
+          "assertion": "",
+          "description": "f(this)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the number of derivatives in the array is not equal to order + 1",
+          "assertion": "assert args[0].getOrder() != (args[0].getFreeParameters() + 1);",
+          "name": "DimensionMismatchException",
+          "content": "if the number of derivatives in the array is not equal to order + 1"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reciprocal",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sqrt",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "cbrt",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "rootN",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "getField",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a must be positive",
+          "assertion": "assert args[0] > 0;",
+          "name": "a",
+          "content": "number to exponentiate"
+        },
+        {
+          "description": "x must be a DerivativeStructure",
+          "assertion": "assert args[1] instanceof DerivativeStructure;",
+          "name": "x",
+          "content": "power to apply"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a<sup>x</sup>",
+          "assertion": "",
+          "description": "a<sup>x</sup>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "e"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "exp",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "expm1",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "log",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "log1p",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "log10",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "base 10 logarithm of the instance",
+          "assertion": "",
+          "description": "base 10 logarithm of the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "cos",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sin",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "tan",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "acos",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "asin",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "atan",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "atan2",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "atan2",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "y must be of type DerivativeStructure",
+          "assertion": "assert args[0] instanceof org.apache.commons.math3.analysis.function.DerivativeStructure;",
+          "name": "y",
+          "content": "first argument of the arc tangent"
+        },
+        {
+          "description": "x must be of type DerivativeStructure",
+          "assertion": "assert args[1] instanceof org.apache.commons.math3.analysis.function.DerivativeStructure;",
+          "name": "x",
+          "content": "second argument of the arc tangent"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the result of atan2(y, x)",
+          "assertion": "assert methodResultID == y.getValue();",
+          "name": null,
+          "content": "the result of atan2(y, x)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "cosh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "sinh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "tanh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "acosh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "asinh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "atanh",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "toDegrees",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "instance converted into degrees",
+          "assertion": "",
+          "description": "instance converted into degrees"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toRadians",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "instance converted into radians",
+          "assertion": "",
+          "description": "instance converted into radians"
+        }
+      ]
+    }
+  },
+  {
+    "method": "taylor",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "delta"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "delta",
+          "content": "parameters offsets (&Delta;x, &Delta;y, ...)",
+          "assertion": "",
+          "description": "parameters offsets (&Delta;x, &Delta;y, ...)"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "value of the Taylor expansion at x + delta.x, y + delta.y",
+          "assertion": "assert result == taylor(args[0]);",
+          "name": null,
+          "content": "value of the Taylor expansion at x + delta.x, y + delta.y"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if factorials becomes too large",
+          "assertion": "assert Math.factorial(Math.getFreeParameters()[0]) > Integer.MAX_VALUE;",
+          "name": "MathArithmeticException",
+          "content": "if factorials becomes too large"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters\nor orders do not match",
+          "assertion": "",
+          "description": "if number of free parameters\nor orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b2"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b1"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b2"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters\nor orders do not match",
+          "assertion": "",
+          "description": "if number of free parameters\nor orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a3"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b3"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() == receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b1"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b2"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a3"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b3"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a3"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b3"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a4"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b4"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "linearCombination",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b1"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b2"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a3"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b3"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a4"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "DerivativeStructure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b4"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "number of free parameters or orders do not match",
+          "assertion": "assert receiverObjectID.getFreeParameters() != receiverObjectID.getOrder();",
+          "name": "DimensionMismatchException",
+          "content": "if number of free parameters or orders do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the two derivative structures must have the same number of free parameters",
+          "assertion": "assert args[0].getFreeParameters() == this.getFreeParameters();",
+          "name": "other",
+          "content": "Object to test for equality to this"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "true if two derivative structures are equal",
+          "assertion": "",
+          "description": "true if two derivative structures are equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a hash code value for this object",
+          "assertion": "",
+          "description": "a hash code value for this object"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,651 @@
+[
+  {
+    "name": "ConcurrentHashMultiset",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.ConcurrentHashMultiset",
+    "javadoc": "/**\n * A multiset that supports concurrent modifications and that provides atomic versions of most\n * {@code Multiset} operations (exceptions where noted). Null elements are not supported.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/NewCollectionTypesExplained#multiset\">\n * {@code Multiset}</a>.\n *\n * @author Cliff L. Biffle\n * @author mike nonemacher\n * @since 2.0\n */\n",
+    "code": "/**\n * A multiset that supports concurrent modifications and that provides atomic versions of most\n * {@code Multiset} operations (exceptions where noted). Null elements are not supported.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/NewCollectionTypesExplained#multiset\">\n * {@code Multiset}</a>.\n *\n * @author Cliff L. Biffle\n * @author mike nonemacher\n * @since 2.0\n */\npublic final class ConcurrentHashMultiset<E> extends AbstractMultiset<E> implements Serializable {\n\n    /*\n   * The ConcurrentHashMultiset's atomic operations are implemented primarily in terms of\n   * AtomicInteger's atomic operations, with some help from ConcurrentMap's atomic operations on\n   * creation and removal (including automatic removal of zeroes). If the modification of an\n   * AtomicInteger results in zero, we compareAndSet the value to zero; if that succeeds, we remove\n   * the entry from the Map. If another operation sees a zero in the map, it knows that the entry is\n   * about to be removed, so this operation may remove it (often by replacing it with a new\n   * AtomicInteger).\n   */\n    /**\n     * The number of occurrences of each element.\n     */\n    private final transient ConcurrentMap<E, AtomicInteger> countMap;\n\n    // This constant allows the deserialization code to set a final field. This holder class\n    // makes sure it is not initialized unless an instance is deserialized.\n    private static class FieldSettersHolder {\n\n        static final FieldSetter<ConcurrentHashMultiset> COUNT_MAP_FIELD_SETTER = Serialization.getFieldSetter(ConcurrentHashMultiset.class, \"countMap\");\n    }\n\n    /**\n     * Creates a new, empty {@code ConcurrentHashMultiset} using the default\n     * initial capacity, load factor, and concurrency settings.\n     */\n    public static <E> ConcurrentHashMultiset<E> create() {\n        // TODO(schmoe): provide a way to use this class with other (possibly arbitrary)\n        // ConcurrentMap implementors. One possibility is to extract most of this class into\n        // an AbstractConcurrentMapMultiset.\n        return new ConcurrentHashMultiset<E>(new ConcurrentHashMap<E, AtomicInteger>());\n    }\n\n    /**\n     * Creates a new {@code ConcurrentHashMultiset} containing the specified elements, using\n     * the default initial capacity, load factor, and concurrency settings.\n     *\n     * <p>This implementation is highly efficient when {@code elements} is itself a {@link Multiset}.\n     *\n     * @param elements the elements that the multiset should contain\n     */\n    public static <E> ConcurrentHashMultiset<E> create(Iterable<? extends E> elements) {\n        ConcurrentHashMultiset<E> multiset = ConcurrentHashMultiset.create();\n        Iterables.addAll(multiset, elements);\n        return multiset;\n    }\n\n    /**\n     * Creates a new, empty {@code ConcurrentHashMultiset} using {@code mapMaker}\n     * to construct the internal backing map.\n     *\n     * <p>If this {@link MapMaker} is configured to use entry eviction of any kind, this eviction\n     * applies to all occurrences of a given element as a single unit. However, most updates to the\n     * multiset do not count as map updates at all, since we're usually just mutating the value\n     * stored in the map, so {@link MapMaker#expireAfterAccess} makes sense (evict the entry that\n     * was queried or updated longest ago), but {@link MapMaker#expireAfterWrite} doesn't, because\n     * the eviction time is measured from when we saw the first occurrence of the object.\n     *\n     * <p>The returned multiset is serializable but any serialization caveats\n     * given in {@code MapMaker} apply.\n     *\n     * <p>Finally, soft/weak values can be used but are not very useful: the values are created\n     * internally and not exposed externally, so no one else will have a strong reference to the\n     * values. Weak keys on the other hand can be useful in some scenarios.\n     *\n     * @since 15.0 (source compatible (accepting the since removed {@code GenericMapMaker} class)\n     *     since 7.0)\n     */\n    @Beta\n    public static <E> ConcurrentHashMultiset<E> create(MapMaker mapMaker) {\n        return new ConcurrentHashMultiset<E>(mapMaker.<E, AtomicInteger>makeMap());\n    }\n\n    /**\n     * Creates an instance using {@code countMap} to store elements and their counts.\n     *\n     * <p>This instance will assume ownership of {@code countMap}, and other code\n     * should not maintain references to the map or modify it in any way.\n     *\n     * @param countMap backing map for storing the elements in the multiset and\n     *     their counts. It must be empty.\n     * @throws IllegalArgumentException if {@code countMap} is not empty\n     */\n    @VisibleForTesting\n    ConcurrentHashMultiset(ConcurrentMap<E, AtomicInteger> countMap) {\n        checkArgument(countMap.isEmpty());\n        this.countMap = countMap;\n    }\n\n    // Query Operations\n    /**\n     * Returns the number of occurrences of {@code element} in this multiset.\n     *\n     * @param element the element to look for\n     * @return the nonnegative number of occurrences of the element\n     */\n    @Override\n    public int count(@Nullable Object element) {\n        AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n        return (existingCounter == null) ? 0 : existingCounter.get();\n    }\n\n    /**\n     * {@inheritDoc}\n     *\n     * <p>If the data in the multiset is modified by any other threads during this method,\n     * it is undefined which (if any) of these modifications will be reflected in the result.\n     */\n    @Override\n    public int size() {\n        long sum = 0L;\n        for (AtomicInteger value : countMap.values()) {\n            sum += value.get();\n        }\n        return Ints.saturatedCast(sum);\n    }\n\n    /*\n   * Note: the superclass toArray() methods assume that size() gives a correct\n   * answer, which ours does not.\n   */\n    @Override\n    public Object[] toArray() {\n        return snapshot().toArray();\n    }\n\n    @Override\n    public <T> T[] toArray(T[] array) {\n        return snapshot().toArray(array);\n    }\n\n    /*\n   * We'd love to use 'new ArrayList(this)' or 'list.addAll(this)', but\n   * either of these would recurse back to us again!\n   */\n    private List<E> snapshot() {\n        List<E> list = Lists.newArrayListWithExpectedSize(size());\n        for (Multiset.Entry<E> entry : entrySet()) {\n            E element = entry.getElement();\n            for (int i = entry.getCount(); i > 0; i--) {\n                list.add(element);\n            }\n        }\n        return list;\n    }\n\n    // Modification Operations\n    /**\n     * Adds a number of occurrences of the specified element to this multiset.\n     *\n     * @param element the element to add\n     * @param occurrences the number of occurrences to add\n     * @return the previous count of the element before the operation; possibly zero\n     * @throws IllegalArgumentException if {@code occurrences} is negative, or if\n     *     the resulting amount would exceed {@link Integer#MAX_VALUE}\n     */\n    @Override\n    public int add(E element, int occurrences) {\n        checkNotNull(element);\n        if (occurrences == 0) {\n            return count(element);\n        }\n        CollectPreconditions.checkPositive(occurrences, \"occurences\");\n        while (true) {\n            AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n            if (existingCounter == null) {\n                existingCounter = countMap.putIfAbsent(element, new AtomicInteger(occurrences));\n                if (existingCounter == null) {\n                    return 0;\n                }\n                // existingCounter != null: fall through to operate against the existing AtomicInteger\n            }\n            while (true) {\n                int oldValue = existingCounter.get();\n                if (oldValue != 0) {\n                    try {\n                        int newValue = IntMath.checkedAdd(oldValue, occurrences);\n                        if (existingCounter.compareAndSet(oldValue, newValue)) {\n                            // newValue can't == 0, so no need to check & remove\n                            return oldValue;\n                        }\n                    } catch (ArithmeticException overflow) {\n                        throw new IllegalArgumentException(\"Overflow adding \" + occurrences + \" occurrences to a count of \" + oldValue);\n                    }\n                } else {\n                    // In the case of a concurrent remove, we might observe a zero value, which means another\n                    // thread is about to remove (element, existingCounter) from the map. Rather than wait,\n                    // we can just do that work here.\n                    AtomicInteger newCounter = new AtomicInteger(occurrences);\n                    if ((countMap.putIfAbsent(element, newCounter) == null) || countMap.replace(element, existingCounter, newCounter)) {\n                        return 0;\n                    }\n                    break;\n                }\n            }\n            // If we're still here, there was a race, so just try again.\n        }\n    }\n\n    /**\n     * Removes a number of occurrences of the specified element from this multiset. If the multiset\n     * contains fewer than this number of occurrences to begin with, all occurrences will be removed.\n     *\n     * @param element the element whose occurrences should be removed\n     * @param occurrences the number of occurrences of the element to remove\n     * @return the count of the element before the operation; possibly zero\n     * @throws IllegalArgumentException if {@code occurrences} is negative\n     */\n    /*\n   * TODO(cpovirk): remove and removeExactly currently accept null inputs only\n   * if occurrences == 0. This satisfies both NullPointerTester and\n   * CollectionRemoveTester.testRemove_nullAllowed, but it's not clear that it's\n   * a good policy, especially because, in order for the test to pass, the\n   * parameter must be misleadingly annotated as @Nullable. I suspect that\n   * we'll want to remove @Nullable, add an eager checkNotNull, and loosen up\n   * testRemove_nullAllowed.\n   */\n    @Override\n    public int remove(@Nullable Object element, int occurrences) {\n        if (occurrences == 0) {\n            return count(element);\n        }\n        CollectPreconditions.checkPositive(occurrences, \"occurences\");\n        AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n        if (existingCounter == null) {\n            return 0;\n        }\n        while (true) {\n            int oldValue = existingCounter.get();\n            if (oldValue != 0) {\n                int newValue = Math.max(0, oldValue - occurrences);\n                if (existingCounter.compareAndSet(oldValue, newValue)) {\n                    if (newValue == 0) {\n                        // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                        // another thread has already replaced it with a new counter, which is fine.\n                        countMap.remove(element, existingCounter);\n                    }\n                    return oldValue;\n                }\n            } else {\n                return 0;\n            }\n        }\n    }\n\n    /**\n     * Removes exactly the specified number of occurrences of {@code element}, or makes no\n     * change if this is not possible.\n     *\n     * <p>This method, in contrast to {@link #remove(Object, int)}, has no effect when the\n     * element count is smaller than {@code occurrences}.\n     *\n     * @param element the element to remove\n     * @param occurrences the number of occurrences of {@code element} to remove\n     * @return {@code true} if the removal was possible (including if {@code occurrences} is zero)\n     * @throws IllegalArgumentException if {@code occurrences} is negative\n     */\n    public boolean removeExactly(@Nullable Object element, int occurrences) {\n        if (occurrences == 0) {\n            return true;\n        }\n        CollectPreconditions.checkPositive(occurrences, \"occurences\");\n        AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n        if (existingCounter == null) {\n            return false;\n        }\n        while (true) {\n            int oldValue = existingCounter.get();\n            if (oldValue < occurrences) {\n                return false;\n            }\n            int newValue = oldValue - occurrences;\n            if (existingCounter.compareAndSet(oldValue, newValue)) {\n                if (newValue == 0) {\n                    // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                    // another thread has already replaced it with a new counter, which is fine.\n                    countMap.remove(element, existingCounter);\n                }\n                return true;\n            }\n        }\n    }\n\n    /**\n     * Adds or removes occurrences of {@code element} such that the {@link #count} of the\n     * element becomes {@code count}.\n     *\n     * @return the count of {@code element} in the multiset before this call\n     * @throws IllegalArgumentException if {@code count} is negative\n     */\n    @Override\n    public int setCount(E element, int count) {\n        checkNotNull(element);\n        checkNonnegative(count, \"count\");\n        while (true) {\n            AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n            if (existingCounter == null) {\n                if (count == 0) {\n                    return 0;\n                } else {\n                    existingCounter = countMap.putIfAbsent(element, new AtomicInteger(count));\n                    if (existingCounter == null) {\n                        return 0;\n                    }\n                    // existingCounter != null: fall through\n                }\n            }\n            while (true) {\n                int oldValue = existingCounter.get();\n                if (oldValue == 0) {\n                    if (count == 0) {\n                        return 0;\n                    } else {\n                        AtomicInteger newCounter = new AtomicInteger(count);\n                        if ((countMap.putIfAbsent(element, newCounter) == null) || countMap.replace(element, existingCounter, newCounter)) {\n                            return 0;\n                        }\n                    }\n                    break;\n                } else {\n                    if (existingCounter.compareAndSet(oldValue, count)) {\n                        if (count == 0) {\n                            // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                            // another thread has already replaced it with a new counter, which is fine.\n                            countMap.remove(element, existingCounter);\n                        }\n                        return oldValue;\n                    }\n                }\n            }\n        }\n    }\n\n    /**\n     * Sets the number of occurrences of {@code element} to {@code newCount}, but only if\n     * the count is currently {@code expectedOldCount}. If {@code element} does not appear\n     * in the multiset exactly {@code expectedOldCount} times, no changes will be made.\n     *\n     * @return {@code true} if the change was successful. This usually indicates\n     *     that the multiset has been modified, but not always: in the case that\n     *     {@code expectedOldCount == newCount}, the method will return {@code true} if\n     *     the condition was met.\n     * @throws IllegalArgumentException if {@code expectedOldCount} or {@code newCount} is negative\n     */\n    @Override\n    public boolean setCount(E element, int expectedOldCount, int newCount) {\n        checkNotNull(element);\n        checkNonnegative(expectedOldCount, \"oldCount\");\n        checkNonnegative(newCount, \"newCount\");\n        AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n        if (existingCounter == null) {\n            if (expectedOldCount != 0) {\n                return false;\n            } else if (newCount == 0) {\n                return true;\n            } else {\n                // if our write lost the race, it must have lost to a nonzero value, so we can stop\n                return countMap.putIfAbsent(element, new AtomicInteger(newCount)) == null;\n            }\n        }\n        int oldValue = existingCounter.get();\n        if (oldValue == expectedOldCount) {\n            if (oldValue == 0) {\n                if (newCount == 0) {\n                    // Just observed a 0; try to remove the entry to clean up the map\n                    countMap.remove(element, existingCounter);\n                    return true;\n                } else {\n                    AtomicInteger newCounter = new AtomicInteger(newCount);\n                    return (countMap.putIfAbsent(element, newCounter) == null) || countMap.replace(element, existingCounter, newCounter);\n                }\n            } else {\n                if (existingCounter.compareAndSet(oldValue, newCount)) {\n                    if (newCount == 0) {\n                        // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                        // another thread has already replaced it with a new counter, which is fine.\n                        countMap.remove(element, existingCounter);\n                    }\n                    return true;\n                }\n            }\n        }\n        return false;\n    }\n\n    // Views\n    @Override\n    Set<E> createElementSet() {\n        final Set<E> delegate = countMap.keySet();\n        return new ForwardingSet<E>() {\n\n            @Override\n            protected Set<E> delegate() {\n                return delegate;\n            }\n\n            @Override\n            public boolean contains(@Nullable Object object) {\n                return object != null && Collections2.safeContains(delegate, object);\n            }\n\n            @Override\n            public boolean containsAll(Collection<?> collection) {\n                return standardContainsAll(collection);\n            }\n\n            @Override\n            public boolean remove(Object object) {\n                return object != null && Collections2.safeRemove(delegate, object);\n            }\n\n            @Override\n            public boolean removeAll(Collection<?> c) {\n                return standardRemoveAll(c);\n            }\n        };\n    }\n\n    @Override\n    public Set<Multiset.Entry<E>> createEntrySet() {\n        return new EntrySet();\n    }\n\n    @Override\n    int distinctElements() {\n        return countMap.size();\n    }\n\n    @Override\n    public boolean isEmpty() {\n        return countMap.isEmpty();\n    }\n\n    @Override\n    Iterator<Entry<E>> entryIterator() {\n        // AbstractIterator makes this fairly clean, but it doesn't support remove(). To support\n        // remove(), we create an AbstractIterator, and then use ForwardingIterator to delegate to it.\n        final Iterator<Entry<E>> readOnlyIterator = new AbstractIterator<Entry<E>>() {\n\n            private Iterator<Map.Entry<E, AtomicInteger>> mapEntries = countMap.entrySet().iterator();\n\n            @Override\n            protected Entry<E> computeNext() {\n                while (true) {\n                    if (!mapEntries.hasNext()) {\n                        return endOfData();\n                    }\n                    Map.Entry<E, AtomicInteger> mapEntry = mapEntries.next();\n                    int count = mapEntry.getValue().get();\n                    if (count != 0) {\n                        return Multisets.immutableEntry(mapEntry.getKey(), count);\n                    }\n                }\n            }\n        };\n        return new ForwardingIterator<Entry<E>>() {\n\n            private Entry<E> last;\n\n            @Override\n            protected Iterator<Entry<E>> delegate() {\n                return readOnlyIterator;\n            }\n\n            @Override\n            public Entry<E> next() {\n                last = super.next();\n                return last;\n            }\n\n            @Override\n            public void remove() {\n                checkRemove(last != null);\n                ConcurrentHashMultiset.this.setCount(last.getElement(), 0);\n                last = null;\n            }\n        };\n    }\n\n    @Override\n    public void clear() {\n        countMap.clear();\n    }\n\n    @WeakOuter\n    private class EntrySet extends AbstractMultiset<E>.EntrySet {\n\n        @Override\n        ConcurrentHashMultiset<E> multiset() {\n            return ConcurrentHashMultiset.this;\n        }\n\n        /*\n     * Note: the superclass toArray() methods assume that size() gives a correct\n     * answer, which ours does not.\n     */\n        @Override\n        public Object[] toArray() {\n            return snapshot().toArray();\n        }\n\n        @Override\n        public <T> T[] toArray(T[] array) {\n            return snapshot().toArray(array);\n        }\n\n        private List<Multiset.Entry<E>> snapshot() {\n            List<Multiset.Entry<E>> list = Lists.newArrayListWithExpectedSize(size());\n            // Not Iterables.addAll(list, this), because that'll forward right back here.\n            Iterators.addAll(list, iterator());\n            return list;\n        }\n    }\n\n    /**\n     * @serialData the ConcurrentMap of elements and their counts.\n     */\n    private void writeObject(ObjectOutputStream stream) throws IOException {\n        stream.defaultWriteObject();\n        stream.writeObject(countMap);\n    }\n\n    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {\n        stream.defaultReadObject();\n        // reading data stored by writeObject\n        @SuppressWarnings(\"unchecked\")\n        ConcurrentMap<E, Integer> deserializedCountMap = (ConcurrentMap<E, Integer>) stream.readObject();\n        FieldSettersHolder.COUNT_MAP_FIELD_SETTER.set(this, deserializedCountMap);\n    }\n\n    private static final long serialVersionUID = 1;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "ConcurrentHashMultiset",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ConcurrentMap",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "countMap"
+          }
+        ],
+        "javadoc": "/**\n * Creates an instance using {@code countMap} to store elements and their counts.\n *\n * <p>This instance will assume ownership of {@code countMap}, and other code\n * should not maintain references to the map or modify it in any way.\n *\n * @param countMap backing map for storing the elements in the multiset and\n *     their counts. It must be empty.\n * @throws IllegalArgumentException if {@code countMap} is not empty\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "countMap",
+            "content": "backing map for storing the elements in the multiset and\n    their counts. It must be empty.",
+            "assertion": "assert receiverObjectID.countMap == null;",
+            "description": "countMap must be empty"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code countMap} is not empty",
+            "assertion": "assert !receiverObjectID.isEmpty();",
+            "description": "if countMap is not empty"
+          }
+        ],
+        "code": "/**\n * Creates an instance using {@code countMap} to store elements and their counts.\n *\n * <p>This instance will assume ownership of {@code countMap}, and other code\n * should not maintain references to the map or modify it in any way.\n *\n * @param countMap backing map for storing the elements in the multiset and\n *     their counts. It must be empty.\n * @throws IllegalArgumentException if {@code countMap} is not empty\n */\n@VisibleForTesting\nConcurrentHashMultiset(ConcurrentMap<E, AtomicInteger> countMap) {\n    checkArgument(countMap.isEmpty());\n    this.countMap = countMap;\n}"
+      },
+      {
+        "type": "method",
+        "name": "create",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ConcurrentHashMultiset",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Creates a new, empty {@code ConcurrentHashMultiset} using the default\n * initial capacity, load factor, and concurrency settings.\n */\n",
+        "tags": [],
+        "code": "/**\n * Creates a new, empty {@code ConcurrentHashMultiset} using the default\n * initial capacity, load factor, and concurrency settings.\n */\npublic static <E> ConcurrentHashMultiset<E> create() {\n    // TODO(schmoe): provide a way to use this class with other (possibly arbitrary)\n    // ConcurrentMap implementors. One possibility is to extract most of this class into\n    // an AbstractConcurrentMapMultiset.\n    return new ConcurrentHashMultiset<E>(new ConcurrentHashMap<E, AtomicInteger>());\n}"
+      },
+      {
+        "type": "method",
+        "name": "create",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ConcurrentHashMultiset",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "elements"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new {@code ConcurrentHashMultiset} containing the specified elements, using\n * the default initial capacity, load factor, and concurrency settings.\n *\n * <p>This implementation is highly efficient when {@code elements} is itself a {@link Multiset}.\n *\n * @param elements the elements that the multiset should contain\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "elements",
+            "content": "the elements that the multiset should contain",
+            "assertion": "assert args[0] instanceof java.util.Iterable;",
+            "description": "elements must be a Iterable"
+          }
+        ],
+        "code": "/**\n * Creates a new {@code ConcurrentHashMultiset} containing the specified elements, using\n * the default initial capacity, load factor, and concurrency settings.\n *\n * <p>This implementation is highly efficient when {@code elements} is itself a {@link Multiset}.\n *\n * @param elements the elements that the multiset should contain\n */\npublic static <E> ConcurrentHashMultiset<E> create(Iterable<? extends E> elements) {\n    ConcurrentHashMultiset<E> multiset = ConcurrentHashMultiset.create();\n    Iterables.addAll(multiset, elements);\n    return multiset;\n}"
+      },
+      {
+        "type": "method",
+        "name": "create",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ConcurrentHashMultiset",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "MapMaker",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "mapMaker"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new, empty {@code ConcurrentHashMultiset} using {@code mapMaker}\n * to construct the internal backing map.\n *\n * <p>If this {@link MapMaker} is configured to use entry eviction of any kind, this eviction\n * applies to all occurrences of a given element as a single unit. However, most updates to the\n * multiset do not count as map updates at all, since we're usually just mutating the value\n * stored in the map, so {@link MapMaker#expireAfterAccess} makes sense (evict the entry that\n * was queried or updated longest ago), but {@link MapMaker#expireAfterWrite} doesn't, because\n * the eviction time is measured from when we saw the first occurrence of the object.\n *\n * <p>The returned multiset is serializable but any serialization caveats\n * given in {@code MapMaker} apply.\n *\n * <p>Finally, soft/weak values can be used but are not very useful: the values are created\n * internally and not exposed externally, so no one else will have a strong reference to the\n * values. Weak keys on the other hand can be useful in some scenarios.\n *\n * @since 15.0 (source compatible (accepting the since removed {@code GenericMapMaker} class)\n *     since 7.0)\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": null,
+            "content": "15.0 (source compatible (accepting the since removed {@code GenericMapMaker} class)\n    since 7.0)"
+          }
+        ],
+        "code": "/**\n * Creates a new, empty {@code ConcurrentHashMultiset} using {@code mapMaker}\n * to construct the internal backing map.\n *\n * <p>If this {@link MapMaker} is configured to use entry eviction of any kind, this eviction\n * applies to all occurrences of a given element as a single unit. However, most updates to the\n * multiset do not count as map updates at all, since we're usually just mutating the value\n * stored in the map, so {@link MapMaker#expireAfterAccess} makes sense (evict the entry that\n * was queried or updated longest ago), but {@link MapMaker#expireAfterWrite} doesn't, because\n * the eviction time is measured from when we saw the first occurrence of the object.\n *\n * <p>The returned multiset is serializable but any serialization caveats\n * given in {@code MapMaker} apply.\n *\n * <p>Finally, soft/weak values can be used but are not very useful: the values are created\n * internally and not exposed externally, so no one else will have a strong reference to the\n * values. Weak keys on the other hand can be useful in some scenarios.\n *\n * @since 15.0 (source compatible (accepting the since removed {@code GenericMapMaker} class)\n *     since 7.0)\n */\n@Beta\npublic static <E> ConcurrentHashMultiset<E> create(MapMaker mapMaker) {\n    return new ConcurrentHashMultiset<E>(mapMaker.<E, AtomicInteger>makeMap());\n}"
+      },
+      {
+        "type": "method",
+        "name": "count",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          }
+        ],
+        "javadoc": "/**\n * Returns the number of occurrences of {@code element} in this multiset.\n *\n * @param element the element to look for\n * @return the nonnegative number of occurrences of the element\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "element",
+            "content": "the element to look for",
+            "assertion": "assert receiverObjectID instanceof java.lang.Object;",
+            "description": "the code must be of type Object"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the nonnegative number of occurrences of the element",
+            "assertion": "assert methodResultID == receiverObjectID.count(args[0]);",
+            "description": "&lt;code&gt;int count(&lt;code&gt;element&lt;/code&gt;)&lt;/p&gt;"
+          }
+        ],
+        "code": "// Query Operations\n/**\n * Returns the number of occurrences of {@code element} in this multiset.\n *\n * @param element the element to look for\n * @return the nonnegative number of occurrences of the element\n */\n@Override\npublic int count(@Nullable Object element) {\n    AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n    return (existingCounter == null) ? 0 : existingCounter.get();\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n *\n * <p>If the data in the multiset is modified by any other threads during this method,\n * it is undefined which (if any) of these modifications will be reflected in the result.\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n *\n * <p>If the data in the multiset is modified by any other threads during this method,\n * it is undefined which (if any) of these modifications will be reflected in the result.\n */\n@Override\npublic int size() {\n    long sum = 0L;\n    for (AtomicInteger value : countMap.values()) {\n        sum += value.get();\n    }\n    return Ints.saturatedCast(sum);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*\n   * Note: the superclass toArray() methods assume that size() gives a correct\n   * answer, which ours does not.\n   */\n@Override\npublic Object[] toArray() {\n    return snapshot().toArray();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic <T> T[] toArray(T[] array) {\n    return snapshot().toArray(array);\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "occurrences"
+          }
+        ],
+        "javadoc": "/**\n * Adds a number of occurrences of the specified element to this multiset.\n *\n * @param element the element to add\n * @param occurrences the number of occurrences to add\n * @return the previous count of the element before the operation; possibly zero\n * @throws IllegalArgumentException if {@code occurrences} is negative, or if\n *     the resulting amount would exceed {@link Integer#MAX_VALUE}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "element",
+            "content": "the element to add",
+            "assertion": "assert receiverObjectID.element instanceof java.lang.Object;",
+            "description": "the element must be of type java.lang.Object"
+          },
+          {
+            "tag": "param",
+            "name": "occurrences",
+            "content": "the number of occurrences to add",
+            "assertion": "assert args[1] instanceof java.lang.Integer;",
+            "description": "occurrences must be of type int"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the previous count of the element before the operation; possibly zero",
+            "assertion": "assert methodResultID == receiverObjectID.size() - receiverObjectID.add(args[0], args[1]);",
+            "description": "the previous count of the element before the operation; possibly zero"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code occurrences} is negative, or if\n    the resulting amount would exceed {@link Integer#MAX_VALUE}",
+            "assertion": "",
+            "description": "if {@code occurrences} is negative, or if\n    the resulting amount would exceed {@link Integer#MAX_VALUE}"
+          }
+        ],
+        "code": "// Modification Operations\n/**\n * Adds a number of occurrences of the specified element to this multiset.\n *\n * @param element the element to add\n * @param occurrences the number of occurrences to add\n * @return the previous count of the element before the operation; possibly zero\n * @throws IllegalArgumentException if {@code occurrences} is negative, or if\n *     the resulting amount would exceed {@link Integer#MAX_VALUE}\n */\n@Override\npublic int add(E element, int occurrences) {\n    checkNotNull(element);\n    if (occurrences == 0) {\n        return count(element);\n    }\n    CollectPreconditions.checkPositive(occurrences, \"occurences\");\n    while (true) {\n        AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n        if (existingCounter == null) {\n            existingCounter = countMap.putIfAbsent(element, new AtomicInteger(occurrences));\n            if (existingCounter == null) {\n                return 0;\n            }\n            // existingCounter != null: fall through to operate against the existing AtomicInteger\n        }\n        while (true) {\n            int oldValue = existingCounter.get();\n            if (oldValue != 0) {\n                try {\n                    int newValue = IntMath.checkedAdd(oldValue, occurrences);\n                    if (existingCounter.compareAndSet(oldValue, newValue)) {\n                        // newValue can't == 0, so no need to check & remove\n                        return oldValue;\n                    }\n                } catch (ArithmeticException overflow) {\n                    throw new IllegalArgumentException(\"Overflow adding \" + occurrences + \" occurrences to a count of \" + oldValue);\n                }\n            } else {\n                // In the case of a concurrent remove, we might observe a zero value, which means another\n                // thread is about to remove (element, existingCounter) from the map. Rather than wait,\n                // we can just do that work here.\n                AtomicInteger newCounter = new AtomicInteger(occurrences);\n                if ((countMap.putIfAbsent(element, newCounter) == null) || countMap.replace(element, existingCounter, newCounter)) {\n                    return 0;\n                }\n                break;\n            }\n        }\n        // If we're still here, there was a race, so just try again.\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "occurrences"
+          }
+        ],
+        "javadoc": null,
+        "tags": [
+          {
+            "tag": "param",
+            "name": "element",
+            "content": "",
+            "assertion": "",
+            "description": ""
+          },
+          {
+            "tag": "param",
+            "name": "occurrences",
+            "content": "",
+            "assertion": "",
+            "description": ""
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "",
+            "assertion": "",
+            "description": ""
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "",
+            "description": ""
+          }        
+          
+        ],
+        "code": "/**\n * Removes a number of occurrences of the specified element from this multiset. If the multiset\n * contains fewer than this number of occurrences to begin with, all occurrences will be removed.\n *\n * @param element the element whose occurrences should be removed\n * @param occurrences the number of occurrences of the element to remove\n * @return the count of the element before the operation; possibly zero\n * @throws IllegalArgumentException if {@code occurrences} is negative\n */\n/*\n   * TODO(cpovirk): remove and removeExactly currently accept null inputs only\n   * if occurrences == 0. This satisfies both NullPointerTester and\n   * CollectionRemoveTester.testRemove_nullAllowed, but it's not clear that it's\n   * a good policy, especially because, in order for the test to pass, the\n   * parameter must be misleadingly annotated as @Nullable. I suspect that\n   * we'll want to remove @Nullable, add an eager checkNotNull, and loosen up\n   * testRemove_nullAllowed.\n   */\n@Override\npublic int remove(@Nullable Object element, int occurrences) {\n    if (occurrences == 0) {\n        return count(element);\n    }\n    CollectPreconditions.checkPositive(occurrences, \"occurences\");\n    AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n    if (existingCounter == null) {\n        return 0;\n    }\n    while (true) {\n        int oldValue = existingCounter.get();\n        if (oldValue != 0) {\n            int newValue = Math.max(0, oldValue - occurrences);\n            if (existingCounter.compareAndSet(oldValue, newValue)) {\n                if (newValue == 0) {\n                    // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                    // another thread has already replaced it with a new counter, which is fine.\n                    countMap.remove(element, existingCounter);\n                }\n                return oldValue;\n            }\n        } else {\n            return 0;\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeExactly",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "occurrences"
+          }
+        ],
+        "javadoc": "/**\n * Removes exactly the specified number of occurrences of {@code element}, or makes no\n * change if this is not possible.\n *\n * <p>This method, in contrast to {@link #remove(Object, int)}, has no effect when the\n * element count is smaller than {@code occurrences}.\n *\n * @param element the element to remove\n * @param occurrences the number of occurrences of {@code element} to remove\n * @return {@code true} if the removal was possible (including if {@code occurrences} is zero)\n * @throws IllegalArgumentException if {@code occurrences} is negative\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "element",
+            "content": "the element to remove",
+            "assertion": "assert receiverObjectID.element != null;",
+            "description": "the element to remove must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "occurrences",
+            "content": "the number of occurrences of {@code element} to remove",
+            "assertion": "assert args[1] >= 0 && receiverObjectID.occurrences > 0;",
+            "description": "occurrences must be non-negative and greater than zero"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if the removal was possible (including if {@code occurrences} is zero)",
+            "assertion": "assert methodResultID == (!receiverObjectID.isEmpty() && receiverObjectID.removeExactly(args[0], args[1]));",
+            "description": "true if the removal was possible (including if occurrences is zero)."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code occurrences} is negative",
+            "assertion": "assert args[1] < 0;",
+            "description": "if occurrences is negative"
+          }
+        ],
+        "code": "/**\n * Removes exactly the specified number of occurrences of {@code element}, or makes no\n * change if this is not possible.\n *\n * <p>This method, in contrast to {@link #remove(Object, int)}, has no effect when the\n * element count is smaller than {@code occurrences}.\n *\n * @param element the element to remove\n * @param occurrences the number of occurrences of {@code element} to remove\n * @return {@code true} if the removal was possible (including if {@code occurrences} is zero)\n * @throws IllegalArgumentException if {@code occurrences} is negative\n */\npublic boolean removeExactly(@Nullable Object element, int occurrences) {\n    if (occurrences == 0) {\n        return true;\n    }\n    CollectPreconditions.checkPositive(occurrences, \"occurences\");\n    AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n    if (existingCounter == null) {\n        return false;\n    }\n    while (true) {\n        int oldValue = existingCounter.get();\n        if (oldValue < occurrences) {\n            return false;\n        }\n        int newValue = oldValue - occurrences;\n        if (existingCounter.compareAndSet(oldValue, newValue)) {\n            if (newValue == 0) {\n                // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                // another thread has already replaced it with a new counter, which is fine.\n                countMap.remove(element, existingCounter);\n            }\n            return true;\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "setCount",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "count"
+          }
+        ],
+        "javadoc": "/**\n * Adds or removes occurrences of {@code element} such that the {@link #count} of the\n * element becomes {@code count}.\n *\n * @return the count of {@code element} in the multiset before this call\n * @throws IllegalArgumentException if {@code count} is negative\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the count of {@code element} in the multiset before this call",
+            "assertion": "assert methodResultID == receiverObjectID.count(args[0]) + (args[1] >= 0);",
+            "description": "the count of element in the multiset before this call"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code count} is negative",
+            "assertion": "",
+            "description": "if {@code count} is negative"
+          }
+        ],
+        "code": "/**\n * Adds or removes occurrences of {@code element} such that the {@link #count} of the\n * element becomes {@code count}.\n *\n * @return the count of {@code element} in the multiset before this call\n * @throws IllegalArgumentException if {@code count} is negative\n */\n@Override\npublic int setCount(E element, int count) {\n    checkNotNull(element);\n    checkNonnegative(count, \"count\");\n    while (true) {\n        AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n        if (existingCounter == null) {\n            if (count == 0) {\n                return 0;\n            } else {\n                existingCounter = countMap.putIfAbsent(element, new AtomicInteger(count));\n                if (existingCounter == null) {\n                    return 0;\n                }\n                // existingCounter != null: fall through\n            }\n        }\n        while (true) {\n            int oldValue = existingCounter.get();\n            if (oldValue == 0) {\n                if (count == 0) {\n                    return 0;\n                } else {\n                    AtomicInteger newCounter = new AtomicInteger(count);\n                    if ((countMap.putIfAbsent(element, newCounter) == null) || countMap.replace(element, existingCounter, newCounter)) {\n                        return 0;\n                    }\n                }\n                break;\n            } else {\n                if (existingCounter.compareAndSet(oldValue, count)) {\n                    if (count == 0) {\n                        // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                        // another thread has already replaced it with a new counter, which is fine.\n                        countMap.remove(element, existingCounter);\n                    }\n                    return oldValue;\n                }\n            }\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "setCount",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "expectedOldCount"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newCount"
+          }
+        ],
+        "javadoc": "/**\n * Sets the number of occurrences of {@code element} to {@code newCount}, but only if\n * the count is currently {@code expectedOldCount}. If {@code element} does not appear\n * in the multiset exactly {@code expectedOldCount} times, no changes will be made.\n *\n * @return {@code true} if the change was successful. This usually indicates\n *     that the multiset has been modified, but not always: in the case that\n *     {@code expectedOldCount == newCount}, the method will return {@code true} if\n *     the condition was met.\n * @throws IllegalArgumentException if {@code expectedOldCount} or {@code newCount} is negative\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if the change was successful. This usually indicates\n    that the multiset has been modified, but not always: in the case that\n    {@code expectedOldCount == newCount}, the method will return {@code true} if\n    the condition was met.",
+            "assertion": "assert (methodResultID == !receiverObjectID.containsEdge(args[0], args[1])) && (newCount >= 0) && (expectedOldCount == newCount);",
+            "description": "returns true if the change was successful and the count is equal to expectedOldCount."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code expectedOldCount} or {@code newCount} is negative",
+            "assertion": "",
+            "description": "if {@code expectedOldCount} or {@code newCount} is negative"
+          }
+        ],
+        "code": "/**\n * Sets the number of occurrences of {@code element} to {@code newCount}, but only if\n * the count is currently {@code expectedOldCount}. If {@code element} does not appear\n * in the multiset exactly {@code expectedOldCount} times, no changes will be made.\n *\n * @return {@code true} if the change was successful. This usually indicates\n *     that the multiset has been modified, but not always: in the case that\n *     {@code expectedOldCount == newCount}, the method will return {@code true} if\n *     the condition was met.\n * @throws IllegalArgumentException if {@code expectedOldCount} or {@code newCount} is negative\n */\n@Override\npublic boolean setCount(E element, int expectedOldCount, int newCount) {\n    checkNotNull(element);\n    checkNonnegative(expectedOldCount, \"oldCount\");\n    checkNonnegative(newCount, \"newCount\");\n    AtomicInteger existingCounter = Maps.safeGet(countMap, element);\n    if (existingCounter == null) {\n        if (expectedOldCount != 0) {\n            return false;\n        } else if (newCount == 0) {\n            return true;\n        } else {\n            // if our write lost the race, it must have lost to a nonzero value, so we can stop\n            return countMap.putIfAbsent(element, new AtomicInteger(newCount)) == null;\n        }\n    }\n    int oldValue = existingCounter.get();\n    if (oldValue == expectedOldCount) {\n        if (oldValue == 0) {\n            if (newCount == 0) {\n                // Just observed a 0; try to remove the entry to clean up the map\n                countMap.remove(element, existingCounter);\n                return true;\n            } else {\n                AtomicInteger newCounter = new AtomicInteger(newCount);\n                return (countMap.putIfAbsent(element, newCounter) == null) || countMap.replace(element, existingCounter, newCounter);\n            }\n        } else {\n            if (existingCounter.compareAndSet(oldValue, newCount)) {\n                if (newCount == 0) {\n                    // Just CASed to 0; remove the entry to clean up the map. If the removal fails,\n                    // another thread has already replaced it with a new counter, which is fine.\n                    countMap.remove(element, existingCounter);\n                }\n                return true;\n            }\n        }\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "createElementSet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Set",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "// Views\n@Override\nSet<E> createElementSet() {\n    final Set<E> delegate = countMap.keySet();\n    return new ForwardingSet<E>() {\n\n        @Override\n        protected Set<E> delegate() {\n            return delegate;\n        }\n\n        @Override\n        public boolean contains(@Nullable Object object) {\n            return object != null && Collections2.safeContains(delegate, object);\n        }\n\n        @Override\n        public boolean containsAll(Collection<?> collection) {\n            return standardContainsAll(collection);\n        }\n\n        @Override\n        public boolean remove(Object object) {\n            return object != null && Collections2.safeRemove(delegate, object);\n        }\n\n        @Override\n        public boolean removeAll(Collection<?> c) {\n            return standardRemoveAll(c);\n        }\n    };\n}"
+      },
+      {
+        "type": "method",
+        "name": "createEntrySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Set",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Set<Multiset.Entry<E>> createEntrySet() {\n    return new EntrySet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "distinctElements",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nint distinctElements() {\n    return countMap.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "isEmpty",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean isEmpty() {\n    return countMap.isEmpty();\n}"
+      },
+      {
+        "type": "method",
+        "name": "entryIterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nIterator<Entry<E>> entryIterator() {\n    // AbstractIterator makes this fairly clean, but it doesn't support remove(). To support\n    // remove(), we create an AbstractIterator, and then use ForwardingIterator to delegate to it.\n    final Iterator<Entry<E>> readOnlyIterator = new AbstractIterator<Entry<E>>() {\n\n        private Iterator<Map.Entry<E, AtomicInteger>> mapEntries = countMap.entrySet().iterator();\n\n        @Override\n        protected Entry<E> computeNext() {\n            while (true) {\n                if (!mapEntries.hasNext()) {\n                    return endOfData();\n                }\n                Map.Entry<E, AtomicInteger> mapEntry = mapEntries.next();\n                int count = mapEntry.getValue().get();\n                if (count != 0) {\n                    return Multisets.immutableEntry(mapEntry.getKey(), count);\n                }\n            }\n        }\n    };\n    return new ForwardingIterator<Entry<E>>() {\n\n        private Entry<E> last;\n\n        @Override\n        protected Iterator<Entry<E>> delegate() {\n            return readOnlyIterator;\n        }\n\n        @Override\n        public Entry<E> next() {\n            last = super.next();\n            return last;\n        }\n\n        @Override\n        public void remove() {\n            checkRemove(last != null);\n            ConcurrentHashMultiset.this.setCount(last.getElement(), 0);\n            last = null;\n        }\n    };\n}"
+      },
+      {
+        "type": "method",
+        "name": "clear",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic void clear() {\n    countMap.clear();\n}"
+      }
+    ]
+  },
+  {
+    "name": "FieldSettersHolder",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.FieldSettersHolder",
+    "javadoc": null,
+    "code": "// This constant allows the deserialization code to set a final field. This holder class\n// makes sure it is not initialized unless an instance is deserialized.\nprivate static class FieldSettersHolder {\n\n    static final FieldSetter<ConcurrentHashMultiset> COUNT_MAP_FIELD_SETTER = Serialization.getFieldSetter(ConcurrentHashMultiset.class, \"countMap\");\n}",
+    "members": []
+  },
+  {
+    "name": "EntrySet",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.EntrySet",
+    "javadoc": null,
+    "code": "@WeakOuter\nprivate class EntrySet extends AbstractMultiset<E>.EntrySet {\n\n    @Override\n    ConcurrentHashMultiset<E> multiset() {\n        return ConcurrentHashMultiset.this;\n    }\n\n    /*\n     * Note: the superclass toArray() methods assume that size() gives a correct\n     * answer, which ours does not.\n     */\n    @Override\n    public Object[] toArray() {\n        return snapshot().toArray();\n    }\n\n    @Override\n    public <T> T[] toArray(T[] array) {\n        return snapshot().toArray(array);\n    }\n\n    private List<Multiset.Entry<E>> snapshot() {\n        List<Multiset.Entry<E>> list = Lists.newArrayListWithExpectedSize(size());\n        // Not Iterables.addAll(list, this), because that'll forward right back here.\n        Iterators.addAll(list, iterator());\n        return list;\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "multiset",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ConcurrentHashMultiset",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nConcurrentHashMultiset<E> multiset() {\n    return ConcurrentHashMultiset.this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*\n     * Note: the superclass toArray() methods assume that size() gives a correct\n     * answer, which ours does not.\n     */\n@Override\npublic Object[] toArray() {\n    return snapshot().toArray();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "array"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic <T> T[] toArray(T[] array) {\n    return snapshot().toArray(array);\n}"
+      }
+    ]
+  }
+]

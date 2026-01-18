@@ -1,0 +1,823 @@
+[
+  {
+    "name": "PSquarePercentile",
+    "package": "org.apache.commons.math3.stat.descriptive.rank",
+    "qualified_name": "org.apache.commons.math3.stat.descriptive.rank.PSquarePercentile",
+    "javadoc": "/**\n * A {@link StorelessUnivariateStatistic} estimating percentiles using the\n * <ahref=http://www.cs.wustl.edu/~jain/papers/ftp/psqr.pdf>P<SUP>2</SUP></a>\n * Algorithm as explained by <a href=http://www.cse.wustl.edu/~jain/>Raj\n * Jain</a> and Imrich Chlamtac in\n * <a href=http://www.cse.wustl.edu/~jain/papers/psqr.htm>P<SUP>2</SUP> Algorithm\n * for Dynamic Calculation of Quantiles and Histogram Without Storing\n * Observations</a>.\n * <p>\n * Note: This implementation is not synchronized and produces an approximate\n * result. For small samples, where data can be stored and processed in memory,\n * {@link Percentile} should be used.</p>\n */\n",
+    "code": "/**\n * A {@link StorelessUnivariateStatistic} estimating percentiles using the\n * <ahref=http://www.cs.wustl.edu/~jain/papers/ftp/psqr.pdf>P<SUP>2</SUP></a>\n * Algorithm as explained by <a href=http://www.cse.wustl.edu/~jain/>Raj\n * Jain</a> and Imrich Chlamtac in\n * <a href=http://www.cse.wustl.edu/~jain/papers/psqr.htm>P<SUP>2</SUP> Algorithm\n * for Dynamic Calculation of Quantiles and Histogram Without Storing\n * Observations</a>.\n * <p>\n * Note: This implementation is not synchronized and produces an approximate\n * result. For small samples, where data can be stored and processed in memory,\n * {@link Percentile} should be used.</p>\n */\npublic class PSquarePercentile extends AbstractStorelessUnivariateStatistic implements StorelessUnivariateStatistic, Serializable {\n\n    /**\n     * The maximum array size used for psquare algorithm\n     */\n    private static final int PSQUARE_CONSTANT = 5;\n\n    /**\n     * A Default quantile needed in case if user prefers to use default no\n     * argument constructor.\n     */\n    private static final double DEFAULT_QUANTILE_DESIRED = 50d;\n\n    /**\n     * Serial ID\n     */\n    private static final long serialVersionUID = 2283912083175715479L;\n\n    /**\n     * A decimal formatter for print convenience\n     */\n    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat(\"00.00\");\n\n    /**\n     * Initial list of 5 numbers corresponding to 5 markers. <b>NOTE:</b>watch\n     * out for the add methods that are overloaded\n     */\n    private final List<Double> initialFive = new FixedCapacityList<Double>(PSQUARE_CONSTANT);\n\n    /**\n     * The quantile needed should be in range of 0-1. The constructor\n     * {@link #PSquarePercentile(double)} ensures that passed in percentile is\n     * divided by 100.\n     */\n    private final double quantile;\n\n    /**\n     * lastObservation is the last observation value/input sample. No need to\n     * serialize\n     */\n    private transient double lastObservation;\n\n    /**\n     * Markers is the marker collection object which comes to effect\n     * only after 5 values are inserted\n     */\n    private PSquareMarkers markers = null;\n\n    /**\n     * Computed p value (i,e percentile value of data set hither to received)\n     */\n    private double pValue = Double.NaN;\n\n    /**\n     * Counter to count the values/observations accepted into this data set\n     */\n    private long countOfObservations;\n\n    /**\n     * Constructs a PSquarePercentile with the specific percentile value.\n     * @param p the percentile\n     * @throws OutOfRangeException  if p is not greater than 0 and less\n     * than or equal to 100\n     */\n    public PSquarePercentile(final double p) {\n        if (p > 100 || p < 0) {\n            throw new OutOfRangeException(LocalizedFormats.OUT_OF_RANGE, p, 0, 100);\n        }\n        // always set it within (0,1]\n        this.quantile = p / 100d;\n    }\n\n    /**\n     * Default constructor that assumes a {@link #DEFAULT_QUANTILE_DESIRED\n     * default quantile} needed\n     */\n    PSquarePercentile() {\n        this(DEFAULT_QUANTILE_DESIRED);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public int hashCode() {\n        double result = getResult();\n        result = Double.isNaN(result) ? 37 : result;\n        final double markersHash = markers == null ? 0 : markers.hashCode();\n        final double[] toHash = { result, quantile, markersHash, countOfObservations };\n        return Arrays.hashCode(toHash);\n    }\n\n    /**\n     * Returns true iff {@code o} is a {@code PSquarePercentile} returning the\n     * same values as this for {@code getResult()} and {@code getN()} and also\n     * having equal markers\n     *\n     * @param o object to compare\n     * @return true if {@code o} is a {@code PSquarePercentile} with\n     * equivalent internal state\n     */\n    @Override\n    public boolean equals(Object o) {\n        boolean result = false;\n        if (this == o) {\n            result = true;\n        } else if (o != null && o instanceof PSquarePercentile) {\n            PSquarePercentile that = (PSquarePercentile) o;\n            boolean isNotNull = markers != null && that.markers != null;\n            boolean isNull = markers == null && that.markers == null;\n            result = isNotNull ? markers.equals(that.markers) : isNull;\n            // markers as in the case of first\n            // five observations\n            result = result && getN() == that.getN();\n        }\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}The internal state updated due to the new value in this\n     * context is basically of the marker positions and computation of the\n     * approximate quantile.\n     *\n     * @param observation the observation currently being added.\n     */\n    @Override\n    public void increment(final double observation) {\n        // Increment counter\n        countOfObservations++;\n        // Store last observation\n        this.lastObservation = observation;\n        // 0. Use Brute force for <5\n        if (markers == null) {\n            if (initialFive.add(observation)) {\n                Collections.sort(initialFive);\n                pValue = initialFive.get((int) (quantile * (initialFive.size() - 1)));\n                return;\n            }\n            // 1. Initialize once after 5th observation\n            markers = newMarkers(initialFive, quantile);\n        }\n        // 2. process a Data Point and return pValue\n        pValue = markers.processDataPoint(observation);\n    }\n\n    /**\n     * Returns a string containing the last observation, the current estimate\n     * of the quantile and all markers.\n     *\n     * @return string representation of state data\n     */\n    @Override\n    public String toString() {\n        if (markers == null) {\n            return String.format(\"obs=%s pValue=%s\", DECIMAL_FORMAT.format(lastObservation), DECIMAL_FORMAT.format(pValue));\n        } else {\n            return String.format(\"obs=%s markers=%s\", DECIMAL_FORMAT.format(lastObservation), markers.toString());\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public long getN() {\n        return countOfObservations;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public StorelessUnivariateStatistic copy() {\n        // multiply quantile by 100 now as anyway constructor divides it by 100\n        PSquarePercentile copy = new PSquarePercentile(100d * quantile);\n        if (markers != null) {\n            copy.markers = (PSquareMarkers) markers.clone();\n        }\n        copy.countOfObservations = countOfObservations;\n        copy.pValue = pValue;\n        copy.initialFive.clear();\n        copy.initialFive.addAll(initialFive);\n        return copy;\n    }\n\n    /**\n     * Returns the quantile estimated by this statistic in the range [0.0-1.0]\n     *\n     * @return quantile estimated by {@link #getResult()}\n     */\n    public double quantile() {\n        return quantile;\n    }\n\n    /**\n     * {@inheritDoc}. This basically clears all the markers, the\n     * initialFive list and sets countOfObservations to 0.\n     */\n    @Override\n    public void clear() {\n        markers = null;\n        initialFive.clear();\n        countOfObservations = 0L;\n        pValue = Double.NaN;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public double getResult() {\n        if (Double.compare(quantile, 1d) == 0) {\n            pValue = maximum();\n        } else if (Double.compare(quantile, 0d) == 0) {\n            pValue = minimum();\n        }\n        return pValue;\n    }\n\n    /**\n     * @return maximum in the data set added to this statistic\n     */\n    private double maximum() {\n        double val = Double.NaN;\n        if (markers != null) {\n            val = markers.height(PSQUARE_CONSTANT);\n        } else if (!initialFive.isEmpty()) {\n            val = initialFive.get(initialFive.size() - 1);\n        }\n        return val;\n    }\n\n    /**\n     * @return minimum in the data set added to this statistic\n     */\n    private double minimum() {\n        double val = Double.NaN;\n        if (markers != null) {\n            val = markers.height(1);\n        } else if (!initialFive.isEmpty()) {\n            val = initialFive.get(0);\n        }\n        return val;\n    }\n\n    /**\n     * Markers is an encapsulation of the five markers/buckets as indicated in\n     * the original works.\n     */\n    private static class Markers implements PSquareMarkers, Serializable {\n\n        /**\n         * Serial version id\n         */\n        private static final long serialVersionUID = 1L;\n\n        /**\n         * Low marker index\n         */\n        private static final int LOW = 2;\n\n        /**\n         * High marker index\n         */\n        private static final int HIGH = 4;\n\n        /**\n         * Array of 5+1 Markers (The first marker is dummy just so we\n         * can match the rest of indexes [1-5] indicated in the original works\n         * which follows unit based index)\n         */\n        private final Marker[] markerArray;\n\n        /**\n         * Kth cell belonging to [1-5] of the markerArray. No need for\n         * this to be serialized\n         */\n        private transient int k = -1;\n\n        /**\n         * Constructor\n         *\n         * @param theMarkerArray marker array to be used\n         */\n        private Markers(final Marker[] theMarkerArray) {\n            MathUtils.checkNotNull(theMarkerArray);\n            markerArray = theMarkerArray;\n            for (int i = 1; i < PSQUARE_CONSTANT; i++) {\n                markerArray[i].previous(markerArray[i - 1]).next(markerArray[i + 1]).index(i);\n            }\n            markerArray[0].previous(markerArray[0]).next(markerArray[1]).index(0);\n            markerArray[5].previous(markerArray[4]).next(markerArray[5]).index(5);\n        }\n\n        /**\n         * Constructor\n         *\n         * @param initialFive elements required to build Marker\n         * @param p quantile required to be computed\n         */\n        private Markers(final List<Double> initialFive, final double p) {\n            this(createMarkerArray(initialFive, p));\n        }\n\n        /**\n         * Creates a marker array using initial five elements and a quantile\n         *\n         * @param initialFive list of initial five elements\n         * @param p the pth quantile\n         * @return Marker array\n         */\n        private static Marker[] createMarkerArray(final List<Double> initialFive, final double p) {\n            final int countObserved = initialFive == null ? -1 : initialFive.size();\n            if (countObserved < PSQUARE_CONSTANT) {\n                throw new InsufficientDataException(LocalizedFormats.INSUFFICIENT_OBSERVED_POINTS_IN_SAMPLE, countObserved, PSQUARE_CONSTANT);\n            }\n            Collections.sort(initialFive);\n            return new Marker[] { // Null Marker\n            new Marker(), new Marker(initialFive.get(0), 1, 0, 1), new Marker(initialFive.get(1), 1 + 2 * p, p / 2, 2), new Marker(initialFive.get(2), 1 + 4 * p, p, 3), new Marker(initialFive.get(3), 3 + 2 * p, (1 + p) / 2, 4), new Marker(initialFive.get(4), 5, 1, 5) };\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        @Override\n        public int hashCode() {\n            return Arrays.deepHashCode(markerArray);\n        }\n\n        /**\n         * {@inheritDoc}.This equals method basically checks for marker array to\n         * be deep equals.\n         *\n         * @param o is the other object\n         * @return true if the object compares with this object are equivalent\n         */\n        @Override\n        public boolean equals(Object o) {\n            boolean result = false;\n            if (this == o) {\n                result = true;\n            } else if (o != null && o instanceof Markers) {\n                Markers that = (Markers) o;\n                result = Arrays.deepEquals(markerArray, that.markerArray);\n            }\n            return result;\n        }\n\n        /**\n         * Process a data point\n         *\n         * @param inputDataPoint is the data point passed\n         * @return computed percentile\n         */\n        public double processDataPoint(final double inputDataPoint) {\n            // 1. Find cell and update minima and maxima\n            final int kthCell = findCellAndUpdateMinMax(inputDataPoint);\n            // 2. Increment positions\n            incrementPositions(1, kthCell + 1, 5);\n            // 2a. Update desired position with increments\n            updateDesiredPositions();\n            // 3. Adjust heights of m[2-4] if necessary\n            adjustHeightsOfMarkers();\n            // 4. Return percentile\n            return getPercentileValue();\n        }\n\n        /**\n         * Returns the percentile computed thus far.\n         *\n         * @return height of mid point marker\n         */\n        public double getPercentileValue() {\n            return height(3);\n        }\n\n        /**\n         * Finds the cell where the input observation / value fits.\n         *\n         * @param observation the input value to be checked for\n         * @return kth cell (of the markers ranging from 1-5) where observed\n         *         sample fits\n         */\n        private int findCellAndUpdateMinMax(final double observation) {\n            k = -1;\n            if (observation < height(1)) {\n                markerArray[1].markerHeight = observation;\n                k = 1;\n            } else if (observation < height(2)) {\n                k = 1;\n            } else if (observation < height(3)) {\n                k = 2;\n            } else if (observation < height(4)) {\n                k = 3;\n            } else if (observation <= height(5)) {\n                k = 4;\n            } else {\n                markerArray[5].markerHeight = observation;\n                k = 4;\n            }\n            return k;\n        }\n\n        /**\n         * Adjust marker heights by setting quantile estimates to middle markers.\n         */\n        private void adjustHeightsOfMarkers() {\n            for (int i = LOW; i <= HIGH; i++) {\n                estimate(i);\n            }\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        public double estimate(final int index) {\n            if (index < LOW || index > HIGH) {\n                throw new OutOfRangeException(index, LOW, HIGH);\n            }\n            return markerArray[index].estimate();\n        }\n\n        /**\n         * Increment positions by d. Refer to algorithm paper for the\n         * definition of d.\n         *\n         * @param d The increment value for the position\n         * @param startIndex start index of the marker array\n         * @param endIndex end index of the marker array\n         */\n        private void incrementPositions(final int d, final int startIndex, final int endIndex) {\n            for (int i = startIndex; i <= endIndex; i++) {\n                markerArray[i].incrementPosition(d);\n            }\n        }\n\n        /**\n         * Desired positions incremented by bucket width. The bucket width is\n         * basically the desired increments.\n         */\n        private void updateDesiredPositions() {\n            for (int i = 1; i < markerArray.length; i++) {\n                markerArray[i].updateDesiredPosition();\n            }\n        }\n\n        /**\n         * Sets previous and next markers after default read is done.\n         *\n         * @param anInputStream the input stream to be deserialized\n         * @throws ClassNotFoundException thrown when a desired class not found\n         * @throws IOException thrown due to any io errors\n         */\n        private void readObject(ObjectInputStream anInputStream) throws ClassNotFoundException, IOException {\n            // always perform the default de-serialization first\n            anInputStream.defaultReadObject();\n            // Build links\n            for (int i = 1; i < PSQUARE_CONSTANT; i++) {\n                markerArray[i].previous(markerArray[i - 1]).next(markerArray[i + 1]).index(i);\n            }\n            markerArray[0].previous(markerArray[0]).next(markerArray[1]).index(0);\n            markerArray[5].previous(markerArray[4]).next(markerArray[5]).index(5);\n        }\n\n        /**\n         * Return marker height given index\n         *\n         * @param markerIndex index of marker within (1,6)\n         * @return marker height\n         */\n        public double height(final int markerIndex) {\n            if (markerIndex >= markerArray.length || markerIndex <= 0) {\n                throw new OutOfRangeException(markerIndex, 1, markerArray.length);\n            }\n            return markerArray[markerIndex].markerHeight;\n        }\n\n        /**\n         * {@inheritDoc}.Clone Markers\n         *\n         * @return cloned object\n         */\n        @Override\n        public Object clone() {\n            return new Markers(new Marker[] { new Marker(), (Marker) markerArray[1].clone(), (Marker) markerArray[2].clone(), (Marker) markerArray[3].clone(), (Marker) markerArray[4].clone(), (Marker) markerArray[5].clone() });\n        }\n\n        /**\n         * Returns string representation of the Marker array.\n         *\n         * @return Markers as a string\n         */\n        @Override\n        public String toString() {\n            return String.format(\"m1=[%s],m2=[%s],m3=[%s],m4=[%s],m5=[%s]\", markerArray[1].toString(), markerArray[2].toString(), markerArray[3].toString(), markerArray[4].toString(), markerArray[5].toString());\n        }\n    }\n\n    /**\n     * The class modeling the attributes of the marker of the P-square algorithm\n     */\n    private static class Marker implements Serializable, Cloneable {\n\n        /**\n         * Serial Version ID\n         */\n        private static final long serialVersionUID = -3575879478288538431L;\n\n        /**\n         * The marker index which is just a serial number for the marker in the\n         * marker array of 5+1.\n         */\n        private int index;\n\n        /**\n         * The integral marker position. Refer to the variable n in the original\n         * works.\n         */\n        private double intMarkerPosition;\n\n        /**\n         * Desired marker position. Refer to the variable n' in the original\n         * works.\n         */\n        private double desiredMarkerPosition;\n\n        /**\n         * Marker height or the quantile. Refer to the variable q in the\n         * original works.\n         */\n        private double markerHeight;\n\n        /**\n         * Desired marker increment. Refer to the variable dn' in the original\n         * works.\n         */\n        private double desiredMarkerIncrement;\n\n        /**\n         * Next and previous markers for easy linked navigation in loops. this\n         * is not serialized as they can be rebuilt during deserialization.\n         */\n        private transient Marker next;\n\n        /**\n         * The previous marker links\n         */\n        private transient Marker previous;\n\n        /**\n         * Nonlinear interpolator\n         */\n        private final UnivariateInterpolator nonLinear = new NevilleInterpolator();\n\n        /**\n         * Linear interpolator which is not serializable\n         */\n        private transient UnivariateInterpolator linear = new LinearInterpolator();\n\n        /**\n         * Default constructor\n         */\n        private Marker() {\n            this.next = this.previous = this;\n        }\n\n        /**\n         * Constructor of the marker with parameters\n         *\n         * @param heightOfMarker represent the quantile value\n         * @param makerPositionDesired represent the desired marker position\n         * @param markerPositionIncrement represent increments for position\n         * @param markerPositionNumber represent the position number of marker\n         */\n        private Marker(double heightOfMarker, double makerPositionDesired, double markerPositionIncrement, double markerPositionNumber) {\n            this();\n            this.markerHeight = heightOfMarker;\n            this.desiredMarkerPosition = makerPositionDesired;\n            this.desiredMarkerIncrement = markerPositionIncrement;\n            this.intMarkerPosition = markerPositionNumber;\n        }\n\n        /**\n         * Sets the previous marker.\n         *\n         * @param previousMarker the previous marker to the current marker in\n         *            the array of markers\n         * @return this instance\n         */\n        private Marker previous(final Marker previousMarker) {\n            MathUtils.checkNotNull(previousMarker);\n            this.previous = previousMarker;\n            return this;\n        }\n\n        /**\n         * Sets the next marker.\n         *\n         * @param nextMarker the next marker to the current marker in the array\n         *            of markers\n         * @return this instance\n         */\n        private Marker next(final Marker nextMarker) {\n            MathUtils.checkNotNull(nextMarker);\n            this.next = nextMarker;\n            return this;\n        }\n\n        /**\n         * Sets the index of the marker.\n         *\n         * @param indexOfMarker the array index of the marker in marker array\n         * @return this instance\n         */\n        private Marker index(final int indexOfMarker) {\n            this.index = indexOfMarker;\n            return this;\n        }\n\n        /**\n         * Update desired Position with increment.\n         */\n        private void updateDesiredPosition() {\n            desiredMarkerPosition += desiredMarkerIncrement;\n        }\n\n        /**\n         * Increment Position by d.\n         *\n         * @param d a delta value to increment\n         */\n        private void incrementPosition(final int d) {\n            intMarkerPosition += d;\n        }\n\n        /**\n         * Difference between desired and actual position\n         *\n         * @return difference between desired and actual position\n         */\n        private double difference() {\n            return desiredMarkerPosition - intMarkerPosition;\n        }\n\n        /**\n         * Estimate the quantile for the current marker.\n         *\n         * @return estimated quantile\n         */\n        private double estimate() {\n            final double di = difference();\n            final boolean isNextHigher = next.intMarkerPosition - intMarkerPosition > 1;\n            final boolean isPreviousLower = previous.intMarkerPosition - intMarkerPosition < -1;\n            if (di >= 1 && isNextHigher || di <= -1 && isPreviousLower) {\n                final int d = di >= 0 ? 1 : -1;\n                final double[] xval = new double[] { previous.intMarkerPosition, intMarkerPosition, next.intMarkerPosition };\n                final double[] yval = new double[] { previous.markerHeight, markerHeight, next.markerHeight };\n                final double xD = intMarkerPosition + d;\n                UnivariateFunction univariateFunction = nonLinear.interpolate(xval, yval);\n                markerHeight = univariateFunction.value(xD);\n                // If parabolic estimate is bad then turn linear\n                if (isEstimateBad(yval, markerHeight)) {\n                    int delta = xD - xval[1] > 0 ? 1 : -1;\n                    final double[] xBad = new double[] { xval[1], xval[1 + delta] };\n                    final double[] yBad = new double[] { yval[1], yval[1 + delta] };\n                    // since d can be +/- 1\n                    MathArrays.sortInPlace(xBad, yBad);\n                    univariateFunction = linear.interpolate(xBad, yBad);\n                    markerHeight = univariateFunction.value(xD);\n                }\n                incrementPosition(d);\n            }\n            return markerHeight;\n        }\n\n        /**\n         * Check if parabolic/nonlinear estimate is bad by checking if the\n         * ordinate found is beyond the y[0] and y[2].\n         *\n         * @param y the array to get the bounds\n         * @param yD the estimate\n         * @return true if yD is a bad estimate\n         */\n        private boolean isEstimateBad(final double[] y, final double yD) {\n            return yD <= y[0] || yD >= y[2];\n        }\n\n        /**\n         * {@inheritDoc}<i>This equals method checks for marker attributes and\n         * as well checks if navigation pointers (next and previous) are the same\n         * between this and passed in object</i>\n         *\n         * @param o Other object\n         * @return true if this equals passed in other object o\n         */\n        @Override\n        public boolean equals(Object o) {\n            boolean result = false;\n            if (this == o) {\n                result = true;\n            } else if (o != null && o instanceof Marker) {\n                Marker that = (Marker) o;\n                result = Double.compare(markerHeight, that.markerHeight) == 0;\n                result = result && Double.compare(intMarkerPosition, that.intMarkerPosition) == 0;\n                result = result && Double.compare(desiredMarkerPosition, that.desiredMarkerPosition) == 0;\n                result = result && Double.compare(desiredMarkerIncrement, that.desiredMarkerIncrement) == 0;\n                result = result && next.index == that.next.index;\n                result = result && previous.index == that.previous.index;\n            }\n            return result;\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        @Override\n        public int hashCode() {\n            return Arrays.hashCode(new double[] { markerHeight, intMarkerPosition, desiredMarkerIncrement, desiredMarkerPosition, previous.index, next.index });\n        }\n\n        /**\n         * Read Object to deserialize.\n         *\n         * @param anInstream Stream Object data\n         * @throws IOException thrown for IO Errors\n         * @throws ClassNotFoundException thrown for class not being found\n         */\n        private void readObject(ObjectInputStream anInstream) throws ClassNotFoundException, IOException {\n            anInstream.defaultReadObject();\n            previous = next = this;\n            linear = new LinearInterpolator();\n        }\n\n        /**\n         * Clone this instance.\n         *\n         * @return cloned marker\n         */\n        @Override\n        public Object clone() {\n            return new Marker(markerHeight, desiredMarkerPosition, desiredMarkerIncrement, intMarkerPosition);\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        @Override\n        public String toString() {\n            return String.format(\"index=%.0f,n=%.0f,np=%.2f,q=%.2f,dn=%.2f,prev=%d,next=%d\", (double) index, Precision.round(intMarkerPosition, 0), Precision.round(desiredMarkerPosition, 2), Precision.round(markerHeight, 2), Precision.round(desiredMarkerIncrement, 2), previous.index, next.index);\n        }\n    }\n\n    /**\n     * A simple fixed capacity list that has an upper bound to growth.\n     * Once its capacity is reached, {@code add} is a no-op, returning\n     * {@code false}.\n     *\n     * @param <E>\n     */\n    private static class FixedCapacityList<E> extends ArrayList<E> implements Serializable {\n\n        /**\n         * Serialization Version Id\n         */\n        private static final long serialVersionUID = 2283952083075725479L;\n\n        /**\n         * Capacity of the list\n         */\n        private final int capacity;\n\n        /**\n         * This constructor constructs the list with given capacity and as well\n         * as stores the capacity\n         *\n         * @param fixedCapacity the capacity to be fixed for this list\n         */\n        FixedCapacityList(final int fixedCapacity) {\n            super(fixedCapacity);\n            this.capacity = fixedCapacity;\n        }\n\n        /**\n         * {@inheritDoc} In addition it checks if the {@link #size()} returns a\n         * size that is within capacity and if true it adds; otherwise the list\n         * contents are unchanged and {@code false} is returned.\n         *\n         * @return true if addition is successful and false otherwise\n         */\n        @Override\n        public boolean add(final E e) {\n            return size() < capacity ? super.add(e) : false;\n        }\n\n        /**\n         * {@inheritDoc} In addition it checks if the sum of Collection size and\n         * this instance's {@link #size()} returns a value that is within\n         * capacity and if true it adds the collection; otherwise the list\n         * contents are unchanged and {@code false} is returned.\n         *\n         * @return true if addition is successful and false otherwise\n         */\n        @Override\n        public boolean addAll(Collection<? extends E> collection) {\n            boolean isCollectionLess = collection != null && collection.size() + size() <= capacity;\n            return isCollectionLess ? super.addAll(collection) : false;\n        }\n    }\n\n    /**\n     * A creation method to build Markers\n     *\n     * @param initialFive list of initial five elements\n     * @param p the quantile desired\n     * @return an instance of PSquareMarkers\n     */\n    public static PSquareMarkers newMarkers(final List<Double> initialFive, final double p) {\n        return new Markers(initialFive, p);\n    }\n\n    /**\n     * An interface that encapsulates abstractions of the\n     * P-square algorithm markers as is explained in the original works. This\n     * interface is exposed with protected access to help in testability.\n     */\n    protected interface PSquareMarkers extends Cloneable {\n\n        /**\n         * Returns Percentile value computed thus far.\n         *\n         * @return percentile\n         */\n        double getPercentileValue();\n\n        /**\n         * A clone function to clone the current instance. It's created as an\n         * interface method as well for convenience though Cloneable is just a\n         * marker interface.\n         *\n         * @return clone of this instance\n         */\n        Object clone();\n\n        /**\n         * Returns the marker height (or percentile) of a given marker index.\n         *\n         * @param markerIndex is the index of marker in the marker array\n         * @return percentile value of the marker index passed\n         * @throws OutOfRangeException in case the index is not within [1-5]\n         */\n        double height(final int markerIndex);\n\n        /**\n         * Process a data point by moving the marker heights based on estimator.\n         *\n         * @param inputDataPoint is the data point passed\n         * @return computed percentile\n         */\n        double processDataPoint(final double inputDataPoint);\n\n        /**\n         * An Estimate of the percentile value of a given Marker\n         *\n         * @param index the marker's index in the array of markers\n         * @return percentile estimate\n         * @throws OutOfRangeException in case if index is not within [1-5]\n         */\n        double estimate(final int index);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "PSquarePercentile",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a PSquarePercentile with the specific percentile value.\n * @param p the percentile\n * @throws OutOfRangeException  if p is not greater than 0 and less\n * than or equal to 100\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p",
+            "content": "the percentile"
+          },
+          {
+            "tag": "throws",
+            "name": "OutOfRangeException",
+            "content": "if p is not greater than 0 and less\nthan or equal to 100"
+          }
+        ],
+        "code": "/**\n * Constructs a PSquarePercentile with the specific percentile value.\n * @param p the percentile\n * @throws OutOfRangeException  if p is not greater than 0 and less\n * than or equal to 100\n */\npublic PSquarePercentile(final double p) {\n    if (p > 100 || p < 0) {\n        throw new OutOfRangeException(LocalizedFormats.OUT_OF_RANGE, p, 0, 100);\n    }\n    // always set it within (0,1]\n    this.quantile = p / 100d;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "PSquarePercentile",
+        "parameters": [],
+        "javadoc": "/**\n * Default constructor that assumes a {@link #DEFAULT_QUANTILE_DESIRED\n * default quantile} needed\n */\n",
+        "tags": [],
+        "code": "/**\n * Default constructor that assumes a {@link #DEFAULT_QUANTILE_DESIRED\n * default quantile} needed\n */\nPSquarePercentile() {\n    this(DEFAULT_QUANTILE_DESIRED);\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic int hashCode() {\n    double result = getResult();\n    result = Double.isNaN(result) ? 37 : result;\n    final double markersHash = markers == null ? 0 : markers.hashCode();\n    final double[] toHash = { result, quantile, markersHash, countOfObservations };\n    return Arrays.hashCode(toHash);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": "/**\n * Returns true iff {@code o} is a {@code PSquarePercentile} returning the\n * same values as this for {@code getResult()} and {@code getN()} and also\n * having equal markers\n *\n * @param o object to compare\n * @return true if {@code o} is a {@code PSquarePercentile} with\n * equivalent internal state\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "o",
+            "content": "object to compare"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if {@code o} is a {@code PSquarePercentile} with\nequivalent internal state"
+          }
+        ],
+        "code": "/**\n * Returns true iff {@code o} is a {@code PSquarePercentile} returning the\n * same values as this for {@code getResult()} and {@code getN()} and also\n * having equal markers\n *\n * @param o object to compare\n * @return true if {@code o} is a {@code PSquarePercentile} with\n * equivalent internal state\n */\n@Override\npublic boolean equals(Object o) {\n    boolean result = false;\n    if (this == o) {\n        result = true;\n    } else if (o != null && o instanceof PSquarePercentile) {\n        PSquarePercentile that = (PSquarePercentile) o;\n        boolean isNotNull = markers != null && that.markers != null;\n        boolean isNull = markers == null && that.markers == null;\n        result = isNotNull ? markers.equals(that.markers) : isNull;\n        // markers as in the case of first\n        // five observations\n        result = result && getN() == that.getN();\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "increment",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "observation"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}The internal state updated due to the new value in this\n * context is basically of the marker positions and computation of the\n * approximate quantile.\n *\n * @param observation the observation currently being added.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "observation",
+            "content": "the observation currently being added."
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}The internal state updated due to the new value in this\n * context is basically of the marker positions and computation of the\n * approximate quantile.\n *\n * @param observation the observation currently being added.\n */\n@Override\npublic void increment(final double observation) {\n    // Increment counter\n    countOfObservations++;\n    // Store last observation\n    this.lastObservation = observation;\n    // 0. Use Brute force for <5\n    if (markers == null) {\n        if (initialFive.add(observation)) {\n            Collections.sort(initialFive);\n            pValue = initialFive.get((int) (quantile * (initialFive.size() - 1)));\n            return;\n        }\n        // 1. Initialize once after 5th observation\n        markers = newMarkers(initialFive, quantile);\n    }\n    // 2. process a Data Point and return pValue\n    pValue = markers.processDataPoint(observation);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a string containing the last observation, the current estimate\n * of the quantile and all markers.\n *\n * @return string representation of state data\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "string representation of state data"
+          }
+        ],
+        "code": "/**\n * Returns a string containing the last observation, the current estimate\n * of the quantile and all markers.\n *\n * @return string representation of state data\n */\n@Override\npublic String toString() {\n    if (markers == null) {\n        return String.format(\"obs=%s pValue=%s\", DECIMAL_FORMAT.format(lastObservation), DECIMAL_FORMAT.format(pValue));\n    } else {\n        return String.format(\"obs=%s markers=%s\", DECIMAL_FORMAT.format(lastObservation), markers.toString());\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "getN",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic long getN() {\n    return countOfObservations;\n}"
+      },
+      {
+        "type": "method",
+        "name": "copy",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StorelessUnivariateStatistic",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic StorelessUnivariateStatistic copy() {\n    // multiply quantile by 100 now as anyway constructor divides it by 100\n    PSquarePercentile copy = new PSquarePercentile(100d * quantile);\n    if (markers != null) {\n        copy.markers = (PSquareMarkers) markers.clone();\n    }\n    copy.countOfObservations = countOfObservations;\n    copy.pValue = pValue;\n    copy.initialFive.clear();\n    copy.initialFive.addAll(initialFive);\n    return copy;\n}"
+      },
+      {
+        "type": "method",
+        "name": "quantile",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the quantile estimated by this statistic in the range [0.0-1.0]\n *\n * @return quantile estimated by {@link #getResult()}\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "quantile estimated by {@link #getResult()}"
+          }
+        ],
+        "code": "/**\n * Returns the quantile estimated by this statistic in the range [0.0-1.0]\n *\n * @return quantile estimated by {@link #getResult()}\n */\npublic double quantile() {\n    return quantile;\n}"
+      },
+      {
+        "type": "method",
+        "name": "clear",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}. This basically clears all the markers, the\n * initialFive list and sets countOfObservations to 0.\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}. This basically clears all the markers, the\n * initialFive list and sets countOfObservations to 0.\n */\n@Override\npublic void clear() {\n    markers = null;\n    initialFive.clear();\n    countOfObservations = 0L;\n    pValue = Double.NaN;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getResult",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic double getResult() {\n    if (Double.compare(quantile, 1d) == 0) {\n        pValue = maximum();\n    } else if (Double.compare(quantile, 0d) == 0) {\n        pValue = minimum();\n    }\n    return pValue;\n}"
+      },
+      {
+        "type": "method",
+        "name": "newMarkers",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "PSquareMarkers",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "List",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialFive"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          }
+        ],
+        "javadoc": "/**\n * A creation method to build Markers\n *\n * @param initialFive list of initial five elements\n * @param p the quantile desired\n * @return an instance of PSquareMarkers\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "initialFive",
+            "content": "list of initial five elements"
+          },
+          {
+            "tag": "param",
+            "name": "p",
+            "content": "the quantile desired"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "an instance of PSquareMarkers"
+          }
+        ],
+        "code": "/**\n * A creation method to build Markers\n *\n * @param initialFive list of initial five elements\n * @param p the quantile desired\n * @return an instance of PSquareMarkers\n */\npublic static PSquareMarkers newMarkers(final List<Double> initialFive, final double p) {\n    return new Markers(initialFive, p);\n}"
+      }
+    ]
+  },
+  {
+    "name": "Markers",
+    "package": "org.apache.commons.math3.stat.descriptive.rank",
+    "qualified_name": "org.apache.commons.math3.stat.descriptive.rank.Markers",
+    "javadoc": "/**\n * Markers is an encapsulation of the five markers/buckets as indicated in\n * the original works.\n */\n",
+    "code": "/**\n * Markers is an encapsulation of the five markers/buckets as indicated in\n * the original works.\n */\nprivate static class Markers implements PSquareMarkers, Serializable {\n\n    /**\n     * Serial version id\n     */\n    private static final long serialVersionUID = 1L;\n\n    /**\n     * Low marker index\n     */\n    private static final int LOW = 2;\n\n    /**\n     * High marker index\n     */\n    private static final int HIGH = 4;\n\n    /**\n     * Array of 5+1 Markers (The first marker is dummy just so we\n     * can match the rest of indexes [1-5] indicated in the original works\n     * which follows unit based index)\n     */\n    private final Marker[] markerArray;\n\n    /**\n     * Kth cell belonging to [1-5] of the markerArray. No need for\n     * this to be serialized\n     */\n    private transient int k = -1;\n\n    /**\n     * Constructor\n     *\n     * @param theMarkerArray marker array to be used\n     */\n    private Markers(final Marker[] theMarkerArray) {\n        MathUtils.checkNotNull(theMarkerArray);\n        markerArray = theMarkerArray;\n        for (int i = 1; i < PSQUARE_CONSTANT; i++) {\n            markerArray[i].previous(markerArray[i - 1]).next(markerArray[i + 1]).index(i);\n        }\n        markerArray[0].previous(markerArray[0]).next(markerArray[1]).index(0);\n        markerArray[5].previous(markerArray[4]).next(markerArray[5]).index(5);\n    }\n\n    /**\n     * Constructor\n     *\n     * @param initialFive elements required to build Marker\n     * @param p quantile required to be computed\n     */\n    private Markers(final List<Double> initialFive, final double p) {\n        this(createMarkerArray(initialFive, p));\n    }\n\n    /**\n     * Creates a marker array using initial five elements and a quantile\n     *\n     * @param initialFive list of initial five elements\n     * @param p the pth quantile\n     * @return Marker array\n     */\n    private static Marker[] createMarkerArray(final List<Double> initialFive, final double p) {\n        final int countObserved = initialFive == null ? -1 : initialFive.size();\n        if (countObserved < PSQUARE_CONSTANT) {\n            throw new InsufficientDataException(LocalizedFormats.INSUFFICIENT_OBSERVED_POINTS_IN_SAMPLE, countObserved, PSQUARE_CONSTANT);\n        }\n        Collections.sort(initialFive);\n        return new Marker[] { // Null Marker\n        new Marker(), new Marker(initialFive.get(0), 1, 0, 1), new Marker(initialFive.get(1), 1 + 2 * p, p / 2, 2), new Marker(initialFive.get(2), 1 + 4 * p, p, 3), new Marker(initialFive.get(3), 3 + 2 * p, (1 + p) / 2, 4), new Marker(initialFive.get(4), 5, 1, 5) };\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public int hashCode() {\n        return Arrays.deepHashCode(markerArray);\n    }\n\n    /**\n     * {@inheritDoc}.This equals method basically checks for marker array to\n     * be deep equals.\n     *\n     * @param o is the other object\n     * @return true if the object compares with this object are equivalent\n     */\n    @Override\n    public boolean equals(Object o) {\n        boolean result = false;\n        if (this == o) {\n            result = true;\n        } else if (o != null && o instanceof Markers) {\n            Markers that = (Markers) o;\n            result = Arrays.deepEquals(markerArray, that.markerArray);\n        }\n        return result;\n    }\n\n    /**\n     * Process a data point\n     *\n     * @param inputDataPoint is the data point passed\n     * @return computed percentile\n     */\n    public double processDataPoint(final double inputDataPoint) {\n        // 1. Find cell and update minima and maxima\n        final int kthCell = findCellAndUpdateMinMax(inputDataPoint);\n        // 2. Increment positions\n        incrementPositions(1, kthCell + 1, 5);\n        // 2a. Update desired position with increments\n        updateDesiredPositions();\n        // 3. Adjust heights of m[2-4] if necessary\n        adjustHeightsOfMarkers();\n        // 4. Return percentile\n        return getPercentileValue();\n    }\n\n    /**\n     * Returns the percentile computed thus far.\n     *\n     * @return height of mid point marker\n     */\n    public double getPercentileValue() {\n        return height(3);\n    }\n\n    /**\n     * Finds the cell where the input observation / value fits.\n     *\n     * @param observation the input value to be checked for\n     * @return kth cell (of the markers ranging from 1-5) where observed\n     *         sample fits\n     */\n    private int findCellAndUpdateMinMax(final double observation) {\n        k = -1;\n        if (observation < height(1)) {\n            markerArray[1].markerHeight = observation;\n            k = 1;\n        } else if (observation < height(2)) {\n            k = 1;\n        } else if (observation < height(3)) {\n            k = 2;\n        } else if (observation < height(4)) {\n            k = 3;\n        } else if (observation <= height(5)) {\n            k = 4;\n        } else {\n            markerArray[5].markerHeight = observation;\n            k = 4;\n        }\n        return k;\n    }\n\n    /**\n     * Adjust marker heights by setting quantile estimates to middle markers.\n     */\n    private void adjustHeightsOfMarkers() {\n        for (int i = LOW; i <= HIGH; i++) {\n            estimate(i);\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public double estimate(final int index) {\n        if (index < LOW || index > HIGH) {\n            throw new OutOfRangeException(index, LOW, HIGH);\n        }\n        return markerArray[index].estimate();\n    }\n\n    /**\n     * Increment positions by d. Refer to algorithm paper for the\n     * definition of d.\n     *\n     * @param d The increment value for the position\n     * @param startIndex start index of the marker array\n     * @param endIndex end index of the marker array\n     */\n    private void incrementPositions(final int d, final int startIndex, final int endIndex) {\n        for (int i = startIndex; i <= endIndex; i++) {\n            markerArray[i].incrementPosition(d);\n        }\n    }\n\n    /**\n     * Desired positions incremented by bucket width. The bucket width is\n     * basically the desired increments.\n     */\n    private void updateDesiredPositions() {\n        for (int i = 1; i < markerArray.length; i++) {\n            markerArray[i].updateDesiredPosition();\n        }\n    }\n\n    /**\n     * Sets previous and next markers after default read is done.\n     *\n     * @param anInputStream the input stream to be deserialized\n     * @throws ClassNotFoundException thrown when a desired class not found\n     * @throws IOException thrown due to any io errors\n     */\n    private void readObject(ObjectInputStream anInputStream) throws ClassNotFoundException, IOException {\n        // always perform the default de-serialization first\n        anInputStream.defaultReadObject();\n        // Build links\n        for (int i = 1; i < PSQUARE_CONSTANT; i++) {\n            markerArray[i].previous(markerArray[i - 1]).next(markerArray[i + 1]).index(i);\n        }\n        markerArray[0].previous(markerArray[0]).next(markerArray[1]).index(0);\n        markerArray[5].previous(markerArray[4]).next(markerArray[5]).index(5);\n    }\n\n    /**\n     * Return marker height given index\n     *\n     * @param markerIndex index of marker within (1,6)\n     * @return marker height\n     */\n    public double height(final int markerIndex) {\n        if (markerIndex >= markerArray.length || markerIndex <= 0) {\n            throw new OutOfRangeException(markerIndex, 1, markerArray.length);\n        }\n        return markerArray[markerIndex].markerHeight;\n    }\n\n    /**\n     * {@inheritDoc}.Clone Markers\n     *\n     * @return cloned object\n     */\n    @Override\n    public Object clone() {\n        return new Markers(new Marker[] { new Marker(), (Marker) markerArray[1].clone(), (Marker) markerArray[2].clone(), (Marker) markerArray[3].clone(), (Marker) markerArray[4].clone(), (Marker) markerArray[5].clone() });\n    }\n\n    /**\n     * Returns string representation of the Marker array.\n     *\n     * @return Markers as a string\n     */\n    @Override\n    public String toString() {\n        return String.format(\"m1=[%s],m2=[%s],m3=[%s],m4=[%s],m5=[%s]\", markerArray[1].toString(), markerArray[2].toString(), markerArray[3].toString(), markerArray[4].toString(), markerArray[5].toString());\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic int hashCode() {\n    return Arrays.deepHashCode(markerArray);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}.This equals method basically checks for marker array to\n * be deep equals.\n *\n * @param o is the other object\n * @return true if the object compares with this object are equivalent\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "o",
+            "content": "is the other object"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if the object compares with this object are equivalent"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}.This equals method basically checks for marker array to\n * be deep equals.\n *\n * @param o is the other object\n * @return true if the object compares with this object are equivalent\n */\n@Override\npublic boolean equals(Object o) {\n    boolean result = false;\n    if (this == o) {\n        result = true;\n    } else if (o != null && o instanceof Markers) {\n        Markers that = (Markers) o;\n        result = Arrays.deepEquals(markerArray, that.markerArray);\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "processDataPoint",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "inputDataPoint"
+          }
+        ],
+        "javadoc": "/**\n * Process a data point\n *\n * @param inputDataPoint is the data point passed\n * @return computed percentile\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "inputDataPoint",
+            "content": "is the data point passed"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "computed percentile"
+          }
+        ],
+        "code": "/**\n * Process a data point\n *\n * @param inputDataPoint is the data point passed\n * @return computed percentile\n */\npublic double processDataPoint(final double inputDataPoint) {\n    // 1. Find cell and update minima and maxima\n    final int kthCell = findCellAndUpdateMinMax(inputDataPoint);\n    // 2. Increment positions\n    incrementPositions(1, kthCell + 1, 5);\n    // 2a. Update desired position with increments\n    updateDesiredPositions();\n    // 3. Adjust heights of m[2-4] if necessary\n    adjustHeightsOfMarkers();\n    // 4. Return percentile\n    return getPercentileValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPercentileValue",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the percentile computed thus far.\n *\n * @return height of mid point marker\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "height of mid point marker"
+          }
+        ],
+        "code": "/**\n * Returns the percentile computed thus far.\n *\n * @return height of mid point marker\n */\npublic double getPercentileValue() {\n    return height(3);\n}"
+      },
+      {
+        "type": "method",
+        "name": "estimate",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic double estimate(final int index) {\n    if (index < LOW || index > HIGH) {\n        throw new OutOfRangeException(index, LOW, HIGH);\n    }\n    return markerArray[index].estimate();\n}"
+      },
+      {
+        "type": "method",
+        "name": "height",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "markerIndex"
+          }
+        ],
+        "javadoc": "/**\n * Return marker height given index\n *\n * @param markerIndex index of marker within (1,6)\n * @return marker height\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "markerIndex",
+            "content": "index of marker within (1,6)"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "marker height"
+          }
+        ],
+        "code": "/**\n * Return marker height given index\n *\n * @param markerIndex index of marker within (1,6)\n * @return marker height\n */\npublic double height(final int markerIndex) {\n    if (markerIndex >= markerArray.length || markerIndex <= 0) {\n        throw new OutOfRangeException(markerIndex, 1, markerArray.length);\n    }\n    return markerArray[markerIndex].markerHeight;\n}"
+      },
+      {
+        "type": "method",
+        "name": "clone",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}.Clone Markers\n *\n * @return cloned object\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "cloned object"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}.Clone Markers\n *\n * @return cloned object\n */\n@Override\npublic Object clone() {\n    return new Markers(new Marker[] { new Marker(), (Marker) markerArray[1].clone(), (Marker) markerArray[2].clone(), (Marker) markerArray[3].clone(), (Marker) markerArray[4].clone(), (Marker) markerArray[5].clone() });\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns string representation of the Marker array.\n *\n * @return Markers as a string\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Markers as a string"
+          }
+        ],
+        "code": "/**\n * Returns string representation of the Marker array.\n *\n * @return Markers as a string\n */\n@Override\npublic String toString() {\n    return String.format(\"m1=[%s],m2=[%s],m3=[%s],m4=[%s],m5=[%s]\", markerArray[1].toString(), markerArray[2].toString(), markerArray[3].toString(), markerArray[4].toString(), markerArray[5].toString());\n}"
+      }
+    ]
+  },
+  {
+    "name": "Marker",
+    "package": "org.apache.commons.math3.stat.descriptive.rank",
+    "qualified_name": "org.apache.commons.math3.stat.descriptive.rank.Marker",
+    "javadoc": "/**\n * The class modeling the attributes of the marker of the P-square algorithm\n */\n",
+    "code": "/**\n * The class modeling the attributes of the marker of the P-square algorithm\n */\nprivate static class Marker implements Serializable, Cloneable {\n\n    /**\n     * Serial Version ID\n     */\n    private static final long serialVersionUID = -3575879478288538431L;\n\n    /**\n     * The marker index which is just a serial number for the marker in the\n     * marker array of 5+1.\n     */\n    private int index;\n\n    /**\n     * The integral marker position. Refer to the variable n in the original\n     * works.\n     */\n    private double intMarkerPosition;\n\n    /**\n     * Desired marker position. Refer to the variable n' in the original\n     * works.\n     */\n    private double desiredMarkerPosition;\n\n    /**\n     * Marker height or the quantile. Refer to the variable q in the\n     * original works.\n     */\n    private double markerHeight;\n\n    /**\n     * Desired marker increment. Refer to the variable dn' in the original\n     * works.\n     */\n    private double desiredMarkerIncrement;\n\n    /**\n     * Next and previous markers for easy linked navigation in loops. this\n     * is not serialized as they can be rebuilt during deserialization.\n     */\n    private transient Marker next;\n\n    /**\n     * The previous marker links\n     */\n    private transient Marker previous;\n\n    /**\n     * Nonlinear interpolator\n     */\n    private final UnivariateInterpolator nonLinear = new NevilleInterpolator();\n\n    /**\n     * Linear interpolator which is not serializable\n     */\n    private transient UnivariateInterpolator linear = new LinearInterpolator();\n\n    /**\n     * Default constructor\n     */\n    private Marker() {\n        this.next = this.previous = this;\n    }\n\n    /**\n     * Constructor of the marker with parameters\n     *\n     * @param heightOfMarker represent the quantile value\n     * @param makerPositionDesired represent the desired marker position\n     * @param markerPositionIncrement represent increments for position\n     * @param markerPositionNumber represent the position number of marker\n     */\n    private Marker(double heightOfMarker, double makerPositionDesired, double markerPositionIncrement, double markerPositionNumber) {\n        this();\n        this.markerHeight = heightOfMarker;\n        this.desiredMarkerPosition = makerPositionDesired;\n        this.desiredMarkerIncrement = markerPositionIncrement;\n        this.intMarkerPosition = markerPositionNumber;\n    }\n\n    /**\n     * Sets the previous marker.\n     *\n     * @param previousMarker the previous marker to the current marker in\n     *            the array of markers\n     * @return this instance\n     */\n    private Marker previous(final Marker previousMarker) {\n        MathUtils.checkNotNull(previousMarker);\n        this.previous = previousMarker;\n        return this;\n    }\n\n    /**\n     * Sets the next marker.\n     *\n     * @param nextMarker the next marker to the current marker in the array\n     *            of markers\n     * @return this instance\n     */\n    private Marker next(final Marker nextMarker) {\n        MathUtils.checkNotNull(nextMarker);\n        this.next = nextMarker;\n        return this;\n    }\n\n    /**\n     * Sets the index of the marker.\n     *\n     * @param indexOfMarker the array index of the marker in marker array\n     * @return this instance\n     */\n    private Marker index(final int indexOfMarker) {\n        this.index = indexOfMarker;\n        return this;\n    }\n\n    /**\n     * Update desired Position with increment.\n     */\n    private void updateDesiredPosition() {\n        desiredMarkerPosition += desiredMarkerIncrement;\n    }\n\n    /**\n     * Increment Position by d.\n     *\n     * @param d a delta value to increment\n     */\n    private void incrementPosition(final int d) {\n        intMarkerPosition += d;\n    }\n\n    /**\n     * Difference between desired and actual position\n     *\n     * @return difference between desired and actual position\n     */\n    private double difference() {\n        return desiredMarkerPosition - intMarkerPosition;\n    }\n\n    /**\n     * Estimate the quantile for the current marker.\n     *\n     * @return estimated quantile\n     */\n    private double estimate() {\n        final double di = difference();\n        final boolean isNextHigher = next.intMarkerPosition - intMarkerPosition > 1;\n        final boolean isPreviousLower = previous.intMarkerPosition - intMarkerPosition < -1;\n        if (di >= 1 && isNextHigher || di <= -1 && isPreviousLower) {\n            final int d = di >= 0 ? 1 : -1;\n            final double[] xval = new double[] { previous.intMarkerPosition, intMarkerPosition, next.intMarkerPosition };\n            final double[] yval = new double[] { previous.markerHeight, markerHeight, next.markerHeight };\n            final double xD = intMarkerPosition + d;\n            UnivariateFunction univariateFunction = nonLinear.interpolate(xval, yval);\n            markerHeight = univariateFunction.value(xD);\n            // If parabolic estimate is bad then turn linear\n            if (isEstimateBad(yval, markerHeight)) {\n                int delta = xD - xval[1] > 0 ? 1 : -1;\n                final double[] xBad = new double[] { xval[1], xval[1 + delta] };\n                final double[] yBad = new double[] { yval[1], yval[1 + delta] };\n                // since d can be +/- 1\n                MathArrays.sortInPlace(xBad, yBad);\n                univariateFunction = linear.interpolate(xBad, yBad);\n                markerHeight = univariateFunction.value(xD);\n            }\n            incrementPosition(d);\n        }\n        return markerHeight;\n    }\n\n    /**\n     * Check if parabolic/nonlinear estimate is bad by checking if the\n     * ordinate found is beyond the y[0] and y[2].\n     *\n     * @param y the array to get the bounds\n     * @param yD the estimate\n     * @return true if yD is a bad estimate\n     */\n    private boolean isEstimateBad(final double[] y, final double yD) {\n        return yD <= y[0] || yD >= y[2];\n    }\n\n    /**\n     * {@inheritDoc}<i>This equals method checks for marker attributes and\n     * as well checks if navigation pointers (next and previous) are the same\n     * between this and passed in object</i>\n     *\n     * @param o Other object\n     * @return true if this equals passed in other object o\n     */\n    @Override\n    public boolean equals(Object o) {\n        boolean result = false;\n        if (this == o) {\n            result = true;\n        } else if (o != null && o instanceof Marker) {\n            Marker that = (Marker) o;\n            result = Double.compare(markerHeight, that.markerHeight) == 0;\n            result = result && Double.compare(intMarkerPosition, that.intMarkerPosition) == 0;\n            result = result && Double.compare(desiredMarkerPosition, that.desiredMarkerPosition) == 0;\n            result = result && Double.compare(desiredMarkerIncrement, that.desiredMarkerIncrement) == 0;\n            result = result && next.index == that.next.index;\n            result = result && previous.index == that.previous.index;\n        }\n        return result;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public int hashCode() {\n        return Arrays.hashCode(new double[] { markerHeight, intMarkerPosition, desiredMarkerIncrement, desiredMarkerPosition, previous.index, next.index });\n    }\n\n    /**\n     * Read Object to deserialize.\n     *\n     * @param anInstream Stream Object data\n     * @throws IOException thrown for IO Errors\n     * @throws ClassNotFoundException thrown for class not being found\n     */\n    private void readObject(ObjectInputStream anInstream) throws ClassNotFoundException, IOException {\n        anInstream.defaultReadObject();\n        previous = next = this;\n        linear = new LinearInterpolator();\n    }\n\n    /**\n     * Clone this instance.\n     *\n     * @return cloned marker\n     */\n    @Override\n    public Object clone() {\n        return new Marker(markerHeight, desiredMarkerPosition, desiredMarkerIncrement, intMarkerPosition);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public String toString() {\n        return String.format(\"index=%.0f,n=%.0f,np=%.2f,q=%.2f,dn=%.2f,prev=%d,next=%d\", (double) index, Precision.round(intMarkerPosition, 0), Precision.round(desiredMarkerPosition, 2), Precision.round(markerHeight, 2), Precision.round(desiredMarkerIncrement, 2), previous.index, next.index);\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}<i>This equals method checks for marker attributes and\n * as well checks if navigation pointers (next and previous) are the same\n * between this and passed in object</i>\n *\n * @param o Other object\n * @return true if this equals passed in other object o\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "o",
+            "content": "Other object"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if this equals passed in other object o"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}<i>This equals method checks for marker attributes and\n * as well checks if navigation pointers (next and previous) are the same\n * between this and passed in object</i>\n *\n * @param o Other object\n * @return true if this equals passed in other object o\n */\n@Override\npublic boolean equals(Object o) {\n    boolean result = false;\n    if (this == o) {\n        result = true;\n    } else if (o != null && o instanceof Marker) {\n        Marker that = (Marker) o;\n        result = Double.compare(markerHeight, that.markerHeight) == 0;\n        result = result && Double.compare(intMarkerPosition, that.intMarkerPosition) == 0;\n        result = result && Double.compare(desiredMarkerPosition, that.desiredMarkerPosition) == 0;\n        result = result && Double.compare(desiredMarkerIncrement, that.desiredMarkerIncrement) == 0;\n        result = result && next.index == that.next.index;\n        result = result && previous.index == that.previous.index;\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic int hashCode() {\n    return Arrays.hashCode(new double[] { markerHeight, intMarkerPosition, desiredMarkerIncrement, desiredMarkerPosition, previous.index, next.index });\n}"
+      },
+      {
+        "type": "method",
+        "name": "clone",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Clone this instance.\n *\n * @return cloned marker\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "cloned marker"
+          }
+        ],
+        "code": "/**\n * Clone this instance.\n *\n * @return cloned marker\n */\n@Override\npublic Object clone() {\n    return new Marker(markerHeight, desiredMarkerPosition, desiredMarkerIncrement, intMarkerPosition);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic String toString() {\n    return String.format(\"index=%.0f,n=%.0f,np=%.2f,q=%.2f,dn=%.2f,prev=%d,next=%d\", (double) index, Precision.round(intMarkerPosition, 0), Precision.round(desiredMarkerPosition, 2), Precision.round(markerHeight, 2), Precision.round(desiredMarkerIncrement, 2), previous.index, next.index);\n}"
+      }
+    ]
+  },
+  {
+    "name": "FixedCapacityList",
+    "package": "org.apache.commons.math3.stat.descriptive.rank",
+    "qualified_name": "org.apache.commons.math3.stat.descriptive.rank.FixedCapacityList",
+    "javadoc": "/**\n * A simple fixed capacity list that has an upper bound to growth.\n * Once its capacity is reached, {@code add} is a no-op, returning\n * {@code false}.\n *\n * @param <E>\n */\n",
+    "code": "/**\n * A simple fixed capacity list that has an upper bound to growth.\n * Once its capacity is reached, {@code add} is a no-op, returning\n * {@code false}.\n *\n * @param <E>\n */\nprivate static class FixedCapacityList<E> extends ArrayList<E> implements Serializable {\n\n    /**\n     * Serialization Version Id\n     */\n    private static final long serialVersionUID = 2283952083075725479L;\n\n    /**\n     * Capacity of the list\n     */\n    private final int capacity;\n\n    /**\n     * This constructor constructs the list with given capacity and as well\n     * as stores the capacity\n     *\n     * @param fixedCapacity the capacity to be fixed for this list\n     */\n    FixedCapacityList(final int fixedCapacity) {\n        super(fixedCapacity);\n        this.capacity = fixedCapacity;\n    }\n\n    /**\n     * {@inheritDoc} In addition it checks if the {@link #size()} returns a\n     * size that is within capacity and if true it adds; otherwise the list\n     * contents are unchanged and {@code false} is returned.\n     *\n     * @return true if addition is successful and false otherwise\n     */\n    @Override\n    public boolean add(final E e) {\n        return size() < capacity ? super.add(e) : false;\n    }\n\n    /**\n     * {@inheritDoc} In addition it checks if the sum of Collection size and\n     * this instance's {@link #size()} returns a value that is within\n     * capacity and if true it adds the collection; otherwise the list\n     * contents are unchanged and {@code false} is returned.\n     *\n     * @return true if addition is successful and false otherwise\n     */\n    @Override\n    public boolean addAll(Collection<? extends E> collection) {\n        boolean isCollectionLess = collection != null && collection.size() + size() <= capacity;\n        return isCollectionLess ? super.addAll(collection) : false;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "FixedCapacityList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fixedCapacity"
+          }
+        ],
+        "javadoc": "/**\n * This constructor constructs the list with given capacity and as well\n * as stores the capacity\n *\n * @param fixedCapacity the capacity to be fixed for this list\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "fixedCapacity",
+            "content": "the capacity to be fixed for this list"
+          }
+        ],
+        "code": "/**\n * This constructor constructs the list with given capacity and as well\n * as stores the capacity\n *\n * @param fixedCapacity the capacity to be fixed for this list\n */\nFixedCapacityList(final int fixedCapacity) {\n    super(fixedCapacity);\n    this.capacity = fixedCapacity;\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc} In addition it checks if the {@link #size()} returns a\n * size that is within capacity and if true it adds; otherwise the list\n * contents are unchanged and {@code false} is returned.\n *\n * @return true if addition is successful and false otherwise\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if addition is successful and false otherwise"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc} In addition it checks if the {@link #size()} returns a\n * size that is within capacity and if true it adds; otherwise the list\n * contents are unchanged and {@code false} is returned.\n *\n * @return true if addition is successful and false otherwise\n */\n@Override\npublic boolean add(final E e) {\n    return size() < capacity ? super.add(e) : false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "addAll",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "collection"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc} In addition it checks if the sum of Collection size and\n * this instance's {@link #size()} returns a value that is within\n * capacity and if true it adds the collection; otherwise the list\n * contents are unchanged and {@code false} is returned.\n *\n * @return true if addition is successful and false otherwise\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if addition is successful and false otherwise"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc} In addition it checks if the sum of Collection size and\n * this instance's {@link #size()} returns a value that is within\n * capacity and if true it adds the collection; otherwise the list\n * contents are unchanged and {@code false} is returned.\n *\n * @return true if addition is successful and false otherwise\n */\n@Override\npublic boolean addAll(Collection<? extends E> collection) {\n    boolean isCollectionLess = collection != null && collection.size() + size() <= capacity;\n    return isCollectionLess ? super.addAll(collection) : false;\n}"
+      }
+    ]
+  },
+  {
+    "name": "PSquareMarkers",
+    "package": "org.apache.commons.math3.stat.descriptive.rank",
+    "qualified_name": "org.apache.commons.math3.stat.descriptive.rank.PSquareMarkers",
+    "javadoc": "/**\n * An interface that encapsulates abstractions of the\n * P-square algorithm markers as is explained in the original works. This\n * interface is exposed with protected access to help in testability.\n */\n",
+    "code": "/**\n * An interface that encapsulates abstractions of the\n * P-square algorithm markers as is explained in the original works. This\n * interface is exposed with protected access to help in testability.\n */\nprotected interface PSquareMarkers extends Cloneable {\n\n    /**\n     * Returns Percentile value computed thus far.\n     *\n     * @return percentile\n     */\n    double getPercentileValue();\n\n    /**\n     * A clone function to clone the current instance. It's created as an\n     * interface method as well for convenience though Cloneable is just a\n     * marker interface.\n     *\n     * @return clone of this instance\n     */\n    Object clone();\n\n    /**\n     * Returns the marker height (or percentile) of a given marker index.\n     *\n     * @param markerIndex is the index of marker in the marker array\n     * @return percentile value of the marker index passed\n     * @throws OutOfRangeException in case the index is not within [1-5]\n     */\n    double height(final int markerIndex);\n\n    /**\n     * Process a data point by moving the marker heights based on estimator.\n     *\n     * @param inputDataPoint is the data point passed\n     * @return computed percentile\n     */\n    double processDataPoint(final double inputDataPoint);\n\n    /**\n     * An Estimate of the percentile value of a given Marker\n     *\n     * @param index the marker's index in the array of markers\n     * @return percentile estimate\n     * @throws OutOfRangeException in case if index is not within [1-5]\n     */\n    double estimate(final int index);\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "getPercentileValue",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns Percentile value computed thus far.\n *\n * @return percentile\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "percentile"
+          }
+        ],
+        "code": "/**\n * Returns Percentile value computed thus far.\n *\n * @return percentile\n */\ndouble getPercentileValue();"
+      },
+      {
+        "type": "method",
+        "name": "clone",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * A clone function to clone the current instance. It's created as an\n * interface method as well for convenience though Cloneable is just a\n * marker interface.\n *\n * @return clone of this instance\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "clone of this instance"
+          }
+        ],
+        "code": "/**\n * A clone function to clone the current instance. It's created as an\n * interface method as well for convenience though Cloneable is just a\n * marker interface.\n *\n * @return clone of this instance\n */\nObject clone();"
+      },
+      {
+        "type": "method",
+        "name": "height",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "markerIndex"
+          }
+        ],
+        "javadoc": "/**\n * Returns the marker height (or percentile) of a given marker index.\n *\n * @param markerIndex is the index of marker in the marker array\n * @return percentile value of the marker index passed\n * @throws OutOfRangeException in case the index is not within [1-5]\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "markerIndex",
+            "content": "is the index of marker in the marker array"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "percentile value of the marker index passed"
+          },
+          {
+            "tag": "throws",
+            "name": "OutOfRangeException",
+            "content": "in case the index is not within [1-5]"
+          }
+        ],
+        "code": "/**\n * Returns the marker height (or percentile) of a given marker index.\n *\n * @param markerIndex is the index of marker in the marker array\n * @return percentile value of the marker index passed\n * @throws OutOfRangeException in case the index is not within [1-5]\n */\ndouble height(final int markerIndex);"
+      },
+      {
+        "type": "method",
+        "name": "processDataPoint",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "inputDataPoint"
+          }
+        ],
+        "javadoc": "/**\n * Process a data point by moving the marker heights based on estimator.\n *\n * @param inputDataPoint is the data point passed\n * @return computed percentile\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "inputDataPoint",
+            "content": "is the data point passed"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "computed percentile"
+          }
+        ],
+        "code": "/**\n * Process a data point by moving the marker heights based on estimator.\n *\n * @param inputDataPoint is the data point passed\n * @return computed percentile\n */\ndouble processDataPoint(final double inputDataPoint);"
+      },
+      {
+        "type": "method",
+        "name": "estimate",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          }
+        ],
+        "javadoc": "/**\n * An Estimate of the percentile value of a given Marker\n *\n * @param index the marker's index in the array of markers\n * @return percentile estimate\n * @throws OutOfRangeException in case if index is not within [1-5]\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "index",
+            "content": "the marker's index in the array of markers"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "percentile estimate"
+          },
+          {
+            "tag": "throws",
+            "name": "OutOfRangeException",
+            "content": "in case if index is not within [1-5]"
+          }
+        ],
+        "code": "/**\n * An Estimate of the percentile value of a given Marker\n *\n * @param index the marker's index in the array of markers\n * @return percentile estimate\n * @throws OutOfRangeException in case if index is not within [1-5]\n */\ndouble estimate(final int index);"
+      }
+    ]
+  }
+]

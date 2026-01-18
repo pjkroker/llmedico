@@ -1,0 +1,407 @@
+[
+  {
+    "name": "Strings",
+    "package": "com.google.common.base",
+    "qualified_name": "com.google.common.base.Strings",
+    "javadoc": "/**\n * Static utility methods pertaining to {@code String} or {@code CharSequence}\n * instances.\n *\n * @author Kevin Bourrillion\n * @since 3.0\n */\n",
+    "code": "/**\n * Static utility methods pertaining to {@code String} or {@code CharSequence}\n * instances.\n *\n * @author Kevin Bourrillion\n * @since 3.0\n */\n@CheckReturnValue\n@GwtCompatible\npublic final class Strings {\n\n    private Strings() {\n    }\n\n    /**\n     * Returns the given string if it is non-null; the empty string otherwise.\n     *\n     * @param string the string to test and possibly return\n     * @return {@code string} itself if it is non-null; {@code \"\"} if it is null\n     */\n    public static String nullToEmpty(@Nullable String string) {\n        return (string == null) ? \"\" : string;\n    }\n\n    /**\n     * Returns the given string if it is nonempty; {@code null} otherwise.\n     *\n     * @param string the string to test and possibly return\n     * @return {@code string} itself if it is nonempty; {@code null} if it is\n     *     empty or null\n     */\n    @Nullable\n    public static String emptyToNull(@Nullable String string) {\n        return isNullOrEmpty(string) ? null : string;\n    }\n\n    /**\n     * Returns {@code true} if the given string is null or is the empty string.\n     *\n     * <p>Consider normalizing your string references with {@link #nullToEmpty}.\n     * If you do, you can use {@link String#isEmpty()} instead of this\n     * method, and you won't need special null-safe forms of methods like {@link\n     * String#toUpperCase} either. Or, if you'd like to normalize \"in the other\n     * direction,\" converting empty strings to {@code null}, you can use {@link\n     * #emptyToNull}.\n     *\n     * @param string a string reference to check\n     * @return {@code true} if the string is null or is the empty string\n     */\n    public static boolean isNullOrEmpty(@Nullable String string) {\n        // string.isEmpty() in Java 6\n        return string == null || string.length() == 0;\n    }\n\n    /**\n     * Returns a string, of length at least {@code minLength}, consisting of\n     * {@code string} prepended with as many copies of {@code padChar} as are\n     * necessary to reach that length. For example,\n     *\n     * <ul>\n     * <li>{@code padStart(\"7\", 3, '0')} returns {@code \"007\"}\n     * <li>{@code padStart(\"2010\", 3, '0')} returns {@code \"2010\"}\n     * </ul>\n     *\n     * <p>See {@link Formatter} for a richer set of formatting capabilities.\n     *\n     * @param string the string which should appear at the end of the result\n     * @param minLength the minimum length the resulting string must have. Can be\n     *     zero or negative, in which case the input string is always returned.\n     * @param padChar the character to insert at the beginning of the result until\n     *     the minimum length is reached\n     * @return the padded string\n     */\n    public static String padStart(String string, int minLength, char padChar) {\n        // eager for GWT.\n        checkNotNull(string);\n        if (string.length() >= minLength) {\n            return string;\n        }\n        StringBuilder sb = new StringBuilder(minLength);\n        for (int i = string.length(); i < minLength; i++) {\n            sb.append(padChar);\n        }\n        sb.append(string);\n        return sb.toString();\n    }\n\n    /**\n     * Returns a string, of length at least {@code minLength}, consisting of\n     * {@code string} appended with as many copies of {@code padChar} as are\n     * necessary to reach that length. For example,\n     *\n     * <ul>\n     * <li>{@code padEnd(\"4.\", 5, '0')} returns {@code \"4.000\"}\n     * <li>{@code padEnd(\"2010\", 3, '!')} returns {@code \"2010\"}\n     * </ul>\n     *\n     * <p>See {@link Formatter} for a richer set of formatting capabilities.\n     *\n     * @param string the string which should appear at the beginning of the result\n     * @param minLength the minimum length the resulting string must have. Can be\n     *     zero or negative, in which case the input string is always returned.\n     * @param padChar the character to append to the end of the result until the\n     *     minimum length is reached\n     * @return the padded string\n     */\n    public static String padEnd(String string, int minLength, char padChar) {\n        // eager for GWT.\n        checkNotNull(string);\n        if (string.length() >= minLength) {\n            return string;\n        }\n        StringBuilder sb = new StringBuilder(minLength);\n        sb.append(string);\n        for (int i = string.length(); i < minLength; i++) {\n            sb.append(padChar);\n        }\n        return sb.toString();\n    }\n\n    /**\n     * Returns a string consisting of a specific number of concatenated copies of\n     * an input string. For example, {@code repeat(\"hey\", 3)} returns the string\n     * {@code \"heyheyhey\"}.\n     *\n     * @param string any non-null string\n     * @param count the number of times to repeat it; a nonnegative integer\n     * @return a string containing {@code string} repeated {@code count} times\n     *     (the empty string if {@code count} is zero)\n     * @throws IllegalArgumentException if {@code count} is negative\n     */\n    public static String repeat(String string, int count) {\n        // eager for GWT.\n        checkNotNull(string);\n        if (count <= 1) {\n            checkArgument(count >= 0, \"invalid count: %s\", count);\n            return (count == 0) ? \"\" : string;\n        }\n        // IF YOU MODIFY THE CODE HERE, you must update StringsRepeatBenchmark\n        final int len = string.length();\n        final long longSize = (long) len * (long) count;\n        final int size = (int) longSize;\n        if (size != longSize) {\n            throw new ArrayIndexOutOfBoundsException(\"Required array size too large: \" + longSize);\n        }\n        final char[] array = new char[size];\n        string.getChars(0, len, array, 0);\n        int n;\n        for (n = len; n < size - n; n <<= 1) {\n            System.arraycopy(array, 0, array, n, n);\n        }\n        System.arraycopy(array, 0, array, n, size - n);\n        return new String(array);\n    }\n\n    /**\n     * Returns the longest string {@code prefix} such that\n     * {@code a.toString().startsWith(prefix) && b.toString().startsWith(prefix)},\n     * taking care not to split surrogate pairs. If {@code a} and {@code b} have\n     * no common prefix, returns the empty string.\n     *\n     * @since 11.0\n     */\n    public static String commonPrefix(CharSequence a, CharSequence b) {\n        checkNotNull(a);\n        checkNotNull(b);\n        int maxPrefixLength = Math.min(a.length(), b.length());\n        int p = 0;\n        while (p < maxPrefixLength && a.charAt(p) == b.charAt(p)) {\n            p++;\n        }\n        if (validSurrogatePairAt(a, p - 1) || validSurrogatePairAt(b, p - 1)) {\n            p--;\n        }\n        return a.subSequence(0, p).toString();\n    }\n\n    /**\n     * Returns the longest string {@code suffix} such that\n     * {@code a.toString().endsWith(suffix) && b.toString().endsWith(suffix)},\n     * taking care not to split surrogate pairs. If {@code a} and {@code b} have\n     * no common suffix, returns the empty string.\n     *\n     * @since 11.0\n     */\n    public static String commonSuffix(CharSequence a, CharSequence b) {\n        checkNotNull(a);\n        checkNotNull(b);\n        int maxSuffixLength = Math.min(a.length(), b.length());\n        int s = 0;\n        while (s < maxSuffixLength && a.charAt(a.length() - s - 1) == b.charAt(b.length() - s - 1)) {\n            s++;\n        }\n        if (validSurrogatePairAt(a, a.length() - s - 1) || validSurrogatePairAt(b, b.length() - s - 1)) {\n            s--;\n        }\n        return a.subSequence(a.length() - s, a.length()).toString();\n    }\n\n    /**\n     * True when a valid surrogate pair starts at the given {@code index} in the\n     * given {@code string}. Out-of-range indexes return false.\n     */\n    @VisibleForTesting\n    static boolean validSurrogatePairAt(CharSequence string, int index) {\n        return index >= 0 && index <= (string.length() - 2) && Character.isHighSurrogate(string.charAt(index)) && Character.isLowSurrogate(string.charAt(index + 1));\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "nullToEmpty",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          }
+        ],
+        "javadoc": "/**\n * Returns the given string if it is non-null; the empty string otherwise.\n *\n * @param string the string to test and possibly return\n * @return {@code string} itself if it is non-null; {@code \"\"} if it is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "the string to test and possibly return"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code string} itself if it is non-null; {@code \"\"} if it is null"
+          }
+        ],
+        "code": "/**\n * Returns the given string if it is non-null; the empty string otherwise.\n *\n * @param string the string to test and possibly return\n * @return {@code string} itself if it is non-null; {@code \"\"} if it is null\n */\npublic static String nullToEmpty(@Nullable String string) {\n    return (string == null) ? \"\" : string;\n}"
+      },
+      {
+        "type": "method",
+        "name": "emptyToNull",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          }
+        ],
+        "javadoc": "/**\n * Returns the given string if it is nonempty; {@code null} otherwise.\n *\n * @param string the string to test and possibly return\n * @return {@code string} itself if it is nonempty; {@code null} if it is\n *     empty or null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "the string to test and possibly return"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code string} itself if it is nonempty; {@code null} if it is\n    empty or null"
+          }
+        ],
+        "code": "/**\n * Returns the given string if it is nonempty; {@code null} otherwise.\n *\n * @param string the string to test and possibly return\n * @return {@code string} itself if it is nonempty; {@code null} if it is\n *     empty or null\n */\n@Nullable\npublic static String emptyToNull(@Nullable String string) {\n    return isNullOrEmpty(string) ? null : string;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isNullOrEmpty",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          }
+        ],
+        "javadoc": "/**\n * Returns {@code true} if the given string is null or is the empty string.\n *\n * <p>Consider normalizing your string references with {@link #nullToEmpty}.\n * If you do, you can use {@link String#isEmpty()} instead of this\n * method, and you won't need special null-safe forms of methods like {@link\n * String#toUpperCase} either. Or, if you'd like to normalize \"in the other\n * direction,\" converting empty strings to {@code null}, you can use {@link\n * #emptyToNull}.\n *\n * @param string a string reference to check\n * @return {@code true} if the string is null or is the empty string\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "a string reference to check"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if the string is null or is the empty string"
+          }
+        ],
+        "code": "/**\n * Returns {@code true} if the given string is null or is the empty string.\n *\n * <p>Consider normalizing your string references with {@link #nullToEmpty}.\n * If you do, you can use {@link String#isEmpty()} instead of this\n * method, and you won't need special null-safe forms of methods like {@link\n * String#toUpperCase} either. Or, if you'd like to normalize \"in the other\n * direction,\" converting empty strings to {@code null}, you can use {@link\n * #emptyToNull}.\n *\n * @param string a string reference to check\n * @return {@code true} if the string is null or is the empty string\n */\npublic static boolean isNullOrEmpty(@Nullable String string) {\n    // string.isEmpty() in Java 6\n    return string == null || string.length() == 0;\n}"
+      },
+      {
+        "type": "method",
+        "name": "padStart",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "minLength"
+          },
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "padChar"
+          }
+        ],
+        "javadoc": "/**\n * Returns a string, of length at least {@code minLength}, consisting of\n * {@code string} prepended with as many copies of {@code padChar} as are\n * necessary to reach that length. For example,\n *\n * <ul>\n * <li>{@code padStart(\"7\", 3, '0')} returns {@code \"007\"}\n * <li>{@code padStart(\"2010\", 3, '0')} returns {@code \"2010\"}\n * </ul>\n *\n * <p>See {@link Formatter} for a richer set of formatting capabilities.\n *\n * @param string the string which should appear at the end of the result\n * @param minLength the minimum length the resulting string must have. Can be\n *     zero or negative, in which case the input string is always returned.\n * @param padChar the character to insert at the beginning of the result until\n *     the minimum length is reached\n * @return the padded string\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "the string which should appear at the end of the result"
+          },
+          {
+            "tag": "param",
+            "name": "minLength",
+            "content": "the minimum length the resulting string must have. Can be\n    zero or negative, in which case the input string is always returned."
+          },
+          {
+            "tag": "param",
+            "name": "padChar",
+            "content": "the character to insert at the beginning of the result until\n    the minimum length is reached"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the padded string"
+          }
+        ],
+        "code": "/**\n * Returns a string, of length at least {@code minLength}, consisting of\n * {@code string} prepended with as many copies of {@code padChar} as are\n * necessary to reach that length. For example,\n *\n * <ul>\n * <li>{@code padStart(\"7\", 3, '0')} returns {@code \"007\"}\n * <li>{@code padStart(\"2010\", 3, '0')} returns {@code \"2010\"}\n * </ul>\n *\n * <p>See {@link Formatter} for a richer set of formatting capabilities.\n *\n * @param string the string which should appear at the end of the result\n * @param minLength the minimum length the resulting string must have. Can be\n *     zero or negative, in which case the input string is always returned.\n * @param padChar the character to insert at the beginning of the result until\n *     the minimum length is reached\n * @return the padded string\n */\npublic static String padStart(String string, int minLength, char padChar) {\n    // eager for GWT.\n    checkNotNull(string);\n    if (string.length() >= minLength) {\n        return string;\n    }\n    StringBuilder sb = new StringBuilder(minLength);\n    for (int i = string.length(); i < minLength; i++) {\n        sb.append(padChar);\n    }\n    sb.append(string);\n    return sb.toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "padEnd",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "minLength"
+          },
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "padChar"
+          }
+        ],
+        "javadoc": "/**\n * Returns a string, of length at least {@code minLength}, consisting of\n * {@code string} appended with as many copies of {@code padChar} as are\n * necessary to reach that length. For example,\n *\n * <ul>\n * <li>{@code padEnd(\"4.\", 5, '0')} returns {@code \"4.000\"}\n * <li>{@code padEnd(\"2010\", 3, '!')} returns {@code \"2010\"}\n * </ul>\n *\n * <p>See {@link Formatter} for a richer set of formatting capabilities.\n *\n * @param string the string which should appear at the beginning of the result\n * @param minLength the minimum length the resulting string must have. Can be\n *     zero or negative, in which case the input string is always returned.\n * @param padChar the character to append to the end of the result until the\n *     minimum length is reached\n * @return the padded string\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "the string which should appear at the beginning of the result"
+          },
+          {
+            "tag": "param",
+            "name": "minLength",
+            "content": "the minimum length the resulting string must have. Can be\n    zero or negative, in which case the input string is always returned."
+          },
+          {
+            "tag": "param",
+            "name": "padChar",
+            "content": "the character to append to the end of the result until the\n    minimum length is reached"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the padded string"
+          }
+        ],
+        "code": "/**\n * Returns a string, of length at least {@code minLength}, consisting of\n * {@code string} appended with as many copies of {@code padChar} as are\n * necessary to reach that length. For example,\n *\n * <ul>\n * <li>{@code padEnd(\"4.\", 5, '0')} returns {@code \"4.000\"}\n * <li>{@code padEnd(\"2010\", 3, '!')} returns {@code \"2010\"}\n * </ul>\n *\n * <p>See {@link Formatter} for a richer set of formatting capabilities.\n *\n * @param string the string which should appear at the beginning of the result\n * @param minLength the minimum length the resulting string must have. Can be\n *     zero or negative, in which case the input string is always returned.\n * @param padChar the character to append to the end of the result until the\n *     minimum length is reached\n * @return the padded string\n */\npublic static String padEnd(String string, int minLength, char padChar) {\n    // eager for GWT.\n    checkNotNull(string);\n    if (string.length() >= minLength) {\n        return string;\n    }\n    StringBuilder sb = new StringBuilder(minLength);\n    sb.append(string);\n    for (int i = string.length(); i < minLength; i++) {\n        sb.append(padChar);\n    }\n    return sb.toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "repeat",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "count"
+          }
+        ],
+        "javadoc": "/**\n * Returns a string consisting of a specific number of concatenated copies of\n * an input string. For example, {@code repeat(\"hey\", 3)} returns the string\n * {@code \"heyheyhey\"}.\n *\n * @param string any non-null string\n * @param count the number of times to repeat it; a nonnegative integer\n * @return a string containing {@code string} repeated {@code count} times\n *     (the empty string if {@code count} is zero)\n * @throws IllegalArgumentException if {@code count} is negative\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "string",
+            "content": "any non-null string"
+          },
+          {
+            "tag": "param",
+            "name": "count",
+            "content": "the number of times to repeat it; a nonnegative integer"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a string containing {@code string} repeated {@code count} times\n    (the empty string if {@code count} is zero)"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if {@code count} is negative"
+          }
+        ],
+        "code": "/**\n * Returns a string consisting of a specific number of concatenated copies of\n * an input string. For example, {@code repeat(\"hey\", 3)} returns the string\n * {@code \"heyheyhey\"}.\n *\n * @param string any non-null string\n * @param count the number of times to repeat it; a nonnegative integer\n * @return a string containing {@code string} repeated {@code count} times\n *     (the empty string if {@code count} is zero)\n * @throws IllegalArgumentException if {@code count} is negative\n */\npublic static String repeat(String string, int count) {\n    // eager for GWT.\n    checkNotNull(string);\n    if (count <= 1) {\n        checkArgument(count >= 0, \"invalid count: %s\", count);\n        return (count == 0) ? \"\" : string;\n    }\n    // IF YOU MODIFY THE CODE HERE, you must update StringsRepeatBenchmark\n    final int len = string.length();\n    final long longSize = (long) len * (long) count;\n    final int size = (int) longSize;\n    if (size != longSize) {\n        throw new ArrayIndexOutOfBoundsException(\"Required array size too large: \" + longSize);\n    }\n    final char[] array = new char[size];\n    string.getChars(0, len, array, 0);\n    int n;\n    for (n = len; n < size - n; n <<= 1) {\n        System.arraycopy(array, 0, array, n, n);\n    }\n    System.arraycopy(array, 0, array, n, size - n);\n    return new String(array);\n}"
+      },
+      {
+        "type": "method",
+        "name": "commonPrefix",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": "/**\n * Returns the longest string {@code prefix} such that\n * {@code a.toString().startsWith(prefix) && b.toString().startsWith(prefix)},\n * taking care not to split surrogate pairs. If {@code a} and {@code b} have\n * no common prefix, returns the empty string.\n *\n * @since 11.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": null,
+            "content": "11.0"
+          }
+        ],
+        "code": "/**\n * Returns the longest string {@code prefix} such that\n * {@code a.toString().startsWith(prefix) && b.toString().startsWith(prefix)},\n * taking care not to split surrogate pairs. If {@code a} and {@code b} have\n * no common prefix, returns the empty string.\n *\n * @since 11.0\n */\npublic static String commonPrefix(CharSequence a, CharSequence b) {\n    checkNotNull(a);\n    checkNotNull(b);\n    int maxPrefixLength = Math.min(a.length(), b.length());\n    int p = 0;\n    while (p < maxPrefixLength && a.charAt(p) == b.charAt(p)) {\n        p++;\n    }\n    if (validSurrogatePairAt(a, p - 1) || validSurrogatePairAt(b, p - 1)) {\n        p--;\n    }\n    return a.subSequence(0, p).toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "commonSuffix",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": "/**\n * Returns the longest string {@code suffix} such that\n * {@code a.toString().endsWith(suffix) && b.toString().endsWith(suffix)},\n * taking care not to split surrogate pairs. If {@code a} and {@code b} have\n * no common suffix, returns the empty string.\n *\n * @since 11.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": null,
+            "content": "11.0"
+          }
+        ],
+        "code": "/**\n * Returns the longest string {@code suffix} such that\n * {@code a.toString().endsWith(suffix) && b.toString().endsWith(suffix)},\n * taking care not to split surrogate pairs. If {@code a} and {@code b} have\n * no common suffix, returns the empty string.\n *\n * @since 11.0\n */\npublic static String commonSuffix(CharSequence a, CharSequence b) {\n    checkNotNull(a);\n    checkNotNull(b);\n    int maxSuffixLength = Math.min(a.length(), b.length());\n    int s = 0;\n    while (s < maxSuffixLength && a.charAt(a.length() - s - 1) == b.charAt(b.length() - s - 1)) {\n        s++;\n    }\n    if (validSurrogatePairAt(a, a.length() - s - 1) || validSurrogatePairAt(b, b.length() - s - 1)) {\n        s--;\n    }\n    return a.subSequence(a.length() - s, a.length()).toString();\n}"
+      },
+      {
+        "type": "method",
+        "name": "validSurrogatePairAt",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "string"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          }
+        ],
+        "javadoc": "/**\n * True when a valid surrogate pair starts at the given {@code index} in the\n * given {@code string}. Out-of-range indexes return false.\n */\n",
+        "tags": [],
+        "code": "/**\n * True when a valid surrogate pair starts at the given {@code index} in the\n * given {@code string}. Out-of-range indexes return false.\n */\n@VisibleForTesting\nstatic boolean validSurrogatePairAt(CharSequence string, int index) {\n    return index >= 0 && index <= (string.length() - 2) && Character.isHighSurrogate(string.charAt(index)) && Character.isLowSurrogate(string.charAt(index + 1));\n}"
+      }
+    ]
+  }
+]

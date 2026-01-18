@@ -1,0 +1,332 @@
+[
+  {
+    "method": "ContinuousOutputModel",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ContinuousOutputModel",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "model"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "model",
+          "content": "model to add at the end of the instance",
+          "assertion": "",
+          "description": "model to add at the end of the instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the model to append is not compatible with the instance (dimension of the state vector, propagation direction, hole between the dates)",
+          "assertion": "assert receiverObjectID.model.dimension != args[0].dimension || receiverObjectID.model.propagationDirection != args[0].propagationDirection || receiverObjectID.model.holeBetweenDates != args[0].holeBetweenDates;",
+          "name": "MathIllegalArgumentException",
+          "content": "if the model to append is not compatible with the instance (dimension of the state vector, propagation direction, hole between the dates)"
+        },
+        {
+          "description": "if the number of functions evaluations is exceeded during step finalization",
+          "assertion": "assert receiverObjectID.functionsEvaluations < 1000;",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded during step finalization"
+        }
+      ]
+    }
+  },
+  {
+    "method": "init",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t0"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y0"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "handleStep",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StepInterpolator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "interpolator"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "isLast"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "interpolator must be of type StepInterpolator",
+          "assertion": "assert receiverObjectID.getConstructor().getParameterTypes()[0].equals(StepInterpolator.class);",
+          "name": "interpolator",
+          "content": "<code>interpolator must be of type <strong>StepInterpolator</strong></code>"
+        },
+        {
+          "description": "isLast must be a boolean value",
+          "assertion": "assert receiverObjectID.getConstructor().getParameterTypes()[1].equals(boolean.class);",
+          "name": "isLast",
+          "content": "<code>isLast must be a boolean value</code>"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the number of functions evaluations is exceeded during step finalization",
+          "assertion": "assert !receiverObjectID.getInitialTime() < receiverObjectID.getMaxCountExceededException().getMaxCount();",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded during step finalization"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInitialTime",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "initial integration time",
+          "assertion": "",
+          "description": "initial integration time"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getFinalTime",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "final integration time",
+          "assertion": "assert methodResultID == receiverObjectID.getFinalTime();",
+          "name": null,
+          "content": "final integration time"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedTime",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "interpolation point time",
+          "assertion": "assert methodResultID == (receiverObjectID.getInterpolatedTime());",
+          "name": null,
+          "content": "interpolation point time"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setInterpolatedTime",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "time"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "time must be a valid double value",
+          "assertion": "assert args[0] instanceof java.lang.Double && (args[0] >= 0 || args[0] > getFinalTime()) && (args[0] <= getInitialTime());",
+          "name": "time",
+          "content": "&lt;strong&gt;This method should &lt;/strong&gt;not be called before the integration is over because some internal variables are set only once the last step has been handled.&lt;/p&gt;<br>&lt;p&gt;Setting the time outside of the integration interval is now allowed, but should be used with care since the accuracy of the interpolator will probably be very poor far from this interval.&lt;/p&gt;<br>&lt;p&gt;Note that each time this method is called, the internal arrays returned in {@link #getInterpolatedState()}, {@link #getInterpolatedDerivatives()} and {@link #getInterpolatedSecondaryState(int)}&lt;/em&gt; will be overwritten.&lt;/p&gt;<br>&lt;p&gt;So if their content must be preserved across several calls, user must copy them.&lt;/p&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedState",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "state vector at time getInterpolatedTime().",
+          "assertion": "assert receiverObjectID.getInterpolatedState() == (receiverObjectID.getInterpolatedTime() * receiverObjectID.getInitialTime());",
+          "name": null,
+          "content": "state vector at time getInterpolatedTime()."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the number of functions evaluations is exceeded",
+          "assertion": "assert receiverObjectID.getFunctionsEvaluated() >= getMaxCount();",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedDerivatives",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "derivatives of the state vector at time getInterpolatedTime().",
+          "assertion": "assert methodResultID == receiverObjectID.getInterpolatedDerivatives();",
+          "name": null,
+          "content": "derivatives of the state vector at time getInterpolatedTime()."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded",
+          "assertion": "",
+          "description": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedSecondaryState",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "secondaryStateIndex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the returned vector should not be modified and it should be copied if it needs to be preserved across several calls to the associated setInterpolatedTime(double) method.",
+          "assertion": "assert receiverObjectID.getInterpolatedSecondaryState(args[0]) == null;",
+          "name": "secondaryStateIndex",
+          "content": "&lt;The returned vector is a reference to a reused array, so it should not be modified and it should be copied if it needs to be preserved across several calls to the associated setInterpolatedTime(double) method.&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "interpolated secondary state at the current interpolation date",
+          "assertion": "assert methodResultID == receiverObjectID.getInterpolatedSecondaryState(args[0]);",
+          "name": null,
+          "content": "interpolated secondary state at the current interpolation date"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if number of functions evaluations is exceeded.",
+          "assertion": "assert receiverObjectID.getInterpolatedSecondaryState(args[0]) > MaxCountExceededException.MAX_COUNT;",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInterpolatedSecondaryDerivatives",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "secondaryStateIndex"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the returned vector is a reference to a reused array, so it should not be modified and it should be copied if it needs to be preserved across several calls to the associated setInterpolatedTime(double) method.",
+          "assertion": "assert args[0] instanceof Object[] && ((Object[])args[0]).length > 0;",
+          "name": "secondaryStateIndex",
+          "content": "&lt;The returned vector is a reference to a reused array, so it should not be modified and it should be copied if it needs to be preserved across several calls to the associated setInterpolatedTime(double) method.&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "interpolated secondary derivatives at the current interpolation date",
+          "assertion": "",
+          "description": "interpolated secondary derivatives at the current interpolation date"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded",
+          "assertion": "",
+          "description": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  }
+]

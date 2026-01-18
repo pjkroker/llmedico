@@ -1,0 +1,255 @@
+[
+  {
+    "method": "CacheLoader",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "load",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "<b>the key must be non-null</b>",
+          "assertion": "assert receiverObjectID != null && args[0] instanceof java.lang.Object;",
+          "name": "key",
+          "content": "<b>the key whose value should be loaded; must not be null</b>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the value associated with key; must not be null",
+          "assertion": "assert methodResultID != null && receiverObjectID.load(args[0]) == methodResultID;",
+          "name": null,
+          "content": "the value associated with key; must not be null"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "<b>must not be null</b>",
+          "assertion": "assert receiverObjectID.load(args[0]) != null;",
+          "name": "Exception",
+          "content": "if the value associated with key is <code>null</code>"
+        },
+        {
+          "description": "if unable to load the result",
+          "assertion": "assert false; // This will always be false, but it's required for consistency",
+          "name": "Exception",
+          "content": "the method was not able to load the result"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reload",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "oldValue"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "key must not be null",
+          "assertion": "assert receiverObjectID != null && receiverObjectID instanceof java.lang.Object;",
+          "name": "key",
+          "content": "<i>the non-null key whose value should be loaded</i>"
+        },
+        {
+          "description": "oldValue must not be null",
+          "assertion": "assert receiverObjectID != null && receiverObjectID instanceof java.lang.Object;",
+          "name": "oldValue",
+          "content": "<i>the non-null old value corresponding to key</i>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the result of calling receiverObjectID.load(args[0], args[1]) must not be null,",
+          "assertion": "assert methodResultID != null && receiverObjectID.load(args[0], args[1]).get() != null;",
+          "name": null,
+          "content": "the result of calling receiverObjectID.load(args[0], args[1]) must not be null,"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if key is not found in the cache.",
+          "assertion": "assert !receiverObjectID.containsKey(key);",
+          "name": "Exception",
+          "content": "if key is not found in the cache."
+        },
+        {
+          "description": "if key is null.",
+          "assertion": "assert key == null;",
+          "name": "NullPointerException",
+          "content": "if key is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "loadAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "keys"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "keys must be non-null and an Iterable",
+          "assertion": "assert receiverObjectID != null && receiverObjectID instanceof java.lang.Iterable;",
+          "name": "keys",
+          "content": "&lt;code&gt;keys must be non-null and an Iterable&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a map from each key in keys to the value associated with that key; may not contain null values",
+          "assertion": "assert methodResultID == receiverObjectID.loadAll(keys);",
+          "name": null,
+          "content": "a map from each key in keys to the value associated with that key; may not contain null values"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if keys is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if keys is <code>null</code>."
+        },
+        {
+          "description": "the returned map doesn't contain all requested keys.",
+          "assertion": "assert !receiverObjectID.containsKeyAll(args[0]);",
+          "name": "Exception",
+          "content": "if the returned map doesn't contain all requested keys."
+        }
+      ]
+    }
+  },
+  {
+    "method": "from",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Function",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "function"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the function must never return null",
+          "assertion": "assert args[0] != null;",
+          "name": "function",
+          "content": "&lt;code&gt;void func&lt;/code&gt;(Object key)&lt;/pre&gt;<br>&lt;code&gt;return null&lt;/code&gt;&lt;/pre&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a cache loader that loads values by passing each key to function",
+          "assertion": "assert methodResultID instanceof CacheLoader && ((CacheLoader)methodResultID).load(args[0]) != null;",
+          "name": null,
+          "content": "a cache loader that loads values by passing each key to function"
+        }
+      ]
+    }
+  },
+  {
+    "method": "from",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Supplier",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "supplier"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the supplier must never return null",
+          "assertion": "assert args[0] != null;",
+          "name": "supplier",
+          "content": "&lt;div&gt;The supplier must never return null&lt;/div&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a cache loader that loads values by calling Supplier#get, irrespective of the key",
+          "assertion": "assert receiverObjectID.from(methodResultID) == (receiverObjectID.supplier().get());",
+          "name": null,
+          "content": "a cache loader that loads values by calling Supplier#get, irrespective of the key"
+        }
+      ]
+    }
+  },
+  {
+    "method": "asyncReloading",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CacheLoader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "loader"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Executor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "executor"
+      }
+    ],
+    "conditions": {}
+  }
+]

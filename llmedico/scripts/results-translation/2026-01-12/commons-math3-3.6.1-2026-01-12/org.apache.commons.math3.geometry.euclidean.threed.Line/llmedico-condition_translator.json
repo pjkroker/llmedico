@@ -1,0 +1,776 @@
+[
+  {
+    "name": "Line",
+    "package": "org.apache.commons.math3.geometry.euclidean.threed",
+    "qualified_name": "org.apache.commons.math3.geometry.euclidean.threed.Line",
+    "javadoc": "/**\n * The class represent lines in a three dimensional space.\n *\n * <p>Each oriented line is intrinsically associated with an abscissa\n * which is a coordinate on the line. The point at abscissa 0 is the\n * orthogonal projection of the origin on the line, another equivalent\n * way to express this is to say that it is the point of the line\n * which is closest to the origin. Abscissa increases in the line\n * direction.</p>\n *\n * @since 3.0\n */\n",
+    "code": "/**\n * The class represent lines in a three dimensional space.\n *\n * <p>Each oriented line is intrinsically associated with an abscissa\n * which is a coordinate on the line. The point at abscissa 0 is the\n * orthogonal projection of the origin on the line, another equivalent\n * way to express this is to say that it is the point of the line\n * which is closest to the origin. Abscissa increases in the line\n * direction.</p>\n *\n * @since 3.0\n */\npublic class Line implements Embedding<Euclidean3D, Euclidean1D> {\n\n    /**\n     * Default value for tolerance.\n     */\n    private static final double DEFAULT_TOLERANCE = 1.0e-10;\n\n    /**\n     * Line direction.\n     */\n    private Vector3D direction;\n\n    /**\n     * Line point closest to the origin.\n     */\n    private Vector3D zero;\n\n    /**\n     * Tolerance below which points are considered identical.\n     */\n    private final double tolerance;\n\n    /**\n     * Build a line from two points.\n     * @param p1 first point belonging to the line (this can be any point)\n     * @param p2 second point belonging to the line (this can be any point, different from p1)\n     * @param tolerance tolerance below which points are considered identical\n     * @exception MathIllegalArgumentException if the points are equal\n     * @since 3.3\n     */\n    public Line(final Vector3D p1, final Vector3D p2, final double tolerance) throws MathIllegalArgumentException {\n        reset(p1, p2);\n        this.tolerance = tolerance;\n    }\n\n    /**\n     * Copy constructor.\n     * <p>The created instance is completely independent from the\n     * original instance, it is a deep copy.</p>\n     * @param line line to copy\n     */\n    public Line(final Line line) {\n        this.direction = line.direction;\n        this.zero = line.zero;\n        this.tolerance = line.tolerance;\n    }\n\n    /**\n     * Build a line from two points.\n     * @param p1 first point belonging to the line (this can be any point)\n     * @param p2 second point belonging to the line (this can be any point, different from p1)\n     * @exception MathIllegalArgumentException if the points are equal\n     * @deprecated as of 3.3, replaced with {@link #Line(Vector3D, Vector3D, double)}\n     */\n    @Deprecated\n    public Line(final Vector3D p1, final Vector3D p2) throws MathIllegalArgumentException {\n        this(p1, p2, DEFAULT_TOLERANCE);\n    }\n\n    /**\n     * Reset the instance as if built from two points.\n     * @param p1 first point belonging to the line (this can be any point)\n     * @param p2 second point belonging to the line (this can be any point, different from p1)\n     * @exception MathIllegalArgumentException if the points are equal\n     */\n    public void reset(final Vector3D p1, final Vector3D p2) throws MathIllegalArgumentException {\n        final Vector3D delta = p2.subtract(p1);\n        final double norm2 = delta.getNormSq();\n        if (norm2 == 0.0) {\n            throw new MathIllegalArgumentException(LocalizedFormats.ZERO_NORM);\n        }\n        this.direction = new Vector3D(1.0 / FastMath.sqrt(norm2), delta);\n        zero = new Vector3D(1.0, p1, -p1.dotProduct(delta) / norm2, delta);\n    }\n\n    /**\n     * Get the tolerance below which points are considered identical.\n     * @return tolerance below which points are considered identical\n     * @since 3.3\n     */\n    public double getTolerance() {\n        return tolerance;\n    }\n\n    /**\n     * Get a line with reversed direction.\n     * @return a new instance, with reversed direction\n     */\n    public Line revert() {\n        final Line reverted = new Line(this);\n        reverted.direction = reverted.direction.negate();\n        return reverted;\n    }\n\n    /**\n     * Get the normalized direction vector.\n     * @return normalized direction vector\n     */\n    public Vector3D getDirection() {\n        return direction;\n    }\n\n    /**\n     * Get the line point closest to the origin.\n     * @return line point closest to the origin\n     */\n    public Vector3D getOrigin() {\n        return zero;\n    }\n\n    /**\n     * Get the abscissa of a point with respect to the line.\n     * <p>The abscissa is 0 if the projection of the point and the\n     * projection of the frame origin on the line are the same\n     * point.</p>\n     * @param point point to check\n     * @return abscissa of the point\n     */\n    public double getAbscissa(final Vector3D point) {\n        return point.subtract(zero).dotProduct(direction);\n    }\n\n    /**\n     * Get one point from the line.\n     * @param abscissa desired abscissa for the point\n     * @return one point belonging to the line, at specified abscissa\n     */\n    public Vector3D pointAt(final double abscissa) {\n        return new Vector3D(1.0, zero, abscissa, direction);\n    }\n\n    /**\n     * Transform a space point into a sub-space point.\n     * @param vector n-dimension point of the space\n     * @return (n-1)-dimension point of the sub-space corresponding to\n     * the specified space point\n     */\n    public Vector1D toSubSpace(Vector<Euclidean3D> vector) {\n        return toSubSpace((Point<Euclidean3D>) vector);\n    }\n\n    /**\n     * Transform a sub-space point into a space point.\n     * @param vector (n-1)-dimension point of the sub-space\n     * @return n-dimension point of the space corresponding to the\n     * specified sub-space point\n     */\n    public Vector3D toSpace(Vector<Euclidean1D> vector) {\n        return toSpace((Point<Euclidean1D>) vector);\n    }\n\n    /**\n     * {@inheritDoc}\n     * @see #getAbscissa(Vector3D)\n     */\n    public Vector1D toSubSpace(final Point<Euclidean3D> point) {\n        return new Vector1D(getAbscissa((Vector3D) point));\n    }\n\n    /**\n     * {@inheritDoc}\n     * @see #pointAt(double)\n     */\n    public Vector3D toSpace(final Point<Euclidean1D> point) {\n        return pointAt(((Vector1D) point).getX());\n    }\n\n    /**\n     * Check if the instance is similar to another line.\n     * <p>Lines are considered similar if they contain the same\n     * points. This does not mean they are equal since they can have\n     * opposite directions.</p>\n     * @param line line to which instance should be compared\n     * @return true if the lines are similar\n     */\n    public boolean isSimilarTo(final Line line) {\n        final double angle = Vector3D.angle(direction, line.direction);\n        return ((angle < tolerance) || (angle > (FastMath.PI - tolerance))) && contains(line.zero);\n    }\n\n    /**\n     * Check if the instance contains a point.\n     * @param p point to check\n     * @return true if p belongs to the line\n     */\n    public boolean contains(final Vector3D p) {\n        return distance(p) < tolerance;\n    }\n\n    /**\n     * Compute the distance between the instance and a point.\n     * @param p to check\n     * @return distance between the instance and the point\n     */\n    public double distance(final Vector3D p) {\n        final Vector3D d = p.subtract(zero);\n        final Vector3D n = new Vector3D(1.0, d, -d.dotProduct(direction), direction);\n        return n.getNorm();\n    }\n\n    /**\n     * Compute the shortest distance between the instance and another line.\n     * @param line line to check against the instance\n     * @return shortest distance between the instance and the line\n     */\n    public double distance(final Line line) {\n        final Vector3D normal = Vector3D.crossProduct(direction, line.direction);\n        final double n = normal.getNorm();\n        if (n < Precision.SAFE_MIN) {\n            // lines are parallel\n            return distance(line.zero);\n        }\n        // signed separation of the two parallel planes that contains the lines\n        final double offset = line.zero.subtract(zero).dotProduct(normal) / n;\n        return FastMath.abs(offset);\n    }\n\n    /**\n     * Compute the point of the instance closest to another line.\n     * @param line line to check against the instance\n     * @return point of the instance closest to another line\n     */\n    public Vector3D closestPoint(final Line line) {\n        final double cos = direction.dotProduct(line.direction);\n        final double n = 1 - cos * cos;\n        if (n < Precision.EPSILON) {\n            // the lines are parallel\n            return zero;\n        }\n        final Vector3D delta0 = line.zero.subtract(zero);\n        final double a = delta0.dotProduct(direction);\n        final double b = delta0.dotProduct(line.direction);\n        return new Vector3D(1, zero, (a - b * cos) / n, direction);\n    }\n\n    /**\n     * Get the intersection point of the instance and another line.\n     * @param line other line\n     * @return intersection point of the instance and the other line\n     * or null if there are no intersection points\n     */\n    public Vector3D intersection(final Line line) {\n        final Vector3D closest = closestPoint(line);\n        return line.contains(closest) ? closest : null;\n    }\n\n    /**\n     * Build a sub-line covering the whole line.\n     * @return a sub-line covering the whole line\n     */\n    public SubLine wholeLine() {\n        return new SubLine(this, new IntervalsSet(tolerance));\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Line",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p2"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tolerance"
+          }
+        ],
+        "javadoc": "/**\n * Build a line from two points.\n * @param p1 first point belonging to the line (this can be any point)\n * @param p2 second point belonging to the line (this can be any point, different from p1)\n * @param tolerance tolerance below which points are considered identical\n * @exception MathIllegalArgumentException if the points are equal\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p1",
+            "content": "first point belonging to the line (this can be any point)",
+            "assertion": "",
+            "description": "first point belonging to the line (this can be any point)"
+          },
+          {
+            "tag": "param",
+            "name": "p2",
+            "content": "second point belonging to the line (this can be any point, different from p1)",
+            "assertion": "",
+            "description": "second point belonging to the line (this can be any point, different from p1)"
+          },
+          {
+            "tag": "param",
+            "name": "tolerance",
+            "content": "tolerance below which points are considered identical",
+            "assertion": "",
+            "description": "tolerance below which points are considered identical"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if the points are equal",
+            "assertion": "",
+            "description": "if the points are equal"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Build a line from two points.\n * @param p1 first point belonging to the line (this can be any point)\n * @param p2 second point belonging to the line (this can be any point, different from p1)\n * @param tolerance tolerance below which points are considered identical\n * @exception MathIllegalArgumentException if the points are equal\n * @since 3.3\n */\npublic Line(final Vector3D p1, final Vector3D p2, final double tolerance) throws MathIllegalArgumentException {\n    reset(p1, p2);\n    this.tolerance = tolerance;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "Line",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Line",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line"
+          }
+        ],
+        "javadoc": "/**\n * Copy constructor.\n * <p>The created instance is completely independent from the\n * original instance, it is a deep copy.</p>\n * @param line line to copy\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "line",
+            "content": "line to copy",
+            "assertion": "",
+            "description": "line to copy"
+          }
+        ],
+        "code": "/**\n * Copy constructor.\n * <p>The created instance is completely independent from the\n * original instance, it is a deep copy.</p>\n * @param line line to copy\n */\npublic Line(final Line line) {\n    this.direction = line.direction;\n    this.zero = line.zero;\n    this.tolerance = line.tolerance;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "Line",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p2"
+          }
+        ],
+        "javadoc": "/**\n * Build a line from two points.\n * @param p1 first point belonging to the line (this can be any point)\n * @param p2 second point belonging to the line (this can be any point, different from p1)\n * @exception MathIllegalArgumentException if the points are equal\n * @deprecated as of 3.3, replaced with {@link #Line(Vector3D, Vector3D, double)}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p1",
+            "content": "first point belonging to the line (this can be any point)",
+            "assertion": "assert receiverObjectID.getTolerance() != null && receiverObjectID.getAbscissa(null) != null;",
+            "description": "p1 can be any point"
+          },
+          {
+            "tag": "param",
+            "name": "p2",
+            "content": "second point belonging to the line (this can be any point, different from p1)",
+            "assertion": "assert receiverObjectID.getTolerance() != null && receiverObjectID.getAbscissa(null) != null && receiverObjectID.getAbscissa(receiverObjectID.pointAt(0)) != null && receiverObjectID.getAbscissa(receiverObjectID.p1) != receiverObjectID.getAbscissa(receiverObjectID.pointAt(0));",
+            "description": "p2 can be any point different from p1"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if the points are equal",
+            "assertion": "assert args[0] == args[1];",
+            "description": "if the points are equal"
+          },
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "as of 3.3, replaced with {@link #Line(Vector3D, Vector3D, double)}"
+          }
+        ],
+        "code": "/**\n * Build a line from two points.\n * @param p1 first point belonging to the line (this can be any point)\n * @param p2 second point belonging to the line (this can be any point, different from p1)\n * @exception MathIllegalArgumentException if the points are equal\n * @deprecated as of 3.3, replaced with {@link #Line(Vector3D, Vector3D, double)}\n */\n@Deprecated\npublic Line(final Vector3D p1, final Vector3D p2) throws MathIllegalArgumentException {\n    this(p1, p2, DEFAULT_TOLERANCE);\n}"
+      },
+      {
+        "type": "method",
+        "name": "reset",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p2"
+          }
+        ],
+        "javadoc": "/**\n * Reset the instance as if built from two points.\n * @param p1 first point belonging to the line (this can be any point)\n * @param p2 second point belonging to the line (this can be any point, different from p1)\n * @exception MathIllegalArgumentException if the points are equal\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p1",
+            "content": "first point belonging to the line (this can be any point)",
+            "assertion": "assert receiverObjectID.get(0) instanceof Vector3D;",
+            "description": "p1 must be a Vector3D"
+          },
+          {
+            "tag": "param",
+            "name": "p2",
+            "content": "second point belonging to the line (this can be any point, different from p1)",
+            "assertion": "assert receiverObjectID.get(1) instanceof Vector3D && !receiverObjectID.get(0).equals(receiverObjectID.get(1));",
+            "description": "p2 must be a Vector3D and different from p1"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if the points are equal",
+            "assertion": "",
+            "description": "if the points are equal"
+          }
+        ],
+        "code": "/**\n * Reset the instance as if built from two points.\n * @param p1 first point belonging to the line (this can be any point)\n * @param p2 second point belonging to the line (this can be any point, different from p1)\n * @exception MathIllegalArgumentException if the points are equal\n */\npublic void reset(final Vector3D p1, final Vector3D p2) throws MathIllegalArgumentException {\n    final Vector3D delta = p2.subtract(p1);\n    final double norm2 = delta.getNormSq();\n    if (norm2 == 0.0) {\n        throw new MathIllegalArgumentException(LocalizedFormats.ZERO_NORM);\n    }\n    this.direction = new Vector3D(1.0 / FastMath.sqrt(norm2), delta);\n    zero = new Vector3D(1.0, p1, -p1.dotProduct(delta) / norm2, delta);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getTolerance",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the tolerance below which points are considered identical.\n * @return tolerance below which points are considered identical\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "tolerance below which points are considered identical",
+            "assertion": "assert methodResultID == receiverObjectID.getTolerance();",
+            "description": "tolerance below which points are considered identical"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Get the tolerance below which points are considered identical.\n * @return tolerance below which points are considered identical\n * @since 3.3\n */\npublic double getTolerance() {\n    return tolerance;\n}"
+      },
+      {
+        "type": "method",
+        "name": "revert",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Line",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get a line with reversed direction.\n * @return a new instance, with reversed direction\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a new instance, with reversed direction",
+            "assertion": "assert methodResultID == receiverObjectID.toSpace(receiverObjectID.getDirection().reverse());",
+            "description": "a new instance, with reversed direction"
+          }
+        ],
+        "code": "/**\n * Get a line with reversed direction.\n * @return a new instance, with reversed direction\n */\npublic Line revert() {\n    final Line reverted = new Line(this);\n    reverted.direction = reverted.direction.negate();\n    return reverted;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getDirection",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the normalized direction vector.\n * @return normalized direction vector\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "normalized direction vector",
+            "assertion": "assert methodResultID == receiverObjectID.getDirection();",
+            "description": "normalized direction vector"
+          }
+        ],
+        "code": "/**\n * Get the normalized direction vector.\n * @return normalized direction vector\n */\npublic Vector3D getDirection() {\n    return direction;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getOrigin",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the line point closest to the origin.\n * @return line point closest to the origin\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "line point closest to the origin",
+            "assertion": "assert methodResultID == receiverObjectID.getOrigin();",
+            "description": "line point closest to the origin."
+          }
+        ],
+        "code": "/**\n * Get the line point closest to the origin.\n * @return line point closest to the origin\n */\npublic Vector3D getOrigin() {\n    return zero;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAbscissa",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "point"
+          }
+        ],
+        "javadoc": "/**\n * Get the abscissa of a point with respect to the line.\n * <p>The abscissa is 0 if the projection of the point and the\n * projection of the frame origin on the line are the same\n * point.</p>\n * @param point point to check\n * @return abscissa of the point\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "point",
+            "content": "point to check",
+            "assertion": "assert receiverObjectID.getAbscissa(args[0]) == 0;",
+            "description": "the projection of the point and the frame origin on the line must be the same point"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "abscissa of the point",
+            "assertion": "",
+            "description": "abscissa of the point"
+          }
+        ],
+        "code": "/**\n * Get the abscissa of a point with respect to the line.\n * <p>The abscissa is 0 if the projection of the point and the\n * projection of the frame origin on the line are the same\n * point.</p>\n * @param point point to check\n * @return abscissa of the point\n */\npublic double getAbscissa(final Vector3D point) {\n    return point.subtract(zero).dotProduct(direction);\n}"
+      },
+      {
+        "type": "method",
+        "name": "pointAt",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "abscissa"
+          }
+        ],
+        "javadoc": "/**\n * Get one point from the line.\n * @param abscissa desired abscissa for the point\n * @return one point belonging to the line, at specified abscissa\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "abscissa",
+            "content": "desired abscissa for the point",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "the abscissa must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "one point belonging to the line, at specified abscissa",
+            "assertion": "assert methodResultID == receiverObjectID.pointAt(args[0]);",
+            "description": "one point belonging to the line, at specified abscissa"
+          }
+        ],
+        "code": "/**\n * Get one point from the line.\n * @param abscissa desired abscissa for the point\n * @return one point belonging to the line, at specified abscissa\n */\npublic Vector3D pointAt(final double abscissa) {\n    return new Vector3D(1.0, zero, abscissa, direction);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toSubSpace",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector1D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vector"
+          }
+        ],
+        "javadoc": "/**\n * Transform a space point into a sub-space point.\n * @param vector n-dimension point of the space\n * @return (n-1)-dimension point of the sub-space corresponding to\n * the specified space point\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "vector",
+            "content": "n-dimension point of the space",
+            "assertion": "assert receiverObjectID.getTolerance() == null && receiverObjectID.getAbscissa(null) != null && receiverObjectID.toSubSpace(null, args[0]) != null;",
+            "description": "the vector must be a n-dimension point of the space"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "(n-1)-dimension point of the sub-space corresponding to\nthe specified space point",
+            "assertion": "assert methodResultID == receiverObjectID.toSubSpace(args[0]);",
+            "description": "Transform a space point into a sub-space point."
+          }
+        ],
+        "code": "/**\n * Transform a space point into a sub-space point.\n * @param vector n-dimension point of the space\n * @return (n-1)-dimension point of the sub-space corresponding to\n * the specified space point\n */\npublic Vector1D toSubSpace(Vector<Euclidean3D> vector) {\n    return toSubSpace((Point<Euclidean3D>) vector);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toSpace",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vector"
+          }
+        ],
+        "javadoc": "/**\n * Transform a sub-space point into a space point.\n * @param vector (n-1)-dimension point of the sub-space\n * @return n-dimension point of the space corresponding to the\n * specified sub-space point\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "vector",
+            "content": "(n-1)-dimension point of the sub-space",
+            "assertion": "",
+            "description": "(n-1)-dimension point of the sub-space"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "n-dimension point of the space corresponding to the\nspecified sub-space point",
+            "assertion": "assert receiverObjectID.toSpace(args[0]) == (new Vector3D(0, 0, 0));",
+            "description": "Transform a sub-space point into a space point."
+          }
+        ],
+        "code": "/**\n * Transform a sub-space point into a space point.\n * @param vector (n-1)-dimension point of the sub-space\n * @return n-dimension point of the space corresponding to the\n * specified sub-space point\n */\npublic Vector3D toSpace(Vector<Euclidean1D> vector) {\n    return toSpace((Point<Euclidean1D>) vector);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toSubSpace",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector1D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Point",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "point"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @see #getAbscissa(Vector3D)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#getAbscissa(Vector3D)"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @see #getAbscissa(Vector3D)\n */\npublic Vector1D toSubSpace(final Point<Euclidean3D> point) {\n    return new Vector1D(getAbscissa((Vector3D) point));\n}"
+      },
+      {
+        "type": "method",
+        "name": "toSpace",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Point",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "point"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n * @see #pointAt(double)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#pointAt(double)"
+          }
+        ],
+        "code": "/**\n * {@inheritDoc}\n * @see #pointAt(double)\n */\npublic Vector3D toSpace(final Point<Euclidean1D> point) {\n    return pointAt(((Vector1D) point).getX());\n}"
+      },
+      {
+        "type": "method",
+        "name": "isSimilarTo",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Line",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line"
+          }
+        ],
+        "javadoc": "/**\n * Check if the instance is similar to another line.\n * <p>Lines are considered similar if they contain the same\n * points. This does not mean they are equal since they can have\n * opposite directions.</p>\n * @param line line to which instance should be compared\n * @return true if the lines are similar\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "line",
+            "content": "line to which instance should be compared",
+            "assertion": "assert receiverObjectID.isSimilarTo(args[0]) == true;",
+            "description": "the instance is similar to another line"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if the lines are similar",
+            "assertion": "assert (receiverObjectID.isSimilarTo(args[0])) == true;",
+            "description": "true if the lines are similar"
+          }
+        ],
+        "code": "/**\n * Check if the instance is similar to another line.\n * <p>Lines are considered similar if they contain the same\n * points. This does not mean they are equal since they can have\n * opposite directions.</p>\n * @param line line to which instance should be compared\n * @return true if the lines are similar\n */\npublic boolean isSimilarTo(final Line line) {\n    final double angle = Vector3D.angle(direction, line.direction);\n    return ((angle < tolerance) || (angle > (FastMath.PI - tolerance))) && contains(line.zero);\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          }
+        ],
+        "javadoc": "/**\n * Check if the instance contains a point.\n * @param p point to check\n * @return true if p belongs to the line\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p",
+            "content": "point to check",
+            "assertion": "assert receiverObjectID.getAbscissa(args[0]) instanceof Vector3D;",
+            "description": "p must be a Vector3D"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if p belongs to the line",
+            "assertion": "assert receiverObjectID.contains(p);",
+            "description": "true if p belongs to the line"
+          }
+        ],
+        "code": "/**\n * Check if the instance contains a point.\n * @param p point to check\n * @return true if p belongs to the line\n */\npublic boolean contains(final Vector3D p) {\n    return distance(p) < tolerance;\n}"
+      },
+      {
+        "type": "method",
+        "name": "distance",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Vector3D",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          }
+        ],
+        "javadoc": "/**\n * Compute the distance between the instance and a point.\n * @param p to check\n * @return distance between the instance and the point\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p",
+            "content": "to check",
+            "assertion": "",
+            "description": "to check"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "distance between the instance and the point",
+            "assertion": "assert methodResultID == receiverObjectID.distance(args[0]);",
+            "description": "distance between the instance and the point"
+          }
+        ],
+        "code": "/**\n * Compute the distance between the instance and a point.\n * @param p to check\n * @return distance between the instance and the point\n */\npublic double distance(final Vector3D p) {\n    final Vector3D d = p.subtract(zero);\n    final Vector3D n = new Vector3D(1.0, d, -d.dotProduct(direction), direction);\n    return n.getNorm();\n}"
+      },
+      {
+        "type": "method",
+        "name": "distance",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Line",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line"
+          }
+        ],
+        "javadoc": "/**\n * Compute the shortest distance between the instance and another line.\n * @param line line to check against the instance\n * @return shortest distance between the instance and the line\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "line",
+            "content": "line to check against the instance",
+            "assertion": "assert receiverObjectID instanceof Line;",
+            "description": "the line must be a Line"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "shortest distance between the instance and the line",
+            "assertion": "assert methodResultID == receiverObjectID.distance(line);",
+            "description": "shortest distance between the instance and the line"
+          }
+        ],
+        "code": "/**\n * Compute the shortest distance between the instance and another line.\n * @param line line to check against the instance\n * @return shortest distance between the instance and the line\n */\npublic double distance(final Line line) {\n    final Vector3D normal = Vector3D.crossProduct(direction, line.direction);\n    final double n = normal.getNorm();\n    if (n < Precision.SAFE_MIN) {\n        // lines are parallel\n        return distance(line.zero);\n    }\n    // signed separation of the two parallel planes that contains the lines\n    final double offset = line.zero.subtract(zero).dotProduct(normal) / n;\n    return FastMath.abs(offset);\n}"
+      },
+      {
+        "type": "method",
+        "name": "closestPoint",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Line",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line"
+          }
+        ],
+        "javadoc": "/**\n * Compute the point of the instance closest to another line.\n * @param line line to check against the instance\n * @return point of the instance closest to another line\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "line",
+            "content": "line to check against the instance",
+            "assertion": "assert args[0] != null;",
+            "description": "the line to check against the instance must not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "point of the instance closest to another line",
+            "assertion": "assert receiverObjectID.closestPoint(args[0]) == (receiverObjectID.distance(args[0]) <= receiverObjectID.getTolerance());",
+            "description": "point of the instance closest to another line"
+          }
+        ],
+        "code": "/**\n * Compute the point of the instance closest to another line.\n * @param line line to check against the instance\n * @return point of the instance closest to another line\n */\npublic Vector3D closestPoint(final Line line) {\n    final double cos = direction.dotProduct(line.direction);\n    final double n = 1 - cos * cos;\n    if (n < Precision.EPSILON) {\n        // the lines are parallel\n        return zero;\n    }\n    final Vector3D delta0 = line.zero.subtract(zero);\n    final double a = delta0.dotProduct(direction);\n    final double b = delta0.dotProduct(line.direction);\n    return new Vector3D(1, zero, (a - b * cos) / n, direction);\n}"
+      },
+      {
+        "type": "method",
+        "name": "intersection",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Line",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line"
+          }
+        ],
+        "javadoc": "/**\n * Get the intersection point of the instance and another line.\n * @param line other line\n * @return intersection point of the instance and the other line\n * or null if there are no intersection points\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "line",
+            "content": "other line",
+            "assertion": "assert receiverObjectID.isSimilarTo(args[0]) && receiverObjectID.contains(null) && receiverObjectID.distance(null) > 0;",
+            "description": "line must be a Line"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "intersection point of the instance and the other line\nor null if there are no intersection points",
+            "assertion": "assert methodResultID == (receiverObjectID.intersection(line) != null);",
+            "description": "intersection point of the instance and another line or null if there are no intersection points"
+          }
+        ],
+        "code": "/**\n * Get the intersection point of the instance and another line.\n * @param line other line\n * @return intersection point of the instance and the other line\n * or null if there are no intersection points\n */\npublic Vector3D intersection(final Line line) {\n    final Vector3D closest = closestPoint(line);\n    return line.contains(closest) ? closest : null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "wholeLine",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "SubLine",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Build a sub-line covering the whole line.\n * @return a sub-line covering the whole line\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a sub-line covering the whole line",
+            "assertion": "assert (methodResultID == receiverObjectID.toSpace(receiverObjectID.getAbscissa(0))) ;",
+            "description": "a sub-line covering the whole line"
+          }
+        ],
+        "code": "/**\n * Build a sub-line covering the whole line.\n * @return a sub-line covering the whole line\n */\npublic SubLine wholeLine() {\n    return new SubLine(this, new IntervalsSet(tolerance));\n}"
+      }
+    ]
+  }
+]

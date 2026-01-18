@@ -1,0 +1,358 @@
+[
+  {
+    "method": "nullToEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the string must be non-null",
+          "assertion": "assert args[0] != null;",
+          "name": "string",
+          "content": "&lt;string&gt; must be non-null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "&lt;code&gt;string is not null&lt;/code&gt;.",
+          "assertion": "assert receiverObjectID.string != null && receiverObjectID.string == receiverObjectID.string;",
+          "name": null,
+          "content": "&lt;code&gt;string is not null&lt;/code&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "emptyToNull",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the string must be nonempty",
+          "assertion": "assert args[0] != null && args[0].length() > 0;",
+          "name": "string",
+          "content": "the string to test and possibly return"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "string is nonempty",
+          "assertion": "assert methodResultID != null && receiverObjectID.string.IsNullOrEmpty();",
+          "name": null,
+          "content": "string is nonempty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isNullOrEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the string is null or is the empty string",
+          "assertion": "assert args[0] == null || args[0].isEmpty();",
+          "name": "string",
+          "content": "the string is null or is the empty string"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the given string is null or is the empty string.",
+          "assertion": "assert methodResultID == (receiverObjectID.string == null || receiverObjectID.string.isEmpty());",
+          "name": null,
+          "content": "true if this string is null or is the empty string."
+        }
+      ]
+    }
+  },
+  {
+    "method": "padStart",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minLength"
+      },
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "padChar"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input string must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "string",
+          "content": "&lt;string&gt; must not be null"
+        },
+        {
+          "description": "minLength must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "minLength",
+          "content": "minLength must be non-negative"
+        },
+        {
+          "description": "padChar must not be null",
+          "assertion": "assert args[2] != null;",
+          "name": "padChar",
+          "content": "&lt;char&gt; must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a string of length at least minLength consisting of string prepended with as many copies of padChar as are necessary to reach that length.",
+          "assertion": "assert receiverObjectID.padStart(string, receiverObjectID.minLength, receiverObjectID.padChar) == new String(new char[receiverObjectID.minLength]).equals(receiverObjectID.padStart(string, receiverObjectID.minLength, receiverObjectID.padChar));",
+          "name": null,
+          "content": "a string of length at least minLength consisting of string prepended with as many copies of padChar as are necessary to reach that length."
+        }
+      ]
+    }
+  },
+  {
+    "method": "padEnd",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minLength"
+      },
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "padChar"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "string must be non-null",
+          "assertion": "assert (args[0] != null);",
+          "name": "string",
+          "content": "<p>the string which should appear at the beginning of the result</p>"
+        },
+        {
+          "description": "minLength must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "minLength",
+          "content": "the minimum length the resulting string must have. Can be zero or negative, in which case the input string is always returned."
+        },
+        {
+          "description": "padChar must be a single character",
+          "assertion": "assert ((char)args[2] == (char)args[2]);",
+          "name": "padChar",
+          "content": "the character to append to the end of the result until the minimum length is reached"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a string, of length at least minLength, consisting of string appended with as many copies of padChar as are necessary to reach that length.",
+          "assertion": "assert receiverObjectID.padEnd(args[0], args[1], args[2]) != null && receiverObjectID.padEnd(args[0], args[1], args[2]).length() == (args[0].length() + args[1] * (args[2].length() - 1));",
+          "name": null,
+          "content": "Returns a string, of length at least minLength, consisting of string appended with as many copies of padChar as are necessary to reach that length."
+        }
+      ]
+    }
+  },
+  {
+    "method": "repeat",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "count"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input string must be non-null",
+          "assertion": "assert args[0] != null;",
+          "name": "string",
+          "content": "any non-null string"
+        },
+        {
+          "description": "the count must be a nonnegative integer",
+          "assertion": "assert args[1] >= 0;",
+          "name": "count",
+          "content": "the number of times to repeat it; a nonnegative integer"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a string consisting of a specific number of concatenated copies of an input string.",
+          "assertion": "assert receiverObjectID.repeat(args[1]) == (receiverObjectID.string + \"\");",
+          "name": null,
+          "content": "a string consisting of a specific number of concatenated copies of an input string."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if count is negative",
+          "assertion": "assert args[1] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if count is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "commonPrefix",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "commonSuffix",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "validSurrogatePairAt",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {}
+  }
+]

@@ -1,0 +1,188 @@
+[
+  {
+    "name": "AndPredicate",
+    "package": "org.apache.commons.collections4.functors",
+    "qualified_name": "org.apache.commons.collections4.functors.AndPredicate",
+    "javadoc": "/**\n * Predicate implementation that returns true if both the predicates return true.\n *\n * @since 3.0\n * @version $Id: AndPredicate.java 1686855 2015-06-22 13:00:27Z tn $\n */\n",
+    "code": "/**\n * Predicate implementation that returns true if both the predicates return true.\n *\n * @since 3.0\n * @version $Id: AndPredicate.java 1686855 2015-06-22 13:00:27Z tn $\n */\npublic final class AndPredicate<T> implements PredicateDecorator<T>, Serializable {\n\n    /**\n     * Serial version UID\n     */\n    private static final long serialVersionUID = 4189014213763186912L;\n\n    /**\n     * The array of predicates to call\n     */\n    private final Predicate<? super T> iPredicate1;\n\n    /**\n     * The array of predicates to call\n     */\n    private final Predicate<? super T> iPredicate2;\n\n    /**\n     * Factory to create the predicate.\n     *\n     * @param <T> the type that the predicate queries\n     * @param predicate1  the first predicate to check, not null\n     * @param predicate2  the second predicate to check, not null\n     * @return the <code>and</code> predicate\n     * @throws NullPointerException if either predicate is null\n     */\n    public static <T> Predicate<T> andPredicate(final Predicate<? super T> predicate1, final Predicate<? super T> predicate2) {\n        if (predicate1 == null || predicate2 == null) {\n            throw new NullPointerException(\"Predicate must not be null\");\n        }\n        return new AndPredicate<T>(predicate1, predicate2);\n    }\n\n    /**\n     * Constructor that performs no validation.\n     * Use <code>andPredicate</code> if you want that.\n     *\n     * @param predicate1  the first predicate to check, not null\n     * @param predicate2  the second predicate to check, not null\n     */\n    public AndPredicate(final Predicate<? super T> predicate1, final Predicate<? super T> predicate2) {\n        super();\n        iPredicate1 = predicate1;\n        iPredicate2 = predicate2;\n    }\n\n    /**\n     * Evaluates the predicate returning true if both predicates return true.\n     *\n     * @param object  the input object\n     * @return true if both decorated predicates return true\n     */\n    public boolean evaluate(final T object) {\n        return iPredicate1.evaluate(object) && iPredicate2.evaluate(object);\n    }\n\n    /**\n     * Gets the two predicates being decorated as an array.\n     *\n     * @return the predicates\n     * @since 3.1\n     */\n    @SuppressWarnings(\"unchecked\")\n    public Predicate<? super T>[] getPredicates() {\n        return new Predicate[] { iPredicate1, iPredicate2 };\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "AndPredicate",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate2"
+          }
+        ],
+        "javadoc": "/**\n * Constructor that performs no validation.\n * Use <code>andPredicate</code> if you want that.\n *\n * @param predicate1  the first predicate to check, not null\n * @param predicate2  the second predicate to check, not null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "predicate1",
+            "content": "the first predicate to check, not null",
+            "assertion": "assert args[0] != null;",
+            "description": "predicate1 must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "predicate2",
+            "content": "the second predicate to check, not null",
+            "assertion": "assert args[1] != null;",
+            "description": "predicate2 must not be null"
+          }
+        ],
+        "code": "/**\n * Constructor that performs no validation.\n * Use <code>andPredicate</code> if you want that.\n *\n * @param predicate1  the first predicate to check, not null\n * @param predicate2  the second predicate to check, not null\n */\npublic AndPredicate(final Predicate<? super T> predicate1, final Predicate<? super T> predicate2) {\n    super();\n    iPredicate1 = predicate1;\n    iPredicate2 = predicate2;\n}"
+      },
+      {
+        "type": "method",
+        "name": "andPredicate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Predicate",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "predicate2"
+          }
+        ],
+        "javadoc": "/**\n * Factory to create the predicate.\n *\n * @param <T> the type that the predicate queries\n * @param predicate1  the first predicate to check, not null\n * @param predicate2  the second predicate to check, not null\n * @return the <code>and</code> predicate\n * @throws NullPointerException if either predicate is null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the type that the predicate queries",
+            "assertion": "",
+            "description": "the type that the predicate queries"
+          },
+          {
+            "tag": "param",
+            "name": "predicate1",
+            "content": "the first predicate to check, not null",
+            "assertion": "",
+            "description": "the first predicate to check, not null"
+          },
+          {
+            "tag": "param",
+            "name": "predicate2",
+            "content": "the second predicate to check, not null",
+            "assertion": "",
+            "description": "the second predicate to check, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the <code>and</code> predicate",
+            "assertion": "assert methodResultID == (receiverObjectID.andPredicate(args[0], args[1]));",
+            "description": "the and predicate created from the two predicates."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if either predicate is null",
+            "assertion": "assert args[0]==null || args[1]==null;",
+            "description": "either predicate is null"
+          }
+        ],
+        "code": "/**\n * Factory to create the predicate.\n *\n * @param <T> the type that the predicate queries\n * @param predicate1  the first predicate to check, not null\n * @param predicate2  the second predicate to check, not null\n * @return the <code>and</code> predicate\n * @throws NullPointerException if either predicate is null\n */\npublic static <T> Predicate<T> andPredicate(final Predicate<? super T> predicate1, final Predicate<? super T> predicate2) {\n    if (predicate1 == null || predicate2 == null) {\n        throw new NullPointerException(\"Predicate must not be null\");\n    }\n    return new AndPredicate<T>(predicate1, predicate2);\n}"
+      },
+      {
+        "type": "method",
+        "name": "evaluate",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": "/**\n * Evaluates the predicate returning true if both predicates return true.\n *\n * @param object  the input object\n * @return true if both decorated predicates return true\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "object",
+            "content": "the input object",
+            "assertion": "assert receiverObjectID instanceof java.lang.Object;",
+            "description": "object must be of type java.lang.Object"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if both decorated predicates return true",
+            "assertion": "assert methodResultID == receiverObjectID.andPredicate(args[0], args[1]).evaluate(object);",
+            "description": "true if both decorated predicates return true."
+          }
+        ],
+        "code": "/**\n * Evaluates the predicate returning true if both predicates return true.\n *\n * @param object  the input object\n * @return true if both decorated predicates return true\n */\npublic boolean evaluate(final T object) {\n    return iPredicate1.evaluate(object) && iPredicate2.evaluate(object);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPredicates",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the two predicates being decorated as an array.\n *\n * @return the predicates\n * @since 3.1\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the predicates",
+            "assertion": "assert receiverObjectID.getPredicates()[0] == null && receiverObjectID.getPredicates()[1] == null;",
+            "description": "the predicates"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.1"
+          }
+        ],
+        "code": "/**\n * Gets the two predicates being decorated as an array.\n *\n * @return the predicates\n * @since 3.1\n */\n@SuppressWarnings(\"unchecked\")\npublic Predicate<? super T>[] getPredicates() {\n    return new Predicate[] { iPredicate1, iPredicate2 };\n}"
+      }
+    ]
+  }
+]

@@ -1,0 +1,269 @@
+[
+  {
+    "name": "UnivariateMultiStartOptimizer",
+    "package": "org.apache.commons.math3.optimization.univariate",
+    "qualified_name": "org.apache.commons.math3.optimization.univariate.UnivariateMultiStartOptimizer",
+    "javadoc": "/**\n * Special implementation of the {@link UnivariateOptimizer} interface\n * adding multi-start features to an existing optimizer.\n *\n * This class wraps a classical optimizer to use it several times in\n * turn with different starting points in order to avoid being trapped\n * into a local extremum when looking for a global one.\n *\n * @param <FUNC> Type of the objective function to be optimized.\n *\n * @deprecated As of 3.1 (to be removed in 4.0).\n * @since 3.0\n */\n",
+    "code": "/**\n * Special implementation of the {@link UnivariateOptimizer} interface\n * adding multi-start features to an existing optimizer.\n *\n * This class wraps a classical optimizer to use it several times in\n * turn with different starting points in order to avoid being trapped\n * into a local extremum when looking for a global one.\n *\n * @param <FUNC> Type of the objective function to be optimized.\n *\n * @deprecated As of 3.1 (to be removed in 4.0).\n * @since 3.0\n */\n@Deprecated\npublic class UnivariateMultiStartOptimizer<FUNC extends UnivariateFunction> implements BaseUnivariateOptimizer<FUNC> {\n\n    /**\n     * Underlying classical optimizer.\n     */\n    private final BaseUnivariateOptimizer<FUNC> optimizer;\n\n    /**\n     * Maximal number of evaluations allowed.\n     */\n    private int maxEvaluations;\n\n    /**\n     * Number of evaluations already performed for all starts.\n     */\n    private int totalEvaluations;\n\n    /**\n     * Number of starts to go.\n     */\n    private int starts;\n\n    /**\n     * Random generator for multi-start.\n     */\n    private RandomGenerator generator;\n\n    /**\n     * Found optima.\n     */\n    private UnivariatePointValuePair[] optima;\n\n    /**\n     * Create a multi-start optimizer from a single-start optimizer.\n     *\n     * @param optimizer Single-start optimizer to wrap.\n     * @param starts Number of starts to perform. If {@code starts == 1},\n     * the {@code optimize} methods will return the same solution as\n     * {@code optimizer} would.\n     * @param generator Random generator to use for restarts.\n     * @throws NullArgumentException if {@code optimizer} or {@code generator}\n     * is {@code null}.\n     * @throws NotStrictlyPositiveException if {@code starts < 1}.\n     */\n    public UnivariateMultiStartOptimizer(final BaseUnivariateOptimizer<FUNC> optimizer, final int starts, final RandomGenerator generator) {\n        if (optimizer == null || generator == null) {\n            throw new NullArgumentException();\n        }\n        if (starts < 1) {\n            throw new NotStrictlyPositiveException(starts);\n        }\n        this.optimizer = optimizer;\n        this.starts = starts;\n        this.generator = generator;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public ConvergenceChecker<UnivariatePointValuePair> getConvergenceChecker() {\n        return optimizer.getConvergenceChecker();\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public int getMaxEvaluations() {\n        return maxEvaluations;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public int getEvaluations() {\n        return totalEvaluations;\n    }\n\n    /**\n     * Get all the optima found during the last call to {@link\n     * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}.\n     * The optimizer stores all the optima found during a set of\n     * restarts. The {@link #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n     * method returns the best point only. This method returns all the points\n     * found at the end of each starts, including the best one already\n     * returned by the {@link #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n     * method.\n     * <br/>\n     * The returned array as one element for each start as specified\n     * in the constructor. It is ordered with the results from the\n     * runs that did converge first, sorted from best to worst\n     * objective value (i.e in ascending order if minimizing and in\n     * descending order if maximizing), followed by {@code null} elements\n     * corresponding to the runs that did not converge. This means all\n     * elements will be {@code null} if the {@link\n     * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n     * method did throw an exception.\n     * This also means that if the first element is not {@code null}, it is\n     * the best point found across all starts.\n     *\n     * @return an array containing the optima.\n     * @throws MathIllegalStateException if {@link\n     * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n     * has not been called.\n     */\n    public UnivariatePointValuePair[] getOptima() {\n        if (optima == null) {\n            throw new MathIllegalStateException(LocalizedFormats.NO_OPTIMUM_COMPUTED_YET);\n        }\n        return optima.clone();\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public UnivariatePointValuePair optimize(int maxEval, final FUNC f, final GoalType goal, final double min, final double max) {\n        return optimize(maxEval, f, goal, min, max, min + 0.5 * (max - min));\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public UnivariatePointValuePair optimize(int maxEval, final FUNC f, final GoalType goal, final double min, final double max, final double startValue) {\n        RuntimeException lastException = null;\n        optima = new UnivariatePointValuePair[starts];\n        totalEvaluations = 0;\n        // Multi-start loop.\n        for (int i = 0; i < starts; ++i) {\n            // CHECKSTYLE: stop IllegalCatch\n            try {\n                final double s = (i == 0) ? startValue : min + generator.nextDouble() * (max - min);\n                optima[i] = optimizer.optimize(maxEval - totalEvaluations, f, goal, min, max, s);\n            } catch (RuntimeException mue) {\n                lastException = mue;\n                optima[i] = null;\n            }\n            // CHECKSTYLE: resume IllegalCatch\n            totalEvaluations += optimizer.getEvaluations();\n        }\n        sortPairs(goal);\n        if (optima[0] == null) {\n            // cannot be null if starts >=1\n            throw lastException;\n        }\n        // Return the point with the best objective function value.\n        return optima[0];\n    }\n\n    /**\n     * Sort the optima from best to worst, followed by {@code null} elements.\n     *\n     * @param goal Goal type.\n     */\n    private void sortPairs(final GoalType goal) {\n        Arrays.sort(optima, new Comparator<UnivariatePointValuePair>() {\n\n            /**\n             * {@inheritDoc}\n             */\n            public int compare(final UnivariatePointValuePair o1, final UnivariatePointValuePair o2) {\n                if (o1 == null) {\n                    return (o2 == null) ? 0 : 1;\n                } else if (o2 == null) {\n                    return -1;\n                }\n                final double v1 = o1.getValue();\n                final double v2 = o2.getValue();\n                return (goal == GoalType.MINIMIZE) ? Double.compare(v1, v2) : Double.compare(v2, v1);\n            }\n        });\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "UnivariateMultiStartOptimizer",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BaseUnivariateOptimizer",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "optimizer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "starts"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "RandomGenerator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "generator"
+          }
+        ],
+        "javadoc": "/**\n * Create a multi-start optimizer from a single-start optimizer.\n *\n * @param optimizer Single-start optimizer to wrap.\n * @param starts Number of starts to perform. If {@code starts == 1},\n * the {@code optimize} methods will return the same solution as\n * {@code optimizer} would.\n * @param generator Random generator to use for restarts.\n * @throws NullArgumentException if {@code optimizer} or {@code generator}\n * is {@code null}.\n * @throws NotStrictlyPositiveException if {@code starts < 1}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "optimizer",
+            "content": "Single-start optimizer to wrap."
+          },
+          {
+            "tag": "param",
+            "name": "starts",
+            "content": "Number of starts to perform. If {@code starts == 1},\nthe {@code optimize} methods will return the same solution as\n{@code optimizer} would."
+          },
+          {
+            "tag": "param",
+            "name": "generator",
+            "content": "Random generator to use for restarts."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code optimizer} or {@code generator}\nis {@code null}."
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code starts < 1}."
+          }
+        ],
+        "code": "/**\n * Create a multi-start optimizer from a single-start optimizer.\n *\n * @param optimizer Single-start optimizer to wrap.\n * @param starts Number of starts to perform. If {@code starts == 1},\n * the {@code optimize} methods will return the same solution as\n * {@code optimizer} would.\n * @param generator Random generator to use for restarts.\n * @throws NullArgumentException if {@code optimizer} or {@code generator}\n * is {@code null}.\n * @throws NotStrictlyPositiveException if {@code starts < 1}.\n */\npublic UnivariateMultiStartOptimizer(final BaseUnivariateOptimizer<FUNC> optimizer, final int starts, final RandomGenerator generator) {\n    if (optimizer == null || generator == null) {\n        throw new NullArgumentException();\n    }\n    if (starts < 1) {\n        throw new NotStrictlyPositiveException(starts);\n    }\n    this.optimizer = optimizer;\n    this.starts = starts;\n    this.generator = generator;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getConvergenceChecker",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ConvergenceChecker",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic ConvergenceChecker<UnivariatePointValuePair> getConvergenceChecker() {\n    return optimizer.getConvergenceChecker();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getMaxEvaluations",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic int getMaxEvaluations() {\n    return maxEvaluations;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEvaluations",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic int getEvaluations() {\n    return totalEvaluations;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getOptima",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "UnivariatePointValuePair",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get all the optima found during the last call to {@link\n * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}.\n * The optimizer stores all the optima found during a set of\n * restarts. The {@link #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * method returns the best point only. This method returns all the points\n * found at the end of each starts, including the best one already\n * returned by the {@link #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * method.\n * <br/>\n * The returned array as one element for each start as specified\n * in the constructor. It is ordered with the results from the\n * runs that did converge first, sorted from best to worst\n * objective value (i.e in ascending order if minimizing and in\n * descending order if maximizing), followed by {@code null} elements\n * corresponding to the runs that did not converge. This means all\n * elements will be {@code null} if the {@link\n * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * method did throw an exception.\n * This also means that if the first element is not {@code null}, it is\n * the best point found across all starts.\n *\n * @return an array containing the optima.\n * @throws MathIllegalStateException if {@link\n * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * has not been called.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "an array containing the optima."
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalStateException",
+            "content": "if {@link\n#optimize(int,UnivariateFunction,GoalType,double,double) optimize}\nhas not been called."
+          }
+        ],
+        "code": "/**\n * Get all the optima found during the last call to {@link\n * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}.\n * The optimizer stores all the optima found during a set of\n * restarts. The {@link #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * method returns the best point only. This method returns all the points\n * found at the end of each starts, including the best one already\n * returned by the {@link #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * method.\n * <br/>\n * The returned array as one element for each start as specified\n * in the constructor. It is ordered with the results from the\n * runs that did converge first, sorted from best to worst\n * objective value (i.e in ascending order if minimizing and in\n * descending order if maximizing), followed by {@code null} elements\n * corresponding to the runs that did not converge. This means all\n * elements will be {@code null} if the {@link\n * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * method did throw an exception.\n * This also means that if the first element is not {@code null}, it is\n * the best point found across all starts.\n *\n * @return an array containing the optima.\n * @throws MathIllegalStateException if {@link\n * #optimize(int,UnivariateFunction,GoalType,double,double) optimize}\n * has not been called.\n */\npublic UnivariatePointValuePair[] getOptima() {\n    if (optima == null) {\n        throw new MathIllegalStateException(LocalizedFormats.NO_OPTIMUM_COMPUTED_YET);\n    }\n    return optima.clone();\n}"
+      },
+      {
+        "type": "method",
+        "name": "optimize",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "UnivariatePointValuePair",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxEval"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "f"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "GoalType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "goal"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "min"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "max"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic UnivariatePointValuePair optimize(int maxEval, final FUNC f, final GoalType goal, final double min, final double max) {\n    return optimize(maxEval, f, goal, min, max, min + 0.5 * (max - min));\n}"
+      },
+      {
+        "type": "method",
+        "name": "optimize",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "UnivariatePointValuePair",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxEval"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "f"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "GoalType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "goal"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "min"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "max"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "startValue"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic UnivariatePointValuePair optimize(int maxEval, final FUNC f, final GoalType goal, final double min, final double max, final double startValue) {\n    RuntimeException lastException = null;\n    optima = new UnivariatePointValuePair[starts];\n    totalEvaluations = 0;\n    // Multi-start loop.\n    for (int i = 0; i < starts; ++i) {\n        // CHECKSTYLE: stop IllegalCatch\n        try {\n            final double s = (i == 0) ? startValue : min + generator.nextDouble() * (max - min);\n            optima[i] = optimizer.optimize(maxEval - totalEvaluations, f, goal, min, max, s);\n        } catch (RuntimeException mue) {\n            lastException = mue;\n            optima[i] = null;\n        }\n        // CHECKSTYLE: resume IllegalCatch\n        totalEvaluations += optimizer.getEvaluations();\n    }\n    sortPairs(goal);\n    if (optima[0] == null) {\n        // cannot be null if starts >=1\n        throw lastException;\n    }\n    // Return the point with the best objective function value.\n    return optima[0];\n}"
+      }
+    ]
+  }
+]

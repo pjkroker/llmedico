@@ -1,0 +1,70 @@
+[
+  {
+    "method": "interpolate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "x must be an array of doubles",
+          "assertion": "assert ((args[0].type.qualified_name == \"double\") && (args[0].is_array)) && (args[0].array_dimensions == 1);",
+          "name": "x",
+          "content": "<pre>the arguments for the interpolation points</pre>"
+        },
+        {
+          "description": "y must be an array of doubles",
+          "assertion": "assert ((args[1].type.qualified_name == \"double\") && (args[1].is_array)) && (args[1].array_dimensions == 1);",
+          "name": "y",
+          "content": "<pre>the values for the interpolation points</pre>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a function which interpolates the data set",
+          "assertion": "assert receiverObjectID.interpolate(args[0], args[1]) == null;",
+          "name": null,
+          "content": "a function which interpolates the data set"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if x and y have different sizes.",
+          "assertion": "assert args[0].length!=args[1].length;",
+          "name": "DimensionMismatchException",
+          "content": "if {@code x} and {@code y} have different sizes."
+        },
+        {
+          "description": "if x is not sorted in strict increasing order.",
+          "assertion": "assert !isSorted(args[0]);",
+          "name": "NonMonotonicSequenceException",
+          "content": "if {@code x} is not sorted in strict increasing order."
+        },
+        {
+          "description": "if the size of x is smaller than 2.",
+          "assertion": "assert args[0].length<2;",
+          "name": "NumberIsTooSmallException",
+          "content": "if the size of {@code x} is smaller than 2."
+        }
+      ]
+    }
+  }
+]

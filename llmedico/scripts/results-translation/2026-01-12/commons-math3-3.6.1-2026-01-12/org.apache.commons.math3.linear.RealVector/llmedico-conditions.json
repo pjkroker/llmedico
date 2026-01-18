@@ -1,0 +1,2256 @@
+[
+  {
+    "method": "getDimension",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the size of this vector.",
+          "assertion": "assert methodResultID == receiverObjectID.getDimension();",
+          "name": null,
+          "content": "the size of this vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getEntry",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the index must be valid",
+          "assertion": "assert receiverObjectID.checkIndex(args[0]);",
+          "name": "index",
+          "content": "&lt;code&gt;Index location of entry to be fetched&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "returns the vector entry at the specified index.",
+          "assertion": "assert result == receiver.getEntry(args[0]);",
+          "name": null,
+          "content": "the vector entry at the specified index."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "OutOfRangeException",
+          "content": "if the index is not valid.",
+          "assertion": "",
+          "description": "if the index is not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "setEntry",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "index must be valid",
+          "assertion": "assert receiverObjectID.getDimension() >= 0 && receiverObjectID.getDimension() <= args[0];",
+          "name": "index",
+          "content": "element index."
+        },
+        {
+          "description": "value must not be NaN or infinite",
+          "assertion": "assert !receiverObjectID.isNaN() && !receiverObjectID.isInfinite();",
+          "name": "value",
+          "content": "new value for the element."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "OutOfRangeException",
+          "content": "if the index is not valid.",
+          "assertion": "",
+          "description": "if the index is not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "addToEntry",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "increment"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Index location of entry to be set must be valid",
+          "assertion": "assert receiverObjectID.checkIndex(args[0]) && args[0] >= 0;",
+          "name": "index",
+          "content": "Index location of entry to be set must be valid"
+        },
+        {
+          "description": "Value to add to the vector entry must not be NaN or infinite",
+          "assertion": "assert !receiverObjectID.isNaN(args[1]) && !receiverObjectID.isInfinite(args[1]) && args[1] != Double.NEGATIVE_INFINITY && args[1] != Double.POSITIVE_INFINITY;",
+          "name": "increment",
+          "content": "Value to add to the vector entry must not be NaN or infinite"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "OutOfRangeException",
+          "content": "if the index is not valid.",
+          "assertion": "",
+          "description": "if the index is not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the vector to append must be of type RealVector",
+          "assertion": "assert receiverObjectID.getDimension() == 1;",
+          "name": "v",
+          "content": "vector to append to this one"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new vector.",
+          "assertion": "",
+          "description": "a new vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "d",
+          "content": "double to append.",
+          "assertion": "",
+          "description": "double to append."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new vector.",
+          "assertion": "",
+          "description": "a new vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getSubVector",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "index must be valid",
+          "assertion": "assert receiverObjectID.getDimension() >= 0 && receiverObjectID.checkIndex(args[0]) == true;",
+          "name": "index",
+          "content": "index must be valid"
+        },
+        {
+          "description": "n must be positive",
+          "assertion": "assert args[1] > 0 && receiverObjectID.checkVectorDimensions(args[1]) == true;",
+          "name": "n",
+          "content": "the number of elements to be retrieved; must be positive"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the vector must be of dimension n.",
+          "assertion": "assert result instanceof RealVector && ((RealVector) result).getDimension() == n;",
+          "name": null,
+          "content": "the vector must be of dimension n."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if index is not valid.",
+          "assertion": "assert !receiverObjectID.checkIndex(args[0]);",
+          "name": "OutOfRangeException",
+          "content": "if index is not valid."
+        },
+        {
+          "description": "if n is not positive.",
+          "assertion": "assert args[1] > 0;",
+          "name": "NotPositiveException",
+          "content": "if n is not positive."
+        }
+      ]
+    }
+  },
+  {
+    "method": "setSubVector",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the index must be valid",
+          "assertion": "assert (receiverObjectID.getDimension() > 0 && receiverObjectID.checkIndex(args[0]));",
+          "name": "index",
+          "content": "index must be valid"
+        },
+        {
+          "description": "the vector v must not be null and its dimensions must be valid",
+          "assertion": "assert (args[1] != null && receiverObjectID.checkVectorDimensions(args[1]));",
+          "name": "v",
+          "content": "vector containing the values to set"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "OutOfRangeException",
+          "content": "if the index is not valid.",
+          "assertion": "",
+          "description": "if the index is not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isNaN",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if any coordinate of this vector is NaN.",
+          "assertion": "assert methodResultID == receiverObjectID.isNaN();",
+          "name": null,
+          "content": "true if any coordinate of this vector is NaN."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isInfinite",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if any coordinate of this vector is infinite and none are NaN.",
+          "assertion": "assert methodResultID == !receiverObjectID.isInfinite() || receiverObjectID.isnan();",
+          "name": null,
+          "content": "true if any coordinate of this vector is infinite and none are NaN."
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkVectorDimensions",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the vectors must have the same dimension",
+          "assertion": "assert receiverObjectID.getDimension() == args[0].array_dimensions;",
+          "name": "v",
+          "content": "Vector to compare instance with."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the vectors do not have the same dimension",
+          "assertion": "assert receiverObjectID.getDimension() != args[0].getDimension();",
+          "name": "DimensionMismatchException",
+          "content": "if the vectors do not have the same dimension"
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkVectorDimensions",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "n must be equal to instance dimension",
+          "assertion": "assert receiverObjectID.getDimension() == args[0];",
+          "name": "n",
+          "content": "instance dimension"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "instance dimension is equal to some expected value",
+          "assertion": "assert receiverObjectID.getDimension() == args[0];",
+          "name": "DimensionMismatchException",
+          "content": "if instance dimension is equal to some expected value"
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkIndex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "index",
+          "content": "Index to check.",
+          "assertion": "",
+          "description": "Index to check."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if index is not valid.",
+          "assertion": "assert !receiverObjectID.getDimension() >= 0 && receiverObjectID.getEntry(args[0]) != Double.NEGATIVE_INFINITY && receiverObjectID.getEntry(args[0]) != Double.POSITIVE_INFINITY;",
+          "name": "OutOfRangeException",
+          "content": "if index is not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkIndices",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "start must be non-negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "start",
+          "content": "the index of the first entry of the subvector"
+        },
+        {
+          "description": "end must be greater than or equal to start and not out of range",
+          "assertion": "assert (args[0] <= args[1]) && (args[1] - args[0] < getDimension());",
+          "name": "end",
+          "content": "the index of the last entry of the subvector (inclusive)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if start of end are not valid",
+          "assertion": "assert args[0] >= 0 && args[1] > args[0];",
+          "name": "OutOfRangeException",
+          "content": "if start of end are not valid"
+        },
+        {
+          "description": "if end < start",
+          "assertion": "assert args[0] <= args[1];",
+          "name": "NumberIsTooSmallException",
+          "content": "if end < start"
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID.getDimension() == 0 && receiverObjectID instanceof RealVector;",
+          "name": "v",
+          "content": "&lt;code&gt;RealVector&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "{@code this} + {@code v}.",
+          "assertion": "",
+          "description": "{@code this} + {@code v}."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if v is not the same size as this vector.",
+          "assertion": "assert receiverObjectID.getDimension() != args[0].getDimension();",
+          "name": "DimensionMismatchException",
+          "content": "if v is not the same size as this vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert args[0] instanceof RealVector;",
+          "name": "v",
+          "content": "Vector to be subtracted."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "{@code this} - {@code v}.",
+          "assertion": "",
+          "description": "{@code this} - {@code v}."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code v} is not the same size as\n{@code this} vector.",
+          "assertion": "",
+          "description": "if {@code v} is not the same size as\n{@code this} vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapAdd",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "d",
+          "content": "Value to be added to each entry.",
+          "assertion": "",
+          "description": "Value to be added to each entry."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "{@code this} + {@code d}.",
+          "assertion": "",
+          "description": "{@code this} + {@code d}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapAddToSelf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "d must be of type double",
+          "assertion": "assert args[0] instanceof java.lang.Double;",
+          "name": "d",
+          "content": "&lt;double&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance after adding a value to each entry.",
+          "assertion": "assert methodResultID == receiverObjectID.mapAddToSelf(args[0]);",
+          "name": null,
+          "content": "this instance after adding a value to each entry."
+        }
+      ]
+    }
+  },
+  {
+    "method": "copy",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a vector copy.",
+          "assertion": "assert methodResultID == receiverObjectID.copy();",
+          "name": null,
+          "content": "a vector copy."
+        }
+      ]
+    }
+  },
+  {
+    "method": "dotProduct",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID instanceof RealVector;",
+          "name": "v",
+          "content": "&lt;code&gt;RealVector&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the scalar dot product between this instance and {@code v}.",
+          "assertion": "",
+          "description": "the scalar dot product between this instance and {@code v}."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code v} is not the same size as\n{@code this} vector.",
+          "assertion": "",
+          "description": "if {@code v} is not the same size as\n{@code this} vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "cosine",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a Vector",
+          "assertion": "assert receiverObjectID.getDimension() == 0 && receiverObjectID instanceof RealVector;",
+          "name": "v",
+          "content": "&lt;vector&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the cosine of the angle between this vector and {@code v}",
+          "assertion": "assert result == v.cosine(this);",
+          "name": null,
+          "content": "the cosine of the angle between this vector and {@code v}"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if this or v is the null vector",
+          "assertion": "assert receiverObjectID.isNaN() && receiverObjectID.getNorm()==0;",
+          "name": "MathArithmeticException",
+          "content": "if this or v is the null vector"
+        },
+        {
+          "description": "if the dimensions of this and v do not match",
+          "assertion": "assert receiverObjectID.getDimension()!=receiverObjectID.getNorm();",
+          "name": "DimensionMismatchException",
+          "content": "if the dimensions of this and v do not match"
+        }
+      ]
+    }
+  },
+  {
+    "method": "ebeDivide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID instanceof com.example.RealVector;",
+          "name": "v",
+          "content": "&lt;div&gt;Vector by which instance elements must be divided&lt;/div&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Element-by-element division. The result is a vector containing this[i] / v[i] for all i.",
+          "assertion": "assert result instanceof RealVector && ((RealVector) result).getDimension() == 0;",
+          "name": null,
+          "content": "The return value of the ebeDivide method is an instance of RealVector and has a dimension of 0, indicating that it's an empty vector."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if v is not the same size as this vector.",
+          "assertion": "assert receiverObjectID.getDimension() != args[0].getDimension();",
+          "name": "DimensionMismatchException",
+          "content": "if v is not the same size as this vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "ebeMultiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID instanceof com.simsio.math.vector.RealVector && args[0] != null;",
+          "name": "v",
+          "content": "&lt;code&gt;RealVector&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a vector containing this[i] * v[i] for all i.",
+          "assertion": "",
+          "description": "a vector containing this[i] * v[i] for all i."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if v is not the same size as this vector.",
+          "assertion": "assert receiverObjectID.getDimension() != args[0].getDimension();",
+          "name": "DimensionMismatchException",
+          "content": "if v is not the same size as this vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDistance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the vector v must not be null",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "v",
+          "content": "&lt;code&gt;the vector v must not be null&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the distance between two vectors.",
+          "assertion": "",
+          "description": "the distance between two vectors."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if v is not the same size as this vector.",
+          "assertion": "assert receiverObjectID.getDimension() != args[0].getDimension();",
+          "name": "DimensionMismatchException",
+          "content": "if v is not the same size as this vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNorm",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the norm.",
+          "assertion": "",
+          "description": "the norm."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getL1Norm",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the norm.",
+          "assertion": "",
+          "description": "the norm."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getLInfNorm",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the norm.",
+          "assertion": "",
+          "description": "the norm."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getL1Distance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID instanceof com.example.RealVector;",
+          "name": "v",
+          "content": "<p>This method computes the distance consistent with L<sub>1</sub> norm, i.e. the sum of the absolute values of the elements differences.</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the distance between two vectors.",
+          "assertion": "",
+          "description": "the distance between two vectors."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code v} is not the same size as\n{@code this} vector.",
+          "assertion": "",
+          "description": "if {@code v} is not the same size as\n{@code this} vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getLInfDistance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID instanceof RealVector;",
+          "name": "v",
+          "content": "Vector to which distance is requested."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the distance between two vectors.",
+          "assertion": "",
+          "description": "the distance between two vectors."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code v} is not the same size as\n{@code this} vector.",
+          "assertion": "",
+          "description": "if {@code v} is not the same size as\n{@code this} vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMinIndex",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the index of the minimum entry or -1 if vector length is 0\nor all entries are {@code NaN}.",
+          "assertion": "",
+          "description": "the index of the minimum entry or -1 if vector length is 0\nor all entries are {@code NaN}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMinValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the value of the minimum entry or NaN if all entries are NaN.",
+          "assertion": "assert methodResultID == (receiverObjectID.getMinValue() != receiverObjectID.isNaN());",
+          "name": null,
+          "content": "the value of the minimum entry or NaN if all entries are NaN."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMaxIndex",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the index of the maximum entry or -1 if vector length is 0 or all entries are NaN",
+          "assertion": "assert methodResultID == (receiverObjectID.getDimension() > 0 ? receiverObjectID.getMaxIndex() : -1);",
+          "name": null,
+          "content": "the index of the maximum entry or -1 if vector length is 0 or all entries are NaN"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMaxValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the value of the maximum entry or NaN if all entries are NaN.",
+          "assertion": "assert methodResultID == getMaxValue();",
+          "name": null,
+          "content": "the value of the maximum entry or NaN if all entries are NaN."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapMultiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "d must be a positive double",
+          "assertion": "assert args[0] > 0.0;",
+          "name": "d",
+          "content": "&lt;double&gt; Multiplication factor."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "{@code this} * {@code d}.",
+          "assertion": "",
+          "description": "{@code this} * {@code d}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapMultiplyToSelf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "d must be a positive double",
+          "assertion": "assert args[0] > 0;",
+          "name": "d",
+          "content": "Multiplication factor."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this instance was changed in-place by multiplication.",
+          "assertion": "assert methodResultID == receiverObjectID.mapMultiplyToSelf(args[0]);",
+          "name": null,
+          "content": "true if this instance was changed in-place by multiplication."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapSubtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "d must be of type double",
+          "assertion": "assert (double) args[0];",
+          "name": "d",
+          "content": "&lt;double&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns a new vector with the specified value subtracted from each entry.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.mapSubtract(args[0]));",
+          "name": null,
+          "content": "Returns a new vector with the specified value subtracted from each entry."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapSubtractToSelf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "d",
+          "content": "Value to be subtracted.",
+          "assertion": "",
+          "description": "Value to be subtracted."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this instance did not change after subtracting a value from each entry.",
+          "assertion": "assert methodResultID == receiverObjectID.mapSubtractToSelf(args[0]).equals(this);",
+          "name": null,
+          "content": "true if this instance did not change after subtracting a value from each entry."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapDivide",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "d must be non-zero",
+          "assertion": "assert args[0] != 0;",
+          "name": "d",
+          "content": "Value to divide by."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "{@code this} / {@code d}.",
+          "assertion": "",
+          "description": "{@code this} / {@code d}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapDivideToSelf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "d"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "d must be a double",
+          "assertion": "assert args[0] instanceof java.lang.Double;",
+          "name": "d",
+          "content": "Value to divide by."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this after division by d",
+          "assertion": "assert methodResultID.equals(receiverObjectID.mapDivideToSelf(args[0]));",
+          "name": null,
+          "content": "this after division by d"
+        }
+      ]
+    }
+  },
+  {
+    "method": "outerProduct",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID instanceof RealVector;",
+          "name": "v",
+          "content": "Vector with which outer product should be computed."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the matrix outer product between this instance and {@code v}.",
+          "assertion": "assert methodResultID == receiverObjectID.outerProduct(args[0]);",
+          "name": null,
+          "content": "the matrix outer product between this instance and {@code v}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "projection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a RealVector",
+          "assertion": "assert receiverObjectID instanceof RealVector;",
+          "name": "v",
+          "content": "&lt;RealVector&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "assert result instanceof RealVector && ((RealVector) result).getDimension() == 0;",
+          "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+          "name": null,
+          "content": "assert result instanceof RealVector && ((RealVector) result).getDimension() == 0;"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if v is not the same size as this vector.",
+          "assertion": "assert receiverObjectID.getDimension() != args[0];",
+          "name": "DimensionMismatchException",
+          "content": "if {@code v} is not the same size as {@code this} vector."
+        },
+        {
+          "description": "if this or v is the null vector.",
+          "assertion": "assert receiverObjectID.getNorm() != 0.0 && args[0]==null;",
+          "name": "MathArithmeticException",
+          "content": "if {@code this} or {@code v} is the null vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "set",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "value",
+          "content": "Single value to set for all elements.",
+          "assertion": "",
+          "description": "Single value to set for all elements."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toArray",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "an array containing a copy of the vector elements.",
+          "assertion": "",
+          "description": "an array containing a copy of the vector elements."
+        }
+      ]
+    }
+  },
+  {
+    "method": "unitVector",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a unit vector pointing in direction of this vector.",
+          "assertion": "assert methodResultID == receiverObjectID.unitVector();",
+          "name": null,
+          "content": "a unit vector pointing in direction of this vector."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the norm is zero",
+          "assertion": "assert receiverObjectID.getNorm() == 0;",
+          "name": "MathArithmeticException",
+          "content": "if the norm is zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "unitize",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if the norm is zero.",
+          "assertion": "assert receiverObjectID.getNorm() == 0;",
+          "name": "MathArithmeticException",
+          "content": "if the norm is zero."
+        }
+      ]
+    }
+  },
+  {
+    "method": "sparseIterator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a sparse iterator.",
+          "assertion": "",
+          "description": "a sparse iterator."
+        }
+      ]
+    }
+  },
+  {
+    "method": "iterator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a dense iterator.",
+          "assertion": "assert methodResultID == receiverObjectID.iterator();",
+          "name": null,
+          "content": "a dense iterator."
+        }
+      ]
+    }
+  },
+  {
+    "method": "map",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "UnivariateFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "function"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "function",
+          "content": "Function to apply to each entry.",
+          "assertion": "",
+          "description": "Function to apply to each entry."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new vector.",
+          "assertion": "",
+          "description": "a new vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "mapToSelf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "UnivariateFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "function"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "function",
+          "content": "Function to apply to each entry.",
+          "assertion": "",
+          "description": "Function to apply to each entry."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a reference to this vector.",
+          "assertion": "",
+          "description": "a reference to this vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "combine",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "Coefficient of {@code this}.",
+          "assertion": "",
+          "description": "Coefficient of {@code this}."
+        },
+        {
+          "tag": "param",
+          "name": "b",
+          "content": "Coefficient of {@code y}.",
+          "assertion": "",
+          "description": "Coefficient of {@code y}."
+        },
+        {
+          "tag": "param",
+          "name": "y",
+          "content": "Vector with which {@code this} is linearly combined.",
+          "assertion": "",
+          "description": "Vector with which {@code this} is linearly combined."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a vector containing {@code a * this[i] + b * y[i]} for all\n{@code i}.",
+          "assertion": "",
+          "description": "a vector containing {@code a * this[i] + b * y[i]} for all\n{@code i}."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if y is not of type RealVector.",
+          "assertion": "assert !receiverObjectID instanceof RealVector;",
+          "name": "DimensionMismatchException",
+          "content": "if y is not of type RealVector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "combineToSelf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a must be between 0.0 and 1.0",
+          "assertion": "assert args[0] >= 0.0 && args[0] <= 1.0;",
+          "name": "a",
+          "content": "Weight of this."
+        },
+        {
+          "description": "b must be between 0.0 and 1.0",
+          "assertion": "assert args[1] >= 0.0 && args[1] <= 1.0;",
+          "name": "b",
+          "content": "Weight of y."
+        },
+        {
+          "description": "y must not be null and must have the same size as this vector",
+          "assertion": "assert (args[2] != null) && ((args[2].getDimension() == this.getDimension()) || (this.getDimension() == 1 && args[2].getDimension() == 0));",
+          "name": "y",
+          "content": "Vector with which this is linearly combined."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "{@code this}, with components equal to\n{@code a * this[i] + b * y[i]} for all {@code i}.",
+          "assertion": "",
+          "description": "{@code this}, with components equal to\n{@code a * this[i] + b * y[i]} for all {@code i}."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code y} is not the same size as\n{@code this} vector.",
+          "assertion": "",
+          "description": "if {@code y} is not the same size as\n{@code this} vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInDefaultOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorPreservingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be an instance of RealVectorPreservingVisitor",
+          "assertion": "assert receiverObjectID instanceof RealVectorPreservingVisitor;",
+          "name": "visitor",
+          "content": "&lt;code&gt;must be an instance of RealVectorPreservingVisitor&lt;/code&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk",
+          "assertion": "",
+          "description": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk"
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInDefaultOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorPreservingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be of type RealVectorPreservingVisitor",
+          "assertion": "assert args[0] instanceof RealVectorPreservingVisitor;",
+          "name": "visitor",
+          "content": "visitor to be used to process the entries of this vector"
+        },
+        {
+          "description": "start must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "start",
+          "content": "the index of the first entry to be visited"
+        },
+        {
+          "description": "end must be non-negative and greater than or equal to start",
+          "assertion": "assert args[2] > 0 && args[2] >= args[1];",
+          "name": "end",
+          "content": "the index of the last entry to be visited (inclusive)"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk",
+          "assertion": "",
+          "description": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if end < start.",
+          "assertion": "assert args[2] <= args[1];",
+          "name": "NumberIsTooSmallException",
+          "content": "if end < start."
+        },
+        {
+          "description": "if the indices are not valid.",
+          "assertion": "assert !receiverObjectID.checkIndices(args[1], args[2]);",
+          "name": "OutOfRangeException",
+          "content": "if the indices are not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInOptimizedOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorPreservingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the visitor must be of type RealVectorPreservingVisitor",
+          "assertion": "assert args[0] instanceof com.example.RealVectorPreservingVisitor;",
+          "name": "visitor",
+          "content": "the visitor to be used to process the entries of this vector"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk",
+          "assertion": "",
+          "description": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk"
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInOptimizedOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorPreservingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the visitor must be of type RealVectorPreservingVisitor",
+          "assertion": "assert args[0] instanceof RealVectorPreservingVisitor;",
+          "name": "visitor",
+          "content": "visitor must be of type RealVectorPreservingVisitor"
+        },
+        {
+          "description": "start must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "start",
+          "content": "start must be non-negative"
+        },
+        {
+          "description": "end must be greater than or equal to start",
+          "assertion": "assert args[2] >= start;",
+          "name": "end",
+          "content": "end must be greater than or equal to start"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk",
+          "assertion": "",
+          "description": "the value returned by {@link RealVectorPreservingVisitor#end()}\nat the end of the walk"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NumberIsTooSmallException",
+          "content": "if {@code end < start}.",
+          "assertion": "",
+          "description": "if {@code end < start}."
+        },
+        {
+          "tag": "throws",
+          "name": "OutOfRangeException",
+          "content": "if the indices are not valid.",
+          "assertion": "",
+          "description": "if the indices are not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInDefaultOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorChangingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "visitor",
+          "content": "the visitor to be used to process and modify the entries\nof this vector",
+          "assertion": "",
+          "description": "the visitor to be used to process and modify the entries\nof this vector"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the value returned by {@link RealVectorChangingVisitor#end()}\nat the end of the walk",
+          "assertion": "",
+          "description": "the value returned by {@link RealVectorChangingVisitor#end()}\nat the end of the walk"
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInDefaultOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorChangingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the visitor must be of type RealVectorChangingVisitor",
+          "assertion": "assert args[0] instanceof RealVectorChangingVisitor;",
+          "name": "visitor",
+          "content": "visitor must be of type RealVectorChangingVisitor"
+        },
+        {
+          "description": "start must be non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "start",
+          "content": "start must be non-negative"
+        },
+        {
+          "description": "end must be greater than or equal to start",
+          "assertion": "assert args[2] >= start;",
+          "name": "end",
+          "content": "end must be greater than or equal to start"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the value returned by {@link RealVectorChangingVisitor#end()}\nat the end of the walk",
+          "assertion": "",
+          "description": "the value returned by {@link RealVectorChangingVisitor#end()}\nat the end of the walk"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if end < start.",
+          "assertion": "assert args[2] < args[1];",
+          "name": "NumberIsTooSmallException",
+          "content": "if end < start."
+        },
+        {
+          "description": "if the indices are not valid.",
+          "assertion": "assert !receiverObjectID.checkIndices(args[1], args[2]);",
+          "name": "OutOfRangeException",
+          "content": "if the indices are not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInOptimizedOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorChangingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "visitor",
+          "content": "the visitor to be used to process the entries of this\nvector",
+          "assertion": "",
+          "description": "the visitor to be used to process the entries of this\nvector"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the value returned by visitor.end() at the end of the walk",
+          "assertion": "assert result == visitor.end();",
+          "name": null,
+          "content": "the value returned by visitor.end() at the end of the walk"
+        }
+      ]
+    }
+  },
+  {
+    "method": "walkInOptimizedOrder",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVectorChangingVisitor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "visitor"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "visitor",
+          "content": "visitor to be used to process the entries of this vector",
+          "assertion": "",
+          "description": "visitor to be used to process the entries of this vector"
+        },
+        {
+          "tag": "param",
+          "name": "start",
+          "content": "the index of the first entry to be visited",
+          "assertion": "",
+          "description": "the index of the first entry to be visited"
+        },
+        {
+          "tag": "param",
+          "name": "end",
+          "content": "the index of the last entry to be visited (inclusive)",
+          "assertion": "",
+          "description": "the index of the last entry to be visited (inclusive)"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "the value returned by {@link RealVectorChangingVisitor#end()}\nat the end of the walk",
+          "assertion": "",
+          "description": "the value returned by {@link RealVectorChangingVisitor#end()}\nat the end of the walk"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if end < start.",
+          "assertion": "assert receiverObjectID.getIndices().size() <= 1;",
+          "name": "NumberIsTooSmallException",
+          "content": "if end < start."
+        },
+        {
+          "description": "if the indices are not valid.",
+          "assertion": "assert !receiverObjectID.getIndices().containsIndex(start) || !receiverObjectID.getIndices().containsIndex(end);",
+          "name": "OutOfRangeException",
+          "content": "if the indices are not valid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "other must be an instance of RealVector or null",
+          "assertion": "assert (args[0] instanceof RealVector) && !(args[0] instanceof Object) || args[0] == null;",
+          "name": "other",
+          "content": "Object to test for equality."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "{@code true} if two vector objects are equal, {@code false} if\n{@code other} is null, not an instance of {@code RealVector}, or\nnot equal to this {@code RealVector} instance.",
+          "assertion": "",
+          "description": "{@code true} if two vector objects are equal, {@code false} if\n{@code other} is null, not an instance of {@code RealVector}, or\nnot equal to this {@code RealVector} instance."
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathUnsupportedOperationException",
+          "content": "if this method is not\noverridden.",
+          "assertion": "",
+          "description": "if this method is not\noverridden."
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "MathUnsupportedOperationException",
+          "content": "if this method is not\noverridden.",
+          "assertion": "",
+          "description": "if this method is not\noverridden."
+        }
+      ]
+    }
+  },
+  {
+    "method": "unmodifiableRealVector",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the returned vector must be immutable",
+          "assertion": "assert args[0].isImmutable() == true;",
+          "name": "v",
+          "content": "an unmodifiable view of v"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "an unmodifiable view of {@code v}.",
+          "assertion": "",
+          "description": "an unmodifiable view of {@code v}."
+        }
+      ]
+    }
+  }
+]

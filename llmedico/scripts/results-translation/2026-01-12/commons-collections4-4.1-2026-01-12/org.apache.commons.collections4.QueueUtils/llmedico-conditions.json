@@ -1,0 +1,196 @@
+[
+  {
+    "method": "unmodifiableQueue",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Queue",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "queue"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the queue must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "queue",
+          "content": "the queue to make unmodifiable, must not be null"
+        },
+        {
+          "description": "it must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "queue",
+          "content": "the queue to make unmodifiable, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an unmodifiable queue backed by the given queue.",
+          "assertion": "assert methodResultID == receiverObjectID.unmodifiableQueue(args[0]);",
+          "name": null,
+          "content": "an unmodifiable queue backed by the given queue."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the queue is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the queue is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "predicatedQueue",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Queue",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "queue"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the queue must not be null",
+          "assertion": "assert receiverObjectID.queue != null;",
+          "name": "queue",
+          "content": "the queue to predicate, must not be null"
+        },
+        {
+          "description": "the predicate must not be null",
+          "assertion": "assert receiverObjectID.predicate != null;",
+          "name": "predicate",
+          "content": "the predicate used to evaluate new elements, must not be null"
+        },
+        {
+          "description": "it is important not to use the original queue after invoking this method",
+          "assertion": "assert receiverObjectID.queue == null;",
+          "name": "queue",
+          "content": "as it is a backdoor for adding invalid objects"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Only objects that pass the test in the given predicate can be added to the queue.",
+          "assertion": "assert methodResultID == (receiverObjectID.predicatedQueue(args[0], args[1]));",
+          "name": null,
+          "content": "Only objects that pass the test in the given predicate can be added to the queue."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if queue or predicate is null.",
+          "assertion": "assert queue!=null && predicate!=null;",
+          "name": "NullPointerException",
+          "content": "if the queue or predicate is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "transformingQueue",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Queue",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "queue"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the queue must not be null",
+          "assertion": "assert receiverObjectID.queue != null;",
+          "name": "queue",
+          "content": "the queue to predicate, must not be null"
+        },
+        {
+          "description": "the transformer must not be null",
+          "assertion": "assert receiverObjectID.transformer != null;",
+          "name": "transformer",
+          "content": "the transformer for the queue, must not be null"
+        },
+        {
+          "description": "the returned queue must not be null",
+          "assertion": "assert receiverObjectID.queue != null;",
+          "name": "queue",
+          "content": "a transformed queue backed by the given queue"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a transformed queue backed by the given queue.",
+          "assertion": "assert receiverObjectID.transformingQueue(args[0], args[1]) == null;",
+          "name": null,
+          "content": "a transformed queue backed by the given queue."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if queue or transformer is null.",
+          "assertion": "assert receiverObjectID.queue==null || receiverObjectID.transformer==null;",
+          "name": "NullPointerException",
+          "content": "if queue or transformer is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "emptyQueue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be empty",
+          "assertion": "assert receiverObjectID.emptyQueue() == null;",
+          "name": "queue",
+          "content": "<code>Queue</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an empty Queue",
+          "assertion": "assert receiverObjectID.emptyQueue() == null;",
+          "name": null,
+          "content": "an empty Queue"
+        }
+      ]
+    }
+  }
+]

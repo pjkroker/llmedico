@@ -1,0 +1,99 @@
+[
+  {
+    "name": "PatonCycleBase",
+    "package": "org.jgrapht.alg.cycle",
+    "qualified_name": "org.jgrapht.alg.cycle.PatonCycleBase",
+    "javadoc": "/**\n * Find a cycle base of an undirected graph using the Paton's algorithm.\n *\n * <p>See:<br>\n * K. Paton, An algorithm for finding a fundamental set of cycles for an\n * undirected linear graph, Comm. ACM 12 (1969), pp. 514-518.\n *\n * @param <V> the vertex type.\n * @param <E> the edge type.\n *\n * @author Nikolay Ognyanov\n */\n",
+    "code": "/**\n * Find a cycle base of an undirected graph using the Paton's algorithm.\n *\n * <p>See:<br>\n * K. Paton, An algorithm for finding a fundamental set of cycles for an\n * undirected linear graph, Comm. ACM 12 (1969), pp. 514-518.\n *\n * @param <V> the vertex type.\n * @param <E> the edge type.\n *\n * @author Nikolay Ognyanov\n */\npublic class PatonCycleBase<V, E> implements UndirectedCycleBase<V, E> {\n\n    private UndirectedGraph<V, E> graph;\n\n    /**\n     * Create a cycle base finder with an unspecified graph.\n     */\n    public PatonCycleBase() {\n    }\n\n    /**\n     * Create a cycle base finder for the specified graph.\n     *\n     * @param graph - the DirectedGraph in which to find cycles.\n     *\n     * @throws IllegalArgumentException if the graph argument is <code>\n     * null</code>.\n     */\n    public PatonCycleBase(UndirectedGraph<V, E> graph) {\n        if (graph == null) {\n            throw new IllegalArgumentException(\"Null graph argument.\");\n        }\n        this.graph = graph;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public UndirectedGraph<V, E> getGraph() {\n        return graph;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public void setGraph(UndirectedGraph<V, E> graph) {\n        if (graph == null) {\n            throw new IllegalArgumentException(\"Null graph argument.\");\n        }\n        this.graph = graph;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public List<List<V>> findCycleBase() {\n        if (graph == null) {\n            throw new IllegalArgumentException(\"Null graph.\");\n        }\n        Map<V, Set<V>> used = new HashMap<V, Set<V>>();\n        Map<V, V> parent = new HashMap<V, V>();\n        ArrayDeque<V> stack = new ArrayDeque<V>();\n        List<List<V>> cycles = new ArrayList<List<V>>();\n        for (V root : graph.vertexSet()) {\n            // Loop over the connected\n            // components of the graph.\n            if (parent.containsKey(root)) {\n                continue;\n            }\n            // Free some memory in case of\n            // multiple connected components.\n            used.clear();\n            // Prepare to walk the spanning tree.\n            parent.put(root, root);\n            used.put(root, new HashSet<V>());\n            stack.push(root);\n            // Do the walk. It is a BFS with\n            // a LIFO instead of the usual\n            // FIFO. Thus it is easier to\n            // find the cycles in the tree.\n            while (!stack.isEmpty()) {\n                V current = stack.pop();\n                Set<V> currentUsed = used.get(current);\n                for (E e : graph.edgesOf(current)) {\n                    V neighbor = graph.getEdgeTarget(e);\n                    if (neighbor.equals(current)) {\n                        neighbor = graph.getEdgeSource(e);\n                    }\n                    if (!used.containsKey(neighbor)) {\n                        // found a new node\n                        parent.put(neighbor, current);\n                        Set<V> neighbourUsed = new HashSet<V>();\n                        neighbourUsed.add(current);\n                        used.put(neighbor, neighbourUsed);\n                        stack.push(neighbor);\n                    } else if (neighbor.equals(current)) {\n                        // found a self loop\n                        List<V> cycle = new ArrayList<V>();\n                        cycle.add(current);\n                        cycles.add(cycle);\n                    } else if (!currentUsed.contains(neighbor)) {\n                        // found a cycle\n                        Set<V> neighbourUsed = used.get(neighbor);\n                        List<V> cycle = new ArrayList<V>();\n                        cycle.add(neighbor);\n                        cycle.add(current);\n                        V p = parent.get(current);\n                        while (!neighbourUsed.contains(p)) {\n                            cycle.add(p);\n                            p = parent.get(p);\n                        }\n                        cycle.add(p);\n                        cycles.add(cycle);\n                        neighbourUsed.add(current);\n                    }\n                }\n            }\n        }\n        return cycles;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "PatonCycleBase",
+        "parameters": [],
+        "javadoc": "/**\n * Create a cycle base finder with an unspecified graph.\n */\n",
+        "tags": [],
+        "code": "/**\n * Create a cycle base finder with an unspecified graph.\n */\npublic PatonCycleBase() {\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "PatonCycleBase",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UndirectedGraph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "graph"
+          }
+        ],
+        "javadoc": "/**\n * Create a cycle base finder for the specified graph.\n *\n * @param graph - the DirectedGraph in which to find cycles.\n *\n * @throws IllegalArgumentException if the graph argument is <code>\n * null</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "graph",
+            "content": "- the DirectedGraph in which to find cycles.",
+            "assertion": "assert receiverObjectID.getGraph() != null;",
+            "description": "the graph argument must not be null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the graph argument is <code>\nnull</code>.",
+            "assertion": "assert args[0]==null;",
+            "description": "if graph argument is <code>null</code>."
+          }
+        ],
+        "code": "/**\n * Create a cycle base finder for the specified graph.\n *\n * @param graph - the DirectedGraph in which to find cycles.\n *\n * @throws IllegalArgumentException if the graph argument is <code>\n * null</code>.\n */\npublic PatonCycleBase(UndirectedGraph<V, E> graph) {\n    if (graph == null) {\n        throw new IllegalArgumentException(\"Null graph argument.\");\n    }\n    this.graph = graph;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getGraph",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "UndirectedGraph",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic UndirectedGraph<V, E> getGraph() {\n    return graph;\n}"
+      },
+      {
+        "type": "method",
+        "name": "setGraph",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UndirectedGraph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "graph"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic void setGraph(UndirectedGraph<V, E> graph) {\n    if (graph == null) {\n        throw new IllegalArgumentException(\"Null graph argument.\");\n    }\n    this.graph = graph;\n}"
+      },
+      {
+        "type": "method",
+        "name": "findCycleBase",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic List<List<V>> findCycleBase() {\n    if (graph == null) {\n        throw new IllegalArgumentException(\"Null graph.\");\n    }\n    Map<V, Set<V>> used = new HashMap<V, Set<V>>();\n    Map<V, V> parent = new HashMap<V, V>();\n    ArrayDeque<V> stack = new ArrayDeque<V>();\n    List<List<V>> cycles = new ArrayList<List<V>>();\n    for (V root : graph.vertexSet()) {\n        // Loop over the connected\n        // components of the graph.\n        if (parent.containsKey(root)) {\n            continue;\n        }\n        // Free some memory in case of\n        // multiple connected components.\n        used.clear();\n        // Prepare to walk the spanning tree.\n        parent.put(root, root);\n        used.put(root, new HashSet<V>());\n        stack.push(root);\n        // Do the walk. It is a BFS with\n        // a LIFO instead of the usual\n        // FIFO. Thus it is easier to\n        // find the cycles in the tree.\n        while (!stack.isEmpty()) {\n            V current = stack.pop();\n            Set<V> currentUsed = used.get(current);\n            for (E e : graph.edgesOf(current)) {\n                V neighbor = graph.getEdgeTarget(e);\n                if (neighbor.equals(current)) {\n                    neighbor = graph.getEdgeSource(e);\n                }\n                if (!used.containsKey(neighbor)) {\n                    // found a new node\n                    parent.put(neighbor, current);\n                    Set<V> neighbourUsed = new HashSet<V>();\n                    neighbourUsed.add(current);\n                    used.put(neighbor, neighbourUsed);\n                    stack.push(neighbor);\n                } else if (neighbor.equals(current)) {\n                    // found a self loop\n                    List<V> cycle = new ArrayList<V>();\n                    cycle.add(current);\n                    cycles.add(cycle);\n                } else if (!currentUsed.contains(neighbor)) {\n                    // found a cycle\n                    Set<V> neighbourUsed = used.get(neighbor);\n                    List<V> cycle = new ArrayList<V>();\n                    cycle.add(neighbor);\n                    cycle.add(current);\n                    V p = parent.get(current);\n                    while (!neighbourUsed.contains(p)) {\n                        cycle.add(p);\n                        p = parent.get(p);\n                    }\n                    cycle.add(p);\n                    cycles.add(cycle);\n                    neighbourUsed.add(current);\n                }\n            }\n        }\n    }\n    return cycles;\n}"
+      }
+    ]
+  }
+]

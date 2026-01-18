@@ -1,0 +1,526 @@
+[
+  {
+    "method": "getZero",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "null vector of the vectorial space or origin point of the affine space",
+          "assertion": "assert methodResultID == null;",
+          "name": null,
+          "content": "null vector of the vectorial space or origin point of the affine space"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNorm1",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "L<sub>1</sub> norm for the vector",
+          "assertion": "assert methodResultID == receiverObjectID.getNorm1();",
+          "name": null,
+          "content": "L<sub>1</sub> norm for the vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNorm",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Euclidean norm for the vector",
+          "assertion": "assert methodResultID == receiverObjectID.getNorm();",
+          "name": null,
+          "content": "Euclidean norm for the vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNormSq",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "square of the Euclidean norm for the vector",
+          "assertion": "assert methodResultID == receiverObjectID.getNormSq();",
+          "name": null,
+          "content": "square of the Euclidean norm for the vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNormInf",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "L<sub>&infin;</sub> norm for the vector",
+          "assertion": "assert methodResultID == receiverObjectID.getNormInf();",
+          "name": null,
+          "content": "L<sub>&infin;</sub> norm for the vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the vector to add must be of type Vector",
+          "assertion": "assert (v instanceof Vector) && v != null;",
+          "name": "v",
+          "content": "vector to add"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector",
+          "assertion": "assert methodResultID == receiverObjectID.add(v);",
+          "name": null,
+          "content": "a new vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "factor"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "factor must be a double",
+          "assertion": "assert args[0] instanceof java.lang.Double;",
+          "name": "factor",
+          "content": "scale factor to apply to v before adding it"
+        },
+        {
+          "description": "v must be a Vector",
+          "assertion": "assert args[1] instanceof com.example.Vector;",
+          "name": "v",
+          "content": "vector to add"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector",
+          "assertion": "assert receiverObjectID.add(args[0], args[1]) == (args[0] != 0 || args[1].getNormSq() > 0);",
+          "name": null,
+          "content": "a new vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "v",
+          "content": "vector to subtract",
+          "assertion": "",
+          "description": "vector to subtract"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector",
+          "assertion": "assert methodResultID == (receiverObjectID.subtract(args[0]).equals(receiverObjectID));",
+          "name": null,
+          "content": "a new vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "factor"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "factor must be a double",
+          "assertion": "assert args[0] instanceof java.lang.Double;",
+          "name": "factor",
+          "content": "scale factor to apply to v before subtracting it"
+        },
+        {
+          "description": "v must be a Vector",
+          "assertion": "assert args[1] instanceof com.example.Vector;",
+          "name": "v",
+          "content": "vector to subtract"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector",
+          "assertion": "assert receiverObjectID.subtract(args[0], args[1]) == (args[0] * args[1]);",
+          "name": null,
+          "content": "a new vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "negate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new vector which is opposite to the instance",
+          "assertion": "assert methodResultID == receiverObjectID.getZero();",
+          "name": null,
+          "content": "a new vector which is opposite to the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "normalize",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new normalized vector",
+          "assertion": "",
+          "description": "a new normalized vector"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the norm is zero",
+          "assertion": "assert receiverObjectID.getNorm() == 0;",
+          "name": "MathArithmeticException",
+          "content": "if the norm is zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "scalarMultiply",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "scalar",
+          "assertion": "",
+          "description": "scalar"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector",
+          "assertion": "assert receiverObjectID.scalarMultiply(args[0]) == null;",
+          "name": null,
+          "content": "a new vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isInfinite",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if any coordinate of this vector is infinite and none are NaN; false otherwise",
+          "assertion": "assert receiverObjectID.isInfinite() == (args[0] == Double.POSITIVE_INFINITY || args[0] == Double.NEGATIVE_INFINITY || args[0] != args[0]);",
+          "name": null,
+          "content": "true if any coordinate of this vector is infinite and none are NaN; false otherwise"
+        }
+      ]
+    }
+  },
+  {
+    "method": "distance1",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a Vector",
+          "assertion": "assert receiverObjectID instanceof java.util.Vector;",
+          "name": "v",
+          "content": "<p>Calling this method is equivalent to calling:</p><code>q.subtract(p).getNorm1()</code> except that no intermediate</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Compute the distance between the instance and another vector according to the L<sub>1</sub> norm.",
+          "assertion": "assert methodResultID == receiverObjectID.getNorm1();",
+          "name": null,
+          "content": "Compute the distance between the instance and another vector according to the L<sub>1</sub> norm."
+        }
+      ]
+    }
+  },
+  {
+    "method": "distance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a Vector",
+          "assertion": "assert receiverObjectID.get(0) instanceof Vector;",
+          "name": "v",
+          "content": "second vector"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the distance between the instance and p according to the L<sub>2</sub> norm.",
+          "assertion": "assert methodResultID == receiverObjectID.getNorm();",
+          "name": null,
+          "content": "the distance between the instance and p according to the L<sub>2</sub> norm."
+        }
+      ]
+    }
+  },
+  {
+    "method": "distanceInf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a Vector",
+          "assertion": "assert receiverObjectID.getZero() == true;",
+          "name": "v",
+          "content": "second vector"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Compute the distance between the instance and another vector according to the L\\infin norm.",
+          "assertion": "assert methodResultID == receiverObjectID.getNormInf();",
+          "name": null,
+          "content": "Compute the distance between the instance and another vector according to the L\\infin norm."
+        }
+      ]
+    }
+  },
+  {
+    "method": "distanceSq",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be a Vector",
+          "assertion": "assert receiverObjectID instanceof java.lang.Vector;",
+          "name": "v",
+          "content": "<p>Calling this method is equivalent to calling:</p><code>q.subtract(p).getNormSq()</code> except that no intermediate vector is built</p>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the square of the distance between the instance and p",
+          "assertion": "assert methodResultID == receiverObjectID.getNormSq();",
+          "name": null,
+          "content": "Compute the square of the distance between the instance and another vector."
+        }
+      ]
+    }
+  },
+  {
+    "method": "dotProduct",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "v must be a Vector",
+          "assertion": "assert receiverObjectID.getZero() == true;",
+          "name": "v",
+          "content": "second vector"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the dot product this.v",
+          "assertion": "assert methodResultID == receiverObjectID.dotProduct(args[0]);",
+          "name": null,
+          "content": "the dot product this.v"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "NumberFormat",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "format"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the custom format for components must be of type NumberFormat",
+          "assertion": "assert args[0].getClass().equals(NumberFormat.class);",
+          "name": "format",
+          "content": "the custom format for components must be of type NumberFormat"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a string representation of this vector",
+          "assertion": "assert receiverObjectID.toString(args[0]) == null;",
+          "name": null,
+          "content": "a string representation of this vector"
+        }
+      ]
+    }
+  }
+]

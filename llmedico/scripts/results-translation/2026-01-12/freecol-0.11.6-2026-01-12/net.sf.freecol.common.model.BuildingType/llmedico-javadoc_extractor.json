@@ -1,0 +1,743 @@
+[
+  {
+    "name": "BuildingType",
+    "package": "net.sf.freecol.common.model",
+    "qualified_name": "net.sf.freecol.common.model.BuildingType",
+    "javadoc": "/**\n * Encapsulates data common to all instances of a particular kind of\n * {@link Building}, such as the number of workplaces, and the types\n * of goods it produces and consumes.\n */\n",
+    "code": "/**\n * Encapsulates data common to all instances of a particular kind of\n * {@link Building}, such as the number of workplaces, and the types\n * of goods it produces and consumes.\n */\npublic final class BuildingType extends BuildableType {\n\n    /**\n     * The level of building.\n     */\n    private int level = 1;\n\n    /**\n     * The number of work places a unit can work in buildings of this type.\n     */\n    private int workPlaces = 3;\n\n    /**\n     * The minimum unit skill to work in buildings of this type.\n     */\n    private int minSkill = UNDEFINED;\n\n    /**\n     * The maximum unit skill to work in buildings of this type.\n     */\n    private int maxSkill = INFINITY;\n\n    /**\n     * Upkeep per turn for buildings ot this type.\n     */\n    private int upkeep = 0;\n\n    /**\n     * Consumption order.\n     */\n    private int priority = Consumer.BUILDING_PRIORITY;\n\n    /**\n     * The building type this upgrades from.\n     */\n    private BuildingType upgradesFrom = null;\n\n    /**\n     * The building type this upgrades to.\n     */\n    private BuildingType upgradesTo = null;\n\n    /**\n     * The possible production types of this building type.\n     */\n    private final List<ProductionType> productionTypes = new ArrayList<>();\n\n    /**\n     * Creates a new <code>BuildingType</code> instance.\n     *\n     * @param id The object identifier.\n     * @param specification The <code>Specification</code> to refer to.\n     */\n    public BuildingType(String id, Specification specification) {\n        super(id, specification);\n    }\n\n    /**\n     * Get the level of this BuildingType.\n     *\n     * @return The building level.\n     */\n    public int getLevel() {\n        return level;\n    }\n\n    /**\n     * Gets the number of workplaces, that is the maximum number of\n     * Units that can work in this BuildingType.\n     *\n     * @return The number of work places.\n     */\n    public int getWorkPlaces() {\n        return workPlaces;\n    }\n\n    /**\n     * Gets the amount of gold necessary to maintain a Building of\n     * this type for one turn.\n     *\n     * @return The per turn upkeep for this building type.\n     */\n    public int getUpkeep() {\n        return upkeep;\n    }\n\n    /**\n     * The consumption priority of a Building of this type. The higher\n     * the priority, the earlier will the Consumer be allowed to\n     * consume the goods it requires.\n     *\n     * @return The consumption priority.\n     */\n    public int getPriority() {\n        return priority;\n    }\n\n    /**\n     * Gets the reason why a given unit type can not be added to a\n     * building of this type.\n     *\n     * @param unitType The <code>UnitType</code> to test.\n     * @return The reason why adding would fail.\n     */\n    public NoAddReason getNoAddReason(UnitType unitType) {\n        return (workPlaces == 0) ? NoAddReason.CAPACITY_EXCEEDED : (!unitType.hasSkill()) ? NoAddReason.MISSING_SKILL : (unitType.getSkill() < minSkill) ? NoAddReason.MINIMUM_SKILL : (unitType.getSkill() > maxSkill) ? NoAddReason.MAXIMUM_SKILL : NoAddReason.NONE;\n    }\n\n    /**\n     * Can a unit of a given type be added to a Building of this type?\n     *\n     * @param unitType The <code>UnitType</code> to check.\n     * @return True if the unit type can be added.\n     */\n    public boolean canAdd(UnitType unitType) {\n        return getNoAddReason(unitType) == NoAddReason.NONE;\n    }\n\n    /**\n     * Gets the type of the building type, which is trivially just this\n     * object.\n     *\n     * @return This.\n     */\n    public FreeColGameObjectType getType() {\n        return this;\n    }\n\n    /**\n     * Gets the BuildingType this BuildingType upgrades from.\n     *\n     * @return The <code>BuildingType</code> that upgrades to this one.\n     */\n    public BuildingType getUpgradesFrom() {\n        return upgradesFrom;\n    }\n\n    /**\n     * Get the BuildingType this BuildingType upgrades to.\n     *\n     * @return The <code>BuildingType</code> to upgrade to from this one.\n     */\n    public BuildingType getUpgradesTo() {\n        return upgradesTo;\n    }\n\n    /**\n     * Gets the first level of this BuildingType.\n     *\n     * @return The base <code>BuildingType</code>.\n     */\n    public BuildingType getFirstLevel() {\n        BuildingType buildingType = this;\n        while (buildingType.getUpgradesFrom() != null) {\n            buildingType = buildingType.getUpgradesFrom();\n        }\n        return buildingType;\n    }\n\n    /**\n     * Is this building type automatically built in any colony?\n     *\n     * @return True if this building type is automatically built.\n     */\n    public boolean isAutomaticBuild() {\n        return !needsGoodsToBuild() && getUpgradesFrom() == null;\n    }\n\n    /**\n     * Add a production type to this building type.\n     *\n     * @param productionType The <code>ProductionType</code> to add.\n     */\n    public void addProductionType(ProductionType productionType) {\n        if (productionType != null)\n            productionTypes.add(productionType);\n    }\n\n    /**\n     * Get the production types provided by this building type at the\n     * current difficulty level.\n     *\n     * @param unattended Whether the production is unattended.\n     * @return A list of <code>ProductionType</code>s.\n     */\n    public List<ProductionType> getAvailableProductionTypes(boolean unattended) {\n        return getAvailableProductionTypes(unattended, null);\n    }\n\n    /**\n     * Gets the production types available at the current difficulty\n     * level.\n     *\n     * FIXME: TileType.getAvailableProductionTypes(boolean) uses the\n     * GameOptions.TILE_PRODUCTION option.  Should we implement a\n     * corresponding one for BuildingTypes?\n     *\n     * @param unattended Whether the production is unattended.\n     * @param level The production level (NYI).\n     * @return A list of <code>ProductionType</code>s.\n     */\n    public List<ProductionType> getAvailableProductionTypes(boolean unattended, String level) {\n        return productionTypes.stream().filter(pt -> pt.getUnattended() == unattended && pt.appliesTo(level)).collect(Collectors.toList());\n    }\n\n    // @compat 0.10.6\n    /**\n     * Get the type of goods consumed by this BuildingType.\n     *\n     * @return The consumed <code>GoodsType</code>.\n     */\n    private GoodsType getConsumedGoodsType() {\n        if (productionTypes.isEmpty())\n            return null;\n        List<AbstractGoods> inputs = productionTypes.get(0).getInputs();\n        return (inputs.isEmpty()) ? null : inputs.get(0).getType();\n    }\n\n    // end @compat\n    /**\n     * Gets the type of goods produced by this BuildingType.\n     *\n     * @return The produced <code>GoodsType</code>.\n     */\n    public GoodsType getProducedGoodsType() {\n        if (productionTypes.isEmpty())\n            return null;\n        List<AbstractGoods> outputs = productionTypes.get(0).getOutputs();\n        return (outputs.isEmpty()) ? null : outputs.get(0).getType();\n    }\n\n    /**\n     * Is this a defence-related building type?  Such buildings\n     * (stockade et al) are visible to other players.\n     *\n     * @return True if this is a defence related building.\n     */\n    public boolean isDefenceType() {\n        return containsModifierKey(Modifier.DEFENCE);\n    }\n\n    /**\n     * Can a tile of this type produce a given goods type?\n     *\n     * @param goodsType The <code>GoodsType</code> to produce.\n     * @param unitType An optional <code>UnitType</code> that is to do\n     *     the work, if null the unattended production is considered.\n     * @return True if this tile type produces the goods.\n     */\n    public boolean canProduce(GoodsType goodsType, UnitType unitType) {\n        return goodsType != null && ProductionType.canProduce(goodsType, getAvailableProductionTypes(unitType == null));\n    }\n\n    /**\n     * Get the base production of a given goods type for an optional\n     * unit type.\n     *\n     * @param productionType An optional <code>ProductionType</code> to use,\n     *     if null the best available one is used.\n     * @param goodsType The <code>GoodsType</code> to produce.\n     * @param unitType An optional <code>UnitType</code> that is to do\n     *     the work, if null the unattended production is considered.\n     * @return The amount of goods produced.\n     */\n    public int getBaseProduction(ProductionType productionType, GoodsType goodsType, UnitType unitType) {\n        if (goodsType == null)\n            return 0;\n        if (productionType == null) {\n            productionType = ProductionType.getBestProductionType(goodsType, getAvailableProductionTypes(unitType == null));\n        }\n        if (productionType == null)\n            return 0;\n        AbstractGoods best = productionType.getOutput(goodsType);\n        return (best == null) ? 0 : best.getAmount();\n    }\n\n    /**\n     * Get the amount of goods of a given goods type the given unit\n     * type could produce on a tile of this tile type.\n     *\n     * @param goodsType The <code>GoodsType</code> to produce.\n     * @param unitType An optional <code>UnitType</code> that is to do\n     *     the work, if null the unattended production is considered.\n     * @return The amount of goods produced.\n     */\n    public int getPotentialProduction(GoodsType goodsType, UnitType unitType) {\n        if (goodsType == null)\n            return 0;\n        int amount = getBaseProduction(null, goodsType, unitType);\n        amount = (int) applyModifiers(amount, null, goodsType.getId(), unitType);\n        return (amount < 0) ? 0 : amount;\n    }\n\n    // Override FreeColObject\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public int compareTo(FreeColObject other) {\n        int cmp = 0;\n        if (other instanceof BuildingType) {\n            BuildingType bt = (BuildingType) other;\n            // BuildingTypes are simply sorted according to the order in\n            // which they are defined in the specification.\n            cmp = getIndex() - bt.getIndex();\n        }\n        if (cmp == 0)\n            cmp = super.compareTo(other);\n        return cmp;\n    }\n\n    // Serialization\n    private static final String MAXIMUM_SKILL_TAG = \"maximum-skill\";\n\n    private static final String MINIMUM_SKILL_TAG = \"minimum-skill\";\n\n    private static final String PRIORITY_TAG = \"priority\";\n\n    private static final String PRODUCTION_TAG = \"production\";\n\n    private static final String UPGRADES_FROM_TAG = \"upgrades-from\";\n\n    private static final String UPKEEP_TAG = \"upkeep\";\n\n    private static final String WORKPLACES_TAG = \"workplaces\";\n\n    // @compat 0.10.6\n    private static final String BASIC_PRODUCTION_TAG = \"basicProduction\";\n\n    private static final String CONSUMES_TAG = \"consumes\";\n\n    private static final String PRODUCES_TAG = \"produces\";\n\n    // end @compat 0.10.6\n    // @compat 0.11.3\n    private static final String OLD_MAX_SKILL_TAG = \"maxSkill\";\n\n    private static final String OLD_MIN_SKILL_TAG = \"minSkill\";\n\n    private static final String OLD_UPGRADES_FROM_TAG = \"upgradesFrom\";\n\n    // end @compat 0.11.3\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void writeAttributes(FreeColXMLWriter xw) throws XMLStreamException {\n        super.writeAttributes(xw);\n        if (upgradesFrom != null) {\n            xw.writeAttribute(UPGRADES_FROM_TAG, upgradesFrom);\n        }\n        xw.writeAttribute(WORKPLACES_TAG, workPlaces);\n        if (minSkill != UNDEFINED) {\n            xw.writeAttribute(MINIMUM_SKILL_TAG, minSkill);\n        }\n        if (maxSkill < INFINITY) {\n            xw.writeAttribute(MAXIMUM_SKILL_TAG, maxSkill);\n        }\n        if (upkeep > 0) {\n            xw.writeAttribute(UPKEEP_TAG, upkeep);\n        }\n        if (priority != Consumer.BUILDING_PRIORITY) {\n            xw.writeAttribute(PRIORITY_TAG, priority);\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void writeChildren(FreeColXMLWriter xw) throws XMLStreamException {\n        super.writeChildren(xw);\n        for (ProductionType productionType : productionTypes) {\n            productionType.toXML(xw);\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void readAttributes(FreeColXMLReader xr) throws XMLStreamException {\n        super.readAttributes(xr);\n        final Specification spec = getSpecification();\n        BuildingType parent = xr.getType(spec, EXTENDS_TAG, BuildingType.class, this);\n        // @compat 0.11.3\n        if (xr.hasAttribute(OLD_UPGRADES_FROM_TAG)) {\n            upgradesFrom = xr.getType(spec, OLD_UPGRADES_FROM_TAG, BuildingType.class, (BuildingType) null);\n        } else\n            // end @compat 0.11.3\n            upgradesFrom = xr.getType(spec, UPGRADES_FROM_TAG, BuildingType.class, (BuildingType) null);\n        if (upgradesFrom == null) {\n            level = 1;\n        } else {\n            upgradesFrom.upgradesTo = this;\n            level = upgradesFrom.level + 1;\n        }\n        workPlaces = xr.getAttribute(WORKPLACES_TAG, parent.workPlaces);\n        // @compat 0.11.3\n        if (xr.hasAttribute(OLD_MIN_SKILL_TAG)) {\n            minSkill = xr.getAttribute(OLD_MIN_SKILL_TAG, parent.minSkill);\n        } else\n            // end @compat 0.11.3\n            minSkill = xr.getAttribute(MINIMUM_SKILL_TAG, parent.minSkill);\n        // @compat 0.11.3\n        if (xr.hasAttribute(OLD_MAX_SKILL_TAG)) {\n            maxSkill = xr.getAttribute(OLD_MAX_SKILL_TAG, parent.maxSkill);\n        } else\n            // end @compat 0.11.3\n            maxSkill = xr.getAttribute(MAXIMUM_SKILL_TAG, parent.maxSkill);\n        upkeep = xr.getAttribute(UPKEEP_TAG, parent.upkeep);\n        priority = xr.getAttribute(PRIORITY_TAG, parent.priority);\n        // @compat 0.10.6\n        int basicProduction = xr.getAttribute(BASIC_PRODUCTION_TAG, -1);\n        if (basicProduction > 0) {\n            GoodsType consumes = xr.getType(spec, CONSUMES_TAG, GoodsType.class, parent.getConsumedGoodsType());\n            GoodsType produces = xr.getType(spec, PRODUCES_TAG, GoodsType.class, parent.getProducedGoodsType());\n            productionTypes.add(new ProductionType(consumes, produces, basicProduction));\n        }\n        // end @compat\n        if (parent != this) {\n            // Handle \"extends\" for super-type fields\n            if (!xr.hasAttribute(REQUIRED_POPULATION_TAG)) {\n                setRequiredPopulation(parent.getRequiredPopulation());\n            }\n            addFeatures(parent);\n            if (parent.isAbstractType()) {\n                getFeatureContainer().replaceSource(parent, this);\n            }\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void readChild(FreeColXMLReader xr) throws XMLStreamException {\n        final Specification spec = getSpecification();\n        final String tag = xr.getLocalName();\n        if (PRODUCTION_TAG.equals(tag)) {\n            if (xr.getAttribute(DELETE_TAG, false)) {\n                productionTypes.clear();\n                xr.closeTag(PRODUCTION_TAG);\n            } else {\n                addProductionType(new ProductionType(xr, spec));\n            }\n        } else {\n            super.readChild(xr);\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public String getXMLTagName() {\n        return getXMLElementTagName();\n    }\n\n    /**\n     * Gets the tag name of the root element representing this object.\n     *\n     * @return \"building-type\".\n     */\n    public static String getXMLElementTagName() {\n        return \"building-type\";\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "BuildingType",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "id"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Specification",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "specification"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new <code>BuildingType</code> instance.\n *\n * @param id The object identifier.\n * @param specification The <code>Specification</code> to refer to.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "id",
+            "content": "The object identifier."
+          },
+          {
+            "tag": "param",
+            "name": "specification",
+            "content": "The <code>Specification</code> to refer to."
+          }
+        ],
+        "code": "/**\n * Creates a new <code>BuildingType</code> instance.\n *\n * @param id The object identifier.\n * @param specification The <code>Specification</code> to refer to.\n */\npublic BuildingType(String id, Specification specification) {\n    super(id, specification);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getLevel",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the level of this BuildingType.\n *\n * @return The building level.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The building level."
+          }
+        ],
+        "code": "/**\n * Get the level of this BuildingType.\n *\n * @return The building level.\n */\npublic int getLevel() {\n    return level;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getWorkPlaces",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the number of workplaces, that is the maximum number of\n * Units that can work in this BuildingType.\n *\n * @return The number of work places.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The number of work places."
+          }
+        ],
+        "code": "/**\n * Gets the number of workplaces, that is the maximum number of\n * Units that can work in this BuildingType.\n *\n * @return The number of work places.\n */\npublic int getWorkPlaces() {\n    return workPlaces;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getUpkeep",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the amount of gold necessary to maintain a Building of\n * this type for one turn.\n *\n * @return The per turn upkeep for this building type.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The per turn upkeep for this building type."
+          }
+        ],
+        "code": "/**\n * Gets the amount of gold necessary to maintain a Building of\n * this type for one turn.\n *\n * @return The per turn upkeep for this building type.\n */\npublic int getUpkeep() {\n    return upkeep;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPriority",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * The consumption priority of a Building of this type. The higher\n * the priority, the earlier will the Consumer be allowed to\n * consume the goods it requires.\n *\n * @return The consumption priority.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The consumption priority."
+          }
+        ],
+        "code": "/**\n * The consumption priority of a Building of this type. The higher\n * the priority, the earlier will the Consumer be allowed to\n * consume the goods it requires.\n *\n * @return The consumption priority.\n */\npublic int getPriority() {\n    return priority;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNoAddReason",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "NoAddReason",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnitType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unitType"
+          }
+        ],
+        "javadoc": "/**\n * Gets the reason why a given unit type can not be added to a\n * building of this type.\n *\n * @param unitType The <code>UnitType</code> to test.\n * @return The reason why adding would fail.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "unitType",
+            "content": "The <code>UnitType</code> to test."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The reason why adding would fail."
+          }
+        ],
+        "code": "/**\n * Gets the reason why a given unit type can not be added to a\n * building of this type.\n *\n * @param unitType The <code>UnitType</code> to test.\n * @return The reason why adding would fail.\n */\npublic NoAddReason getNoAddReason(UnitType unitType) {\n    return (workPlaces == 0) ? NoAddReason.CAPACITY_EXCEEDED : (!unitType.hasSkill()) ? NoAddReason.MISSING_SKILL : (unitType.getSkill() < minSkill) ? NoAddReason.MINIMUM_SKILL : (unitType.getSkill() > maxSkill) ? NoAddReason.MAXIMUM_SKILL : NoAddReason.NONE;\n}"
+      },
+      {
+        "type": "method",
+        "name": "canAdd",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnitType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unitType"
+          }
+        ],
+        "javadoc": "/**\n * Can a unit of a given type be added to a Building of this type?\n *\n * @param unitType The <code>UnitType</code> to check.\n * @return True if the unit type can be added.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "unitType",
+            "content": "The <code>UnitType</code> to check."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "True if the unit type can be added."
+          }
+        ],
+        "code": "/**\n * Can a unit of a given type be added to a Building of this type?\n *\n * @param unitType The <code>UnitType</code> to check.\n * @return True if the unit type can be added.\n */\npublic boolean canAdd(UnitType unitType) {\n    return getNoAddReason(unitType) == NoAddReason.NONE;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getType",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FreeColGameObjectType",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the type of the building type, which is trivially just this\n * object.\n *\n * @return This.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "This."
+          }
+        ],
+        "code": "/**\n * Gets the type of the building type, which is trivially just this\n * object.\n *\n * @return This.\n */\npublic FreeColGameObjectType getType() {\n    return this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getUpgradesFrom",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BuildingType",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the BuildingType this BuildingType upgrades from.\n *\n * @return The <code>BuildingType</code> that upgrades to this one.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The <code>BuildingType</code> that upgrades to this one."
+          }
+        ],
+        "code": "/**\n * Gets the BuildingType this BuildingType upgrades from.\n *\n * @return The <code>BuildingType</code> that upgrades to this one.\n */\npublic BuildingType getUpgradesFrom() {\n    return upgradesFrom;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getUpgradesTo",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BuildingType",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the BuildingType this BuildingType upgrades to.\n *\n * @return The <code>BuildingType</code> to upgrade to from this one.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The <code>BuildingType</code> to upgrade to from this one."
+          }
+        ],
+        "code": "/**\n * Get the BuildingType this BuildingType upgrades to.\n *\n * @return The <code>BuildingType</code> to upgrade to from this one.\n */\npublic BuildingType getUpgradesTo() {\n    return upgradesTo;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getFirstLevel",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BuildingType",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the first level of this BuildingType.\n *\n * @return The base <code>BuildingType</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The base <code>BuildingType</code>."
+          }
+        ],
+        "code": "/**\n * Gets the first level of this BuildingType.\n *\n * @return The base <code>BuildingType</code>.\n */\npublic BuildingType getFirstLevel() {\n    BuildingType buildingType = this;\n    while (buildingType.getUpgradesFrom() != null) {\n        buildingType = buildingType.getUpgradesFrom();\n    }\n    return buildingType;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isAutomaticBuild",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Is this building type automatically built in any colony?\n *\n * @return True if this building type is automatically built.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "True if this building type is automatically built."
+          }
+        ],
+        "code": "/**\n * Is this building type automatically built in any colony?\n *\n * @return True if this building type is automatically built.\n */\npublic boolean isAutomaticBuild() {\n    return !needsGoodsToBuild() && getUpgradesFrom() == null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "addProductionType",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ProductionType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "productionType"
+          }
+        ],
+        "javadoc": "/**\n * Add a production type to this building type.\n *\n * @param productionType The <code>ProductionType</code> to add.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "productionType",
+            "content": "The <code>ProductionType</code> to add."
+          }
+        ],
+        "code": "/**\n * Add a production type to this building type.\n *\n * @param productionType The <code>ProductionType</code> to add.\n */\npublic void addProductionType(ProductionType productionType) {\n    if (productionType != null)\n        productionTypes.add(productionType);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAvailableProductionTypes",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unattended"
+          }
+        ],
+        "javadoc": "/**\n * Get the production types provided by this building type at the\n * current difficulty level.\n *\n * @param unattended Whether the production is unattended.\n * @return A list of <code>ProductionType</code>s.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "unattended",
+            "content": "Whether the production is unattended."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "A list of <code>ProductionType</code>s."
+          }
+        ],
+        "code": "/**\n * Get the production types provided by this building type at the\n * current difficulty level.\n *\n * @param unattended Whether the production is unattended.\n * @return A list of <code>ProductionType</code>s.\n */\npublic List<ProductionType> getAvailableProductionTypes(boolean unattended) {\n    return getAvailableProductionTypes(unattended, null);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getAvailableProductionTypes",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unattended"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "level"
+          }
+        ],
+        "javadoc": "/**\n * Gets the production types available at the current difficulty\n * level.\n *\n * FIXME: TileType.getAvailableProductionTypes(boolean) uses the\n * GameOptions.TILE_PRODUCTION option.  Should we implement a\n * corresponding one for BuildingTypes?\n *\n * @param unattended Whether the production is unattended.\n * @param level The production level (NYI).\n * @return A list of <code>ProductionType</code>s.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "unattended",
+            "content": "Whether the production is unattended."
+          },
+          {
+            "tag": "param",
+            "name": "level",
+            "content": "The production level (NYI)."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "A list of <code>ProductionType</code>s."
+          }
+        ],
+        "code": "/**\n * Gets the production types available at the current difficulty\n * level.\n *\n * FIXME: TileType.getAvailableProductionTypes(boolean) uses the\n * GameOptions.TILE_PRODUCTION option.  Should we implement a\n * corresponding one for BuildingTypes?\n *\n * @param unattended Whether the production is unattended.\n * @param level The production level (NYI).\n * @return A list of <code>ProductionType</code>s.\n */\npublic List<ProductionType> getAvailableProductionTypes(boolean unattended, String level) {\n    return productionTypes.stream().filter(pt -> pt.getUnattended() == unattended && pt.appliesTo(level)).collect(Collectors.toList());\n}"
+      },
+      {
+        "type": "method",
+        "name": "getProducedGoodsType",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "GoodsType",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the type of goods produced by this BuildingType.\n *\n * @return The produced <code>GoodsType</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The produced <code>GoodsType</code>."
+          }
+        ],
+        "code": "// end @compat\n/**\n * Gets the type of goods produced by this BuildingType.\n *\n * @return The produced <code>GoodsType</code>.\n */\npublic GoodsType getProducedGoodsType() {\n    if (productionTypes.isEmpty())\n        return null;\n    List<AbstractGoods> outputs = productionTypes.get(0).getOutputs();\n    return (outputs.isEmpty()) ? null : outputs.get(0).getType();\n}"
+      },
+      {
+        "type": "method",
+        "name": "isDefenceType",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Is this a defence-related building type?  Such buildings\n * (stockade et al) are visible to other players.\n *\n * @return True if this is a defence related building.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "True if this is a defence related building."
+          }
+        ],
+        "code": "/**\n * Is this a defence-related building type?  Such buildings\n * (stockade et al) are visible to other players.\n *\n * @return True if this is a defence related building.\n */\npublic boolean isDefenceType() {\n    return containsModifierKey(Modifier.DEFENCE);\n}"
+      },
+      {
+        "type": "method",
+        "name": "canProduce",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "GoodsType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "goodsType"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnitType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unitType"
+          }
+        ],
+        "javadoc": "/**\n * Can a tile of this type produce a given goods type?\n *\n * @param goodsType The <code>GoodsType</code> to produce.\n * @param unitType An optional <code>UnitType</code> that is to do\n *     the work, if null the unattended production is considered.\n * @return True if this tile type produces the goods.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "goodsType",
+            "content": "The <code>GoodsType</code> to produce."
+          },
+          {
+            "tag": "param",
+            "name": "unitType",
+            "content": "An optional <code>UnitType</code> that is to do\n    the work, if null the unattended production is considered."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "True if this tile type produces the goods."
+          }
+        ],
+        "code": "/**\n * Can a tile of this type produce a given goods type?\n *\n * @param goodsType The <code>GoodsType</code> to produce.\n * @param unitType An optional <code>UnitType</code> that is to do\n *     the work, if null the unattended production is considered.\n * @return True if this tile type produces the goods.\n */\npublic boolean canProduce(GoodsType goodsType, UnitType unitType) {\n    return goodsType != null && ProductionType.canProduce(goodsType, getAvailableProductionTypes(unitType == null));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getBaseProduction",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ProductionType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "productionType"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "GoodsType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "goodsType"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnitType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unitType"
+          }
+        ],
+        "javadoc": "/**\n * Get the base production of a given goods type for an optional\n * unit type.\n *\n * @param productionType An optional <code>ProductionType</code> to use,\n *     if null the best available one is used.\n * @param goodsType The <code>GoodsType</code> to produce.\n * @param unitType An optional <code>UnitType</code> that is to do\n *     the work, if null the unattended production is considered.\n * @return The amount of goods produced.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "productionType",
+            "content": "An optional <code>ProductionType</code> to use,\n    if null the best available one is used."
+          },
+          {
+            "tag": "param",
+            "name": "goodsType",
+            "content": "The <code>GoodsType</code> to produce."
+          },
+          {
+            "tag": "param",
+            "name": "unitType",
+            "content": "An optional <code>UnitType</code> that is to do\n    the work, if null the unattended production is considered."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The amount of goods produced."
+          }
+        ],
+        "code": "/**\n * Get the base production of a given goods type for an optional\n * unit type.\n *\n * @param productionType An optional <code>ProductionType</code> to use,\n *     if null the best available one is used.\n * @param goodsType The <code>GoodsType</code> to produce.\n * @param unitType An optional <code>UnitType</code> that is to do\n *     the work, if null the unattended production is considered.\n * @return The amount of goods produced.\n */\npublic int getBaseProduction(ProductionType productionType, GoodsType goodsType, UnitType unitType) {\n    if (goodsType == null)\n        return 0;\n    if (productionType == null) {\n        productionType = ProductionType.getBestProductionType(goodsType, getAvailableProductionTypes(unitType == null));\n    }\n    if (productionType == null)\n        return 0;\n    AbstractGoods best = productionType.getOutput(goodsType);\n    return (best == null) ? 0 : best.getAmount();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getPotentialProduction",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "GoodsType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "goodsType"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnitType",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unitType"
+          }
+        ],
+        "javadoc": "/**\n * Get the amount of goods of a given goods type the given unit\n * type could produce on a tile of this tile type.\n *\n * @param goodsType The <code>GoodsType</code> to produce.\n * @param unitType An optional <code>UnitType</code> that is to do\n *     the work, if null the unattended production is considered.\n * @return The amount of goods produced.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "goodsType",
+            "content": "The <code>GoodsType</code> to produce."
+          },
+          {
+            "tag": "param",
+            "name": "unitType",
+            "content": "An optional <code>UnitType</code> that is to do\n    the work, if null the unattended production is considered."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The amount of goods produced."
+          }
+        ],
+        "code": "/**\n * Get the amount of goods of a given goods type the given unit\n * type could produce on a tile of this tile type.\n *\n * @param goodsType The <code>GoodsType</code> to produce.\n * @param unitType An optional <code>UnitType</code> that is to do\n *     the work, if null the unattended production is considered.\n * @return The amount of goods produced.\n */\npublic int getPotentialProduction(GoodsType goodsType, UnitType unitType) {\n    if (goodsType == null)\n        return 0;\n    int amount = getBaseProduction(null, goodsType, unitType);\n    amount = (int) applyModifiers(amount, null, goodsType.getId(), unitType);\n    return (amount < 0) ? 0 : amount;\n}"
+      },
+      {
+        "type": "method",
+        "name": "compareTo",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColObject",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "// Override FreeColObject\n/**\n * {@inheritDoc}\n */\n@Override\npublic int compareTo(FreeColObject other) {\n    int cmp = 0;\n    if (other instanceof BuildingType) {\n        BuildingType bt = (BuildingType) other;\n        // BuildingTypes are simply sorted according to the order in\n        // which they are defined in the specification.\n        cmp = getIndex() - bt.getIndex();\n    }\n    if (cmp == 0)\n        cmp = super.compareTo(other);\n    return cmp;\n}"
+      },
+      {
+        "type": "method",
+        "name": "writeAttributes",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColXMLWriter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "xw"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "// end @compat 0.11.3\n/**\n * {@inheritDoc}\n */\n@Override\nprotected void writeAttributes(FreeColXMLWriter xw) throws XMLStreamException {\n    super.writeAttributes(xw);\n    if (upgradesFrom != null) {\n        xw.writeAttribute(UPGRADES_FROM_TAG, upgradesFrom);\n    }\n    xw.writeAttribute(WORKPLACES_TAG, workPlaces);\n    if (minSkill != UNDEFINED) {\n        xw.writeAttribute(MINIMUM_SKILL_TAG, minSkill);\n    }\n    if (maxSkill < INFINITY) {\n        xw.writeAttribute(MAXIMUM_SKILL_TAG, maxSkill);\n    }\n    if (upkeep > 0) {\n        xw.writeAttribute(UPKEEP_TAG, upkeep);\n    }\n    if (priority != Consumer.BUILDING_PRIORITY) {\n        xw.writeAttribute(PRIORITY_TAG, priority);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "writeChildren",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColXMLWriter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "xw"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void writeChildren(FreeColXMLWriter xw) throws XMLStreamException {\n    super.writeChildren(xw);\n    for (ProductionType productionType : productionTypes) {\n        productionType.toXML(xw);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "readAttributes",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColXMLReader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "xr"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void readAttributes(FreeColXMLReader xr) throws XMLStreamException {\n    super.readAttributes(xr);\n    final Specification spec = getSpecification();\n    BuildingType parent = xr.getType(spec, EXTENDS_TAG, BuildingType.class, this);\n    // @compat 0.11.3\n    if (xr.hasAttribute(OLD_UPGRADES_FROM_TAG)) {\n        upgradesFrom = xr.getType(spec, OLD_UPGRADES_FROM_TAG, BuildingType.class, (BuildingType) null);\n    } else\n        // end @compat 0.11.3\n        upgradesFrom = xr.getType(spec, UPGRADES_FROM_TAG, BuildingType.class, (BuildingType) null);\n    if (upgradesFrom == null) {\n        level = 1;\n    } else {\n        upgradesFrom.upgradesTo = this;\n        level = upgradesFrom.level + 1;\n    }\n    workPlaces = xr.getAttribute(WORKPLACES_TAG, parent.workPlaces);\n    // @compat 0.11.3\n    if (xr.hasAttribute(OLD_MIN_SKILL_TAG)) {\n        minSkill = xr.getAttribute(OLD_MIN_SKILL_TAG, parent.minSkill);\n    } else\n        // end @compat 0.11.3\n        minSkill = xr.getAttribute(MINIMUM_SKILL_TAG, parent.minSkill);\n    // @compat 0.11.3\n    if (xr.hasAttribute(OLD_MAX_SKILL_TAG)) {\n        maxSkill = xr.getAttribute(OLD_MAX_SKILL_TAG, parent.maxSkill);\n    } else\n        // end @compat 0.11.3\n        maxSkill = xr.getAttribute(MAXIMUM_SKILL_TAG, parent.maxSkill);\n    upkeep = xr.getAttribute(UPKEEP_TAG, parent.upkeep);\n    priority = xr.getAttribute(PRIORITY_TAG, parent.priority);\n    // @compat 0.10.6\n    int basicProduction = xr.getAttribute(BASIC_PRODUCTION_TAG, -1);\n    if (basicProduction > 0) {\n        GoodsType consumes = xr.getType(spec, CONSUMES_TAG, GoodsType.class, parent.getConsumedGoodsType());\n        GoodsType produces = xr.getType(spec, PRODUCES_TAG, GoodsType.class, parent.getProducedGoodsType());\n        productionTypes.add(new ProductionType(consumes, produces, basicProduction));\n    }\n    // end @compat\n    if (parent != this) {\n        // Handle \"extends\" for super-type fields\n        if (!xr.hasAttribute(REQUIRED_POPULATION_TAG)) {\n            setRequiredPopulation(parent.getRequiredPopulation());\n        }\n        addFeatures(parent);\n        if (parent.isAbstractType()) {\n            getFeatureContainer().replaceSource(parent, this);\n        }\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "readChild",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColXMLReader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "xr"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void readChild(FreeColXMLReader xr) throws XMLStreamException {\n    final Specification spec = getSpecification();\n    final String tag = xr.getLocalName();\n    if (PRODUCTION_TAG.equals(tag)) {\n        if (xr.getAttribute(DELETE_TAG, false)) {\n            productionTypes.clear();\n            xr.closeTag(PRODUCTION_TAG);\n        } else {\n            addProductionType(new ProductionType(xr, spec));\n        }\n    } else {\n        super.readChild(xr);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "getXMLTagName",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic String getXMLTagName() {\n    return getXMLElementTagName();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getXMLElementTagName",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the tag name of the root element representing this object.\n *\n * @return \"building-type\".\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "\"building-type\"."
+          }
+        ],
+        "code": "/**\n * Gets the tag name of the root element representing this object.\n *\n * @return \"building-type\".\n */\npublic static String getXMLElementTagName() {\n    return \"building-type\";\n}"
+      }
+    ]
+  }
+]

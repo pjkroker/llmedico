@@ -1,0 +1,57 @@
+[
+  {
+    "name": "BinaryMutation",
+    "package": "org.apache.commons.math3.genetics",
+    "qualified_name": "org.apache.commons.math3.genetics.BinaryMutation",
+    "javadoc": "/**\n * Mutation for {@link BinaryChromosome}s. Randomly changes one gene.\n *\n * @since 2.0\n */\n",
+    "code": "/**\n * Mutation for {@link BinaryChromosome}s. Randomly changes one gene.\n *\n * @since 2.0\n */\npublic class BinaryMutation implements MutationPolicy {\n\n    /**\n     * Mutate the given chromosome. Randomly changes one gene.\n     *\n     * @param original the original chromosome.\n     * @return the mutated chromosome.\n     * @throws MathIllegalArgumentException if <code>original</code> is not an instance of {@link BinaryChromosome}.\n     */\n    public Chromosome mutate(Chromosome original) throws MathIllegalArgumentException {\n        if (!(original instanceof BinaryChromosome)) {\n            throw new MathIllegalArgumentException(LocalizedFormats.INVALID_BINARY_CHROMOSOME);\n        }\n        BinaryChromosome origChrom = (BinaryChromosome) original;\n        List<Integer> newRepr = new ArrayList<Integer>(origChrom.getRepresentation());\n        // randomly select a gene\n        int geneIndex = GeneticAlgorithm.getRandomGenerator().nextInt(origChrom.getLength());\n        // and change it\n        newRepr.set(geneIndex, origChrom.getRepresentation().get(geneIndex) == 0 ? 1 : 0);\n        Chromosome newChrom = origChrom.newFixedLengthChromosome(newRepr);\n        return newChrom;\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "mutate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Chromosome",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Chromosome",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "original"
+          }
+        ],
+        "javadoc": "/**\n * Mutate the given chromosome. Randomly changes one gene.\n *\n * @param original the original chromosome.\n * @return the mutated chromosome.\n * @throws MathIllegalArgumentException if <code>original</code> is not an instance of {@link BinaryChromosome}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "original",
+            "content": "the original chromosome.",
+            "assertion": "assert receiverObjectID instanceof BinaryChromosome;",
+            "description": "the code must be an instance of BinaryChromosome"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the mutated chromosome.",
+            "assertion": "assert receiverObjectID.mutate(args[0]) == null;",
+            "description": "the mutated chromosome."
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if <code>original</code> is not an instance of {@link BinaryChromosome}.",
+            "assertion": "assert !(receiverObjectID instanceof java.lang.BinaryChromosome);",
+            "description": "if original is not an instance of BinaryChromosome."
+          }
+        ],
+        "code": "/**\n * Mutate the given chromosome. Randomly changes one gene.\n *\n * @param original the original chromosome.\n * @return the mutated chromosome.\n * @throws MathIllegalArgumentException if <code>original</code> is not an instance of {@link BinaryChromosome}.\n */\npublic Chromosome mutate(Chromosome original) throws MathIllegalArgumentException {\n    if (!(original instanceof BinaryChromosome)) {\n        throw new MathIllegalArgumentException(LocalizedFormats.INVALID_BINARY_CHROMOSOME);\n    }\n    BinaryChromosome origChrom = (BinaryChromosome) original;\n    List<Integer> newRepr = new ArrayList<Integer>(origChrom.getRepresentation());\n    // randomly select a gene\n    int geneIndex = GeneticAlgorithm.getRandomGenerator().nextInt(origChrom.getLength());\n    // and change it\n    newRepr.set(geneIndex, origChrom.getRepresentation().get(geneIndex) == 0 ? 1 : 0);\n    Chromosome newChrom = origChrom.newFixedLengthChromosome(newRepr);\n    return newChrom;\n}"
+      }
+    ]
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "BivariateGridInterpolator",
+    "package": "org.apache.commons.math3.analysis.interpolation",
+    "qualified_name": "org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator",
+    "javadoc": "/**\n * Interface representing a bivariate real interpolating function where the\n * sample points must be specified on a regular grid.\n */\n",
+    "code": "/**\n * Interface representing a bivariate real interpolating function where the\n * sample points must be specified on a regular grid.\n */\npublic interface BivariateGridInterpolator {\n\n    /**\n     * Compute an interpolating function for the dataset.\n     *\n     * @param xval All the x-coordinates of the interpolation points, sorted\n     * in increasing order.\n     * @param yval All the y-coordinates of the interpolation points, sorted\n     * in increasing order.\n     * @param fval The values of the interpolation points on all the grid knots:\n     * {@code fval[i][j] = f(xval[i], yval[j])}.\n     * @return a function which interpolates the dataset.\n     * @throws NoDataException if any of the arrays has zero length.\n     * @throws DimensionMismatchException if the array lengths are inconsistent.\n     * @throws NonMonotonicSequenceException if the array is not sorted.\n     * @throws NumberIsTooSmallException if the number of points is too small for\n     * the order of the interpolation\n     */\n    BivariateFunction interpolate(double[] xval, double[] yval, double[][] fval) throws NoDataException, DimensionMismatchException, NonMonotonicSequenceException, NumberIsTooSmallException;\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "interpolate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "BivariateFunction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "xval"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "yval"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 2
+            },
+            "name": "fval"
+          }
+        ],
+        "javadoc": "/**\n * Compute an interpolating function for the dataset.\n *\n * @param xval All the x-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param yval All the y-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param fval The values of the interpolation points on all the grid knots:\n * {@code fval[i][j] = f(xval[i], yval[j])}.\n * @return a function which interpolates the dataset.\n * @throws NoDataException if any of the arrays has zero length.\n * @throws DimensionMismatchException if the array lengths are inconsistent.\n * @throws NonMonotonicSequenceException if the array is not sorted.\n * @throws NumberIsTooSmallException if the number of points is too small for\n * the order of the interpolation\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "xval",
+            "content": "All the x-coordinates of the interpolation points, sorted\nin increasing order.",
+            "assertion": "assert args[0].length > 0;",
+            "description": "xval must be an array of length greater than zero"
+          },
+          {
+            "tag": "param",
+            "name": "yval",
+            "content": "All the y-coordinates of the interpolation points, sorted\nin increasing order.",
+            "assertion": "assert args[1].length > 0;",
+            "description": "yval must be an array of length greater than zero"
+          },
+          {
+            "tag": "param",
+            "name": "fval",
+            "content": "The values of the interpolation points on all the grid knots:\n{@code fval[i][j] = f(xval[i], yval[j])}.",
+            "assertion": "assert args[2].length > 0 && args[2][0].length > 1;",
+            "description": "fval must be a two-dimensional array of size greater than one by one"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a function which interpolates the dataset.",
+            "assertion": "assert receiverObjectID.interpolate(args[0], args[1], args[2]) != null;",
+            "description": "a function which interpolates the dataset."
+          },
+          {
+            "tag": "throws",
+            "name": "NoDataException",
+            "content": "if any of the arrays has zero length.",
+            "assertion": "assert receiverObjectID.xval.length == 0 || receiverObjectID.yval.length == 0 || receiverObjectID.fval.length[0] == 0 || receiverObjectID.fval.length[1] == 0;",
+            "description": "if any of the arrays has zero length."
+          },
+          {
+            "tag": "throws",
+            "name": "DimensionMismatchException",
+            "content": "if the array lengths are inconsistent.",
+            "assertion": "assert receiverObjectID.xval.length == receiverObjectID.yval.length && receiverObjectID.fval.length[0] == receiverObjectID.fval.length[1];",
+            "description": "if the array lengths are inconsistent."
+          },
+          {
+            "tag": "throws",
+            "name": "NonMonotonicSequenceException",
+            "content": "if the array is not sorted.",
+            "assertion": "assert receiverObjectID.xval.sort() == receiverObjectID.yval.sort();",
+            "description": "if the array is not sorted."
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooSmallException",
+            "content": "if the number of points is too small for\nthe order of the interpolation",
+            "assertion": "assert receiverObjectID.xval.length >= 2 && receiverObjectID.yval.length >= 2 && receiverObjectID.fval.length[0] == receiverObjectID.fval.length[1];",
+            "description": "if the number of points is too small for the order of the interpolation."
+          }
+        ],
+        "code": "/**\n * Compute an interpolating function for the dataset.\n *\n * @param xval All the x-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param yval All the y-coordinates of the interpolation points, sorted\n * in increasing order.\n * @param fval The values of the interpolation points on all the grid knots:\n * {@code fval[i][j] = f(xval[i], yval[j])}.\n * @return a function which interpolates the dataset.\n * @throws NoDataException if any of the arrays has zero length.\n * @throws DimensionMismatchException if the array lengths are inconsistent.\n * @throws NonMonotonicSequenceException if the array is not sorted.\n * @throws NumberIsTooSmallException if the number of points is too small for\n * the order of the interpolation\n */\nBivariateFunction interpolate(double[] xval, double[] yval, double[][] fval) throws NoDataException, DimensionMismatchException, NonMonotonicSequenceException, NumberIsTooSmallException;"
+      }
+    ]
+  }
+]

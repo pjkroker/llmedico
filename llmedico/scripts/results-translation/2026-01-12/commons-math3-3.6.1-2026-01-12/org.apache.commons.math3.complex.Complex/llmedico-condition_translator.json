@@ -1,0 +1,1748 @@
+[
+  {
+    "name": "Complex",
+    "package": "org.apache.commons.math3.complex",
+    "qualified_name": "org.apache.commons.math3.complex.Complex",
+    "javadoc": "/**\n * Representation of a Complex number, i.e. a number which has both a\n * real and imaginary part.\n * <p>\n * Implementations of arithmetic operations handle {@code NaN} and\n * infinite values according to the rules for {@link java.lang.Double}, i.e.\n * {@link #equals} is an equivalence relation for all instances that have\n * a {@code NaN} in either real or imaginary part, e.g. the following are\n * considered equal:\n * <ul>\n *  <li>{@code 1 + NaNi}</li>\n *  <li>{@code NaN + i}</li>\n *  <li>{@code NaN + NaNi}</li>\n * </ul><p>\n * Note that this contradicts the IEEE-754 standard for floating\n * point numbers (according to which the test {@code x == x} must fail if\n * {@code x} is {@code NaN}). The method\n * {@link org.apache.commons.math3.util.Precision#equals(double,double,int)\n * equals for primitive double} in {@link org.apache.commons.math3.util.Precision}\n * conforms with IEEE-754 while this class conforms with the standard behavior\n * for Java object types.</p>\n */\n",
+    "code": "/**\n * Representation of a Complex number, i.e. a number which has both a\n * real and imaginary part.\n * <p>\n * Implementations of arithmetic operations handle {@code NaN} and\n * infinite values according to the rules for {@link java.lang.Double}, i.e.\n * {@link #equals} is an equivalence relation for all instances that have\n * a {@code NaN} in either real or imaginary part, e.g. the following are\n * considered equal:\n * <ul>\n *  <li>{@code 1 + NaNi}</li>\n *  <li>{@code NaN + i}</li>\n *  <li>{@code NaN + NaNi}</li>\n * </ul><p>\n * Note that this contradicts the IEEE-754 standard for floating\n * point numbers (according to which the test {@code x == x} must fail if\n * {@code x} is {@code NaN}). The method\n * {@link org.apache.commons.math3.util.Precision#equals(double,double,int)\n * equals for primitive double} in {@link org.apache.commons.math3.util.Precision}\n * conforms with IEEE-754 while this class conforms with the standard behavior\n * for Java object types.</p>\n */\npublic class Complex implements FieldElement<Complex>, Serializable {\n\n    /**\n     * The square root of -1. A number representing \"0.0 + 1.0i\"\n     */\n    public static final Complex I = new Complex(0.0, 1.0);\n\n    // CHECKSTYLE: stop ConstantName\n    /**\n     * A complex number representing \"NaN + NaNi\"\n     */\n    public static final Complex NaN = new Complex(Double.NaN, Double.NaN);\n\n    // CHECKSTYLE: resume ConstantName\n    /**\n     * A complex number representing \"+INF + INFi\"\n     */\n    public static final Complex INF = new Complex(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);\n\n    /**\n     * A complex number representing \"1.0 + 0.0i\"\n     */\n    public static final Complex ONE = new Complex(1.0, 0.0);\n\n    /**\n     * A complex number representing \"0.0 + 0.0i\"\n     */\n    public static final Complex ZERO = new Complex(0.0, 0.0);\n\n    /**\n     * Serializable version identifier\n     */\n    private static final long serialVersionUID = -6195664516687396620L;\n\n    /**\n     * The imaginary part.\n     */\n    private final double imaginary;\n\n    /**\n     * The real part.\n     */\n    private final double real;\n\n    /**\n     * Record whether this complex number is equal to NaN.\n     */\n    private final transient boolean isNaN;\n\n    /**\n     * Record whether this complex number is infinite.\n     */\n    private final transient boolean isInfinite;\n\n    /**\n     * Create a complex number given only the real part.\n     *\n     * @param real Real part.\n     */\n    public Complex(double real) {\n        this(real, 0.0);\n    }\n\n    /**\n     * Create a complex number given the real and imaginary parts.\n     *\n     * @param real Real part.\n     * @param imaginary Imaginary part.\n     */\n    public Complex(double real, double imaginary) {\n        this.real = real;\n        this.imaginary = imaginary;\n        isNaN = Double.isNaN(real) || Double.isNaN(imaginary);\n        isInfinite = !isNaN && (Double.isInfinite(real) || Double.isInfinite(imaginary));\n    }\n\n    /**\n     * Return the absolute value of this complex number.\n     * Returns {@code NaN} if either real or imaginary part is {@code NaN}\n     * and {@code Double.POSITIVE_INFINITY} if neither part is {@code NaN},\n     * but at least one part is infinite.\n     *\n     * @return the absolute value.\n     */\n    public double abs() {\n        if (isNaN) {\n            return Double.NaN;\n        }\n        if (isInfinite()) {\n            return Double.POSITIVE_INFINITY;\n        }\n        if (FastMath.abs(real) < FastMath.abs(imaginary)) {\n            if (imaginary == 0.0) {\n                return FastMath.abs(real);\n            }\n            double q = real / imaginary;\n            return FastMath.abs(imaginary) * FastMath.sqrt(1 + q * q);\n        } else {\n            if (real == 0.0) {\n                return FastMath.abs(imaginary);\n            }\n            double q = imaginary / real;\n            return FastMath.abs(real) * FastMath.sqrt(1 + q * q);\n        }\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is\n     * {@code (this + addend)}.\n     * Uses the definitional formula\n     * <p>\n     *   {@code (a + bi) + (c + di) = (a+c) + (b+d)i}\n     * </p>\n     * If either {@code this} or {@code addend} has a {@code NaN} value in\n     * either part, {@link #NaN} is returned; otherwise {@code Infinite}\n     * and {@code NaN} values are returned in the parts of the result\n     * according to the rules for {@link java.lang.Double} arithmetic.\n     *\n     * @param  addend Value to be added to this {@code Complex}.\n     * @return {@code this + addend}.\n     * @throws NullArgumentException if {@code addend} is {@code null}.\n     */\n    public Complex add(Complex addend) throws NullArgumentException {\n        MathUtils.checkNotNull(addend);\n        if (isNaN || addend.isNaN) {\n            return NaN;\n        }\n        return createComplex(real + addend.getReal(), imaginary + addend.getImaginary());\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is {@code (this + addend)},\n     * with {@code addend} interpreted as a real number.\n     *\n     * @param addend Value to be added to this {@code Complex}.\n     * @return {@code this + addend}.\n     * @see #add(Complex)\n     */\n    public Complex add(double addend) {\n        if (isNaN || Double.isNaN(addend)) {\n            return NaN;\n        }\n        return createComplex(real + addend, imaginary);\n    }\n\n    /**\n     * Returns the conjugate of this complex number.\n     * The conjugate of {@code a + bi} is {@code a - bi}.\n     * <p>\n     * {@link #NaN} is returned if either the real or imaginary\n     * part of this Complex number equals {@code Double.NaN}.\n     * </p><p>\n     * If the imaginary part is infinite, and the real part is not\n     * {@code NaN}, the returned value has infinite imaginary part\n     * of the opposite sign, e.g. the conjugate of\n     * {@code 1 + POSITIVE_INFINITY i} is {@code 1 - NEGATIVE_INFINITY i}.\n     * </p>\n     * @return the conjugate of this Complex object.\n     */\n    public Complex conjugate() {\n        if (isNaN) {\n            return NaN;\n        }\n        return createComplex(real, -imaginary);\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is\n     * {@code (this / divisor)}.\n     * Implements the definitional formula\n     * <pre>\n     *  <code>\n     *    a + bi          ac + bd + (bc - ad)i\n     *    ----------- = -------------------------\n     *    c + di         c<sup>2</sup> + d<sup>2</sup>\n     *  </code>\n     * </pre>\n     * but uses\n     * <a href=\"http://doi.acm.org/10.1145/1039813.1039814\">\n     * prescaling of operands</a> to limit the effects of overflows and\n     * underflows in the computation.\n     * <p>\n     * {@code Infinite} and {@code NaN} values are handled according to the\n     * following rules, applied in the order presented:\n     * <ul>\n     *  <li>If either {@code this} or {@code divisor} has a {@code NaN} value\n     *   in either part, {@link #NaN} is returned.\n     *  </li>\n     *  <li>If {@code divisor} equals {@link #ZERO}, {@link #NaN} is returned.\n     *  </li>\n     *  <li>If {@code this} and {@code divisor} are both infinite,\n     *   {@link #NaN} is returned.\n     *  </li>\n     *  <li>If {@code this} is finite (i.e., has no {@code Infinite} or\n     *   {@code NaN} parts) and {@code divisor} is infinite (one or both parts\n     *   infinite), {@link #ZERO} is returned.\n     *  </li>\n     *  <li>If {@code this} is infinite and {@code divisor} is finite,\n     *   {@code NaN} values are returned in the parts of the result if the\n     *   {@link java.lang.Double} rules applied to the definitional formula\n     *   force {@code NaN} results.\n     *  </li>\n     * </ul>\n     *\n     * @param divisor Value by which this {@code Complex} is to be divided.\n     * @return {@code this / divisor}.\n     * @throws NullArgumentException if {@code divisor} is {@code null}.\n     */\n    public Complex divide(Complex divisor) throws NullArgumentException {\n        MathUtils.checkNotNull(divisor);\n        if (isNaN || divisor.isNaN) {\n            return NaN;\n        }\n        final double c = divisor.getReal();\n        final double d = divisor.getImaginary();\n        if (c == 0.0 && d == 0.0) {\n            return NaN;\n        }\n        if (divisor.isInfinite() && !isInfinite()) {\n            return ZERO;\n        }\n        if (FastMath.abs(c) < FastMath.abs(d)) {\n            double q = c / d;\n            double denominator = c * q + d;\n            return createComplex((real * q + imaginary) / denominator, (imaginary * q - real) / denominator);\n        } else {\n            double q = d / c;\n            double denominator = d * q + c;\n            return createComplex((imaginary * q + real) / denominator, (imaginary - real * q) / denominator);\n        }\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is {@code (this / divisor)},\n     * with {@code divisor} interpreted as a real number.\n     *\n     * @param  divisor Value by which this {@code Complex} is to be divided.\n     * @return {@code this / divisor}.\n     * @see #divide(Complex)\n     */\n    public Complex divide(double divisor) {\n        if (isNaN || Double.isNaN(divisor)) {\n            return NaN;\n        }\n        if (divisor == 0d) {\n            return NaN;\n        }\n        if (Double.isInfinite(divisor)) {\n            return !isInfinite() ? ZERO : NaN;\n        }\n        return createComplex(real / divisor, imaginary / divisor);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public Complex reciprocal() {\n        if (isNaN) {\n            return NaN;\n        }\n        if (real == 0.0 && imaginary == 0.0) {\n            return INF;\n        }\n        if (isInfinite) {\n            return ZERO;\n        }\n        if (FastMath.abs(real) < FastMath.abs(imaginary)) {\n            double q = real / imaginary;\n            double scale = 1. / (real * q + imaginary);\n            return createComplex(scale * q, -scale);\n        } else {\n            double q = imaginary / real;\n            double scale = 1. / (imaginary * q + real);\n            return createComplex(scale, -scale * q);\n        }\n    }\n\n    /**\n     * Test for equality with another object.\n     * If both the real and imaginary parts of two complex numbers\n     * are exactly the same, and neither is {@code Double.NaN}, the two\n     * Complex objects are considered to be equal.\n     * The behavior is the same as for JDK's {@link Double#equals(Object)\n     * Double}:\n     * <ul>\n     *  <li>All {@code NaN} values are considered to be equal,\n     *   i.e, if either (or both) real and imaginary parts of the complex\n     *   number are equal to {@code Double.NaN}, the complex number is equal\n     *   to {@code NaN}.\n     *  </li>\n     *  <li>\n     *   Instances constructed with different representations of zero (i.e.\n     *   either \"0\" or \"-0\") are <em>not</em> considered to be equal.\n     *  </li>\n     * </ul>\n     *\n     * @param other Object to test for equality with this instance.\n     * @return {@code true} if the objects are equal, {@code false} if object\n     * is {@code null}, not an instance of {@code Complex}, or not equal to\n     * this instance.\n     */\n    @Override\n    public boolean equals(Object other) {\n        if (this == other) {\n            return true;\n        }\n        if (other instanceof Complex) {\n            Complex c = (Complex) other;\n            if (c.isNaN) {\n                return isNaN;\n            } else {\n                return MathUtils.equals(real, c.real) && MathUtils.equals(imaginary, c.imaginary);\n            }\n        }\n        return false;\n    }\n\n    /**\n     * Test for the floating-point equality between Complex objects.\n     * It returns {@code true} if both arguments are equal or within the\n     * range of allowed error (inclusive).\n     *\n     * @param x First value (cannot be {@code null}).\n     * @param y Second value (cannot be {@code null}).\n     * @param maxUlps {@code (maxUlps - 1)} is the number of floating point\n     * values between the real (resp. imaginary) parts of {@code x} and\n     * {@code y}.\n     * @return {@code true} if there are fewer than {@code maxUlps} floating\n     * point values between the real (resp. imaginary) parts of {@code x}\n     * and {@code y}.\n     *\n     * @see Precision#equals(double,double,int)\n     * @since 3.3\n     */\n    public static boolean equals(Complex x, Complex y, int maxUlps) {\n        return Precision.equals(x.real, y.real, maxUlps) && Precision.equals(x.imaginary, y.imaginary, maxUlps);\n    }\n\n    /**\n     * Returns {@code true} iff the values are equal as defined by\n     * {@link #equals(Complex,Complex,int) equals(x, y, 1)}.\n     *\n     * @param x First value (cannot be {@code null}).\n     * @param y Second value (cannot be {@code null}).\n     * @return {@code true} if the values are equal.\n     *\n     * @since 3.3\n     */\n    public static boolean equals(Complex x, Complex y) {\n        return equals(x, y, 1);\n    }\n\n    /**\n     * Returns {@code true} if, both for the real part and for the imaginary\n     * part, there is no double value strictly between the arguments or the\n     * difference between them is within the range of allowed error\n     * (inclusive).  Returns {@code false} if either of the arguments is NaN.\n     *\n     * @param x First value (cannot be {@code null}).\n     * @param y Second value (cannot be {@code null}).\n     * @param eps Amount of allowed absolute error.\n     * @return {@code true} if the values are two adjacent floating point\n     * numbers or they are within range of each other.\n     *\n     * @see Precision#equals(double,double,double)\n     * @since 3.3\n     */\n    public static boolean equals(Complex x, Complex y, double eps) {\n        return Precision.equals(x.real, y.real, eps) && Precision.equals(x.imaginary, y.imaginary, eps);\n    }\n\n    /**\n     * Returns {@code true} if, both for the real part and for the imaginary\n     * part, there is no double value strictly between the arguments or the\n     * relative difference between them is smaller or equal to the given\n     * tolerance. Returns {@code false} if either of the arguments is NaN.\n     *\n     * @param x First value (cannot be {@code null}).\n     * @param y Second value (cannot be {@code null}).\n     * @param eps Amount of allowed relative error.\n     * @return {@code true} if the values are two adjacent floating point\n     * numbers or they are within range of each other.\n     *\n     * @see Precision#equalsWithRelativeTolerance(double,double,double)\n     * @since 3.3\n     */\n    public static boolean equalsWithRelativeTolerance(Complex x, Complex y, double eps) {\n        return Precision.equalsWithRelativeTolerance(x.real, y.real, eps) && Precision.equalsWithRelativeTolerance(x.imaginary, y.imaginary, eps);\n    }\n\n    /**\n     * Get a hashCode for the complex number.\n     * Any {@code Double.NaN} value in real or imaginary part produces\n     * the same hash code {@code 7}.\n     *\n     * @return a hash code value for this object.\n     */\n    @Override\n    public int hashCode() {\n        if (isNaN) {\n            return 7;\n        }\n        return 37 * (17 * MathUtils.hash(imaginary) + MathUtils.hash(real));\n    }\n\n    /**\n     * Access the imaginary part.\n     *\n     * @return the imaginary part.\n     */\n    public double getImaginary() {\n        return imaginary;\n    }\n\n    /**\n     * Access the real part.\n     *\n     * @return the real part.\n     */\n    public double getReal() {\n        return real;\n    }\n\n    /**\n     * Checks whether either or both parts of this complex number is\n     * {@code NaN}.\n     *\n     * @return true if either or both parts of this complex number is\n     * {@code NaN}; false otherwise.\n     */\n    public boolean isNaN() {\n        return isNaN;\n    }\n\n    /**\n     * Checks whether either the real or imaginary part of this complex number\n     * takes an infinite value (either {@code Double.POSITIVE_INFINITY} or\n     * {@code Double.NEGATIVE_INFINITY}) and neither part\n     * is {@code NaN}.\n     *\n     * @return true if one or both parts of this complex number are infinite\n     * and neither part is {@code NaN}.\n     */\n    public boolean isInfinite() {\n        return isInfinite;\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is {@code this * factor}.\n     * Implements preliminary checks for {@code NaN} and infinity followed by\n     * the definitional formula:\n     * <p>\n     *   {@code (a + bi)(c + di) = (ac - bd) + (ad + bc)i}\n     * </p>\n     * Returns {@link #NaN} if either {@code this} or {@code factor} has one or\n     * more {@code NaN} parts.\n     * <p>\n     * Returns {@link #INF} if neither {@code this} nor {@code factor} has one\n     * or more {@code NaN} parts and if either {@code this} or {@code factor}\n     * has one or more infinite parts (same result is returned regardless of\n     * the sign of the components).\n     * </p><p>\n     * Returns finite values in components of the result per the definitional\n     * formula in all remaining cases.</p>\n     *\n     * @param  factor value to be multiplied by this {@code Complex}.\n     * @return {@code this * factor}.\n     * @throws NullArgumentException if {@code factor} is {@code null}.\n     */\n    public Complex multiply(Complex factor) throws NullArgumentException {\n        MathUtils.checkNotNull(factor);\n        if (isNaN || factor.isNaN) {\n            return NaN;\n        }\n        if (Double.isInfinite(real) || Double.isInfinite(imaginary) || Double.isInfinite(factor.real) || Double.isInfinite(factor.imaginary)) {\n            // we don't use isInfinite() to avoid testing for NaN again\n            return INF;\n        }\n        return createComplex(real * factor.real - imaginary * factor.imaginary, real * factor.imaginary + imaginary * factor.real);\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is {@code this * factor}, with {@code factor}\n     * interpreted as a integer number.\n     *\n     * @param  factor value to be multiplied by this {@code Complex}.\n     * @return {@code this * factor}.\n     * @see #multiply(Complex)\n     */\n    public Complex multiply(final int factor) {\n        if (isNaN) {\n            return NaN;\n        }\n        if (Double.isInfinite(real) || Double.isInfinite(imaginary)) {\n            return INF;\n        }\n        return createComplex(real * factor, imaginary * factor);\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is {@code this * factor}, with {@code factor}\n     * interpreted as a real number.\n     *\n     * @param  factor value to be multiplied by this {@code Complex}.\n     * @return {@code this * factor}.\n     * @see #multiply(Complex)\n     */\n    public Complex multiply(double factor) {\n        if (isNaN || Double.isNaN(factor)) {\n            return NaN;\n        }\n        if (Double.isInfinite(real) || Double.isInfinite(imaginary) || Double.isInfinite(factor)) {\n            // we don't use isInfinite() to avoid testing for NaN again\n            return INF;\n        }\n        return createComplex(real * factor, imaginary * factor);\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is {@code (-this)}.\n     * Returns {@code NaN} if either real or imaginary\n     * part of this Complex number is {@code Double.NaN}.\n     *\n     * @return {@code -this}.\n     */\n    public Complex negate() {\n        if (isNaN) {\n            return NaN;\n        }\n        return createComplex(-real, -imaginary);\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is\n     * {@code (this - subtrahend)}.\n     * Uses the definitional formula\n     * <p>\n     *  {@code (a + bi) - (c + di) = (a-c) + (b-d)i}\n     * </p>\n     * If either {@code this} or {@code subtrahend} has a {@code NaN]} value in either part,\n     * {@link #NaN} is returned; otherwise infinite and {@code NaN} values are\n     * returned in the parts of the result according to the rules for\n     * {@link java.lang.Double} arithmetic.\n     *\n     * @param  subtrahend value to be subtracted from this {@code Complex}.\n     * @return {@code this - subtrahend}.\n     * @throws NullArgumentException if {@code subtrahend} is {@code null}.\n     */\n    public Complex subtract(Complex subtrahend) throws NullArgumentException {\n        MathUtils.checkNotNull(subtrahend);\n        if (isNaN || subtrahend.isNaN) {\n            return NaN;\n        }\n        return createComplex(real - subtrahend.getReal(), imaginary - subtrahend.getImaginary());\n    }\n\n    /**\n     * Returns a {@code Complex} whose value is\n     * {@code (this - subtrahend)}.\n     *\n     * @param  subtrahend value to be subtracted from this {@code Complex}.\n     * @return {@code this - subtrahend}.\n     * @see #subtract(Complex)\n     */\n    public Complex subtract(double subtrahend) {\n        if (isNaN || Double.isNaN(subtrahend)) {\n            return NaN;\n        }\n        return createComplex(real - subtrahend, imaginary);\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/InverseCosine.html\" TARGET=\"_top\">\n     * inverse cosine</a> of this complex number.\n     * Implements the formula:\n     * <p>\n     *  {@code acos(z) = -i (log(z + i (sqrt(1 - z<sup>2</sup>))))}\n     * </p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN} or infinite.\n     *\n     * @return the inverse cosine of this complex number.\n     * @since 1.2\n     */\n    public Complex acos() {\n        if (isNaN) {\n            return NaN;\n        }\n        return this.add(this.sqrt1z().multiply(I)).log().multiply(I.negate());\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/InverseSine.html\" TARGET=\"_top\">\n     * inverse sine</a> of this complex number.\n     * Implements the formula:\n     * <p>\n     *  {@code asin(z) = -i (log(sqrt(1 - z<sup>2</sup>) + iz))}\n     * </p><p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN} or infinite.</p>\n     *\n     * @return the inverse sine of this complex number.\n     * @since 1.2\n     */\n    public Complex asin() {\n        if (isNaN) {\n            return NaN;\n        }\n        return sqrt1z().add(this.multiply(I)).log().multiply(I.negate());\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/InverseTangent.html\" TARGET=\"_top\">\n     * inverse tangent</a> of this complex number.\n     * Implements the formula:\n     * <p>\n     * {@code atan(z) = (i/2) log((i + z)/(i - z))}\n     * </p><p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN} or infinite.</p>\n     *\n     * @return the inverse tangent of this complex number\n     * @since 1.2\n     */\n    public Complex atan() {\n        if (isNaN) {\n            return NaN;\n        }\n        return this.add(I).divide(I.subtract(this)).log().multiply(I.divide(createComplex(2.0, 0.0)));\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/Cosine.html\" TARGET=\"_top\">\n     * cosine</a> of this complex number.\n     * Implements the formula:\n     * <p>\n     *  {@code cos(a + bi) = cos(a)cosh(b) - sin(a)sinh(b)i}\n     * </p><p>\n     * where the (real) functions on the right-hand side are\n     * {@link FastMath#sin}, {@link FastMath#cos},\n     * {@link FastMath#cosh} and {@link FastMath#sinh}.\n     * </p><p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p><p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or NaN values returned in parts of the result.</p>\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   cos(1 &plusmn; INFINITY i) = 1 \\u2213 INFINITY i\n     *   cos(&plusmn;INFINITY + i) = NaN + NaN i\n     *   cos(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n     *  </code>\n     * </pre>\n     *\n     * @return the cosine of this complex number.\n     * @since 1.2\n     */\n    public Complex cos() {\n        if (isNaN) {\n            return NaN;\n        }\n        return createComplex(FastMath.cos(real) * FastMath.cosh(imaginary), -FastMath.sin(real) * FastMath.sinh(imaginary));\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/HyperbolicCosine.html\" TARGET=\"_top\">\n     * hyperbolic cosine</a> of this complex number.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   cosh(a + bi) = cosh(a)cos(b) + sinh(a)sin(b)i\n     *  </code>\n     * </pre>\n     * where the (real) functions on the right-hand side are\n     * {@link FastMath#sin}, {@link FastMath#cos},\n     * {@link FastMath#cosh} and {@link FastMath#sinh}.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or NaN values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   cosh(1 &plusmn; INFINITY i) = NaN + NaN i\n     *   cosh(&plusmn;INFINITY + i) = INFINITY &plusmn; INFINITY i\n     *   cosh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n     *  </code>\n     * </pre>\n     *\n     * @return the hyperbolic cosine of this complex number.\n     * @since 1.2\n     */\n    public Complex cosh() {\n        if (isNaN) {\n            return NaN;\n        }\n        return createComplex(FastMath.cosh(real) * FastMath.cos(imaginary), FastMath.sinh(real) * FastMath.sin(imaginary));\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/ExponentialFunction.html\" TARGET=\"_top\">\n     * exponential function</a> of this complex number.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   exp(a + bi) = exp(a)cos(b) + exp(a)sin(b)i\n     *  </code>\n     * </pre>\n     * where the (real) functions on the right-hand side are\n     * {@link FastMath#exp}, {@link FastMath#cos}, and\n     * {@link FastMath#sin}.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or NaN values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   exp(1 &plusmn; INFINITY i) = NaN + NaN i\n     *   exp(INFINITY + i) = INFINITY + INFINITY i\n     *   exp(-INFINITY + i) = 0 + 0i\n     *   exp(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n     *  </code>\n     * </pre>\n     *\n     * @return <code><i>e</i><sup>this</sup></code>.\n     * @since 1.2\n     */\n    public Complex exp() {\n        if (isNaN) {\n            return NaN;\n        }\n        double expReal = FastMath.exp(real);\n        return createComplex(expReal * FastMath.cos(imaginary), expReal * FastMath.sin(imaginary));\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/NaturalLogarithm.html\" TARGET=\"_top\">\n     * natural logarithm</a> of this complex number.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   log(a + bi) = ln(|a + bi|) + arg(a + bi)i\n     *  </code>\n     * </pre>\n     * where ln on the right hand side is {@link FastMath#log},\n     * {@code |a + bi|} is the modulus, {@link Complex#abs},  and\n     * {@code arg(a + bi) = }{@link FastMath#atan2}(b, a).\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p>\n     * Infinite (or critical) values in real or imaginary parts of the input may\n     * result in infinite or NaN values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   log(1 &plusmn; INFINITY i) = INFINITY &plusmn; (&pi;/2)i\n     *   log(INFINITY + i) = INFINITY + 0i\n     *   log(-INFINITY + i) = INFINITY + &pi;i\n     *   log(INFINITY &plusmn; INFINITY i) = INFINITY &plusmn; (&pi;/4)i\n     *   log(-INFINITY &plusmn; INFINITY i) = INFINITY &plusmn; (3&pi;/4)i\n     *   log(0 + 0i) = -INFINITY + 0i\n     *  </code>\n     * </pre>\n     *\n     * @return the value <code>ln &nbsp; this</code>, the natural logarithm\n     * of {@code this}.\n     * @since 1.2\n     */\n    public Complex log() {\n        if (isNaN) {\n            return NaN;\n        }\n        return createComplex(FastMath.log(abs()), FastMath.atan2(imaginary, real));\n    }\n\n    /**\n     * Returns of value of this complex number raised to the power of {@code x}.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   y<sup>x</sup> = exp(x&middot;log(y))\n     *  </code>\n     * </pre>\n     * where {@code exp} and {@code log} are {@link #exp} and\n     * {@link #log}, respectively.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN} or infinite, or if {@code y}\n     * equals {@link Complex#ZERO}.</p>\n     *\n     * @param  x exponent to which this {@code Complex} is to be raised.\n     * @return <code> this<sup>x</sup></code>.\n     * @throws NullArgumentException if x is {@code null}.\n     * @since 1.2\n     */\n    public Complex pow(Complex x) throws NullArgumentException {\n        MathUtils.checkNotNull(x);\n        return this.log().multiply(x).exp();\n    }\n\n    /**\n     * Returns of value of this complex number raised to the power of {@code x}.\n     *\n     * @param  x exponent to which this {@code Complex} is to be raised.\n     * @return <code>this<sup>x</sup></code>.\n     * @see #pow(Complex)\n     */\n    public Complex pow(double x) {\n        return this.log().multiply(x).exp();\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/Sine.html\" TARGET=\"_top\">\n     * sine</a>\n     * of this complex number.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   sin(a + bi) = sin(a)cosh(b) - cos(a)sinh(b)i\n     *  </code>\n     * </pre>\n     * where the (real) functions on the right-hand side are\n     * {@link FastMath#sin}, {@link FastMath#cos},\n     * {@link FastMath#cosh} and {@link FastMath#sinh}.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p><p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or {@code NaN} values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   sin(1 &plusmn; INFINITY i) = 1 &plusmn; INFINITY i\n     *   sin(&plusmn;INFINITY + i) = NaN + NaN i\n     *   sin(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n     *  </code>\n     * </pre>\n     *\n     * @return the sine of this complex number.\n     * @since 1.2\n     */\n    public Complex sin() {\n        if (isNaN) {\n            return NaN;\n        }\n        return createComplex(FastMath.sin(real) * FastMath.cosh(imaginary), FastMath.cos(real) * FastMath.sinh(imaginary));\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/HyperbolicSine.html\" TARGET=\"_top\">\n     * hyperbolic sine</a> of this complex number.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   sinh(a + bi) = sinh(a)cos(b)) + cosh(a)sin(b)i\n     *  </code>\n     * </pre>\n     * where the (real) functions on the right-hand side are\n     * {@link FastMath#sin}, {@link FastMath#cos},\n     * {@link FastMath#cosh} and {@link FastMath#sinh}.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p><p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or NaN values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   sinh(1 &plusmn; INFINITY i) = NaN + NaN i\n     *   sinh(&plusmn;INFINITY + i) = &plusmn; INFINITY + INFINITY i\n     *   sinh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n     *  </code>\n     * </pre>\n     *\n     * @return the hyperbolic sine of {@code this}.\n     * @since 1.2\n     */\n    public Complex sinh() {\n        if (isNaN) {\n            return NaN;\n        }\n        return createComplex(FastMath.sinh(real) * FastMath.cos(imaginary), FastMath.cosh(real) * FastMath.sin(imaginary));\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/SquareRoot.html\" TARGET=\"_top\">\n     * square root</a> of this complex number.\n     * Implements the following algorithm to compute {@code sqrt(a + bi)}:\n     * <ol><li>Let {@code t = sqrt((|a| + |a + bi|) / 2)}</li>\n     * <li><pre>if {@code  a &#8805; 0} return {@code t + (b/2t)i}\n     *  else return {@code |b|/2t + sign(b)t i }</pre></li>\n     * </ol>\n     * where <ul>\n     * <li>{@code |a| = }{@link FastMath#abs}(a)</li>\n     * <li>{@code |a + bi| = }{@link Complex#abs}(a + bi)</li>\n     * <li>{@code sign(b) =  }{@link FastMath#copySign(double,double) copySign(1d, b)}\n     * </ul>\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or NaN values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   sqrt(1 &plusmn; INFINITY i) = INFINITY + NaN i\n     *   sqrt(INFINITY + i) = INFINITY + 0i\n     *   sqrt(-INFINITY + i) = 0 + INFINITY i\n     *   sqrt(INFINITY &plusmn; INFINITY i) = INFINITY + NaN i\n     *   sqrt(-INFINITY &plusmn; INFINITY i) = NaN &plusmn; INFINITY i\n     *  </code>\n     * </pre>\n     *\n     * @return the square root of {@code this}.\n     * @since 1.2\n     */\n    public Complex sqrt() {\n        if (isNaN) {\n            return NaN;\n        }\n        if (real == 0.0 && imaginary == 0.0) {\n            return createComplex(0.0, 0.0);\n        }\n        double t = FastMath.sqrt((FastMath.abs(real) + abs()) / 2.0);\n        if (real >= 0.0) {\n            return createComplex(t, imaginary / (2.0 * t));\n        } else {\n            return createComplex(FastMath.abs(imaginary) / (2.0 * t), FastMath.copySign(1d, imaginary) * t);\n        }\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/SquareRoot.html\" TARGET=\"_top\">\n     * square root</a> of <code>1 - this<sup>2</sup></code> for this complex\n     * number.\n     * Computes the result directly as\n     * {@code sqrt(ONE.subtract(z.multiply(z)))}.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or NaN values returned in parts of the result.\n     *\n     * @return the square root of <code>1 - this<sup>2</sup></code>.\n     * @since 1.2\n     */\n    public Complex sqrt1z() {\n        return createComplex(1.0, 0.0).subtract(this.multiply(this)).sqrt();\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/Tangent.html\" TARGET=\"_top\">\n     * tangent</a> of this complex number.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   tan(a + bi) = sin(2a)/(cos(2a)+cosh(2b)) + [sinh(2b)/(cos(2a)+cosh(2b))]i\n     *  </code>\n     * </pre>\n     * where the (real) functions on the right-hand side are\n     * {@link FastMath#sin}, {@link FastMath#cos}, {@link FastMath#cosh} and\n     * {@link FastMath#sinh}.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p>\n     * Infinite (or critical) values in real or imaginary parts of the input may\n     * result in infinite or NaN values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   tan(a &plusmn; INFINITY i) = 0 &plusmn; i\n     *   tan(&plusmn;INFINITY + bi) = NaN + NaN i\n     *   tan(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n     *   tan(&plusmn;&pi;/2 + 0 i) = &plusmn;INFINITY + NaN i\n     *  </code>\n     * </pre>\n     *\n     * @return the tangent of {@code this}.\n     * @since 1.2\n     */\n    public Complex tan() {\n        if (isNaN || Double.isInfinite(real)) {\n            return NaN;\n        }\n        if (imaginary > 20.0) {\n            return createComplex(0.0, 1.0);\n        }\n        if (imaginary < -20.0) {\n            return createComplex(0.0, -1.0);\n        }\n        double real2 = 2.0 * real;\n        double imaginary2 = 2.0 * imaginary;\n        double d = FastMath.cos(real2) + FastMath.cosh(imaginary2);\n        return createComplex(FastMath.sin(real2) / d, FastMath.sinh(imaginary2) / d);\n    }\n\n    /**\n     * Compute the\n     * <a href=\"http://mathworld.wolfram.com/HyperbolicTangent.html\" TARGET=\"_top\">\n     * hyperbolic tangent</a> of this complex number.\n     * Implements the formula:\n     * <pre>\n     *  <code>\n     *   tan(a + bi) = sinh(2a)/(cosh(2a)+cos(2b)) + [sin(2b)/(cosh(2a)+cos(2b))]i\n     *  </code>\n     * </pre>\n     * where the (real) functions on the right-hand side are\n     * {@link FastMath#sin}, {@link FastMath#cos}, {@link FastMath#cosh} and\n     * {@link FastMath#sinh}.\n     * <p>\n     * Returns {@link Complex#NaN} if either real or imaginary part of the\n     * input argument is {@code NaN}.\n     * </p>\n     * Infinite values in real or imaginary parts of the input may result in\n     * infinite or NaN values returned in parts of the result.\n     * <pre>\n     *  Examples:\n     *  <code>\n     *   tanh(a &plusmn; INFINITY i) = NaN + NaN i\n     *   tanh(&plusmn;INFINITY + bi) = &plusmn;1 + 0 i\n     *   tanh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n     *   tanh(0 + (&pi;/2)i) = NaN + INFINITY i\n     *  </code>\n     * </pre>\n     *\n     * @return the hyperbolic tangent of {@code this}.\n     * @since 1.2\n     */\n    public Complex tanh() {\n        if (isNaN || Double.isInfinite(imaginary)) {\n            return NaN;\n        }\n        if (real > 20.0) {\n            return createComplex(1.0, 0.0);\n        }\n        if (real < -20.0) {\n            return createComplex(-1.0, 0.0);\n        }\n        double real2 = 2.0 * real;\n        double imaginary2 = 2.0 * imaginary;\n        double d = FastMath.cosh(real2) + FastMath.cos(imaginary2);\n        return createComplex(FastMath.sinh(real2) / d, FastMath.sin(imaginary2) / d);\n    }\n\n    /**\n     * Compute the argument of this complex number.\n     * The argument is the angle phi between the positive real axis and\n     * the point representing this number in the complex plane.\n     * The value returned is between -PI (not inclusive)\n     * and PI (inclusive), with negative values returned for numbers with\n     * negative imaginary parts.\n     * <p>\n     * If either real or imaginary part (or both) is NaN, NaN is returned.\n     * Infinite parts are handled as {@code Math.atan2} handles them,\n     * essentially treating finite parts as zero in the presence of an\n     * infinite coordinate and returning a multiple of pi/4 depending on\n     * the signs of the infinite parts.\n     * See the javadoc for {@code Math.atan2} for full details.\n     *\n     * @return the argument of {@code this}.\n     */\n    public double getArgument() {\n        return FastMath.atan2(getImaginary(), getReal());\n    }\n\n    /**\n     * Computes the n-th roots of this complex number.\n     * The nth roots are defined by the formula:\n     * <pre>\n     *  <code>\n     *   z<sub>k</sub> = abs<sup>1/n</sup> (cos(phi + 2&pi;k/n) + i (sin(phi + 2&pi;k/n))\n     *  </code>\n     * </pre>\n     * for <i>{@code k=0, 1, ..., n-1}</i>, where {@code abs} and {@code phi}\n     * are respectively the {@link #abs() modulus} and\n     * {@link #getArgument() argument} of this complex number.\n     * <p>\n     * If one or both parts of this complex number is NaN, a list with just\n     * one element, {@link #NaN} is returned.\n     * if neither part is NaN, but at least one part is infinite, the result\n     * is a one-element list containing {@link #INF}.\n     *\n     * @param n Degree of root.\n     * @return a List of all {@code n}-th roots of {@code this}.\n     * @throws NotPositiveException if {@code n <= 0}.\n     * @since 2.0\n     */\n    public List<Complex> nthRoot(int n) throws NotPositiveException {\n        if (n <= 0) {\n            throw new NotPositiveException(LocalizedFormats.CANNOT_COMPUTE_NTH_ROOT_FOR_NEGATIVE_N, n);\n        }\n        final List<Complex> result = new ArrayList<Complex>();\n        if (isNaN) {\n            result.add(NaN);\n            return result;\n        }\n        if (isInfinite()) {\n            result.add(INF);\n            return result;\n        }\n        // nth root of abs -- faster / more accurate to use a solver here?\n        final double nthRootOfAbs = FastMath.pow(abs(), 1.0 / n);\n        // Compute nth roots of complex number with k = 0, 1, ... n-1\n        final double nthPhi = getArgument() / n;\n        final double slice = 2 * FastMath.PI / n;\n        double innerPart = nthPhi;\n        for (int k = 0; k < n; k++) {\n            // inner part\n            final double realPart = nthRootOfAbs * FastMath.cos(innerPart);\n            final double imaginaryPart = nthRootOfAbs * FastMath.sin(innerPart);\n            result.add(createComplex(realPart, imaginaryPart));\n            innerPart += slice;\n        }\n        return result;\n    }\n\n    /**\n     * Create a complex number given the real and imaginary parts.\n     *\n     * @param realPart Real part.\n     * @param imaginaryPart Imaginary part.\n     * @return a new complex number instance.\n     * @since 1.2\n     * @see #valueOf(double, double)\n     */\n    protected Complex createComplex(double realPart, double imaginaryPart) {\n        return new Complex(realPart, imaginaryPart);\n    }\n\n    /**\n     * Create a complex number given the real and imaginary parts.\n     *\n     * @param realPart Real part.\n     * @param imaginaryPart Imaginary part.\n     * @return a Complex instance.\n     */\n    public static Complex valueOf(double realPart, double imaginaryPart) {\n        if (Double.isNaN(realPart) || Double.isNaN(imaginaryPart)) {\n            return NaN;\n        }\n        return new Complex(realPart, imaginaryPart);\n    }\n\n    /**\n     * Create a complex number given only the real part.\n     *\n     * @param realPart Real part.\n     * @return a Complex instance.\n     */\n    public static Complex valueOf(double realPart) {\n        if (Double.isNaN(realPart)) {\n            return NaN;\n        }\n        return new Complex(realPart);\n    }\n\n    /**\n     * Resolve the transient fields in a deserialized Complex Object.\n     * Subclasses will need to override {@link #createComplex} to\n     * deserialize properly.\n     *\n     * @return A Complex instance with all fields resolved.\n     * @since 2.0\n     */\n    protected final Object readResolve() {\n        return createComplex(real, imaginary);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public ComplexField getField() {\n        return ComplexField.getInstance();\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public String toString() {\n        return \"(\" + real + \", \" + imaginary + \")\";\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Complex",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "real"
+          }
+        ],
+        "javadoc": "/**\n * Create a complex number given only the real part.\n *\n * @param real Real part.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "real",
+            "content": "Real part.",
+            "assertion": "assert receiverObjectID.getReal() > 0;",
+            "description": "the code must be positive"
+          }
+        ],
+        "code": "/**\n * Create a complex number given only the real part.\n *\n * @param real Real part.\n */\npublic Complex(double real) {\n    this(real, 0.0);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "Complex",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "real"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "imaginary"
+          }
+        ],
+        "javadoc": "/**\n * Create a complex number given the real and imaginary parts.\n *\n * @param real Real part.\n * @param imaginary Imaginary part.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "real",
+            "content": "Real part.",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "Real part must be a double"
+          },
+          {
+            "tag": "param",
+            "name": "imaginary",
+            "content": "Imaginary part.",
+            "assertion": "assert args[1] instanceof java.lang.Double;",
+            "description": "Imaginary part must be a double"
+          }
+        ],
+        "code": "/**\n * Create a complex number given the real and imaginary parts.\n *\n * @param real Real part.\n * @param imaginary Imaginary part.\n */\npublic Complex(double real, double imaginary) {\n    this.real = real;\n    this.imaginary = imaginary;\n    isNaN = Double.isNaN(real) || Double.isNaN(imaginary);\n    isInfinite = !isNaN && (Double.isInfinite(real) || Double.isInfinite(imaginary));\n}"
+      },
+      {
+        "type": "method",
+        "name": "abs",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Return the absolute value of this complex number.\n * Returns {@code NaN} if either real or imaginary part is {@code NaN}\n * and {@code Double.POSITIVE_INFINITY} if neither part is {@code NaN},\n * but at least one part is infinite.\n *\n * @return the absolute value.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the absolute value.",
+            "assertion": "assert methodResultID == Math.abs(receiverObjectID.getReal()) || methodResultID == Math.abs(receiverObjectID.getImaginary());",
+            "description": "the absolute value of this complex number."
+          }
+        ],
+        "code": "/**\n * Return the absolute value of this complex number.\n * Returns {@code NaN} if either real or imaginary part is {@code NaN}\n * and {@code Double.POSITIVE_INFINITY} if neither part is {@code NaN},\n * but at least one part is infinite.\n *\n * @return the absolute value.\n */\npublic double abs() {\n    if (isNaN) {\n        return Double.NaN;\n    }\n    if (isInfinite()) {\n        return Double.POSITIVE_INFINITY;\n    }\n    if (FastMath.abs(real) < FastMath.abs(imaginary)) {\n        if (imaginary == 0.0) {\n            return FastMath.abs(real);\n        }\n        double q = real / imaginary;\n        return FastMath.abs(imaginary) * FastMath.sqrt(1 + q * q);\n    } else {\n        if (real == 0.0) {\n            return FastMath.abs(imaginary);\n        }\n        double q = imaginary / real;\n        return FastMath.abs(real) * FastMath.sqrt(1 + q * q);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "addend"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this + addend)}.\n * Uses the definitional formula\n * <p>\n *   {@code (a + bi) + (c + di) = (a+c) + (b+d)i}\n * </p>\n * If either {@code this} or {@code addend} has a {@code NaN} value in\n * either part, {@link #NaN} is returned; otherwise {@code Infinite}\n * and {@code NaN} values are returned in the parts of the result\n * according to the rules for {@link java.lang.Double} arithmetic.\n *\n * @param  addend Value to be added to this {@code Complex}.\n * @return {@code this + addend}.\n * @throws NullArgumentException if {@code addend} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "addend",
+            "content": "Value to be added to this {@code Complex}.",
+            "assertion": "assert args[0] instanceof Complex;",
+            "description": "addend must be of type Complex"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this + addend}.",
+            "assertion": "assert methodResultID == receiverObjectID.add(newComplex(addend.getReal(), addend.getImaginary()));",
+            "description": "Returns a Complex whose value is (this + addend)."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code addend} is {@code null}.",
+            "assertion": "assert receiverObjectID.addend == null;",
+            "description": "if addend is null."
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this + addend)}.\n * Uses the definitional formula\n * <p>\n *   {@code (a + bi) + (c + di) = (a+c) + (b+d)i}\n * </p>\n * If either {@code this} or {@code addend} has a {@code NaN} value in\n * either part, {@link #NaN} is returned; otherwise {@code Infinite}\n * and {@code NaN} values are returned in the parts of the result\n * according to the rules for {@link java.lang.Double} arithmetic.\n *\n * @param  addend Value to be added to this {@code Complex}.\n * @return {@code this + addend}.\n * @throws NullArgumentException if {@code addend} is {@code null}.\n */\npublic Complex add(Complex addend) throws NullArgumentException {\n    MathUtils.checkNotNull(addend);\n    if (isNaN || addend.isNaN) {\n        return NaN;\n    }\n    return createComplex(real + addend.getReal(), imaginary + addend.getImaginary());\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "addend"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is {@code (this + addend)},\n * with {@code addend} interpreted as a real number.\n *\n * @param addend Value to be added to this {@code Complex}.\n * @return {@code this + addend}.\n * @see #add(Complex)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "addend",
+            "content": "Value to be added to this {@code Complex}.",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "addend must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this + addend}.",
+            "assertion": "assert receiverObjectID.getReal() == (receiverObjectID.getImaginary() * 0.0) + args[0];",
+            "description": "this + addend"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#add(Complex)"
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is {@code (this + addend)},\n * with {@code addend} interpreted as a real number.\n *\n * @param addend Value to be added to this {@code Complex}.\n * @return {@code this + addend}.\n * @see #add(Complex)\n */\npublic Complex add(double addend) {\n    if (isNaN || Double.isNaN(addend)) {\n        return NaN;\n    }\n    return createComplex(real + addend, imaginary);\n}"
+      },
+      {
+        "type": "method",
+        "name": "conjugate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the conjugate of this complex number.\n * The conjugate of {@code a + bi} is {@code a - bi}.\n * <p>\n * {@link #NaN} is returned if either the real or imaginary\n * part of this Complex number equals {@code Double.NaN}.\n * </p><p>\n * If the imaginary part is infinite, and the real part is not\n * {@code NaN}, the returned value has infinite imaginary part\n * of the opposite sign, e.g. the conjugate of\n * {@code 1 + POSITIVE_INFINITY i} is {@code 1 - NEGATIVE_INFINITY i}.\n * </p>\n * @return the conjugate of this Complex object.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the conjugate of this Complex object.",
+            "assertion": "assert receiverObjectID.getImaginary() == -receiverObjectID.getReal();",
+            "description": "the conjugate of this Complex object."
+          }
+        ],
+        "code": "/**\n * Returns the conjugate of this complex number.\n * The conjugate of {@code a + bi} is {@code a - bi}.\n * <p>\n * {@link #NaN} is returned if either the real or imaginary\n * part of this Complex number equals {@code Double.NaN}.\n * </p><p>\n * If the imaginary part is infinite, and the real part is not\n * {@code NaN}, the returned value has infinite imaginary part\n * of the opposite sign, e.g. the conjugate of\n * {@code 1 + POSITIVE_INFINITY i} is {@code 1 - NEGATIVE_INFINITY i}.\n * </p>\n * @return the conjugate of this Complex object.\n */\npublic Complex conjugate() {\n    if (isNaN) {\n        return NaN;\n    }\n    return createComplex(real, -imaginary);\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "divisor"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this / divisor)}.\n * Implements the definitional formula\n * <pre>\n *  <code>\n *    a + bi          ac + bd + (bc - ad)i\n *    ----------- = -------------------------\n *    c + di         c<sup>2</sup> + d<sup>2</sup>\n *  </code>\n * </pre>\n * but uses\n * <a href=\"http://doi.acm.org/10.1145/1039813.1039814\">\n * prescaling of operands</a> to limit the effects of overflows and\n * underflows in the computation.\n * <p>\n * {@code Infinite} and {@code NaN} values are handled according to the\n * following rules, applied in the order presented:\n * <ul>\n *  <li>If either {@code this} or {@code divisor} has a {@code NaN} value\n *   in either part, {@link #NaN} is returned.\n *  </li>\n *  <li>If {@code divisor} equals {@link #ZERO}, {@link #NaN} is returned.\n *  </li>\n *  <li>If {@code this} and {@code divisor} are both infinite,\n *   {@link #NaN} is returned.\n *  </li>\n *  <li>If {@code this} is finite (i.e., has no {@code Infinite} or\n *   {@code NaN} parts) and {@code divisor} is infinite (one or both parts\n *   infinite), {@link #ZERO} is returned.\n *  </li>\n *  <li>If {@code this} is infinite and {@code divisor} is finite,\n *   {@code NaN} values are returned in the parts of the result if the\n *   {@link java.lang.Double} rules applied to the definitional formula\n *   force {@code NaN} results.\n *  </li>\n * </ul>\n *\n * @param divisor Value by which this {@code Complex} is to be divided.\n * @return {@code this / divisor}.\n * @throws NullArgumentException if {@code divisor} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "divisor",
+            "content": "Value by which this {@code Complex} is to be divided.",
+            "assertion": "assert args[0] != null;",
+            "description": "divisor must not be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this / divisor}.",
+            "assertion": "",
+            "description": "{@code this / divisor}."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code divisor} is {@code null}.",
+            "assertion": "",
+            "description": "if {@code divisor} is {@code null}."
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this / divisor)}.\n * Implements the definitional formula\n * <pre>\n *  <code>\n *    a + bi          ac + bd + (bc - ad)i\n *    ----------- = -------------------------\n *    c + di         c<sup>2</sup> + d<sup>2</sup>\n *  </code>\n * </pre>\n * but uses\n * <a href=\"http://doi.acm.org/10.1145/1039813.1039814\">\n * prescaling of operands</a> to limit the effects of overflows and\n * underflows in the computation.\n * <p>\n * {@code Infinite} and {@code NaN} values are handled according to the\n * following rules, applied in the order presented:\n * <ul>\n *  <li>If either {@code this} or {@code divisor} has a {@code NaN} value\n *   in either part, {@link #NaN} is returned.\n *  </li>\n *  <li>If {@code divisor} equals {@link #ZERO}, {@link #NaN} is returned.\n *  </li>\n *  <li>If {@code this} and {@code divisor} are both infinite,\n *   {@link #NaN} is returned.\n *  </li>\n *  <li>If {@code this} is finite (i.e., has no {@code Infinite} or\n *   {@code NaN} parts) and {@code divisor} is infinite (one or both parts\n *   infinite), {@link #ZERO} is returned.\n *  </li>\n *  <li>If {@code this} is infinite and {@code divisor} is finite,\n *   {@code NaN} values are returned in the parts of the result if the\n *   {@link java.lang.Double} rules applied to the definitional formula\n *   force {@code NaN} results.\n *  </li>\n * </ul>\n *\n * @param divisor Value by which this {@code Complex} is to be divided.\n * @return {@code this / divisor}.\n * @throws NullArgumentException if {@code divisor} is {@code null}.\n */\npublic Complex divide(Complex divisor) throws NullArgumentException {\n    MathUtils.checkNotNull(divisor);\n    if (isNaN || divisor.isNaN) {\n        return NaN;\n    }\n    final double c = divisor.getReal();\n    final double d = divisor.getImaginary();\n    if (c == 0.0 && d == 0.0) {\n        return NaN;\n    }\n    if (divisor.isInfinite() && !isInfinite()) {\n        return ZERO;\n    }\n    if (FastMath.abs(c) < FastMath.abs(d)) {\n        double q = c / d;\n        double denominator = c * q + d;\n        return createComplex((real * q + imaginary) / denominator, (imaginary * q - real) / denominator);\n    } else {\n        double q = d / c;\n        double denominator = d * q + c;\n        return createComplex((imaginary * q + real) / denominator, (imaginary - real * q) / denominator);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "divide",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "divisor"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is {@code (this / divisor)},\n * with {@code divisor} interpreted as a real number.\n *\n * @param  divisor Value by which this {@code Complex} is to be divided.\n * @return {@code this / divisor}.\n * @see #divide(Complex)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "divisor",
+            "content": "Value by which this {@code Complex} is to be divided.",
+            "assertion": "assert args[0] != 0 && args[0] % 1 == 0;",
+            "description": "divisor must be a non-zero real number"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this / divisor}.",
+            "assertion": "assert receiverObjectID.getReal() * receiverObjectID.getImaginary() == 0 && receiverObjectID.getReal() != 0 && receiverObjectID.getDivisor() == 1.0;",
+            "description": "this / divisor"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#divide(Complex)"
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is {@code (this / divisor)},\n * with {@code divisor} interpreted as a real number.\n *\n * @param  divisor Value by which this {@code Complex} is to be divided.\n * @return {@code this / divisor}.\n * @see #divide(Complex)\n */\npublic Complex divide(double divisor) {\n    if (isNaN || Double.isNaN(divisor)) {\n        return NaN;\n    }\n    if (divisor == 0d) {\n        return NaN;\n    }\n    if (Double.isInfinite(divisor)) {\n        return !isInfinite() ? ZERO : NaN;\n    }\n    return createComplex(real / divisor, imaginary / divisor);\n}"
+      },
+      {
+        "type": "method",
+        "name": "reciprocal",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic Complex reciprocal() {\n    if (isNaN) {\n        return NaN;\n    }\n    if (real == 0.0 && imaginary == 0.0) {\n        return INF;\n    }\n    if (isInfinite) {\n        return ZERO;\n    }\n    if (FastMath.abs(real) < FastMath.abs(imaginary)) {\n        double q = real / imaginary;\n        double scale = 1. / (real * q + imaginary);\n        return createComplex(scale * q, -scale);\n    } else {\n        double q = imaginary / real;\n        double scale = 1. / (imaginary * q + real);\n        return createComplex(scale, -scale * q);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          }
+        ],
+        "javadoc": "/**\n * Test for equality with another object.\n * If both the real and imaginary parts of two complex numbers\n * are exactly the same, and neither is {@code Double.NaN}, the two\n * Complex objects are considered to be equal.\n * The behavior is the same as for JDK's {@link Double#equals(Object)\n * Double}:\n * <ul>\n *  <li>All {@code NaN} values are considered to be equal,\n *   i.e, if either (or both) real and imaginary parts of the complex\n *   number are equal to {@code Double.NaN}, the complex number is equal\n *   to {@code NaN}.\n *  </li>\n *  <li>\n *   Instances constructed with different representations of zero (i.e.\n *   either \"0\" or \"-0\") are <em>not</em> considered to be equal.\n *  </li>\n * </ul>\n *\n * @param other Object to test for equality with this instance.\n * @return {@code true} if the objects are equal, {@code false} if object\n * is {@code null}, not an instance of {@code Complex}, or not equal to\n * this instance.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "Object to test for equality with this instance.",
+            "assertion": "",
+            "description": "Object to test for equality with this instance."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if the objects are equal, {@code false} if object\nis {@code null}, not an instance of {@code Complex}, or not equal to\nthis instance.",
+            "assertion": "",
+            "description": "{@code true} if the objects are equal, {@code false} if object\nis {@code null}, not an instance of {@code Complex}, or not equal to\nthis instance."
+          }
+        ],
+        "code": "/**\n * Test for equality with another object.\n * If both the real and imaginary parts of two complex numbers\n * are exactly the same, and neither is {@code Double.NaN}, the two\n * Complex objects are considered to be equal.\n * The behavior is the same as for JDK's {@link Double#equals(Object)\n * Double}:\n * <ul>\n *  <li>All {@code NaN} values are considered to be equal,\n *   i.e, if either (or both) real and imaginary parts of the complex\n *   number are equal to {@code Double.NaN}, the complex number is equal\n *   to {@code NaN}.\n *  </li>\n *  <li>\n *   Instances constructed with different representations of zero (i.e.\n *   either \"0\" or \"-0\") are <em>not</em> considered to be equal.\n *  </li>\n * </ul>\n *\n * @param other Object to test for equality with this instance.\n * @return {@code true} if the objects are equal, {@code false} if object\n * is {@code null}, not an instance of {@code Complex}, or not equal to\n * this instance.\n */\n@Override\npublic boolean equals(Object other) {\n    if (this == other) {\n        return true;\n    }\n    if (other instanceof Complex) {\n        Complex c = (Complex) other;\n        if (c.isNaN) {\n            return isNaN;\n        } else {\n            return MathUtils.equals(real, c.real) && MathUtils.equals(imaginary, c.imaginary);\n        }\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxUlps"
+          }
+        ],
+        "javadoc": "/**\n * Test for the floating-point equality between Complex objects.\n * It returns {@code true} if both arguments are equal or within the\n * range of allowed error (inclusive).\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @param maxUlps {@code (maxUlps - 1)} is the number of floating point\n * values between the real (resp. imaginary) parts of {@code x} and\n * {@code y}.\n * @return {@code true} if there are fewer than {@code maxUlps} floating\n * point values between the real (resp. imaginary) parts of {@code x}\n * and {@code y}.\n *\n * @see Precision#equals(double,double,int)\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "First value (cannot be {@code null}).",
+            "assertion": "assert receiverObjectID.x == null;",
+            "description": "x must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "y",
+            "content": "Second value (cannot be {@code null}).",
+            "assertion": "assert receiverObjectID.y == null;",
+            "description": "y must not be null"
+          },
+          {
+            "tag": "param",
+            "name": "maxUlps",
+            "content": "{@code (maxUlps - 1)} is the number of floating point\nvalues between the real (resp. imaginary) parts of {@code x} and\n{@code y}.",
+            "assertion": "assert args[2] >= 0;",
+            "description": "maxUlps - 1 must not be negative"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if there are fewer than {@code maxUlps} floating\npoint values between the real (resp. imaginary) parts of {@code x}\nand {@code y}.",
+            "assertion": "",
+            "description": "{@code true} if there are fewer than {@code maxUlps} floating\npoint values between the real (resp. imaginary) parts of {@code x}\nand {@code y}."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Precision#equals(double,double,int)"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Test for the floating-point equality between Complex objects.\n * It returns {@code true} if both arguments are equal or within the\n * range of allowed error (inclusive).\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @param maxUlps {@code (maxUlps - 1)} is the number of floating point\n * values between the real (resp. imaginary) parts of {@code x} and\n * {@code y}.\n * @return {@code true} if there are fewer than {@code maxUlps} floating\n * point values between the real (resp. imaginary) parts of {@code x}\n * and {@code y}.\n *\n * @see Precision#equals(double,double,int)\n * @since 3.3\n */\npublic static boolean equals(Complex x, Complex y, int maxUlps) {\n    return Precision.equals(x.real, y.real, maxUlps) && Precision.equals(x.imaginary, y.imaginary, maxUlps);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          }
+        ],
+        "javadoc": "/**\n * Returns {@code true} iff the values are equal as defined by\n * {@link #equals(Complex,Complex,int) equals(x, y, 1)}.\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @return {@code true} if the values are equal.\n *\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "First value (cannot be {@code null}).",
+            "assertion": "assert args[0] != null;",
+            "description": "x cannot be null"
+          },
+          {
+            "tag": "param",
+            "name": "y",
+            "content": "Second value (cannot be {@code null}).",
+            "assertion": "assert args[1] != null;",
+            "description": "y cannot be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if the values are equal.",
+            "assertion": "",
+            "description": "{@code true} if the values are equal."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Returns {@code true} iff the values are equal as defined by\n * {@link #equals(Complex,Complex,int) equals(x, y, 1)}.\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @return {@code true} if the values are equal.\n *\n * @since 3.3\n */\npublic static boolean equals(Complex x, Complex y) {\n    return equals(x, y, 1);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "eps"
+          }
+        ],
+        "javadoc": "/**\n * Returns {@code true} if, both for the real part and for the imaginary\n * part, there is no double value strictly between the arguments or the\n * difference between them is within the range of allowed error\n * (inclusive).  Returns {@code false} if either of the arguments is NaN.\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @param eps Amount of allowed absolute error.\n * @return {@code true} if the values are two adjacent floating point\n * numbers or they are within range of each other.\n *\n * @see Precision#equals(double,double,double)\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "First value (cannot be {@code null}).",
+            "assertion": "assert receiverObjectID instanceof java.math.Complex;",
+            "description": "x must be a Complex object"
+          },
+          {
+            "tag": "param",
+            "name": "y",
+            "content": "Second value (cannot be {@code null}).",
+            "assertion": "assert receiverObjectID instanceof java.math.Complex;",
+            "description": "y must be a Complex object"
+          },
+          {
+            "tag": "param",
+            "name": "eps",
+            "content": "Amount of allowed absolute error.",
+            "assertion": "assert receiverObjectID instanceof java.lang.Double;",
+            "description": "eps must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if the values are two adjacent floating point\nnumbers or they are within range of each other.",
+            "assertion": "",
+            "description": "{@code true} if the values are two adjacent floating point\nnumbers or they are within range of each other."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Precision#equals(double,double,double)"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Returns {@code true} if, both for the real part and for the imaginary\n * part, there is no double value strictly between the arguments or the\n * difference between them is within the range of allowed error\n * (inclusive).  Returns {@code false} if either of the arguments is NaN.\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @param eps Amount of allowed absolute error.\n * @return {@code true} if the values are two adjacent floating point\n * numbers or they are within range of each other.\n *\n * @see Precision#equals(double,double,double)\n * @since 3.3\n */\npublic static boolean equals(Complex x, Complex y, double eps) {\n    return Precision.equals(x.real, y.real, eps) && Precision.equals(x.imaginary, y.imaginary, eps);\n}"
+      },
+      {
+        "type": "method",
+        "name": "equalsWithRelativeTolerance",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "eps"
+          }
+        ],
+        "javadoc": "/**\n * Returns {@code true} if, both for the real part and for the imaginary\n * part, there is no double value strictly between the arguments or the\n * relative difference between them is smaller or equal to the given\n * tolerance. Returns {@code false} if either of the arguments is NaN.\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @param eps Amount of allowed relative error.\n * @return {@code true} if the values are two adjacent floating point\n * numbers or they are within range of each other.\n *\n * @see Precision#equalsWithRelativeTolerance(double,double,double)\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "First value (cannot be {@code null}).",
+            "assertion": "assert !receiverObjectID.getReal() == 0.0 && receiverObjectID.getImaginary() == 0.0;",
+            "description": "x must not be NaN"
+          },
+          {
+            "tag": "param",
+            "name": "y",
+            "content": "Second value (cannot be {@code null}).",
+            "assertion": "assert !receiverObjectID.getReal() == 0.0 && receiverObjectID.getImaginary() == 0.0;",
+            "description": "y must not be NaN"
+          },
+          {
+            "tag": "param",
+            "name": "eps",
+            "content": "Amount of allowed relative error.",
+            "assertion": "assert !receiverObjectID.getReal() == 0.0 && receiverObjectID.getImaginary() == 0.0;",
+            "description": "eps must not be NaN"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code true} if the values are two adjacent floating point\nnumbers or they are within range of each other.",
+            "assertion": "",
+            "description": "{@code true} if the values are two adjacent floating point\nnumbers or they are within range of each other."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "Precision#equalsWithRelativeTolerance(double,double,double)"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "3.3"
+          }
+        ],
+        "code": "/**\n * Returns {@code true} if, both for the real part and for the imaginary\n * part, there is no double value strictly between the arguments or the\n * relative difference between them is smaller or equal to the given\n * tolerance. Returns {@code false} if either of the arguments is NaN.\n *\n * @param x First value (cannot be {@code null}).\n * @param y Second value (cannot be {@code null}).\n * @param eps Amount of allowed relative error.\n * @return {@code true} if the values are two adjacent floating point\n * numbers or they are within range of each other.\n *\n * @see Precision#equalsWithRelativeTolerance(double,double,double)\n * @since 3.3\n */\npublic static boolean equalsWithRelativeTolerance(Complex x, Complex y, double eps) {\n    return Precision.equalsWithRelativeTolerance(x.real, y.real, eps) && Precision.equalsWithRelativeTolerance(x.imaginary, y.imaginary, eps);\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get a hashCode for the complex number.\n * Any {@code Double.NaN} value in real or imaginary part produces\n * the same hash code {@code 7}.\n *\n * @return a hash code value for this object.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a hash code value for this object.",
+            "assertion": "assert methodResultID == (receiverObjectID.hashCode() != 0);",
+            "description": "a hash code value for this object."
+          }
+        ],
+        "code": "/**\n * Get a hashCode for the complex number.\n * Any {@code Double.NaN} value in real or imaginary part produces\n * the same hash code {@code 7}.\n *\n * @return a hash code value for this object.\n */\n@Override\npublic int hashCode() {\n    if (isNaN) {\n        return 7;\n    }\n    return 37 * (17 * MathUtils.hash(imaginary) + MathUtils.hash(real));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getImaginary",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Access the imaginary part.\n *\n * @return the imaginary part.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the imaginary part.",
+            "assertion": "assert receiverObjectID.getImaginary() == 0.0;",
+            "description": "the imaginary part."
+          }
+        ],
+        "code": "/**\n * Access the imaginary part.\n *\n * @return the imaginary part.\n */\npublic double getImaginary() {\n    return imaginary;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getReal",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Access the real part.\n *\n * @return the real part.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the real part.",
+            "assertion": "assert methodResultID == receiverObjectID.getReal();",
+            "description": "the real part."
+          }
+        ],
+        "code": "/**\n * Access the real part.\n *\n * @return the real part.\n */\npublic double getReal() {\n    return real;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isNaN",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Checks whether either or both parts of this complex number is\n * {@code NaN}.\n *\n * @return true if either or both parts of this complex number is\n * {@code NaN}; false otherwise.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if either or both parts of this complex number is\n{@code NaN}; false otherwise.",
+            "assertion": "assert methodResultID == (receiverObjectID.isNaN() || receiverObjectID.getImaginary().isNaN());",
+            "description": "true if either or both parts of this complex number is NaN."
+          }
+        ],
+        "code": "/**\n * Checks whether either or both parts of this complex number is\n * {@code NaN}.\n *\n * @return true if either or both parts of this complex number is\n * {@code NaN}; false otherwise.\n */\npublic boolean isNaN() {\n    return isNaN;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isInfinite",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Checks whether either the real or imaginary part of this complex number\n * takes an infinite value (either {@code Double.POSITIVE_INFINITY} or\n * {@code Double.NEGATIVE_INFINITY}) and neither part\n * is {@code NaN}.\n *\n * @return true if one or both parts of this complex number are infinite\n * and neither part is {@code NaN}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if one or both parts of this complex number are infinite\nand neither part is {@code NaN}.",
+            "assertion": "assert methodResultID == (receiverObjectID.getReal() == Double.POSITIVE_INFINITY || receiverObjectID.getImaginary() == Double.POSITIVE_INFINITY) && !(receiverObjectID.getReal() == Double.NEGATIVE_INFINITY || receiverObjectID.getImaginary() == Double.NEGATIVE_INFINITY) && !receiverObjectID.isNaN();",
+            "description": "true if one or both parts of this complex number are infinite and neither part is NaN."
+          }
+        ],
+        "code": "/**\n * Checks whether either the real or imaginary part of this complex number\n * takes an infinite value (either {@code Double.POSITIVE_INFINITY} or\n * {@code Double.NEGATIVE_INFINITY}) and neither part\n * is {@code NaN}.\n *\n * @return true if one or both parts of this complex number are infinite\n * and neither part is {@code NaN}.\n */\npublic boolean isInfinite() {\n    return isInfinite;\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "factor"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is {@code this * factor}.\n * Implements preliminary checks for {@code NaN} and infinity followed by\n * the definitional formula:\n * <p>\n *   {@code (a + bi)(c + di) = (ac - bd) + (ad + bc)i}\n * </p>\n * Returns {@link #NaN} if either {@code this} or {@code factor} has one or\n * more {@code NaN} parts.\n * <p>\n * Returns {@link #INF} if neither {@code this} nor {@code factor} has one\n * or more {@code NaN} parts and if either {@code this} or {@code factor}\n * has one or more infinite parts (same result is returned regardless of\n * the sign of the components).\n * </p><p>\n * Returns finite values in components of the result per the definitional\n * formula in all remaining cases.</p>\n *\n * @param  factor value to be multiplied by this {@code Complex}.\n * @return {@code this * factor}.\n * @throws NullArgumentException if {@code factor} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "factor",
+            "content": "value to be multiplied by this {@code Complex}.",
+            "assertion": "assert args[0] instanceof Complex;",
+            "description": "factor must be of type Complex"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this * factor}.",
+            "assertion": "",
+            "description": "{@code this * factor}."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code factor} is {@code null}.",
+            "assertion": "",
+            "description": "if {@code factor} is {@code null}."
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is {@code this * factor}.\n * Implements preliminary checks for {@code NaN} and infinity followed by\n * the definitional formula:\n * <p>\n *   {@code (a + bi)(c + di) = (ac - bd) + (ad + bc)i}\n * </p>\n * Returns {@link #NaN} if either {@code this} or {@code factor} has one or\n * more {@code NaN} parts.\n * <p>\n * Returns {@link #INF} if neither {@code this} nor {@code factor} has one\n * or more {@code NaN} parts and if either {@code this} or {@code factor}\n * has one or more infinite parts (same result is returned regardless of\n * the sign of the components).\n * </p><p>\n * Returns finite values in components of the result per the definitional\n * formula in all remaining cases.</p>\n *\n * @param  factor value to be multiplied by this {@code Complex}.\n * @return {@code this * factor}.\n * @throws NullArgumentException if {@code factor} is {@code null}.\n */\npublic Complex multiply(Complex factor) throws NullArgumentException {\n    MathUtils.checkNotNull(factor);\n    if (isNaN || factor.isNaN) {\n        return NaN;\n    }\n    if (Double.isInfinite(real) || Double.isInfinite(imaginary) || Double.isInfinite(factor.real) || Double.isInfinite(factor.imaginary)) {\n        // we don't use isInfinite() to avoid testing for NaN again\n        return INF;\n    }\n    return createComplex(real * factor.real - imaginary * factor.imaginary, real * factor.imaginary + imaginary * factor.real);\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "factor"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is {@code this * factor}, with {@code factor}\n * interpreted as a integer number.\n *\n * @param  factor value to be multiplied by this {@code Complex}.\n * @return {@code this * factor}.\n * @see #multiply(Complex)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "factor",
+            "content": "value to be multiplied by this {@code Complex}.",
+            "assertion": "assert (int)args[0] % 1 == 0;",
+            "description": "factor must be an integer number"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this * factor}.",
+            "assertion": "assert receiverObjectID.getReal() * args[0] == receiverObjectID.getImaginary();",
+            "description": "this * factor"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#multiply(Complex)"
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is {@code this * factor}, with {@code factor}\n * interpreted as a integer number.\n *\n * @param  factor value to be multiplied by this {@code Complex}.\n * @return {@code this * factor}.\n * @see #multiply(Complex)\n */\npublic Complex multiply(final int factor) {\n    if (isNaN) {\n        return NaN;\n    }\n    if (Double.isInfinite(real) || Double.isInfinite(imaginary)) {\n        return INF;\n    }\n    return createComplex(real * factor, imaginary * factor);\n}"
+      },
+      {
+        "type": "method",
+        "name": "multiply",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "factor"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is {@code this * factor}, with {@code factor}\n * interpreted as a real number.\n *\n * @param  factor value to be multiplied by this {@code Complex}.\n * @return {@code this * factor}.\n * @see #multiply(Complex)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "factor",
+            "content": "value to be multiplied by this {@code Complex}.",
+            "assertion": "",
+            "description": "value to be multiplied by this {@code Complex}."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this * factor}.",
+            "assertion": "assert receiverObjectID.getReal() * args[0] == receiverObjectID.multiply(args[0]).getReal();",
+            "description": "this * factor"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#multiply(Complex)"
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is {@code this * factor}, with {@code factor}\n * interpreted as a real number.\n *\n * @param  factor value to be multiplied by this {@code Complex}.\n * @return {@code this * factor}.\n * @see #multiply(Complex)\n */\npublic Complex multiply(double factor) {\n    if (isNaN || Double.isNaN(factor)) {\n        return NaN;\n    }\n    if (Double.isInfinite(real) || Double.isInfinite(imaginary) || Double.isInfinite(factor)) {\n        // we don't use isInfinite() to avoid testing for NaN again\n        return INF;\n    }\n    return createComplex(real * factor, imaginary * factor);\n}"
+      },
+      {
+        "type": "method",
+        "name": "negate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is {@code (-this)}.\n * Returns {@code NaN} if either real or imaginary\n * part of this Complex number is {@code Double.NaN}.\n *\n * @return {@code -this}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code -this}.",
+            "assertion": "assert receiverObjectID.isNaN() || receiverObjectID.isInfinite();",
+            "description": "true if this Complex number is NaN or infinite."
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is {@code (-this)}.\n * Returns {@code NaN} if either real or imaginary\n * part of this Complex number is {@code Double.NaN}.\n *\n * @return {@code -this}.\n */\npublic Complex negate() {\n    if (isNaN) {\n        return NaN;\n    }\n    return createComplex(-real, -imaginary);\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "subtrahend"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this - subtrahend)}.\n * Uses the definitional formula\n * <p>\n *  {@code (a + bi) - (c + di) = (a-c) + (b-d)i}\n * </p>\n * If either {@code this} or {@code subtrahend} has a {@code NaN]} value in either part,\n * {@link #NaN} is returned; otherwise infinite and {@code NaN} values are\n * returned in the parts of the result according to the rules for\n * {@link java.lang.Double} arithmetic.\n *\n * @param  subtrahend value to be subtracted from this {@code Complex}.\n * @return {@code this - subtrahend}.\n * @throws NullArgumentException if {@code subtrahend} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "subtrahend",
+            "content": "value to be subtracted from this {@code Complex}.",
+            "assertion": "assert args[0] instanceof java.lang.Complex;",
+            "description": "subtrahend must be a Complex"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this - subtrahend}.",
+            "assertion": "assert methodResultID.equals(receiverObjectID.subtract(args[0]));",
+            "description": "this - subtrahend"
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code subtrahend} is {@code null}.",
+            "assertion": "",
+            "description": "if {@code subtrahend} is {@code null}."
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this - subtrahend)}.\n * Uses the definitional formula\n * <p>\n *  {@code (a + bi) - (c + di) = (a-c) + (b-d)i}\n * </p>\n * If either {@code this} or {@code subtrahend} has a {@code NaN]} value in either part,\n * {@link #NaN} is returned; otherwise infinite and {@code NaN} values are\n * returned in the parts of the result according to the rules for\n * {@link java.lang.Double} arithmetic.\n *\n * @param  subtrahend value to be subtracted from this {@code Complex}.\n * @return {@code this - subtrahend}.\n * @throws NullArgumentException if {@code subtrahend} is {@code null}.\n */\npublic Complex subtract(Complex subtrahend) throws NullArgumentException {\n    MathUtils.checkNotNull(subtrahend);\n    if (isNaN || subtrahend.isNaN) {\n        return NaN;\n    }\n    return createComplex(real - subtrahend.getReal(), imaginary - subtrahend.getImaginary());\n}"
+      },
+      {
+        "type": "method",
+        "name": "subtract",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "subtrahend"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this - subtrahend)}.\n *\n * @param  subtrahend value to be subtracted from this {@code Complex}.\n * @return {@code this - subtrahend}.\n * @see #subtract(Complex)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "subtrahend",
+            "content": "value to be subtracted from this {@code Complex}.",
+            "assertion": "assert (args[0] instanceof java.lang.Double) && args[0] != null;",
+            "description": "subtrahend must be of type double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@code this - subtrahend}.",
+            "assertion": "assert receiverObjectID.equals(methodResultID.subtract(args[0]));",
+            "description": "this - subtrahend"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#subtract(Complex)"
+          }
+        ],
+        "code": "/**\n * Returns a {@code Complex} whose value is\n * {@code (this - subtrahend)}.\n *\n * @param  subtrahend value to be subtracted from this {@code Complex}.\n * @return {@code this - subtrahend}.\n * @see #subtract(Complex)\n */\npublic Complex subtract(double subtrahend) {\n    if (isNaN || Double.isNaN(subtrahend)) {\n        return NaN;\n    }\n    return createComplex(real - subtrahend, imaginary);\n}"
+      },
+      {
+        "type": "method",
+        "name": "acos",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/InverseCosine.html\" TARGET=\"_top\">\n * inverse cosine</a> of this complex number.\n * Implements the formula:\n * <p>\n *  {@code acos(z) = -i (log(z + i (sqrt(1 - z<sup>2</sup>))))}\n * </p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite.\n *\n * @return the inverse cosine of this complex number.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the inverse cosine of this complex number.",
+            "assertion": "",
+            "description": "the inverse cosine of this complex number."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/InverseCosine.html\" TARGET=\"_top\">\n * inverse cosine</a> of this complex number.\n * Implements the formula:\n * <p>\n *  {@code acos(z) = -i (log(z + i (sqrt(1 - z<sup>2</sup>))))}\n * </p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite.\n *\n * @return the inverse cosine of this complex number.\n * @since 1.2\n */\npublic Complex acos() {\n    if (isNaN) {\n        return NaN;\n    }\n    return this.add(this.sqrt1z().multiply(I)).log().multiply(I.negate());\n}"
+      },
+      {
+        "type": "method",
+        "name": "asin",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/InverseSine.html\" TARGET=\"_top\">\n * inverse sine</a> of this complex number.\n * Implements the formula:\n * <p>\n *  {@code asin(z) = -i (log(sqrt(1 - z<sup>2</sup>) + iz))}\n * </p><p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite.</p>\n *\n * @return the inverse sine of this complex number.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the inverse sine of this complex number.",
+            "assertion": "assert receiverObjectID.asin() == Complex.NaN;",
+            "description": "Compute the inverse sine of this complex number."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/InverseSine.html\" TARGET=\"_top\">\n * inverse sine</a> of this complex number.\n * Implements the formula:\n * <p>\n *  {@code asin(z) = -i (log(sqrt(1 - z<sup>2</sup>) + iz))}\n * </p><p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite.</p>\n *\n * @return the inverse sine of this complex number.\n * @since 1.2\n */\npublic Complex asin() {\n    if (isNaN) {\n        return NaN;\n    }\n    return sqrt1z().add(this.multiply(I)).log().multiply(I.negate());\n}"
+      },
+      {
+        "type": "method",
+        "name": "atan",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/InverseTangent.html\" TARGET=\"_top\">\n * inverse tangent</a> of this complex number.\n * Implements the formula:\n * <p>\n * {@code atan(z) = (i/2) log((i + z)/(i - z))}\n * </p><p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite.</p>\n *\n * @return the inverse tangent of this complex number\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the inverse tangent of this complex number",
+            "assertion": "",
+            "description": "the inverse tangent of this complex number"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/InverseTangent.html\" TARGET=\"_top\">\n * inverse tangent</a> of this complex number.\n * Implements the formula:\n * <p>\n * {@code atan(z) = (i/2) log((i + z)/(i - z))}\n * </p><p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite.</p>\n *\n * @return the inverse tangent of this complex number\n * @since 1.2\n */\npublic Complex atan() {\n    if (isNaN) {\n        return NaN;\n    }\n    return this.add(I).divide(I.subtract(this)).log().multiply(I.divide(createComplex(2.0, 0.0)));\n}"
+      },
+      {
+        "type": "method",
+        "name": "cos",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/Cosine.html\" TARGET=\"_top\">\n * cosine</a> of this complex number.\n * Implements the formula:\n * <p>\n *  {@code cos(a + bi) = cos(a)cosh(b) - sin(a)sinh(b)i}\n * </p><p>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * </p><p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p><p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.</p>\n * <pre>\n *  Examples:\n *  <code>\n *   cos(1 &plusmn; INFINITY i) = 1 \\u2213 INFINITY i\n *   cos(&plusmn;INFINITY + i) = NaN + NaN i\n *   cos(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the cosine of this complex number.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the cosine of this complex number.",
+            "assertion": "",
+            "description": "the cosine of this complex number."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/Cosine.html\" TARGET=\"_top\">\n * cosine</a> of this complex number.\n * Implements the formula:\n * <p>\n *  {@code cos(a + bi) = cos(a)cosh(b) - sin(a)sinh(b)i}\n * </p><p>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * </p><p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p><p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.</p>\n * <pre>\n *  Examples:\n *  <code>\n *   cos(1 &plusmn; INFINITY i) = 1 \\u2213 INFINITY i\n *   cos(&plusmn;INFINITY + i) = NaN + NaN i\n *   cos(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the cosine of this complex number.\n * @since 1.2\n */\npublic Complex cos() {\n    if (isNaN) {\n        return NaN;\n    }\n    return createComplex(FastMath.cos(real) * FastMath.cosh(imaginary), -FastMath.sin(real) * FastMath.sinh(imaginary));\n}"
+      },
+      {
+        "type": "method",
+        "name": "cosh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/HyperbolicCosine.html\" TARGET=\"_top\">\n * hyperbolic cosine</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   cosh(a + bi) = cosh(a)cos(b) + sinh(a)sin(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   cosh(1 &plusmn; INFINITY i) = NaN + NaN i\n *   cosh(&plusmn;INFINITY + i) = INFINITY &plusmn; INFINITY i\n *   cosh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the hyperbolic cosine of this complex number.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the hyperbolic cosine of this complex number.",
+            "assertion": "",
+            "description": "the hyperbolic cosine of this complex number."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/HyperbolicCosine.html\" TARGET=\"_top\">\n * hyperbolic cosine</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   cosh(a + bi) = cosh(a)cos(b) + sinh(a)sin(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   cosh(1 &plusmn; INFINITY i) = NaN + NaN i\n *   cosh(&plusmn;INFINITY + i) = INFINITY &plusmn; INFINITY i\n *   cosh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the hyperbolic cosine of this complex number.\n * @since 1.2\n */\npublic Complex cosh() {\n    if (isNaN) {\n        return NaN;\n    }\n    return createComplex(FastMath.cosh(real) * FastMath.cos(imaginary), FastMath.sinh(real) * FastMath.sin(imaginary));\n}"
+      },
+      {
+        "type": "method",
+        "name": "exp",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/ExponentialFunction.html\" TARGET=\"_top\">\n * exponential function</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   exp(a + bi) = exp(a)cos(b) + exp(a)sin(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#exp}, {@link FastMath#cos}, and\n * {@link FastMath#sin}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   exp(1 &plusmn; INFINITY i) = NaN + NaN i\n *   exp(INFINITY + i) = INFINITY + INFINITY i\n *   exp(-INFINITY + i) = 0 + 0i\n *   exp(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return <code><i>e</i><sup>this</sup></code>.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<code><i>e</i><sup>this</sup></code>.",
+            "assertion": "",
+            "description": "<code><i>e</i><sup>this</sup></code>."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/ExponentialFunction.html\" TARGET=\"_top\">\n * exponential function</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   exp(a + bi) = exp(a)cos(b) + exp(a)sin(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#exp}, {@link FastMath#cos}, and\n * {@link FastMath#sin}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   exp(1 &plusmn; INFINITY i) = NaN + NaN i\n *   exp(INFINITY + i) = INFINITY + INFINITY i\n *   exp(-INFINITY + i) = 0 + 0i\n *   exp(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return <code><i>e</i><sup>this</sup></code>.\n * @since 1.2\n */\npublic Complex exp() {\n    if (isNaN) {\n        return NaN;\n    }\n    double expReal = FastMath.exp(real);\n    return createComplex(expReal * FastMath.cos(imaginary), expReal * FastMath.sin(imaginary));\n}"
+      },
+      {
+        "type": "method",
+        "name": "log",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/NaturalLogarithm.html\" TARGET=\"_top\">\n * natural logarithm</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   log(a + bi) = ln(|a + bi|) + arg(a + bi)i\n *  </code>\n * </pre>\n * where ln on the right hand side is {@link FastMath#log},\n * {@code |a + bi|} is the modulus, {@link Complex#abs},  and\n * {@code arg(a + bi) = }{@link FastMath#atan2}(b, a).\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite (or critical) values in real or imaginary parts of the input may\n * result in infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   log(1 &plusmn; INFINITY i) = INFINITY &plusmn; (&pi;/2)i\n *   log(INFINITY + i) = INFINITY + 0i\n *   log(-INFINITY + i) = INFINITY + &pi;i\n *   log(INFINITY &plusmn; INFINITY i) = INFINITY &plusmn; (&pi;/4)i\n *   log(-INFINITY &plusmn; INFINITY i) = INFINITY &plusmn; (3&pi;/4)i\n *   log(0 + 0i) = -INFINITY + 0i\n *  </code>\n * </pre>\n *\n * @return the value <code>ln &nbsp; this</code>, the natural logarithm\n * of {@code this}.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the value <code>ln &nbsp; this</code>, the natural logarithm\nof {@code this}.",
+            "assertion": "",
+            "description": "the value <code>ln &nbsp; this</code>, the natural logarithm\nof {@code this}."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/NaturalLogarithm.html\" TARGET=\"_top\">\n * natural logarithm</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   log(a + bi) = ln(|a + bi|) + arg(a + bi)i\n *  </code>\n * </pre>\n * where ln on the right hand side is {@link FastMath#log},\n * {@code |a + bi|} is the modulus, {@link Complex#abs},  and\n * {@code arg(a + bi) = }{@link FastMath#atan2}(b, a).\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite (or critical) values in real or imaginary parts of the input may\n * result in infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   log(1 &plusmn; INFINITY i) = INFINITY &plusmn; (&pi;/2)i\n *   log(INFINITY + i) = INFINITY + 0i\n *   log(-INFINITY + i) = INFINITY + &pi;i\n *   log(INFINITY &plusmn; INFINITY i) = INFINITY &plusmn; (&pi;/4)i\n *   log(-INFINITY &plusmn; INFINITY i) = INFINITY &plusmn; (3&pi;/4)i\n *   log(0 + 0i) = -INFINITY + 0i\n *  </code>\n * </pre>\n *\n * @return the value <code>ln &nbsp; this</code>, the natural logarithm\n * of {@code this}.\n * @since 1.2\n */\npublic Complex log() {\n    if (isNaN) {\n        return NaN;\n    }\n    return createComplex(FastMath.log(abs()), FastMath.atan2(imaginary, real));\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Complex",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * Returns of value of this complex number raised to the power of {@code x}.\n * Implements the formula:\n * <pre>\n *  <code>\n *   y<sup>x</sup> = exp(x&middot;log(y))\n *  </code>\n * </pre>\n * where {@code exp} and {@code log} are {@link #exp} and\n * {@link #log}, respectively.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite, or if {@code y}\n * equals {@link Complex#ZERO}.</p>\n *\n * @param  x exponent to which this {@code Complex} is to be raised.\n * @return <code> this<sup>x</sup></code>.\n * @throws NullArgumentException if x is {@code null}.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "exponent to which this {@code Complex} is to be raised.",
+            "assertion": "",
+            "description": "exponent to which this {@code Complex} is to be raised."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<code> this<sup>x</sup></code>.",
+            "assertion": "assert methodResultID.equals(receiverObjectID.pow(args[0]));",
+            "description": "true if this complex number was raised to the power of x and has not been modified by other operations."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if x is {@code null}.",
+            "assertion": "",
+            "description": "if x is {@code null}."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Returns of value of this complex number raised to the power of {@code x}.\n * Implements the formula:\n * <pre>\n *  <code>\n *   y<sup>x</sup> = exp(x&middot;log(y))\n *  </code>\n * </pre>\n * where {@code exp} and {@code log} are {@link #exp} and\n * {@link #log}, respectively.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN} or infinite, or if {@code y}\n * equals {@link Complex#ZERO}.</p>\n *\n * @param  x exponent to which this {@code Complex} is to be raised.\n * @return <code> this<sup>x</sup></code>.\n * @throws NullArgumentException if x is {@code null}.\n * @since 1.2\n */\npublic Complex pow(Complex x) throws NullArgumentException {\n    MathUtils.checkNotNull(x);\n    return this.log().multiply(x).exp();\n}"
+      },
+      {
+        "type": "method",
+        "name": "pow",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/**\n * Returns of value of this complex number raised to the power of {@code x}.\n *\n * @param  x exponent to which this {@code Complex} is to be raised.\n * @return <code>this<sup>x</sup></code>.\n * @see #pow(Complex)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "x",
+            "content": "exponent to which this {@code Complex} is to be raised.",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "x must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "<code>this<sup>x</sup></code>.",
+            "assertion": "assert methodResultID.equals(receiverObjectID.pow(args[0]));",
+            "description": "this<sup>x</sup>"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#pow(Complex)"
+          }
+        ],
+        "code": "/**\n * Returns of value of this complex number raised to the power of {@code x}.\n *\n * @param  x exponent to which this {@code Complex} is to be raised.\n * @return <code>this<sup>x</sup></code>.\n * @see #pow(Complex)\n */\npublic Complex pow(double x) {\n    return this.log().multiply(x).exp();\n}"
+      },
+      {
+        "type": "method",
+        "name": "sin",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/Sine.html\" TARGET=\"_top\">\n * sine</a>\n * of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   sin(a + bi) = sin(a)cosh(b) - cos(a)sinh(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p><p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or {@code NaN} values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   sin(1 &plusmn; INFINITY i) = 1 &plusmn; INFINITY i\n *   sin(&plusmn;INFINITY + i) = NaN + NaN i\n *   sin(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the sine of this complex number.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the sine of this complex number.",
+            "assertion": "",
+            "description": "the sine of this complex number."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/Sine.html\" TARGET=\"_top\">\n * sine</a>\n * of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   sin(a + bi) = sin(a)cosh(b) - cos(a)sinh(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p><p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or {@code NaN} values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   sin(1 &plusmn; INFINITY i) = 1 &plusmn; INFINITY i\n *   sin(&plusmn;INFINITY + i) = NaN + NaN i\n *   sin(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the sine of this complex number.\n * @since 1.2\n */\npublic Complex sin() {\n    if (isNaN) {\n        return NaN;\n    }\n    return createComplex(FastMath.sin(real) * FastMath.cosh(imaginary), FastMath.cos(real) * FastMath.sinh(imaginary));\n}"
+      },
+      {
+        "type": "method",
+        "name": "sinh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/HyperbolicSine.html\" TARGET=\"_top\">\n * hyperbolic sine</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   sinh(a + bi) = sinh(a)cos(b)) + cosh(a)sin(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p><p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   sinh(1 &plusmn; INFINITY i) = NaN + NaN i\n *   sinh(&plusmn;INFINITY + i) = &plusmn; INFINITY + INFINITY i\n *   sinh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the hyperbolic sine of {@code this}.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the hyperbolic sine of {@code this}.",
+            "assertion": "",
+            "description": "the hyperbolic sine of {@code this}."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/HyperbolicSine.html\" TARGET=\"_top\">\n * hyperbolic sine</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   sinh(a + bi) = sinh(a)cos(b)) + cosh(a)sin(b)i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos},\n * {@link FastMath#cosh} and {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p><p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   sinh(1 &plusmn; INFINITY i) = NaN + NaN i\n *   sinh(&plusmn;INFINITY + i) = &plusmn; INFINITY + INFINITY i\n *   sinh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *  </code>\n * </pre>\n *\n * @return the hyperbolic sine of {@code this}.\n * @since 1.2\n */\npublic Complex sinh() {\n    if (isNaN) {\n        return NaN;\n    }\n    return createComplex(FastMath.sinh(real) * FastMath.cos(imaginary), FastMath.cosh(real) * FastMath.sin(imaginary));\n}"
+      },
+      {
+        "type": "method",
+        "name": "sqrt",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/SquareRoot.html\" TARGET=\"_top\">\n * square root</a> of this complex number.\n * Implements the following algorithm to compute {@code sqrt(a + bi)}:\n * <ol><li>Let {@code t = sqrt((|a| + |a + bi|) / 2)}</li>\n * <li><pre>if {@code  a &#8805; 0} return {@code t + (b/2t)i}\n *  else return {@code |b|/2t + sign(b)t i }</pre></li>\n * </ol>\n * where <ul>\n * <li>{@code |a| = }{@link FastMath#abs}(a)</li>\n * <li>{@code |a + bi| = }{@link Complex#abs}(a + bi)</li>\n * <li>{@code sign(b) =  }{@link FastMath#copySign(double,double) copySign(1d, b)}\n * </ul>\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   sqrt(1 &plusmn; INFINITY i) = INFINITY + NaN i\n *   sqrt(INFINITY + i) = INFINITY + 0i\n *   sqrt(-INFINITY + i) = 0 + INFINITY i\n *   sqrt(INFINITY &plusmn; INFINITY i) = INFINITY + NaN i\n *   sqrt(-INFINITY &plusmn; INFINITY i) = NaN &plusmn; INFINITY i\n *  </code>\n * </pre>\n *\n * @return the square root of {@code this}.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the square root of {@code this}.",
+            "assertion": "",
+            "description": "the square root of {@code this}."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/SquareRoot.html\" TARGET=\"_top\">\n * square root</a> of this complex number.\n * Implements the following algorithm to compute {@code sqrt(a + bi)}:\n * <ol><li>Let {@code t = sqrt((|a| + |a + bi|) / 2)}</li>\n * <li><pre>if {@code  a &#8805; 0} return {@code t + (b/2t)i}\n *  else return {@code |b|/2t + sign(b)t i }</pre></li>\n * </ol>\n * where <ul>\n * <li>{@code |a| = }{@link FastMath#abs}(a)</li>\n * <li>{@code |a + bi| = }{@link Complex#abs}(a + bi)</li>\n * <li>{@code sign(b) =  }{@link FastMath#copySign(double,double) copySign(1d, b)}\n * </ul>\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   sqrt(1 &plusmn; INFINITY i) = INFINITY + NaN i\n *   sqrt(INFINITY + i) = INFINITY + 0i\n *   sqrt(-INFINITY + i) = 0 + INFINITY i\n *   sqrt(INFINITY &plusmn; INFINITY i) = INFINITY + NaN i\n *   sqrt(-INFINITY &plusmn; INFINITY i) = NaN &plusmn; INFINITY i\n *  </code>\n * </pre>\n *\n * @return the square root of {@code this}.\n * @since 1.2\n */\npublic Complex sqrt() {\n    if (isNaN) {\n        return NaN;\n    }\n    if (real == 0.0 && imaginary == 0.0) {\n        return createComplex(0.0, 0.0);\n    }\n    double t = FastMath.sqrt((FastMath.abs(real) + abs()) / 2.0);\n    if (real >= 0.0) {\n        return createComplex(t, imaginary / (2.0 * t));\n    } else {\n        return createComplex(FastMath.abs(imaginary) / (2.0 * t), FastMath.copySign(1d, imaginary) * t);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "sqrt1z",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/SquareRoot.html\" TARGET=\"_top\">\n * square root</a> of <code>1 - this<sup>2</sup></code> for this complex\n * number.\n * Computes the result directly as\n * {@code sqrt(ONE.subtract(z.multiply(z)))}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n *\n * @return the square root of <code>1 - this<sup>2</sup></code>.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the square root of <code>1 - this<sup>2</sup></code>.",
+            "assertion": "assert receiverObjectID.getImaginary().isNaN() || receiverObjectID.getReal().isNaN();",
+            "description": "Returns Complex.NAN if either real or imaginary part of the input argument is NaN."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/SquareRoot.html\" TARGET=\"_top\">\n * square root</a> of <code>1 - this<sup>2</sup></code> for this complex\n * number.\n * Computes the result directly as\n * {@code sqrt(ONE.subtract(z.multiply(z)))}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n *\n * @return the square root of <code>1 - this<sup>2</sup></code>.\n * @since 1.2\n */\npublic Complex sqrt1z() {\n    return createComplex(1.0, 0.0).subtract(this.multiply(this)).sqrt();\n}"
+      },
+      {
+        "type": "method",
+        "name": "tan",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/Tangent.html\" TARGET=\"_top\">\n * tangent</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   tan(a + bi) = sin(2a)/(cos(2a)+cosh(2b)) + [sinh(2b)/(cos(2a)+cosh(2b))]i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos}, {@link FastMath#cosh} and\n * {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite (or critical) values in real or imaginary parts of the input may\n * result in infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   tan(a &plusmn; INFINITY i) = 0 &plusmn; i\n *   tan(&plusmn;INFINITY + bi) = NaN + NaN i\n *   tan(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *   tan(&plusmn;&pi;/2 + 0 i) = &plusmn;INFINITY + NaN i\n *  </code>\n * </pre>\n *\n * @return the tangent of {@code this}.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the tangent of {@code this}.",
+            "assertion": "assert result.isNaN() == (this.getReal().isNaN() || this.getImaginary().isNaN());",
+            "description": "Returns NaN if either real or imaginary part of the input argument is NaN."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/Tangent.html\" TARGET=\"_top\">\n * tangent</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   tan(a + bi) = sin(2a)/(cos(2a)+cosh(2b)) + [sinh(2b)/(cos(2a)+cosh(2b))]i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos}, {@link FastMath#cosh} and\n * {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite (or critical) values in real or imaginary parts of the input may\n * result in infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   tan(a &plusmn; INFINITY i) = 0 &plusmn; i\n *   tan(&plusmn;INFINITY + bi) = NaN + NaN i\n *   tan(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *   tan(&plusmn;&pi;/2 + 0 i) = &plusmn;INFINITY + NaN i\n *  </code>\n * </pre>\n *\n * @return the tangent of {@code this}.\n * @since 1.2\n */\npublic Complex tan() {\n    if (isNaN || Double.isInfinite(real)) {\n        return NaN;\n    }\n    if (imaginary > 20.0) {\n        return createComplex(0.0, 1.0);\n    }\n    if (imaginary < -20.0) {\n        return createComplex(0.0, -1.0);\n    }\n    double real2 = 2.0 * real;\n    double imaginary2 = 2.0 * imaginary;\n    double d = FastMath.cos(real2) + FastMath.cosh(imaginary2);\n    return createComplex(FastMath.sin(real2) / d, FastMath.sinh(imaginary2) / d);\n}"
+      },
+      {
+        "type": "method",
+        "name": "tanh",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/HyperbolicTangent.html\" TARGET=\"_top\">\n * hyperbolic tangent</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   tan(a + bi) = sinh(2a)/(cosh(2a)+cos(2b)) + [sin(2b)/(cosh(2a)+cos(2b))]i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos}, {@link FastMath#cosh} and\n * {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   tanh(a &plusmn; INFINITY i) = NaN + NaN i\n *   tanh(&plusmn;INFINITY + bi) = &plusmn;1 + 0 i\n *   tanh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *   tanh(0 + (&pi;/2)i) = NaN + INFINITY i\n *  </code>\n * </pre>\n *\n * @return the hyperbolic tangent of {@code this}.\n * @since 1.2\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the hyperbolic tangent of {@code this}.",
+            "assertion": "",
+            "description": "the hyperbolic tangent of {@code this}."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          }
+        ],
+        "code": "/**\n * Compute the\n * <a href=\"http://mathworld.wolfram.com/HyperbolicTangent.html\" TARGET=\"_top\">\n * hyperbolic tangent</a> of this complex number.\n * Implements the formula:\n * <pre>\n *  <code>\n *   tan(a + bi) = sinh(2a)/(cosh(2a)+cos(2b)) + [sin(2b)/(cosh(2a)+cos(2b))]i\n *  </code>\n * </pre>\n * where the (real) functions on the right-hand side are\n * {@link FastMath#sin}, {@link FastMath#cos}, {@link FastMath#cosh} and\n * {@link FastMath#sinh}.\n * <p>\n * Returns {@link Complex#NaN} if either real or imaginary part of the\n * input argument is {@code NaN}.\n * </p>\n * Infinite values in real or imaginary parts of the input may result in\n * infinite or NaN values returned in parts of the result.\n * <pre>\n *  Examples:\n *  <code>\n *   tanh(a &plusmn; INFINITY i) = NaN + NaN i\n *   tanh(&plusmn;INFINITY + bi) = &plusmn;1 + 0 i\n *   tanh(&plusmn;INFINITY &plusmn; INFINITY i) = NaN + NaN i\n *   tanh(0 + (&pi;/2)i) = NaN + INFINITY i\n *  </code>\n * </pre>\n *\n * @return the hyperbolic tangent of {@code this}.\n * @since 1.2\n */\npublic Complex tanh() {\n    if (isNaN || Double.isInfinite(imaginary)) {\n        return NaN;\n    }\n    if (real > 20.0) {\n        return createComplex(1.0, 0.0);\n    }\n    if (real < -20.0) {\n        return createComplex(-1.0, 0.0);\n    }\n    double real2 = 2.0 * real;\n    double imaginary2 = 2.0 * imaginary;\n    double d = FastMath.cosh(real2) + FastMath.cos(imaginary2);\n    return createComplex(FastMath.sinh(real2) / d, FastMath.sin(imaginary2) / d);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getArgument",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Compute the argument of this complex number.\n * The argument is the angle phi between the positive real axis and\n * the point representing this number in the complex plane.\n * The value returned is between -PI (not inclusive)\n * and PI (inclusive), with negative values returned for numbers with\n * negative imaginary parts.\n * <p>\n * If either real or imaginary part (or both) is NaN, NaN is returned.\n * Infinite parts are handled as {@code Math.atan2} handles them,\n * essentially treating finite parts as zero in the presence of an\n * infinite coordinate and returning a multiple of pi/4 depending on\n * the signs of the infinite parts.\n * See the javadoc for {@code Math.atan2} for full details.\n *\n * @return the argument of {@code this}.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the argument of {@code this}.",
+            "assertion": "",
+            "description": "the argument of {@code this}."
+          }
+        ],
+        "code": "/**\n * Compute the argument of this complex number.\n * The argument is the angle phi between the positive real axis and\n * the point representing this number in the complex plane.\n * The value returned is between -PI (not inclusive)\n * and PI (inclusive), with negative values returned for numbers with\n * negative imaginary parts.\n * <p>\n * If either real or imaginary part (or both) is NaN, NaN is returned.\n * Infinite parts are handled as {@code Math.atan2} handles them,\n * essentially treating finite parts as zero in the presence of an\n * infinite coordinate and returning a multiple of pi/4 depending on\n * the signs of the infinite parts.\n * See the javadoc for {@code Math.atan2} for full details.\n *\n * @return the argument of {@code this}.\n */\npublic double getArgument() {\n    return FastMath.atan2(getImaginary(), getReal());\n}"
+      },
+      {
+        "type": "method",
+        "name": "nthRoot",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * Computes the n-th roots of this complex number.\n * The nth roots are defined by the formula:\n * <pre>\n *  <code>\n *   z<sub>k</sub> = abs<sup>1/n</sup> (cos(phi + 2&pi;k/n) + i (sin(phi + 2&pi;k/n))\n *  </code>\n * </pre>\n * for <i>{@code k=0, 1, ..., n-1}</i>, where {@code abs} and {@code phi}\n * are respectively the {@link #abs() modulus} and\n * {@link #getArgument() argument} of this complex number.\n * <p>\n * If one or both parts of this complex number is NaN, a list with just\n * one element, {@link #NaN} is returned.\n * if neither part is NaN, but at least one part is infinite, the result\n * is a one-element list containing {@link #INF}.\n *\n * @param n Degree of root.\n * @return a List of all {@code n}-th roots of {@code this}.\n * @throws NotPositiveException if {@code n <= 0}.\n * @since 2.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "n",
+            "content": "Degree of root.",
+            "assertion": "assert args[0] > 0;",
+            "description": "n must be positive"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a List of all {@code n}-th roots of {@code this}.",
+            "assertion": "",
+            "description": "a List of all {@code n}-th roots of {@code this}."
+          },
+          {
+            "tag": "throws",
+            "name": "NotPositiveException",
+            "content": "if {@code n <= 0}.",
+            "assertion": "assert args[0] <= 0;",
+            "description": "if n is not positive"
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "2.0"
+          }
+        ],
+        "code": "/**\n * Computes the n-th roots of this complex number.\n * The nth roots are defined by the formula:\n * <pre>\n *  <code>\n *   z<sub>k</sub> = abs<sup>1/n</sup> (cos(phi + 2&pi;k/n) + i (sin(phi + 2&pi;k/n))\n *  </code>\n * </pre>\n * for <i>{@code k=0, 1, ..., n-1}</i>, where {@code abs} and {@code phi}\n * are respectively the {@link #abs() modulus} and\n * {@link #getArgument() argument} of this complex number.\n * <p>\n * If one or both parts of this complex number is NaN, a list with just\n * one element, {@link #NaN} is returned.\n * if neither part is NaN, but at least one part is infinite, the result\n * is a one-element list containing {@link #INF}.\n *\n * @param n Degree of root.\n * @return a List of all {@code n}-th roots of {@code this}.\n * @throws NotPositiveException if {@code n <= 0}.\n * @since 2.0\n */\npublic List<Complex> nthRoot(int n) throws NotPositiveException {\n    if (n <= 0) {\n        throw new NotPositiveException(LocalizedFormats.CANNOT_COMPUTE_NTH_ROOT_FOR_NEGATIVE_N, n);\n    }\n    final List<Complex> result = new ArrayList<Complex>();\n    if (isNaN) {\n        result.add(NaN);\n        return result;\n    }\n    if (isInfinite()) {\n        result.add(INF);\n        return result;\n    }\n    // nth root of abs -- faster / more accurate to use a solver here?\n    final double nthRootOfAbs = FastMath.pow(abs(), 1.0 / n);\n    // Compute nth roots of complex number with k = 0, 1, ... n-1\n    final double nthPhi = getArgument() / n;\n    final double slice = 2 * FastMath.PI / n;\n    double innerPart = nthPhi;\n    for (int k = 0; k < n; k++) {\n        // inner part\n        final double realPart = nthRootOfAbs * FastMath.cos(innerPart);\n        final double imaginaryPart = nthRootOfAbs * FastMath.sin(innerPart);\n        result.add(createComplex(realPart, imaginaryPart));\n        innerPart += slice;\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "createComplex",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "realPart"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "imaginaryPart"
+          }
+        ],
+        "javadoc": "/**\n * Create a complex number given the real and imaginary parts.\n *\n * @param realPart Real part.\n * @param imaginaryPart Imaginary part.\n * @return a new complex number instance.\n * @since 1.2\n * @see #valueOf(double, double)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "realPart",
+            "content": "Real part.",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "realPart must be a double"
+          },
+          {
+            "tag": "param",
+            "name": "imaginaryPart",
+            "content": "Imaginary part.",
+            "assertion": "assert args[1] instanceof java.lang.Double;",
+            "description": "imaginaryPart must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a new complex number instance.",
+            "assertion": "",
+            "description": "a new complex number instance."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.2"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#valueOf(double, double)"
+          }
+        ],
+        "code": "/**\n * Create a complex number given the real and imaginary parts.\n *\n * @param realPart Real part.\n * @param imaginaryPart Imaginary part.\n * @return a new complex number instance.\n * @since 1.2\n * @see #valueOf(double, double)\n */\nprotected Complex createComplex(double realPart, double imaginaryPart) {\n    return new Complex(realPart, imaginaryPart);\n}"
+      },
+      {
+        "type": "method",
+        "name": "valueOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "realPart"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "imaginaryPart"
+          }
+        ],
+        "javadoc": "/**\n * Create a complex number given the real and imaginary parts.\n *\n * @param realPart Real part.\n * @param imaginaryPart Imaginary part.\n * @return a Complex instance.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "realPart",
+            "content": "Real part.",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "realPart must be a double"
+          },
+          {
+            "tag": "param",
+            "name": "imaginaryPart",
+            "content": "Imaginary part.",
+            "assertion": "assert args[1] instanceof java.lang.Double;",
+            "description": "imaginaryPart must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a Complex instance.",
+            "assertion": "",
+            "description": "a Complex instance."
+          }
+        ],
+        "code": "/**\n * Create a complex number given the real and imaginary parts.\n *\n * @param realPart Real part.\n * @param imaginaryPart Imaginary part.\n * @return a Complex instance.\n */\npublic static Complex valueOf(double realPart, double imaginaryPart) {\n    if (Double.isNaN(realPart) || Double.isNaN(imaginaryPart)) {\n        return NaN;\n    }\n    return new Complex(realPart, imaginaryPart);\n}"
+      },
+      {
+        "type": "method",
+        "name": "valueOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Complex",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "realPart"
+          }
+        ],
+        "javadoc": "/**\n * Create a complex number given only the real part.\n *\n * @param realPart Real part.\n * @return a Complex instance.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "realPart",
+            "content": "Real part.",
+            "assertion": "assert args[0] instanceof java.lang.Double;",
+            "description": "Real part must be a double"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "a Complex instance.",
+            "assertion": "assert new receiverObjectID.Complex(receiverObjectID.getReal()) == methodResultID;",
+            "description": "a Complex instance."
+          }
+        ],
+        "code": "/**\n * Create a complex number given only the real part.\n *\n * @param realPart Real part.\n * @return a Complex instance.\n */\npublic static Complex valueOf(double realPart) {\n    if (Double.isNaN(realPart)) {\n        return NaN;\n    }\n    return new Complex(realPart);\n}"
+      },
+      {
+        "type": "method",
+        "name": "readResolve",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Resolve the transient fields in a deserialized Complex Object.\n * Subclasses will need to override {@link #createComplex} to\n * deserialize properly.\n *\n * @return A Complex instance with all fields resolved.\n * @since 2.0\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "A Complex instance with all fields resolved.",
+            "assertion": "assert receiverObjectID.readResolve() instanceof java.lang.Object;",
+            "description": "A Complex instance with all fields resolved."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "2.0"
+          }
+        ],
+        "code": "/**\n * Resolve the transient fields in a deserialized Complex Object.\n * Subclasses will need to override {@link #createComplex} to\n * deserialize properly.\n *\n * @return A Complex instance with all fields resolved.\n * @since 2.0\n */\nprotected final Object readResolve() {\n    return createComplex(real, imaginary);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getField",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ComplexField",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic ComplexField getField() {\n    return ComplexField.getInstance();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic String toString() {\n    return \"(\" + real + \", \" + imaginary + \")\";\n}"
+      }
+    ]
+  }
+]

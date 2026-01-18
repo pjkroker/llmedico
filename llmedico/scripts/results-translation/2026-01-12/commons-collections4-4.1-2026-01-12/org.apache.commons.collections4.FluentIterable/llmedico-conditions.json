@@ -1,0 +1,1000 @@
+[
+  {
+    "method": "FluentIterable",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "empty",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be empty",
+          "assertion": "assert receiverObjectID.empty() == null;",
+          "name": "empty",
+          "content": "a new empty FluentIterable"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new empty FluentIterable",
+          "assertion": "assert methodResultID == receiverObjectID.empty();",
+          "name": null,
+          "content": "a new empty FluentIterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "of",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "singleton"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the singleton must be of type java.lang.Object",
+          "assertion": "assert args[0] instanceof java.lang.Object;",
+          "name": "singleton",
+          "content": "&lt;object&gt;"
+        },
+        {
+          "description": "the singleton must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "singleton",
+          "content": "&lt;null&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new FluentIterable containing the singleton",
+          "assertion": "assert receiverObjectID instanceof FluentIterable && methodResultID == (args[0] instanceof Object);",
+          "name": null,
+          "content": "a new FluentIterable containing the singleton"
+        }
+      ]
+    }
+  },
+  {
+    "method": "of",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "elements"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "elements must be of type java.lang.Object",
+          "assertion": "assert args[0] instanceof java.lang.Object;",
+          "name": "elements",
+          "content": "&lt;ul&gt;&lt;li&gt;The elements to be contained in the FluentIterable must be of type java.lang.Object&lt;/li&gt;&lt;/ul&gt;"
+        },
+        {
+          "description": "the returned iterable's iterator does not support remove()",
+          "assertion": "assert false;",
+          "name": "None",
+          "content": "The returned iterable's iterator does not support remove()."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new FluentIterable containing the provided elements",
+          "assertion": "assert receiverObjectID == of(elements);",
+          "name": null,
+          "content": "a new FluentIterable containing the provided elements"
+        }
+      ]
+    }
+  },
+  {
+    "method": "of",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "iterable"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "iterable may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "iterable",
+          "content": "the iterable to wrap into a FluentIterable, may not be null"
+        },
+        {
+          "description": "the corresponding input iterator supports remove()",
+          "assertion": "assert args[0].iterator().remove() != null;",
+          "name": "iterable",
+          "content": "the corresponding input iterator supports remove()"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new FluentIterable wrapping the provided iterable",
+          "assertion": "assert (receiverObjectID instanceof FluentIterable && !(receiverObjectID instanceof FluentIterable || receiverObjectID == iterable)) || receiverObjectID instanceof FluentIterable;",
+          "name": null,
+          "content": "a new FluentIterable wrapping the provided iterable"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "iterable may not be null.",
+          "assertion": "assert args[0] != null;",
+          "name": "NullPointerException",
+          "content": "if iterable is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "elements"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "elements must be of type java.lang.Object",
+          "assertion": "assert args[0] instanceof java.lang.Object;",
+          "name": "elements",
+          "content": "the elements to append to the iterable"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new iterable, combining this iterable with the elements",
+          "assertion": "assert (receiverObjectID instanceof FluentIterable && methodResultID instanceof Iterable) || receiverObjectID == null && methodResultID == null;",
+          "name": null,
+          "content": "a new iterable, combining this iterable with the elements"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the other iterable may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "other",
+          "content": "the other iterable; may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new iterable, combining this iterable with other",
+          "assertion": "assert methodResultID == FluentIterable.of(receiverObjectID).append(args[0]).iterator().next();",
+          "name": null,
+          "content": "a new iterable, combining this iterable with other"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if other is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if other is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the other iterable may not be null",
+          "assertion": "assert receiverObjectID != null;",
+          "name": "other",
+          "content": "&lt;ul&gt;&lt;li&gt;this contains elements [1, 3, 5, 7]&lt;/li&gt;&lt;li&gt;other contains elements [2, 4, 6, 8]&lt;/li&gt;&lt;/ul&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new iterable, collating this iterable with the other in natural order.",
+          "assertion": "assert receiverObjectID.collate(args[0]).equals(receiverObjectID);",
+          "name": null,
+          "content": "a new iterable, collating this iterable with the other in natural order."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if other is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if vertex is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "collate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comparator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "comparator must be null or not null",
+          "assertion": "assert args[1] == null || !args[1] != null;",
+          "name": "comparator",
+          "content": "&lt;ul&gt;&lt;li&gt;comparator must be null&lt;/li&gt;&lt;/ul&gt;&lt;br /&gt;&lt;ul&gt;&lt;li&gt;comparator must not be null&lt;/li&gt;&lt;/ul&gt;"
+        },
+        {
+          "description": "other must be null or not null",
+          "assertion": "assert args[0] == null || !args[0] != null;",
+          "name": "other",
+          "content": "&lt;ul&gt;&lt;li&gt;other must be null&lt;/li&gt;&lt;/ul&gt;&lt;br /&gt;&lt;ul&gt;&lt;li&gt;other must not be null&lt;/li&gt;&lt;/ul&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new iterable, collating this iterable with the other in natural order",
+          "assertion": "",
+          "description": "a new iterable, collating this iterable with the other in natural order"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if other is null",
+          "assertion": "",
+          "description": "if other is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "eval",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new iterable with the same contents as this iterable",
+          "assertion": "assert receiverObjectID instanceof FluentIterable && methodResultID == receiverObjectID.toList();",
+          "name": null,
+          "content": "a new iterable with the same contents as this iterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "filter",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "predicate must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "predicate",
+          "content": "&lt;code&gt;predicate&lt;/code&gt; must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new iterable, providing a filtered view of this iterable",
+          "assertion": "assert methodResultID instanceof FluentIterable && receiverObjectID.filter(args[0]).iterator().hasNext();",
+          "name": null,
+          "content": "a new iterable, providing a filtered view of this iterable"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if predicate is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if predicate is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "limit",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxSize"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "maxSize must be non-negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "maxSize",
+          "content": "the maximum number of elements"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new iterable, providing a bounded view of this iterable",
+          "assertion": "",
+          "description": "a new iterable, providing a bounded view of this iterable"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if maxSize is negative",
+          "assertion": "assert args[0] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if maxSize is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "loop",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new iterable, providing a looping view of this iterable",
+          "assertion": "assert methodResultID instanceof FluentIterable && receiverObjectID.loop();",
+          "name": null,
+          "content": "a new iterable, providing a looping view of this iterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reverse",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new iterable, providing a reversed view of this iterable",
+          "assertion": "",
+          "description": "a new iterable, providing a reversed view of this iterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "skip",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "elementsToSkip"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "elementsToSkip must be non-negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "elementsToSkip",
+          "content": "the number of elements to skip"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new iterable, providing a view of this iterable by skipping\n  the first N elements",
+          "assertion": "",
+          "description": "a new iterable, providing a view of this iterable by skipping\n  the first N elements"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if elementsToSkip is negative",
+          "assertion": "assert args[0] < 0;",
+          "name": "IllegalArgumentException",
+          "content": "if elementsToSkip is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "transform",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "transformer must not be null",
+          "assertion": "assert args[0] == null;",
+          "name": "transformer",
+          "content": "the transformer applied to each element"
+        },
+        {
+          "description": "transformer must implement the Transformer interface",
+          "assertion": "assert args[0] instanceof java.util.function.Transformer;",
+          "name": "transformer",
+          "content": "the transformer applied to each element"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new iterable, providing a transformed view of this iterable",
+          "assertion": "",
+          "description": "a new iterable, providing a transformed view of this iterable"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if transformer is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if transformer is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "unique",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new iterable, providing a unique view of this iterable",
+          "assertion": "assert methodResultID == receiverObjectID.unique();",
+          "name": null,
+          "content": "a new iterable, providing a unique view of this iterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "unmodifiable",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new iterable, providing an unmodifiable view of this iterable",
+          "assertion": "assert methodResultID instanceof FluentIterable && receiverObjectID.iterator().hasNext();",
+          "name": null,
+          "content": "a new iterable, providing an unmodifiable view of this iterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "zip",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "other may not be null",
+          "assertion": "assert receiverObjectID != null && receiverObjectID != null;",
+          "name": "other",
+          "content": "&lt;span&gt;the other iterable to interleave, may not be null&lt;/span&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new iterable, interleaving this iterable with others",
+          "assertion": "",
+          "description": "a new iterable, interleaving this iterable with others"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if other is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if other is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "zip",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "others"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "others may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "others",
+          "content": "&lt;ul&gt;&lt;li&gt;the iterables to interleave, may not be null&lt;/li&gt;&lt;/ul&gt;"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "a new iterable, interleaving this iterable with others",
+          "assertion": "",
+          "description": "a new iterable, interleaving this iterable with others"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either of the provided iterables is null.",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if either of the provided iterables is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "iterator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "asEnumeration",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "an Enumeration over the elements of this iterable",
+          "assertion": "assert receiverObjectID.asEnumeration().hasNext() && receiverObjectID.asEnumeration().nextElement() != null;",
+          "name": null,
+          "content": "an Enumeration over the elements of this iterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "allMatch",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "predicate may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "predicate",
+          "content": "the predicate to use, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "true if all elements contained in this iterable match the predicate,\n  false otherwise",
+          "assertion": "",
+          "description": "true if all elements contained in this iterable match the predicate,\n  false otherwise"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "predicate may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "NullPointerException",
+          "content": "if predicate is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "anyMatch",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "predicate may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "predicate",
+          "content": "&lt;code&gt;null&lt;/code&gt; or empty iterable returns false."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "true if at least one element contained in this iterable matches the predicate,\n  false otherwise",
+          "assertion": "",
+          "description": "true if at least one element contained in this iterable matches the predicate,\n  false otherwise"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "predicate is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if predicate is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEmpty",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if this iterable does not contain any elements, false otherwise",
+          "assertion": "assert methodResultID == (receiverObjectID.isEmpty());",
+          "name": null,
+          "content": "true if this iterable does not contain any elements, false otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "contains",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the code must be contained in this iterable",
+          "assertion": "assert receiverObjectID.contains(args[0]) && receiverObjectID.isEmpty();",
+          "name": "object",
+          "content": "the object to check"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the object is contained in this iterable.",
+          "assertion": "assert methodResultID == receiverObjectID.contains(object);",
+          "name": null,
+          "content": "true if the object is contained in this iterable."
+        }
+      ]
+    }
+  },
+  {
+    "method": "forEach",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Closure",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the closure may not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "closure",
+          "content": "may not be null"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if closure is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if closure is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "position"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the position must be non-negative",
+          "assertion": "assert args[0] >= 0 && args[0] < size();",
+          "name": "position",
+          "content": "the position of the element to return"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "Returns the element at the provided position in this iterable. In order to return the element, an iterator needs to be traversed up to the requested position.",
+          "assertion": "assert receiverObjectID.get(args[0]) == null;",
+          "name": null,
+          "content": "Returns the element at the provided position in this iterable. In order to return the element, an iterator needs to be traversed up to the requested position."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "the provided position is outside the valid range of this iterable: [0, size)",
+          "assertion": "assert position >= 0 && position < receiverObjectID.size();",
+          "name": "IndexOutOfBoundsException",
+          "content": "In order to return the element, an iterator needs to be traversed up to the requested position."
+        }
+      ]
+    }
+  },
+  {
+    "method": "size",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the size of this iterable",
+          "assertion": "assert methodResultID == receiverObjectID.size();",
+          "name": null,
+          "content": "the size of this iterable"
+        }
+      ]
+    }
+  },
+  {
+    "method": "copyInto",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "collection must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection to add the elements"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if collection is null.",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if collection is <code>null</code>."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "arrayClass"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the return value is an Object",
+          "assertion": "assert receiverObjectID instanceof java.lang.Object;",
+          "name": "returnValue",
+          "content": "an array of the iterable contents"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "an array of the iterable contents",
+          "assertion": "",
+          "description": "an array of the iterable contents"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if arrayClass is invalid",
+          "assertion": "assert !receiverObjectID.toArrayClass().equals(null);",
+          "name": "ArrayStoreException",
+          "content": "if arrayClass is invalid"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toList",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a list of the iterable contents",
+          "assertion": "assert methodResultID instanceof java.util.List && receiverObjectID.size() == 0;",
+          "name": null,
+          "content": "a list of the iterable contents"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  }
+]

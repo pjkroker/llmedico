@@ -1,0 +1,208 @@
+[
+  {
+    "method": "PSquarePercentile",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "p must be greater than 0 and less than or equal to 100",
+          "assertion": "assert args[0] > 0 && args[0] <= 100;",
+          "name": "p",
+          "content": "&lt;p&gt; must be greater than 0 and less than or equal to 100"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "p is not greater than 0 and less than or equal to 100",
+          "assertion": "assert args[0] > 0 && args[0] <= 100;",
+          "name": "OutOfRangeException",
+          "content": "if p is not greater than 0 and less than or equal to 100"
+        }
+      ]
+    }
+  },
+  {
+    "method": "PSquarePercentile",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "o"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "o",
+          "content": "object to compare",
+          "assertion": "",
+          "description": "object to compare"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true iff o is a PSquarePercentile with equivalent internal state",
+          "assertion": "assert methodResultID == receiverObjectID.equals(null);",
+          "name": null,
+          "content": "true iff o is a PSquarePercentile with equivalent internal state"
+        }
+      ]
+    }
+  },
+  {
+    "method": "increment",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "observation"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the observation must be of type double",
+          "assertion": "assert receiverObjectID.observation instanceof java.lang.Double;",
+          "name": "observation",
+          "content": "&lt;double&gt;"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "string representation of state data",
+          "assertion": "assert methodResultID.equals(receiverObjectID.toString());",
+          "name": null,
+          "content": "string representation of state data"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getN",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "copy",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "quantile",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns the quantile estimated by this statistic in the range [0.0-1.0].",
+          "assertion": "assert methodResultID == (receiverObjectID.getResult() >= 0.0 && receiverObjectID.getResult() <= 1.0);",
+          "name": null,
+          "content": "Returns the quantile estimated by this statistic in the range [0.0-1.0]."
+        }
+      ]
+    }
+  },
+  {
+    "method": "clear",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "getResult",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "newMarkers",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "initialFive"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "initialFive must be a list",
+          "assertion": "assert args[0] instanceof java.util.List;",
+          "name": "initialFive",
+          "content": "initialFive must be a list"
+        },
+        {
+          "description": "p must be a double",
+          "assertion": "assert args[1] instanceof java.lang.Double;",
+          "name": "p",
+          "content": "the quantile desired"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an instance of PSquareMarkers",
+          "assertion": "assert receiverObjectID.newMarkers(args[0], args[1]) == null;",
+          "name": null,
+          "content": "an instance of PSquareMarkers"
+        }
+      ]
+    }
+  }
+]

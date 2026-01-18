@@ -1,0 +1,622 @@
+[
+  {
+    "name": "FixedArrayList",
+    "package": "org.graphstream.util.set",
+    "qualified_name": "org.graphstream.util.set.FixedArrayList",
+    "javadoc": "/**\n * Array list with immutable element indices.\n *\n * <p>A fixed array list is like an array list, but it ensures the property that\n * each element will always stay at the same index, even if elements are\n * removed in between. The counterpart of this property is that the array\n * handles by itself the insertion of new elements (since when an element is\n * removed in the middle, this position can be reused), and therefore indices\n * cannot be chosen (i.e. only the {@link #add(Object)} and\n * {@link #addAll(Collection)} methods are usable to insert new elements in the\n * array).</p>\n *\n * <p>This is the reason why this does not implement the List interface, because\n * the add(int,E) method cannot be implemented.</p>\n *\n * <p>Furthermore, this array cannot contain null values, because it marks\n * unused positions within the array using the null value.</p>\n *\n * @author Antoine Dutot\n * @since 20040912\n */\n",
+    "code": "/**\n * Array list with immutable element indices.\n *\n * <p>A fixed array list is like an array list, but it ensures the property that\n * each element will always stay at the same index, even if elements are\n * removed in between. The counterpart of this property is that the array\n * handles by itself the insertion of new elements (since when an element is\n * removed in the middle, this position can be reused), and therefore indices\n * cannot be chosen (i.e. only the {@link #add(Object)} and\n * {@link #addAll(Collection)} methods are usable to insert new elements in the\n * array).</p>\n *\n * <p>This is the reason why this does not implement the List interface, because\n * the add(int,E) method cannot be implemented.</p>\n *\n * <p>Furthermore, this array cannot contain null values, because it marks\n * unused positions within the array using the null value.</p>\n *\n * @author Antoine Dutot\n * @since 20040912\n */\npublic class FixedArrayList<E> implements Collection<E>, RandomAccess {\n\n    // Attributes\n    /**\n     * List of elements.\n     */\n    protected ArrayList<E> elements = new ArrayList<E>();\n\n    /**\n     * List of free indices.\n     */\n    protected ArrayList<Integer> freeIndices = new ArrayList<Integer>();\n\n    /**\n     * Last inserted element index.\n     */\n    protected int lastIndex = -1;\n\n    // Constructors\n    public FixedArrayList() {\n        elements = new ArrayList<E>();\n        freeIndices = new ArrayList<Integer>(16);\n    }\n\n    public FixedArrayList(int capacity) {\n        elements = new ArrayList<E>(capacity);\n        freeIndices = new ArrayList<Integer>(16);\n    }\n\n    // Accessors\n    /**\n     * Number of elements in the array.\n     * @return The number of elements in the array.\n     */\n    public int size() {\n        return elements.size() - freeIndices.size();\n    }\n\n    /**\n     * Real size of the array, counting elements that have been erased.\n     * @see #unsafeGet(int)\n     */\n    public int realSize() {\n        return elements.size();\n    }\n\n    public boolean isEmpty() {\n        return (size() == 0);\n    }\n\n    /**\n     * I-th element.\n     * @param i The element index.\n     * @return The element at index <code>i</code>.\n     */\n    public E get(int i) {\n        E e = elements.get(i);\n        if (e == null)\n            throw new NoSuchElementException(\"no element at index \" + i);\n        return e;\n    }\n\n    /**\n     * I-th element. Like the {@link #get(int)} method but it does not check\n     * the element does not exists at the given index.\n     * @param i The element index.\n     * @return The element at index <code>i</code>.\n     */\n    public E unsafeGet(int i) {\n        return elements.get(i);\n    }\n\n    public boolean contains(Object o) {\n        int n = elements.size();\n        for (int i = 0; i < n; ++i) {\n            E e = elements.get(i);\n            if (e != null) {\n                if (e == o)\n                    return true;\n                if (elements.equals(o))\n                    return true;\n            }\n        }\n        return false;\n    }\n\n    public boolean containsAll(Collection<?> c) {\n        for (Object o : c) {\n            if (!contains(o))\n                return false;\n        }\n        return true;\n    }\n\n    @Override\n    @SuppressWarnings(\"unchecked\")\n    public boolean equals(Object o) {\n        if (o instanceof FixedArrayList) {\n            FixedArrayList<? extends E> other = (FixedArrayList<? extends E>) o;\n            int n = size();\n            if (other.size() == n) {\n                for (int i = 0; i < n; ++i) {\n                    E e0 = elements.get(i);\n                    E e1 = other.elements.get(i);\n                    if (e0 != e1) {\n                        if (e0 == null && e1 != null)\n                            return false;\n                        if (e0 != null && e1 == null)\n                            return false;\n                        if (!e0.equals(e1))\n                            return false;\n                    }\n                }\n                return true;\n            }\n        }\n        return false;\n    }\n\n    public java.util.Iterator<E> iterator() {\n        return new FixedArrayIterator();\n    }\n\n    /**\n     * Last index used by the {@link #add(Object)} method.\n     * @return The last insertion index.\n     */\n    public int getLastIndex() {\n        return lastIndex;\n    }\n\n    /**\n     * The index that will be used in case of a next insertion in this array.\n     * @return\n     */\n    public int getNextAddIndex() {\n        int n = freeIndices.size();\n        if (n > 0)\n            return freeIndices.get(n - 1);\n        else\n            return elements.size();\n    }\n\n    public Object[] toArray() {\n        int n = size();\n        int m = elements.size();\n        int j = 0;\n        Object[] a = new Object[n];\n        for (int i = 0; i < m; ++i) {\n            E e = elements.get(i);\n            if (e != null)\n                a[j++] = e;\n        }\n        assert (j == n);\n        return a;\n    }\n\n    public <T> T[] toArray(T[] a) {\n        // TODO\n        throw new RuntimeException(\"not implemented yet\");\n    }\n\n    // Commands\n    /**\n     * Add one <code>element</code> in the array. The index used for inserting\n     * the element is then available using {@link #getLastIndex()}.\n     * @see #getLastIndex()\n     * @param element The element to add.\n     * @return Always true.\n     * @throws NullPointerException If a null value is inserted.\n     */\n    public boolean add(E element) throws java.lang.NullPointerException {\n        if (element == null)\n            throw new java.lang.NullPointerException(\"this array cannot contain null value\");\n        int n = freeIndices.size();\n        if (n > 0) {\n            int i = freeIndices.remove(n - 1);\n            elements.set(i, element);\n            lastIndex = i;\n        } else {\n            elements.add(element);\n            lastIndex = elements.size() - 1;\n        }\n        return true;\n    }\n\n    public boolean addAll(Collection<? extends E> c) throws UnsupportedOperationException {\n        java.util.Iterator<? extends E> k = c.iterator();\n        while (k.hasNext()) {\n            add(k.next());\n        }\n        return true;\n    }\n\n    /**\n     * Remove the element at index <code>i</code>.\n     * @param i Index of the element to remove.\n     * @return The removed element.\n     */\n    public E remove(int i) {\n        int n = elements.size();\n        if (i < 0 || i >= n)\n            throw new ArrayIndexOutOfBoundsException(\"index \" + i + \" does not exist\");\n        if (n > 0) {\n            if (elements.get(i) == null)\n                throw new NullPointerException(\"no element stored at index \" + i);\n            if (i == (n - 1)) {\n                return elements.remove(i);\n            } else {\n                E e = elements.get(i);\n                elements.set(i, null);\n                freeIndices.add(i);\n                return e;\n            }\n        }\n        throw new ArrayIndexOutOfBoundsException(\"index \" + i + \" does not exist\");\n    }\n\n    protected void removeIt(int i) {\n        remove(i);\n    }\n\n    /**\n     * Remove the element <code>e</code>.\n     * @param e The element to remove.\n     * @return True if removed.\n     */\n    public boolean remove(Object e) {\n        int n = elements.size();\n        for (int i = 0; i < n; ++i) {\n            if (elements.get(i) == e) {\n                elements.remove(i);\n                return true;\n            }\n        }\n        return false;\n    }\n\n    public boolean removeAll(Collection<?> c) {\n        throw new UnsupportedOperationException(\"not implemented yet\");\n    }\n\n    public boolean retainAll(Collection<?> c) {\n        throw new UnsupportedOperationException(\"not implemented yet\");\n    }\n\n    public void clear() {\n        elements.clear();\n        freeIndices.clear();\n    }\n\n    // Nested classes\n    protected class FixedArrayIterator implements java.util.Iterator<E> {\n\n        int i;\n\n        public FixedArrayIterator() {\n            i = -1;\n        }\n\n        public boolean hasNext() {\n            int n = elements.size();\n            for (int j = i + 1; j < n; ++j) {\n                if (elements.get(j) != null)\n                    return true;\n            }\n            return false;\n        }\n\n        public E next() {\n            int n = elements.size();\n            for (int j = i + 1; j < n; ++j) {\n                E e = elements.get(j);\n                if (e != null) {\n                    i = j;\n                    return e;\n                }\n            }\n            throw new NoSuchElementException(\"no more elements in iterator\");\n        }\n\n        public void remove() throws UnsupportedOperationException {\n            //\t\tthrow new UnsupportedOperationException( \"not implemented yet\" );\n            if (i >= 0 && i < elements.size() && elements.get(i) != null) {\n                // A parent class method cannot be called if it has\n                removeIt(i);\n                // the same name as one in the inner class\n                // (normal), but even if they have distinct\n                // arguments types. Hence this strange removeIt()\n                // method...\n            } else {\n                throw new IllegalStateException(\"no such element\");\n            }\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "FixedArrayList",
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "// Constructors\npublic FixedArrayList() {\n    elements = new ArrayList<E>();\n    freeIndices = new ArrayList<Integer>(16);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "FixedArrayList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "capacity"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public FixedArrayList(int capacity) {\n    elements = new ArrayList<E>(capacity);\n    freeIndices = new ArrayList<Integer>(16);\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Number of elements in the array.\n * @return The number of elements in the array.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The number of elements in the array.",
+            "assertion": "",
+            "description": "The number of elements in the array."
+          }
+        ],
+        "code": "// Accessors\n/**\n * Number of elements in the array.\n * @return The number of elements in the array.\n */\npublic int size() {\n    return elements.size() - freeIndices.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "realSize",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Real size of the array, counting elements that have been erased.\n * @see #unsafeGet(int)\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#unsafeGet(int)"
+          }
+        ],
+        "code": "/**\n * Real size of the array, counting elements that have been erased.\n * @see #unsafeGet(int)\n */\npublic int realSize() {\n    return elements.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "isEmpty",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean isEmpty() {\n    return (size() == 0);\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * I-th element.\n * @param i The element index.\n * @return The element at index <code>i</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "The element index.",
+            "assertion": "assert receiverObjectID.get(args[0]) != null;",
+            "description": "the element at index i is not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The element at index <code>i</code>.",
+            "assertion": "assert methodResultID.equals(receiverObjectID.get(i));",
+            "description": "The element at index <code>i</code>."
+          }
+        ],
+        "code": "/**\n * I-th element.\n * @param i The element index.\n * @return The element at index <code>i</code>.\n */\npublic E get(int i) {\n    E e = elements.get(i);\n    if (e == null)\n        throw new NoSuchElementException(\"no element at index \" + i);\n    return e;\n}"
+      },
+      {
+        "type": "method",
+        "name": "unsafeGet",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * I-th element. Like the {@link #get(int)} method but it does not check\n * the element does not exists at the given index.\n * @param i The element index.\n * @return The element at index <code>i</code>.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "The element index.",
+            "assertion": "assert !receiverObjectID.iterator().hasNext() || receiverObjectID.size() == i;",
+            "description": "The element at index <code>i</code> does not exist"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The element at index <code>i</code>.",
+            "assertion": "assert methodResultID.equals(receiverObjectID.get(i));",
+            "description": "The element at index <code>i</code>."
+          }
+        ],
+        "code": "/**\n * I-th element. Like the {@link #get(int)} method but it does not check\n * the element does not exists at the given index.\n * @param i The element index.\n * @return The element at index <code>i</code>.\n */\npublic E unsafeGet(int i) {\n    return elements.get(i);\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean contains(Object o) {\n    int n = elements.size();\n    for (int i = 0; i < n; ++i) {\n        E e = elements.get(i);\n        if (e != null) {\n            if (e == o)\n                return true;\n            if (elements.equals(o))\n                return true;\n        }\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsAll",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "c"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean containsAll(Collection<?> c) {\n    for (Object o : c) {\n        if (!contains(o))\n            return false;\n    }\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\n@SuppressWarnings(\"unchecked\")\npublic boolean equals(Object o) {\n    if (o instanceof FixedArrayList) {\n        FixedArrayList<? extends E> other = (FixedArrayList<? extends E>) o;\n        int n = size();\n        if (other.size() == n) {\n            for (int i = 0; i < n; ++i) {\n                E e0 = elements.get(i);\n                E e1 = other.elements.get(i);\n                if (e0 != e1) {\n                    if (e0 == null && e1 != null)\n                        return false;\n                    if (e0 != null && e1 == null)\n                        return false;\n                    if (!e0.equals(e1))\n                        return false;\n                }\n            }\n            return true;\n        }\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "java.util.Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public java.util.Iterator<E> iterator() {\n    return new FixedArrayIterator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getLastIndex",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Last index used by the {@link #add(Object)} method.\n * @return The last insertion index.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The last insertion index.",
+            "assertion": "assert methodResultID == receiverObjectID.getLastIndex();",
+            "description": "The last insertion index."
+          }
+        ],
+        "code": "/**\n * Last index used by the {@link #add(Object)} method.\n * @return The last insertion index.\n */\npublic int getLastIndex() {\n    return lastIndex;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNextAddIndex",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * The index that will be used in case of a next insertion in this array.\n * @return\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID == receiverObjectID.getNextAddIndex();",
+            "description": "The index that will be used in case of a next insertion in this array."
+          }
+        ],
+        "code": "/**\n * The index that will be used in case of a next insertion in this array.\n * @return\n */\npublic int getNextAddIndex() {\n    int n = freeIndices.size();\n    if (n > 0)\n        return freeIndices.get(n - 1);\n    else\n        return elements.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Object[] toArray() {\n    int n = size();\n    int m = elements.size();\n    int j = 0;\n    Object[] a = new Object[n];\n    for (int i = 0; i < m; ++i) {\n        E e = elements.get(i);\n        if (e != null)\n            a[j++] = e;\n    }\n    assert (j == n);\n    return a;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public <T> T[] toArray(T[] a) {\n    // TODO\n    throw new RuntimeException(\"not implemented yet\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "add",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          }
+        ],
+        "javadoc": "/**\n * Add one <code>element</code> in the array. The index used for inserting\n * the element is then available using {@link #getLastIndex()}.\n * @see #getLastIndex()\n * @param element The element to add.\n * @return Always true.\n * @throws NullPointerException If a null value is inserted.\n */\n",
+        "tags": [
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#getLastIndex()"
+          },
+          {
+            "tag": "param",
+            "name": "element",
+            "content": "The element to add.",
+            "assertion": "",
+            "description": "The element to add."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Always true.",
+            "assertion": "assert methodResultID == true;",
+            "description": "Always true."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "If a null value is inserted.",
+            "assertion": "assert args[0]==null;",
+            "description": "if a null value is inserted."
+          }
+        ],
+        "code": "// Commands\n/**\n * Add one <code>element</code> in the array. The index used for inserting\n * the element is then available using {@link #getLastIndex()}.\n * @see #getLastIndex()\n * @param element The element to add.\n * @return Always true.\n * @throws NullPointerException If a null value is inserted.\n */\npublic boolean add(E element) throws java.lang.NullPointerException {\n    if (element == null)\n        throw new java.lang.NullPointerException(\"this array cannot contain null value\");\n    int n = freeIndices.size();\n    if (n > 0) {\n        int i = freeIndices.remove(n - 1);\n        elements.set(i, element);\n        lastIndex = i;\n    } else {\n        elements.add(element);\n        lastIndex = elements.size() - 1;\n    }\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "addAll",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "c"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean addAll(Collection<? extends E> c) throws UnsupportedOperationException {\n    java.util.Iterator<? extends E> k = c.iterator();\n    while (k.hasNext()) {\n        add(k.next());\n    }\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": "/**\n * Remove the element at index <code>i</code>.\n * @param i Index of the element to remove.\n * @return The removed element.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "i",
+            "content": "Index of the element to remove.",
+            "assertion": "assert args[0] >= 0 && args[0] < size();",
+            "description": "i must be within the valid index range"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "The removed element.",
+            "assertion": "",
+            "description": "The removed element."
+          }
+        ],
+        "code": "/**\n * Remove the element at index <code>i</code>.\n * @param i Index of the element to remove.\n * @return The removed element.\n */\npublic E remove(int i) {\n    int n = elements.size();\n    if (i < 0 || i >= n)\n        throw new ArrayIndexOutOfBoundsException(\"index \" + i + \" does not exist\");\n    if (n > 0) {\n        if (elements.get(i) == null)\n            throw new NullPointerException(\"no element stored at index \" + i);\n        if (i == (n - 1)) {\n            return elements.remove(i);\n        } else {\n            E e = elements.get(i);\n            elements.set(i, null);\n            freeIndices.add(i);\n            return e;\n        }\n    }\n    throw new ArrayIndexOutOfBoundsException(\"index \" + i + \" does not exist\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeIt",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "i"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "protected void removeIt(int i) {\n    remove(i);\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": "/**\n * Remove the element <code>e</code>.\n * @param e The element to remove.\n * @return True if removed.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "e",
+            "content": "The element to remove.",
+            "assertion": "assert receiverObjectID == null;",
+            "description": "the element to remove must be null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "True if removed.",
+            "assertion": "assert methodResultID == receiverObjectID.remove(args[0]);",
+            "description": "true if removed."
+          }
+        ],
+        "code": "/**\n * Remove the element <code>e</code>.\n * @param e The element to remove.\n * @return True if removed.\n */\npublic boolean remove(Object e) {\n    int n = elements.size();\n    for (int i = 0; i < n; ++i) {\n        if (elements.get(i) == e) {\n            elements.remove(i);\n            return true;\n        }\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeAll",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "c"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean removeAll(Collection<?> c) {\n    throw new UnsupportedOperationException(\"not implemented yet\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "retainAll",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Collection",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "c"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean retainAll(Collection<?> c) {\n    throw new UnsupportedOperationException(\"not implemented yet\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "clear",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public void clear() {\n    elements.clear();\n    freeIndices.clear();\n}"
+      }
+    ]
+  },
+  {
+    "name": "FixedArrayIterator",
+    "package": "org.graphstream.util.set",
+    "qualified_name": "org.graphstream.util.set.FixedArrayIterator",
+    "javadoc": null,
+    "code": "// Nested classes\nprotected class FixedArrayIterator implements java.util.Iterator<E> {\n\n    int i;\n\n    public FixedArrayIterator() {\n        i = -1;\n    }\n\n    public boolean hasNext() {\n        int n = elements.size();\n        for (int j = i + 1; j < n; ++j) {\n            if (elements.get(j) != null)\n                return true;\n        }\n        return false;\n    }\n\n    public E next() {\n        int n = elements.size();\n        for (int j = i + 1; j < n; ++j) {\n            E e = elements.get(j);\n            if (e != null) {\n                i = j;\n                return e;\n            }\n        }\n        throw new NoSuchElementException(\"no more elements in iterator\");\n    }\n\n    public void remove() throws UnsupportedOperationException {\n        //\t\tthrow new UnsupportedOperationException( \"not implemented yet\" );\n        if (i >= 0 && i < elements.size() && elements.get(i) != null) {\n            // A parent class method cannot be called if it has\n            removeIt(i);\n            // the same name as one in the inner class\n            // (normal), but even if they have distinct\n            // arguments types. Hence this strange removeIt()\n            // method...\n        } else {\n            throw new IllegalStateException(\"no such element\");\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "FixedArrayIterator",
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public FixedArrayIterator() {\n    i = -1;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hasNext",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean hasNext() {\n    int n = elements.size();\n    for (int j = i + 1; j < n; ++j) {\n        if (elements.get(j) != null)\n            return true;\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "next",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public E next() {\n    int n = elements.size();\n    for (int j = i + 1; j < n; ++j) {\n        E e = elements.get(j);\n        if (e != null) {\n            i = j;\n            return e;\n        }\n    }\n    throw new NoSuchElementException(\"no more elements in iterator\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public void remove() throws UnsupportedOperationException {\n    //\t\tthrow new UnsupportedOperationException( \"not implemented yet\" );\n    if (i >= 0 && i < elements.size() && elements.get(i) != null) {\n        // A parent class method cannot be called if it has\n        removeIt(i);\n        // the same name as one in the inner class\n        // (normal), but even if they have distinct\n        // arguments types. Hence this strange removeIt()\n        // method...\n    } else {\n        throw new IllegalStateException(\"no such element\");\n    }\n}"
+      }
+    ]
+  }
+]

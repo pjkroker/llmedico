@@ -1,0 +1,1489 @@
+2026-01-13 06:01:56,344 - DEBUG - llmedico.main - ---Starting LLMedico---
+2026-01-13 06:01:56,345 - DEBUG - llmedico.config.config - Loaded config from /vol/fob-vol3/mi20/krokerpa/ba/llmedico/llmedico/config.toml
+2026-01-13 06:01:56,345 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2026-01-13 06:01:56,412 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2026-01-13 06:01:56,413 - DEBUG - llmedico.main - translating every method of the class
+2026-01-13 06:01:56,413 - DEBUG - llmedico.main - current method name: isPrime
+2026-01-13 06:01:56,413 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Primality test: tells if the argument is a (provable) prime or not.
+ * <p>
+ * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+ * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+ * by Menezes, table 4.1).
+ *
+ * @param n number to test.
+ * @return true if n is prime. (All numbers &lt; 2 return false).
+ */
+
+2026-01-13 06:01:56,413 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'RETURN': 1}
+2026-01-13 06:01:56,413 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'number to test.'}, {'tag': 'return', 'name': None, 'content': 'true if n is prime. (All numbers &lt; 2 return false).'}]
+2026-01-13 06:01:56,413 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:01:56,413 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Primality test: tells if the argument is a (provable) prime or not.
+ * <p>
+ * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+ * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+ * by Menezes, table 4.1).
+ *
+ * @param n number to test.
+ * @return true if n is prime. (All numbers &lt; 2 return false).
+ */
+"
+    For the method:
+    "isPrime"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:01:59,054 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here are the Java pre-condition assertions in the provided output format:
+
+```json
+[
+  {
+    "description": "n must be a positive integer",
+    "assertion": "assert args[0] > 1 && args[0] % 2 != 0;",
+    "name": "n",
+    "content": "&lt;strong&gt;n must be a positive integer&lt;/strong&gt;"
+  }
+]
+```
+
+Note that the assertion checks for two conditions: `args[0] > 1` to ensure `n` is at least 2, and `args[0] % 2 != 0` to ensure `n` is odd. This is because all numbers less than 2 are not prime, and even numbers greater than 2 can be prime. The assertion uses the fact that a number is composite if it has any divisors other than 1 and itself, so we need to check for both `args[0] > 1` and `args[0] % 2 == 0`.
+2026-01-13 06:01:59,055 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'n must be a positive integer', 'assertion': 'assert args[0] > 1 && args[0] % 2 != 0;', 'name': 'n', 'content': '&lt;strong&gt;n must be a positive integer&lt;/strong&gt;'}]
+2026-01-13 06:01:59,055 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'number to test.'}, {'tag': 'return', 'name': None, 'content': 'true if n is prime. (All numbers &lt; 2 return false).'}]
+2026-01-13 06:01:59,055 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:01:59,055 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Primality test: tells if the argument is a (provable) prime or not.
+ * <p>
+ * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+ * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+ * by Menezes, table 4.1).
+ *
+ * @param n number to test.
+ * @return true if n is prime. (All numbers &lt; 2 return false).
+ */
+"
+    For the method:
+    "isPrime"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:02:01,259 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here's a Java assertion statement based on the provided Javadoc:
+
+```json
+[
+  {
+    "description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."
+  }
+]
+```
+
+This Java assertion statement represents the conditions described by the `@return` tag in the Javadoc. It checks that the return value of the `isPrime` method is true only when the input number `n` is greater than or equal to 2, and returns false for all numbers less than 2.
+2026-01-13 06:02:01,260 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'true if n is prime. (All numbers < 2 return false).', 'assertion': 'assert methodResultID == (args[0] >= 2);', 'name': None, 'content': 'true if n is prime. (All numbers &lt; 2 return false).'}]
+2026-01-13 06:02:01,260 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'RETURN': 1} for isPrime:
+ {'PARAM': [{'description': 'n must be a positive integer', 'assertion': 'assert args[0] > 1 && args[0] % 2 != 0;', 'name': 'n', 'content': '&lt;strong&gt;n must be a positive integer&lt;/strong&gt;'}], 'RETURN': [{'description': 'true if n is prime. (All numbers < 2 return false).', 'assertion': 'assert methodResultID == (args[0] >= 2);', 'name': None, 'content': 'true if n is prime. (All numbers &lt; 2 return false).'}]}
+2026-01-13 06:02:01,260 - DEBUG - llmedico.main - current method name: nextPrime
+2026-01-13 06:02:01,260 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Return the smallest prime greater than or equal to n.
+ *
+ * @param n a positive number.
+ * @return the smallest prime greater than or equal to n.
+ * @throws MathIllegalArgumentException if n &lt; 0.
+ */
+
+2026-01-13 06:02:01,261 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'RETURN': 1, 'THROWS': 1}
+2026-01-13 06:02:01,261 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'a positive number.'}, {'tag': 'return', 'name': None, 'content': 'the smallest prime greater than or equal to n.'}, {'tag': 'throws', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 0.'}]
+2026-01-13 06:02:01,261 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:02:01,261 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Return the smallest prime greater than or equal to n.
+ *
+ * @param n a positive number.
+ * @return the smallest prime greater than or equal to n.
+ * @throws MathIllegalArgumentException if n &lt; 0.
+ */
+"
+    For the method:
+    "nextPrime"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:02:02,750 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here are the Java pre-condition assertions in the provided output format:
+
+```json
+[
+  {
+    "description": "n must be a positive number",
+    "assertion": "assert args[0] > 0;",
+    "name": "n",
+    "content": "a positive number"
+  }
+]
+```
+
+Note that I've ignored the `@return` and `@throws` tags as per requirement, and only generated pre-condition checks.
+2026-01-13 06:02:02,751 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'n must be a positive number', 'assertion': 'assert args[0] > 0;', 'name': 'n', 'content': 'a positive number'}]
+2026-01-13 06:02:02,751 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'a positive number.'}, {'tag': 'return', 'name': None, 'content': 'the smallest prime greater than or equal to n.'}, {'tag': 'throws', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 0.'}]
+2026-01-13 06:02:02,751 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:02:02,751 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Return the smallest prime greater than or equal to n.
+ *
+ * @param n a positive number.
+ * @return the smallest prime greater than or equal to n.
+ * @throws MathIllegalArgumentException if n &lt; 0.
+ */
+"
+    For the method:
+    "nextPrime"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:02:04,619 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here's how you can generate a valid Java assertion statement based on the provided Javadoc:
+
+```json
+[
+  {
+    "description": "the smallest prime greater than or equal to n.",
+    "assertion": "assert receiverObjectID.nextPrime(methodResultID) == (methodResultID >= 2);",
+    "name": null,
+    "content": "the smallest prime greater than or equal to n."
+  }
+]
+```
+
+This assertion checks that the result of `nextPrime` is a number greater than or equal to 2, which is the definition of the next prime after a given number.
+2026-01-13 06:02:04,620 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the smallest prime greater than or equal to n.', 'assertion': 'assert receiverObjectID.nextPrime(methodResultID) == (methodResultID >= 2);', 'name': None, 'content': 'the smallest prime greater than or equal to n.'}]
+2026-01-13 06:02:04,620 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'a positive number.'}, {'tag': 'return', 'name': None, 'content': 'the smallest prime greater than or equal to n.'}, {'tag': 'throws', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 0.'}]
+2026-01-13 06:02:04,620 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:02:04,620 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Return the smallest prime greater than or equal to n.
+ *
+ * @param n a positive number.
+ * @return the smallest prime greater than or equal to n.
+ * @throws MathIllegalArgumentException if n &lt; 0.
+ */
+"
+    For the Method:
+    "nextPrime"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:02:06,437 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: ```json
+[
+  {
+    "description": "if n &lt; 0.",
+    "assertion": "assert args[0] < 0;",
+    "name": "MathIllegalArgumentException",
+    "content": "if n &lt; 0."
+  }
+]
+```
+
+Note: I have only included the assertion for `MathIllegalArgumentException` as per the provided input. The other available instance methods (`isPrime`, `nextPrime`, and `primeFactors`) are not used in this case, but they could be used to express additional conditions if needed.
+2026-01-13 06:02:06,437 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if n &lt; 0.', 'assertion': 'assert args[0] < 0;', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 0.'}]
+2026-01-13 06:02:06,437 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'RETURN': 1, 'THROWS': 1} for nextPrime:
+ {'PARAM': [{'description': 'n must be a positive number', 'assertion': 'assert args[0] > 0;', 'name': 'n', 'content': 'a positive number'}], 'RETURN': [{'description': 'the smallest prime greater than or equal to n.', 'assertion': 'assert receiverObjectID.nextPrime(methodResultID) == (methodResultID >= 2);', 'name': None, 'content': 'the smallest prime greater than or equal to n.'}], 'THROWS': [{'description': 'if n &lt; 0.', 'assertion': 'assert args[0] < 0;', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 0.'}]}
+2026-01-13 06:02:06,438 - DEBUG - llmedico.main - current method name: primeFactors
+2026-01-13 06:02:06,438 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Prime factors decomposition
+ *
+ * @param n number to factorize: must be &ge; 2
+ * @return list of prime factors of n
+ * @throws MathIllegalArgumentException if n &lt; 2.
+ */
+
+2026-01-13 06:02:06,438 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'RETURN': 1, 'THROWS': 1}
+2026-01-13 06:02:06,438 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'number to factorize: must be &ge; 2'}, {'tag': 'return', 'name': None, 'content': 'list of prime factors of n'}, {'tag': 'throws', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 2.'}]
+2026-01-13 06:02:06,438 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:02:06,438 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Pre-condition assertions must only constrain the parameter described by the @param tag, Do not introduce constraints on the receiver object or on other parameters.
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    Example:
+    Input Javadoc:
+    /**
+     * Sends a message over the connection.
+     * @param x must be positive
+     */
+     Input Parameters:
+    [{"type": {
+      "qualified_name": "int",
+      "name": "int",
+      "is_array": false
+    },
+    "name": "x"}]
+    Input Return Type:
+    null
+    Output Java assertions:
+    ```json
+    [{"description": "the code must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "x must be positive"}]
+    ```
+    Input Javadoc:
+    /**
+     * Adds two positive integers and returns the result.
+     *
+     * @param x the first number; must be positive
+     * @param y the second number; must be positive
+     * @return the sum of x and y
+     * @throws IllegalArgumentException if either x or y is zero or negative
+     */
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+    "simple_name": "boolean",
+    "is_array": false
+    }
+    Output Java assertions:
+    ```json
+    [{"description": "x must be positive",
+    "assertion": "assert args[0] > 0;",
+    "name": "x",
+    "content": "the first number; must be positive"},
+    {"description": "y must be positive",
+    "assertion": "assert args[1] > 0;",
+    "name": "y",
+    "content": "the second number; must be positive"}]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Prime factors decomposition
+ *
+ * @param n number to factorize: must be &ge; 2
+ * @return list of prime factors of n
+ * @throws MathIllegalArgumentException if n &lt; 2.
+ */
+"
+    For the method:
+    "primeFactors"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'List', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:02:08,070 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here are the generated Java pre-condition assertions in the provided output format:
+
+```json
+[
+  {
+    "description": "n must be &ge; 2",
+    "assertion": "assert args[0] >= 2;",
+    "name": "n",
+    "content": "&lt;strong&gt;n must be &amp;ge; 2&amp;lt;/strong&gt;"
+  }
+]
+```
+
+Note that I've ignored the `@return` and `@throws` tags as per requirement, and only generated pre-condition checks for the parameters described in the `@param` tag.
+2026-01-13 06:02:08,071 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'n must be &ge; 2', 'assertion': 'assert args[0] >= 2;', 'name': 'n', 'content': '&lt;strong&gt;n must be &amp;ge; 2&amp;lt;/strong&gt;'}]
+2026-01-13 06:02:08,071 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'number to factorize: must be &ge; 2'}, {'tag': 'return', 'name': None, 'content': 'list of prime factors of n'}, {'tag': 'throws', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 2.'}]
+2026-01-13 06:02:08,071 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:02:08,071 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Prime factors decomposition
+ *
+ * @param n number to factorize: must be &ge; 2
+ * @return list of prime factors of n
+ * @throws MathIllegalArgumentException if n &lt; 2.
+ */
+"
+    For the method:
+    "primeFactors"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'List', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:02:09,923 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: Here's how you can generate a valid Java assertion statement based on the provided requirements:
+
+```json
+[
+    {
+        "description": "list of prime factors of n",
+        "assertion": "assert receiverObjectID.primeFactors(args[0]).equals(null);",
+        "name": null,
+        "content": "list of prime factors of n"
+    }
+]
+```
+
+This Java assertion statement is based on the provided Javadoc, method name, parameters, return type, and available instance methods. The assertion checks that the `primeFactors` method returns a list of prime factors for the input number `n`.
+2026-01-13 06:02:09,924 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'list of prime factors of n', 'assertion': 'assert receiverObjectID.primeFactors(args[0]).equals(null);', 'name': None, 'content': 'list of prime factors of n'}]
+2026-01-13 06:02:09,924 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'param', 'name': 'n', 'content': 'number to factorize: must be &ge; 2'}, {'tag': 'return', 'name': None, 'content': 'list of prime factors of n'}, {'tag': 'throws', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 2.'}]
+2026-01-13 06:02:09,924 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    C. Only output JSON, no additional explanations or commentary.
+    D. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    E. Provide a short description for the generated assertion as shown in the example.
+    F. Refer to the parameters as args[0], and args[1] and so on.
+    G. Assertions must relate the return value to method inputs and/or receiver state as required by the documented semantics. Do not assert constant return values without justification from the documentation.
+    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation. Prefer semantic conditions (e.g., membership, bounds, ordering).
+    I. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    J. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    K. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    L. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    M. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    N. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    
+
+2026-01-13 06:02:09,924 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Prime factors decomposition
+ *
+ * @param n number to factorize: must be &ge; 2
+ * @return list of prime factors of n
+ * @throws MathIllegalArgumentException if n &lt; 2.
+ */
+"
+    For the Method:
+    "primeFactors"
+    With the following Parameters:
+    "[{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}]"
+    And the following Return Type:
+    "{'qualified_name': None, 'simple_name': 'List', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean isPrime(int n)
+int nextPrime(int n)
+None primeFactors(int n)
+"
+    
+2026-01-13 06:02:11,341 - DEBUG - llm_caller.models.ollama - raw response from llama3.2:latest: ```json
+[
+  {
+    "description": "if n < 2.",
+    "assertion": "assert args[0] < 2;",
+    "name": "MathIllegalArgumentException",
+    "content": "if n &lt; 2."
+  }
+]
+```
+
+Note: The generated assertion only includes the condition that matches the exception condition, as per requirement L.
+2026-01-13 06:02:11,342 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if n < 2.', 'assertion': 'assert args[0] < 2;', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 2.'}]
+2026-01-13 06:02:11,342 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'RETURN': 1, 'THROWS': 1} for primeFactors:
+ {'PARAM': [{'description': 'n must be &ge; 2', 'assertion': 'assert args[0] >= 2;', 'name': 'n', 'content': '&lt;strong&gt;n must be &amp;ge; 2&amp;lt;/strong&gt;'}], 'RETURN': [{'description': 'list of prime factors of n', 'assertion': 'assert receiverObjectID.primeFactors(args[0]).equals(null);', 'name': None, 'content': 'list of prime factors of n'}], 'THROWS': [{'description': 'if n < 2.', 'assertion': 'assert args[0] < 2;', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 2.'}]}
+2026-01-13 06:02:11,344 - DEBUG - llmedico.main - the following java assertions have been generated for org.apache.commons.math3.primes.Primes: 
+ [{'method': 'isPrime', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}], 'conditions': {'PARAM': [{'description': 'n must be a positive integer', 'assertion': 'assert args[0] > 1 && args[0] % 2 != 0;', 'name': 'n', 'content': '&lt;strong&gt;n must be a positive integer&lt;/strong&gt;'}], 'RETURN': [{'description': 'true if n is prime. (All numbers < 2 return false).', 'assertion': 'assert methodResultID == (args[0] >= 2);', 'name': None, 'content': 'true if n is prime. (All numbers &lt; 2 return false).'}]}}, {'method': 'nextPrime', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}], 'conditions': {'PARAM': [{'description': 'n must be a positive number', 'assertion': 'assert args[0] > 0;', 'name': 'n', 'content': 'a positive number'}], 'RETURN': [{'description': 'the smallest prime greater than or equal to n.', 'assertion': 'assert receiverObjectID.nextPrime(methodResultID) == (methodResultID >= 2);', 'name': None, 'content': 'the smallest prime greater than or equal to n.'}], 'THROWS': [{'description': 'if n &lt; 0.', 'assertion': 'assert args[0] < 0;', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 0.'}]}}, {'method': 'primeFactors', 'type': 'method', 'parameters': [{'type': {'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}, 'name': 'n'}], 'conditions': {'PARAM': [{'description': 'n must be &ge; 2', 'assertion': 'assert args[0] >= 2;', 'name': 'n', 'content': '&lt;strong&gt;n must be &amp;ge; 2&amp;lt;/strong&gt;'}], 'RETURN': [{'description': 'list of prime factors of n', 'assertion': 'assert receiverObjectID.primeFactors(args[0]).equals(null);', 'name': None, 'content': 'list of prime factors of n'}], 'THROWS': [{'description': 'if n < 2.', 'assertion': 'assert args[0] < 2;', 'name': 'MathIllegalArgumentException', 'content': 'if n &lt; 2.'}]}}]
+2026-01-13 06:02:11,344 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2026-01-13 06:02:11,345 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "Primes",
+    "package": "org.apache.commons.math3.primes",
+    "qualified_name": "org.apache.commons.math3.primes.Primes",
+    "javadoc": "/**\n * Methods related to prime numbers in the range of <code>int</code>:\n * <ul>\n * <li>primality test</li>\n * <li>prime number generation</li>\n * <li>factorization</li>\n * </ul>\n *\n * @since 3.2\n */\n",
+    "code": "/**\n * Methods related to prime numbers in the range of <code>int</code>:\n * <ul>\n * <li>primality test</li>\n * <li>prime number generation</li>\n * <li>factorization</li>\n * </ul>\n *\n * @since 3.2\n */\npublic class Primes {\n\n    /**\n     * Hide utility class.\n     */\n    private Primes() {\n    }\n\n    /**\n     * Primality test: tells if the argument is a (provable) prime or not.\n     * <p>\n     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:\n     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography\n     * by Menezes, table 4.1).\n     *\n     * @param n number to test.\n     * @return true if n is prime. (All numbers &lt; 2 return false).\n     */\n    public static boolean isPrime(int n) {\n        if (n < 2) {\n            return false;\n        }\n        for (int p : SmallPrimes.PRIMES) {\n            if (0 == (n % p)) {\n                return n == p;\n            }\n        }\n        return SmallPrimes.millerRabinPrimeTest(n);\n    }\n\n    /**\n     * Return the smallest prime greater than or equal to n.\n     *\n     * @param n a positive number.\n     * @return the smallest prime greater than or equal to n.\n     * @throws MathIllegalArgumentException if n &lt; 0.\n     */\n    public static int nextPrime(int n) {\n        if (n < 0) {\n            throw new MathIllegalArgumentException(LocalizedFormats.NUMBER_TOO_SMALL, n, 0);\n        }\n        if (n == 2) {\n            return 2;\n        }\n        //make sure n is odd\n        n |= 1;\n        if (n == 1) {\n            return 2;\n        }\n        if (isPrime(n)) {\n            return n;\n        }\n        // prepare entry in the +2, +4 loop:\n        // n should not be a multiple of 3\n        final int rem = n % 3;\n        if (0 == rem) {\n            // if n % 3 == 0\n            // n % 3 == 2\n            n += 2;\n        } else if (1 == rem) {\n            // if n % 3 == 1\n            // if (isPrime(n)) return n;\n            // n % 3 == 2\n            n += 4;\n        }\n        while (true) {\n            // this loop skips all multiple of 3\n            if (isPrime(n)) {\n                return n;\n            }\n            // n % 3 == 1\n            n += 2;\n            if (isPrime(n)) {\n                return n;\n            }\n            // n % 3 == 2\n            n += 4;\n        }\n    }\n\n    /**\n     * Prime factors decomposition\n     *\n     * @param n number to factorize: must be &ge; 2\n     * @return list of prime factors of n\n     * @throws MathIllegalArgumentException if n &lt; 2.\n     */\n    public static List<Integer> primeFactors(int n) {\n        if (n < 2) {\n            throw new MathIllegalArgumentException(LocalizedFormats.NUMBER_TOO_SMALL, n, 2);\n        }\n        // slower than trial div unless we do an awful lot of computation\n        // (then it finally gets JIT-compiled efficiently\n        // List<Integer> out = PollardRho.primeFactors(n);\n        return SmallPrimes.trialDivision(n);\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "isPrime",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * Primality test: tells if the argument is a (provable) prime or not.\n * <p>\n * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:\n * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography\n * by Menezes, table 4.1).\n *\n * @param n number to test.\n * @return true if n is prime. (All numbers &lt; 2 return false).\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "n",
+            "content": "number to test.",
+            "assertion": "assert args[0] > 1 && args[0] % 2 != 0;",
+            "description": "n must be a positive integer"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true if n is prime. (All numbers &lt; 2 return false).",
+            "assertion": "assert methodResultID == (args[0] >= 2);",
+            "description": "true if n is prime. (All numbers < 2 return false)."
+          }
+        ],
+        "code": "/**\n * Primality test: tells if the argument is a (provable) prime or not.\n * <p>\n * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:\n * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography\n * by Menezes, table 4.1).\n *\n * @param n number to test.\n * @return true if n is prime. (All numbers &lt; 2 return false).\n */\npublic static boolean isPrime(int n) {\n    if (n < 2) {\n        return false;\n    }\n    for (int p : SmallPrimes.PRIMES) {\n        if (0 == (n % p)) {\n            return n == p;\n        }\n    }\n    return SmallPrimes.millerRabinPrimeTest(n);\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextPrime",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * Return the smallest prime greater than or equal to n.\n *\n * @param n a positive number.\n * @return the smallest prime greater than or equal to n.\n * @throws MathIllegalArgumentException if n &lt; 0.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "n",
+            "content": "a positive number.",
+            "assertion": "assert args[0] > 0;",
+            "description": "n must be a positive number"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the smallest prime greater than or equal to n.",
+            "assertion": "assert receiverObjectID.nextPrime(methodResultID) == (methodResultID >= 2);",
+            "description": "the smallest prime greater than or equal to n."
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if n &lt; 0.",
+            "assertion": "assert args[0] < 0;",
+            "description": "if n &lt; 0."
+          }
+        ],
+        "code": "/**\n * Return the smallest prime greater than or equal to n.\n *\n * @param n a positive number.\n * @return the smallest prime greater than or equal to n.\n * @throws MathIllegalArgumentException if n &lt; 0.\n */\npublic static int nextPrime(int n) {\n    if (n < 0) {\n        throw new MathIllegalArgumentException(LocalizedFormats.NUMBER_TOO_SMALL, n, 0);\n    }\n    if (n == 2) {\n        return 2;\n    }\n    //make sure n is odd\n    n |= 1;\n    if (n == 1) {\n        return 2;\n    }\n    if (isPrime(n)) {\n        return n;\n    }\n    // prepare entry in the +2, +4 loop:\n    // n should not be a multiple of 3\n    final int rem = n % 3;\n    if (0 == rem) {\n        // if n % 3 == 0\n        // n % 3 == 2\n        n += 2;\n    } else if (1 == rem) {\n        // if n % 3 == 1\n        // if (isPrime(n)) return n;\n        // n % 3 == 2\n        n += 4;\n    }\n    while (true) {\n        // this loop skips all multiple of 3\n        if (isPrime(n)) {\n            return n;\n        }\n        // n % 3 == 1\n        n += 2;\n        if (isPrime(n)) {\n            return n;\n        }\n        // n % 3 == 2\n        n += 4;\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "primeFactors",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * Prime factors decomposition\n *\n * @param n number to factorize: must be &ge; 2\n * @return list of prime factors of n\n * @throws MathIllegalArgumentException if n &lt; 2.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "n",
+            "content": "number to factorize: must be &ge; 2",
+            "assertion": "assert args[0] >= 2;",
+            "description": "n must be &ge; 2"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list of prime factors of n",
+            "assertion": "assert receiverObjectID.primeFactors(args[0]).equals(null);",
+            "description": "list of prime factors of n"
+          },
+          {
+            "tag": "throws",
+            "name": "MathIllegalArgumentException",
+            "content": "if n &lt; 2.",
+            "assertion": "assert args[0] < 2;",
+            "description": "if n < 2."
+          }
+        ],
+        "code": "/**\n * Prime factors decomposition\n *\n * @param n number to factorize: must be &ge; 2\n * @return list of prime factors of n\n * @throws MathIllegalArgumentException if n &lt; 2.\n */\npublic static List<Integer> primeFactors(int n) {\n    if (n < 2) {\n        throw new MathIllegalArgumentException(LocalizedFormats.NUMBER_TOO_SMALL, n, 2);\n    }\n    // slower than trial div unless we do an awful lot of computation\n    // (then it finally gets JIT-compiled efficiently\n    // List<Integer> out = PollardRho.primeFactors(n);\n    return SmallPrimes.trialDivision(n);\n}"
+      }
+    ]
+  }
+]
+2026-01-13 06:02:11,346 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2026-01-13 06:02:11,347 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2026-01-13 06:02:11,349 - DEBUG - llmedico.main - ---Ending LLMedico---

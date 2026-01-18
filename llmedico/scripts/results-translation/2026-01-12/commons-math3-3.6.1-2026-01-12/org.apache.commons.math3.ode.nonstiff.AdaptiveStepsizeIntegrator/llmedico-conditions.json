@@ -1,0 +1,660 @@
+[
+  {
+    "method": "AdaptiveStepsizeIntegrator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "name"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "scalAbsoluteTolerance"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "scalRelativeTolerance"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the default step handler does nothing",
+          "assertion": "assert receiverObjectID.sanityChecks(args[0], None) == null;",
+          "name": "sanityChecks",
+          "content": "the default step handler does nothing"
+        },
+        {
+          "description": "minimal step (sign is irrelevant, regardless of integration direction, forward or backward), the last step can be smaller than this",
+          "assertion": "assert receiverObjectID.initializeStep(args[0], args[1], args[2], None, null, null, null, null) == null;",
+          "name": "initializeStep",
+          "content": "the first number; must be positive"
+        },
+        {
+          "description": "maximal step (sign is irrelevant, regardless of integration direction, forward or backward), the last step can be smaller than this",
+          "assertion": "assert receiverObjectID.initializeStep(args[2], args[1], args[0], None, null, null, null, null) == null;",
+          "name": "initializeStep",
+          "content": "the second number; must be positive"
+        },
+        {
+          "description": "allowed absolute error",
+          "assertion": "assert receiverObjectID.sanityChecks(args[3], None) == null;",
+          "name": "sanityChecks",
+          "content": "scalAbsoluteTolerance"
+        },
+        {
+          "description": "allowed relative error",
+          "assertion": "assert receiverObjectID.sanityChecks(args[4], None) == null;",
+          "name": "sanityChecks",
+          "content": "scalRelativeTolerance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "AdaptiveStepsizeIntegrator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "name"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "vecAbsoluteTolerance"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "vecRelativeTolerance"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "name must be a string",
+          "assertion": "assert args[0] instanceof String;",
+          "name": "name",
+          "content": "name must be a string"
+        },
+        {
+          "description": "minStep must be a double",
+          "assertion": "assert args[1] instanceof Double;",
+          "name": "minStep",
+          "content": "minimal step (sign is irrelevant, regardless of integration direction, forward or backward), the last step can be smaller than this"
+        },
+        {
+          "description": "maxStep must be a double",
+          "assertion": "assert args[2] instanceof Double;",
+          "name": "maxStep",
+          "content": " maximal step (sign is irrelevant, regardless of integration direction, forward or backward), the last step can be smaller than this"
+        },
+        {
+          "description": "vecAbsoluteTolerance must be a double array",
+          "assertion": "assert args[3] instanceof Double[];",
+          "name": "vecAbsoluteTolerance",
+          "content": "allowed absolute error"
+        },
+        {
+          "description": "vecRelativeTolerance must be a double array",
+          "assertion": "assert args[4] instanceof Double[];",
+          "name": "vecRelativeTolerance",
+          "content": "allowed relative error"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setStepSizeControl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minimalStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maximalStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "absoluteTolerance"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "relativeTolerance"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "minimal step (must be positive even for backward integration), the last step can be smaller than this",
+          "assertion": "assert args[0] > 0;",
+          "name": "minimalStep",
+          "content": "the minimal step; must be positive"
+        },
+        {
+          "description": "maximal step (must be positive even for backward integration)",
+          "assertion": "assert args[1] > 0;",
+          "name": "maximalStep",
+          "content": "the maximal step; must be positive"
+        },
+        {
+          "description": "allowed absolute error",
+          "assertion": "assert args[2] >= 0;",
+          "name": "absoluteTolerance",
+          "content": "the allowed absolute error"
+        },
+        {
+          "description": "allowed relative error",
+          "assertion": "assert args[3] > 0;",
+          "name": "relativeTolerance",
+          "content": "the allowed relative error"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setStepSizeControl",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minimalStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maximalStep"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "absoluteTolerance"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "relativeTolerance"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "minimalStep must be positive even for backward integration",
+          "assertion": "assert args[0] > 0;",
+          "name": "minimalStep",
+          "content": "minimal step (must be positive even for backward integration)"
+        },
+        {
+          "description": "maximalStep must be positive even for backward integration",
+          "assertion": "assert args[1] > 0;",
+          "name": "maximalStep",
+          "content": "maximal step (must be positive even for backward integration)"
+        },
+        {
+          "description": "absoluteTolerance must be positive",
+          "assertion": "assert args[2] > 0;",
+          "name": "absoluteTolerance",
+          "content": "allowed absolute error"
+        },
+        {
+          "description": "relativeTolerance must be positive",
+          "assertion": "assert args[3] > 0;",
+          "name": "relativeTolerance",
+          "content": "allowed relative error"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setInitialStepSize",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "initialStepSize"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "initial step size must be positive even for backward integration",
+          "assertion": "assert receiverObjectID.initialStepSize > 0.0;",
+          "name": "initialStepSize",
+          "content": "initial step size to use (must be positive even for backward integration ; providing a negative value or a value outside of the min/max step interval will lead the integrator to ignore the value and compute the initial step size by itself)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "sanityChecks",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ExpandableStatefulODE",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "equations"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "initializeStep",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "forward"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "scale"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t0"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y0"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "yDot0"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y1"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "yDot1"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "forward",
+          "content": "forward integration indicator",
+          "assertion": "",
+          "description": "forward integration indicator"
+        },
+        {
+          "tag": "param",
+          "name": "order",
+          "content": "order of the method",
+          "assertion": "",
+          "description": "order of the method"
+        },
+        {
+          "tag": "param",
+          "name": "scale",
+          "content": "scaling vector for the state vector (can be shorter than state vector)",
+          "assertion": "",
+          "description": "scaling vector for the state vector (can be shorter than state vector)"
+        },
+        {
+          "tag": "param",
+          "name": "t0",
+          "content": "start time",
+          "assertion": "",
+          "description": "start time"
+        },
+        {
+          "tag": "param",
+          "name": "y0",
+          "content": "state vector at t0",
+          "assertion": "",
+          "description": "state vector at t0"
+        },
+        {
+          "tag": "param",
+          "name": "yDot0",
+          "content": "first time derivative of y0",
+          "assertion": "",
+          "description": "first time derivative of y0"
+        },
+        {
+          "tag": "param",
+          "name": "y1",
+          "content": "work array for a state vector",
+          "assertion": "",
+          "description": "work array for a state vector"
+        },
+        {
+          "tag": "param",
+          "name": "yDot1",
+          "content": "work array for the first time derivative of y1",
+          "assertion": "",
+          "description": "work array for the first time derivative of y1"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the result of the integration step",
+          "assertion": "assert result == integrate(equations, t0) && forward; // sanity check: forward integration indicator must be true",
+          "name": null,
+          "content": "the result of the integration step"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if arrays dimensions do not match equations settings",
+          "assertion": "assert receiverObjectID.filterStep(args[3],args[1]==0, args[4]==0) == 0;",
+          "name": "DimensionMismatchException",
+          "content": "if arrays dimensions do not match equations settings"
+        },
+        {
+          "description": "if the number of functions evaluations is exceeded",
+          "assertion": "assert receiverObjectID.maxStep() > args[2];",
+          "name": "MaxCountExceededException",
+          "content": "if the number of functions evaluations is exceeded"
+        }
+      ]
+    }
+  },
+  {
+    "method": "filterStep",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "h"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "forward"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "acceptSmall"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "h must be signed",
+          "assertion": "assert args[0] >= 0;",
+          "name": "h",
+          "content": "signed step"
+        },
+        {
+          "description": "forward must be true or false",
+          "assertion": "assert args[1] == true || args[1] == false;",
+          "name": "forward",
+          "content": "forward integration indicator"
+        },
+        {
+          "description": "acceptSmall must be true or false",
+          "assertion": "assert args[2] == true || args[2] == false;",
+          "name": "acceptSmall",
+          "content": "if true, steps smaller than the minimal value are silently increased up to this value, if false such small steps generate an exception"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a bounded integration step (h if no bound is reach, or a bounded value).",
+          "assertion": "assert methodResultID == ((args[0] >= getMinStep()) && (args[0] <= getMaxStep())) || methodResultID == (getMinStep());",
+          "name": null,
+          "content": "a bounded integration step (h if no bound is reach, or a bounded value)."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if step is too small and acceptSmall is false",
+          "assertion": "assert args[0] < NumberIsTooSmallException.MIN_VALUE && !args[2];",
+          "name": "NumberIsTooSmallException",
+          "content": "if the step is too small and acceptSmall is false"
+        }
+      ]
+    }
+  },
+  {
+    "method": "integrate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ExpandableStatefulODE",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "equations"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "t"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "getCurrentStepStart",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "resetInternalState",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "getMinStep",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "minimal step",
+          "assertion": "assert methodResultID == receiverObjectID.getMinStep();",
+          "name": null,
+          "content": "Get the minimal step."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMaxStep",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if maximal step is returned.",
+          "assertion": "assert methodResultID == receiverObjectID.getMaxStep();",
+          "name": null,
+          "content": "true if maximal step is returned."
+        }
+      ]
+    }
+  }
+]
