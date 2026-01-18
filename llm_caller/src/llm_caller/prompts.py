@@ -250,26 +250,26 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
     Input Method Name:
     switchClosure
      Input Parameters:
-    [{{'type': {{'qualified_name': None, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}}, 'name': 'predicates'}}, {{'type': {{'qualified_name': None, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}}, 'name': 'closures'}}]
+    [{{'type': {{'qualified_name': null, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}}, 'name': 'predicates'}}, {{'type': {{'qualified_name': null, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}}, 'name': 'closures'}}]
     Input Return Type:
-    {{'qualified_name': None, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}}
+    {{'qualified_name': null, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}}
     And the following available instance methods:
-    None exceptionClosure()
-    None nopClosure()
-    None asClosure(None transformer)
-    None forClosure(int count,None closure)
-    None whileClosure(None predicate,None closure)
-    None doWhileClosure(None closure,None predicate)
-    None invokerClosure(None methodName)
-    None invokerClosure(None methodName,None paramTypes,None args)
-    None chainedClosure(None closures)
-    None chainedClosure(None closures)
-    None ifClosure(None predicate,None trueClosure)
-    None ifClosure(None predicate,None trueClosure,None falseClosure)
-    None switchClosure(None predicates,None closures)
-    None switchClosure(None predicates,None closures,None defaultClosure)
-    None switchClosure(None predicatesAndClosures)
-    None switchMapClosure(None objectsAndClosures)
+    void exceptionClosure()
+    void nopClosure()
+    void asClosure(void transformer)
+    void forClosure(int count,void closure)
+    void whileClosure(void predicate,void closure)
+    void doWhileClosure(void closure,void predicate)
+    void invokerClosure(void methodName)
+    void invokerClosure(void methodName,void paramTypes,void args)
+    void chainedClosure(void closures)
+    void chainedClosure(void closures)
+    void ifClosure(void predicate,void trueClosure)
+    void ifClosure(void predicate,void trueClosure,void falseClosure)
+    void switchClosure(void predicates,void closures)
+    void switchClosure(void predicates,void closures,void defaultClosure)
+    void switchClosure(void predicatesAndClosures)
+    void switchMapClosure(void objectsAndClosures)
     Output Java assertions:
     ```json
     [{{"description": "an array of predicates to check, not null",
@@ -292,13 +292,13 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
      Input Parameters:
     [{{'type': {{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}}, 'name': 'on'}}]
     Input Return Type:
-    None
+    void
     Instance Methods:
     boolean isLocked()
-    boolean hasParameter(None parameter)
-    boolean getBooleanParameter(None parameter)
-    int getBooleanParameteri(None parameter)
-    double getNumberParameter(None parameter)
+    boolean hasParameter(void parameter)
+    boolean getBooleanParameter(void parameter)
+    int getBooleanParameteri(void parameter)
+    double getNumberParameter(void parameter)
     int getParameterCount()
     void lockEnvironment(boolean on)
     
@@ -306,10 +306,10 @@ PRE_CONDITION_PROMPT_JSON_STRING = """
     ```json
     [
         {{
-        "description": "the environment is locked",
+        "description": "true if locked",
         "assertion": "assert receiverObjectID.isLocked();",
         "name": "on",
-        "content": "true"
+        "content": "If true the environment is locked."
         }}
     ]
     ```
@@ -376,7 +376,9 @@ RETURN_CONDITION_PROMPT_JSON_STRING = """
           "simple_name": "boolean",
           "is_array": false}}
     Input available Instance Methods:
-    
+    boolean isPrime(int n)
+    int nextPrime(int n)
+    void primeFactors(int n)
     Output Java assertions:
      ```json
     [{{"description": "true if n is prime. (All numbers < 2 return false).",
