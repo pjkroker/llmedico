@@ -1,0 +1,478 @@
+[
+  {
+    "name": "KeyAnalyzer",
+    "package": "org.apache.commons.collections4.trie",
+    "qualified_name": "org.apache.commons.collections4.trie.KeyAnalyzer",
+    "javadoc": "/**\n * Defines the interface to analyze {@link org.apache.commons.collections4.Trie Trie} keys on a bit level.\n * {@link KeyAnalyzer}'s methods return the length of the key in bits, whether or not a bit is set,\n * and bits per element in the key.\n * <p>\n * Additionally, a method determines if a key is a prefix of another\n * key and returns the bit index where one key is different from another\n * key (if the key and found key are equal than the return value is\n * {@link #EQUAL_BIT_KEY}).\n *\n * @since 4.0\n * @version $Id: KeyAnalyzer.java 1491621 2013-06-10 22:05:38Z tn $\n */\n",
+    "code": "/**\n * Defines the interface to analyze {@link org.apache.commons.collections4.Trie Trie} keys on a bit level.\n * {@link KeyAnalyzer}'s methods return the length of the key in bits, whether or not a bit is set,\n * and bits per element in the key.\n * <p>\n * Additionally, a method determines if a key is a prefix of another\n * key and returns the bit index where one key is different from another\n * key (if the key and found key are equal than the return value is\n * {@link #EQUAL_BIT_KEY}).\n *\n * @since 4.0\n * @version $Id: KeyAnalyzer.java 1491621 2013-06-10 22:05:38Z tn $\n */\npublic abstract class KeyAnalyzer<K> implements Comparator<K>, Serializable {\n\n    /**\n     * Serialization version\n     */\n    private static final long serialVersionUID = -20497563720380683L;\n\n    /**\n     * Returned by {@link #bitIndex(Object, int, int, Object, int, int)}\n     * if key's bits are all 0.\n     */\n    public static final int NULL_BIT_KEY = -1;\n\n    /**\n     * Returned by {@link #bitIndex(Object, int, int, Object, int, int)} if key and found key are equal.\n     * This is a very very specific case and shouldn't happen on a regular basis.\n     */\n    public static final int EQUAL_BIT_KEY = -2;\n\n    public static final int OUT_OF_BOUNDS_BIT_KEY = -3;\n\n    /**\n     * Returns true if bitIndex is a {@link KeyAnalyzer#OUT_OF_BOUNDS_BIT_KEY}.\n     */\n    static boolean isOutOfBoundsIndex(final int bitIndex) {\n        return bitIndex == OUT_OF_BOUNDS_BIT_KEY;\n    }\n\n    /**\n     * Returns true if bitIndex is a {@link KeyAnalyzer#EQUAL_BIT_KEY}.\n     */\n    static boolean isEqualBitKey(final int bitIndex) {\n        return bitIndex == EQUAL_BIT_KEY;\n    }\n\n    /**\n     * Returns true if bitIndex is a {@link KeyAnalyzer#NULL_BIT_KEY}.\n     */\n    static boolean isNullBitKey(final int bitIndex) {\n        return bitIndex == NULL_BIT_KEY;\n    }\n\n    /**\n     * Returns true if the given bitIndex is valid.\n     * Indices are considered valid if they're between 0 and {@link Integer#MAX_VALUE}\n     */\n    static boolean isValidBitIndex(final int bitIndex) {\n        return bitIndex >= 0;\n    }\n\n    /**\n     * Returns the number of bits per element in the key.\n     * This is only useful for variable-length keys, such as Strings.\n     *\n     * @return the number of bits per element\n     */\n    public abstract int bitsPerElement();\n\n    /**\n     * Returns the length of the Key in bits.\n     *\n     * @param key  the key\n     * @return the bit length of the key\n     */\n    public abstract int lengthInBits(K key);\n\n    /**\n     * Returns whether or not a bit is set.\n     *\n     * @param key  the key to check, may not be null\n     * @param bitIndex  the bit index to check\n     * @param lengthInBits  the maximum key length in bits to check\n     * @return {@code true} if the bit is set in the given key and\n     *   {@code bitIndex} &lt; {@code lengthInBits}, {@code false} otherwise.\n     */\n    public abstract boolean isBitSet(K key, int bitIndex, int lengthInBits);\n\n    /**\n     * Returns the n-th different bit between key and other. This starts the comparison in\n     * key at 'offsetInBits' and goes for 'lengthInBits' bits, and compares to the other key starting\n     * at 'otherOffsetInBits' and going for 'otherLengthInBits' bits.\n     *\n     * @param key  the key to use\n     * @param offsetInBits  the bit offset in the key\n     * @param lengthInBits  the maximum key length in bits to use\n     * @param other  the other key to use\n     * @param otherOffsetInBits  the bit offset in the other key\n     * @param otherLengthInBits  the maximum key length in bits for the other key\n     * @return the bit index where the key and other first differ\n     */\n    public abstract int bitIndex(K key, int offsetInBits, int lengthInBits, K other, int otherOffsetInBits, int otherLengthInBits);\n\n    /**\n     * Determines whether or not the given prefix (from offset to length) is a prefix of the given key.\n     *\n     * @param prefix  the prefix to check\n     * @param offsetInBits  the bit offset in the key\n     * @param lengthInBits  the maximum key length in bits to use\n     * @param key  the key to check\n     * @return {@code true} if this is a valid prefix for the given key\n     */\n    public abstract boolean isPrefix(K prefix, int offsetInBits, int lengthInBits, K key);\n\n    @SuppressWarnings(\"unchecked\")\n    public int compare(final K o1, final K o2) {\n        if (o1 == null) {\n            return o2 == null ? 0 : -1;\n        } else if (o2 == null) {\n            return 1;\n        }\n        return ((Comparable<K>) o1).compareTo(o2);\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "isOutOfBoundsIndex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bitIndex"
+          }
+        ],
+        "javadoc": "/**\n * Returns true if bitIndex is a {@link KeyAnalyzer#OUT_OF_BOUNDS_BIT_KEY}.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns true if bitIndex is a {@link KeyAnalyzer#OUT_OF_BOUNDS_BIT_KEY}.\n */\nstatic boolean isOutOfBoundsIndex(final int bitIndex) {\n    return bitIndex == OUT_OF_BOUNDS_BIT_KEY;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isEqualBitKey",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bitIndex"
+          }
+        ],
+        "javadoc": "/**\n * Returns true if bitIndex is a {@link KeyAnalyzer#EQUAL_BIT_KEY}.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns true if bitIndex is a {@link KeyAnalyzer#EQUAL_BIT_KEY}.\n */\nstatic boolean isEqualBitKey(final int bitIndex) {\n    return bitIndex == EQUAL_BIT_KEY;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isNullBitKey",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bitIndex"
+          }
+        ],
+        "javadoc": "/**\n * Returns true if bitIndex is a {@link KeyAnalyzer#NULL_BIT_KEY}.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns true if bitIndex is a {@link KeyAnalyzer#NULL_BIT_KEY}.\n */\nstatic boolean isNullBitKey(final int bitIndex) {\n    return bitIndex == NULL_BIT_KEY;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isValidBitIndex",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bitIndex"
+          }
+        ],
+        "javadoc": "/**\n * Returns true if the given bitIndex is valid.\n * Indices are considered valid if they're between 0 and {@link Integer#MAX_VALUE}\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns true if the given bitIndex is valid.\n * Indices are considered valid if they're between 0 and {@link Integer#MAX_VALUE}\n */\nstatic boolean isValidBitIndex(final int bitIndex) {\n    return bitIndex >= 0;\n}"
+      },
+      {
+        "type": "method",
+        "name": "bitsPerElement",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the number of bits per element in the key.\n * This is only useful for variable-length keys, such as Strings.\n *\n * @return the number of bits per element\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of bits per element",
+            "assertion": "assert methodResultID > 0;",
+            "description": "the number of bits per element"
+          }
+        ],
+        "code": "/**\n * Returns the number of bits per element in the key.\n * This is only useful for variable-length keys, such as Strings.\n *\n * @return the number of bits per element\n */\npublic abstract int bitsPerElement();"
+      },
+      {
+        "type": "method",
+        "name": "lengthInBits",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n * Returns the length of the Key in bits.\n *\n * @param key  the key\n * @return the bit length of the key\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key",
+            "assertion": "assert args[0] != null;",
+            "description": "the key"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "bit length of the key",
+            "assertion": "assert methodResultID >= 0;",
+            "description": "the bit length of the key"
+          }
+        ],
+        "code": "/**\n * Returns the length of the Key in bits.\n *\n * @param key  the key\n * @return the bit length of the key\n */\npublic abstract int lengthInBits(K key);"
+      },
+      {
+        "type": "method",
+        "name": "isBitSet",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bitIndex"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lengthInBits"
+          }
+        ],
+        "javadoc": "/**\n * Returns whether or not a bit is set.\n *\n * @param key  the key to check, may not be null\n * @param bitIndex  the bit index to check\n * @param lengthInBits  the maximum key length in bits to check\n * @return {@code true} if the bit is set in the given key and\n *   {@code bitIndex} &lt; {@code lengthInBits}, {@code false} otherwise.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key to check, may not be null",
+            "assertion": "assert args[0] != null;",
+            "description": "the key to check, may not be null"
+          },
+          {
+            "tag": "param",
+            "name": "bitIndex",
+            "content": "the bit index to check",
+            "assertion": "assert !receiverObjectID.isOutOfBoundsIndex(args[1]);",
+            "description": "the bit index to check"
+          },
+          {
+            "tag": "param",
+            "name": "lengthInBits",
+            "content": "the maximum key length in bits to check",
+            "assertion": "assert args[2] >= 0;",
+            "description": "the maximum key length in bits to check"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if the bit is set in the given key and {@code bitIndex} &lt; {@code lengthInBits}, {@code false} otherwise.",
+            "assertion": "assert methodResultID == (bitIndex < lengthInBits && ((java.lang.Object[])key)[bitIndex / bitsPerElement()] << (bitIndex % bitsPerElement()) != 0);",
+            "description": "true if the bit is set in the given key and {@code bitIndex} &lt; {@code lengthInBits}, {@code false} otherwise."
+          }
+        ],
+        "code": "/**\n * Returns whether or not a bit is set.\n *\n * @param key  the key to check, may not be null\n * @param bitIndex  the bit index to check\n * @param lengthInBits  the maximum key length in bits to check\n * @return {@code true} if the bit is set in the given key and\n *   {@code bitIndex} &lt; {@code lengthInBits}, {@code false} otherwise.\n */\npublic abstract boolean isBitSet(K key, int bitIndex, int lengthInBits);"
+      },
+      {
+        "type": "method",
+        "name": "bitIndex",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "offsetInBits"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lengthInBits"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "other"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "otherOffsetInBits"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "otherLengthInBits"
+          }
+        ],
+        "javadoc": "/**\n * Returns the n-th different bit between key and other. This starts the comparison in\n * key at 'offsetInBits' and goes for 'lengthInBits' bits, and compares to the other key starting\n * at 'otherOffsetInBits' and going for 'otherLengthInBits' bits.\n *\n * @param key  the key to use\n * @param offsetInBits  the bit offset in the key\n * @param lengthInBits  the maximum key length in bits to use\n * @param other  the other key to use\n * @param otherOffsetInBits  the bit offset in the other key\n * @param otherLengthInBits  the maximum key length in bits for the other key\n * @return the bit index where the key and other first differ\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key to use",
+            "assertion": "",
+            "description": "the key to use"
+          },
+          {
+            "tag": "param",
+            "name": "offsetInBits",
+            "content": "the bit offset in the key",
+            "assertion": "",
+            "description": "the bit offset in the key"
+          },
+          {
+            "tag": "param",
+            "name": "lengthInBits",
+            "content": "the maximum key length in bits to use",
+            "assertion": "",
+            "description": "the maximum key length in bits to use"
+          },
+          {
+            "tag": "param",
+            "name": "other",
+            "content": "the other key to use",
+            "assertion": "",
+            "description": "the other key to use"
+          },
+          {
+            "tag": "param",
+            "name": "otherOffsetInBits",
+            "content": "the bit offset in the other key",
+            "assertion": "",
+            "description": "the bit offset in the other key"
+          },
+          {
+            "tag": "param",
+            "name": "otherLengthInBits",
+            "content": "the maximum key length in bits for the other key",
+            "assertion": "",
+            "description": "the maximum key length in bits for the other key"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "bit index where the key and other first differ",
+            "assertion": "assert methodResultID == receiverObjectID.bitIndex(args[0], args[1], args[2], args[3], args[4], args[5]);",
+            "description": "bit index where the key and other first differ"
+          }
+        ],
+        "code": "/**\n * Returns the n-th different bit between key and other. This starts the comparison in\n * key at 'offsetInBits' and goes for 'lengthInBits' bits, and compares to the other key starting\n * at 'otherOffsetInBits' and going for 'otherLengthInBits' bits.\n *\n * @param key  the key to use\n * @param offsetInBits  the bit offset in the key\n * @param lengthInBits  the maximum key length in bits to use\n * @param other  the other key to use\n * @param otherOffsetInBits  the bit offset in the other key\n * @param otherLengthInBits  the maximum key length in bits for the other key\n * @return the bit index where the key and other first differ\n */\npublic abstract int bitIndex(K key, int offsetInBits, int lengthInBits, K other, int otherOffsetInBits, int otherLengthInBits);"
+      },
+      {
+        "type": "method",
+        "name": "isPrefix",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "prefix"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "offsetInBits"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lengthInBits"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n * Determines whether or not the given prefix (from offset to length) is a prefix of the given key.\n *\n * @param prefix  the prefix to check\n * @param offsetInBits  the bit offset in the key\n * @param lengthInBits  the maximum key length in bits to use\n * @param key  the key to check\n * @return {@code true} if this is a valid prefix for the given key\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "prefix",
+            "content": "the prefix to check",
+            "assertion": "assert args[0] != null;",
+            "description": "the prefix to check"
+          },
+          {
+            "tag": "param",
+            "name": "offsetInBits",
+            "content": "the bit offset in the key",
+            "assertion": "assert offsetInBits >= 0;",
+            "description": ""
+          },
+          {
+            "tag": "param",
+            "name": "lengthInBits",
+            "content": "the maximum key length in bits to use",
+            "assertion": "assert lengthInBits > 0;",
+            "description": ""
+          },
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key to check",
+            "assertion": "assert args[3] != null;",
+            "description": "the key to check"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if this is a valid prefix for the given key",
+            "assertion": "assert methodResultID == receiverObjectID.isPrefix(args[0], args[1], args[2], args[3]);",
+            "description": "true if this is a valid prefix for the given key"
+          }
+        ],
+        "code": "/**\n * Determines whether or not the given prefix (from offset to length) is a prefix of the given key.\n *\n * @param prefix  the prefix to check\n * @param offsetInBits  the bit offset in the key\n * @param lengthInBits  the maximum key length in bits to use\n * @param key  the key to check\n * @return {@code true} if this is a valid prefix for the given key\n */\npublic abstract boolean isPrefix(K prefix, int offsetInBits, int lengthInBits, K key);"
+      },
+      {
+        "type": "method",
+        "name": "compare",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o2"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@SuppressWarnings(\"unchecked\")\npublic int compare(final K o1, final K o2) {\n    if (o1 == null) {\n        return o2 == null ? 0 : -1;\n    } else if (o2 == null) {\n        return 1;\n    }\n    return ((Comparable<K>) o1).compareTo(o2);\n}"
+      }
+    ]
+  }
+]
