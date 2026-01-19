@@ -36,6 +36,7 @@ METRIC_DEFINITIONS = {
             AssertionRelation.IDENTICAL,
             #AssertionRelation.EMPTY,
             AssertionRelation.EQUIVALENT,
+            AssertionRelation.STRONGER
         },
         "wrong2": {
             AssertionRelation.DUAL,
