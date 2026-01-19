@@ -61,7 +61,7 @@ class MethodSelector:
 
         return_type = method.signature.return_type
         return_value = "void" if return_type is None else return_type.qualified_name
-        return f"{return_value} {method.signature.name}({params})"
+        return f"{return_value} {method.signature.name}({params})" #TODO replace None with void in method.signature.name
 
     def get_methods_to_str(self):
         strs = ""
