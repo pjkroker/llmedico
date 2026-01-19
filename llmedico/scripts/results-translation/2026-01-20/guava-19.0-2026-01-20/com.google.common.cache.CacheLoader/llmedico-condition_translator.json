@@ -1,0 +1,458 @@
+[
+  {
+    "name": "CacheLoader",
+    "package": "com.google.common.cache",
+    "qualified_name": "com.google.common.cache.CacheLoader",
+    "javadoc": "/**\n * Computes or retrieves values, based on a key, for use in populating a {@link LoadingCache}.\n *\n * <p>Most implementations will only need to implement {@link #load}. Other methods may be\n * overridden as desired.\n *\n * <p>Usage example: <pre>   {@code\n *\n *   CacheLoader<Key, Graph> loader = new CacheLoader<Key, Graph>() {\n *     public Graph load(Key key) throws AnyException {\n *       return createExpensiveGraph(key);\n *     }\n *   };\n *   LoadingCache<Key, Graph> cache = CacheBuilder.newBuilder().build(loader);}</pre>\n *\n * @author Charles Fry\n * @since 10.0\n */\n",
+    "code": "/**\n * Computes or retrieves values, based on a key, for use in populating a {@link LoadingCache}.\n *\n * <p>Most implementations will only need to implement {@link #load}. Other methods may be\n * overridden as desired.\n *\n * <p>Usage example: <pre>   {@code\n *\n *   CacheLoader<Key, Graph> loader = new CacheLoader<Key, Graph>() {\n *     public Graph load(Key key) throws AnyException {\n *       return createExpensiveGraph(key);\n *     }\n *   };\n *   LoadingCache<Key, Graph> cache = CacheBuilder.newBuilder().build(loader);}</pre>\n *\n * @author Charles Fry\n * @since 10.0\n */\n@GwtCompatible(emulated = true)\npublic abstract class CacheLoader<K, V> {\n\n    /**\n     * Constructor for use by subclasses.\n     */\n    protected CacheLoader() {\n    }\n\n    /**\n     * Computes or retrieves the value corresponding to {@code key}.\n     *\n     * @param key the non-null key whose value should be loaded\n     * @return the value associated with {@code key}; <b>must not be null</b>\n     * @throws Exception if unable to load the result\n     * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n     *     treated like any other {@code Exception} in all respects except that, when it is caught,\n     *     the thread's interrupt status is set\n     */\n    public abstract V load(K key) throws Exception;\n\n    /**\n     * Computes or retrieves a replacement value corresponding to an already-cached {@code key}. This\n     * method is called when an existing cache entry is refreshed by\n     * {@link CacheBuilder#refreshAfterWrite}, or through a call to {@link LoadingCache#refresh}.\n     *\n     * <p>This implementation synchronously delegates to {@link #load}. It is recommended that it be\n     * overridden with an asynchronous implementation when using\n     * {@link CacheBuilder#refreshAfterWrite}.\n     *\n     * <p><b>Note:</b> <i>all exceptions thrown by this method will be logged and then swallowed</i>.\n     *\n     * @param key the non-null key whose value should be loaded\n     * @param oldValue the non-null old value corresponding to {@code key}\n     * @return the future new value associated with {@code key};\n     *     <b>must not be null, must not return null</b>\n     * @throws Exception if unable to reload the result\n     * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n     *     treated like any other {@code Exception} in all respects except that, when it is caught,\n     *     the thread's interrupt status is set\n     * @since 11.0\n     */\n    @GwtIncompatible(\"Futures\")\n    public ListenableFuture<V> reload(K key, V oldValue) throws Exception {\n        checkNotNull(key);\n        checkNotNull(oldValue);\n        return Futures.immediateFuture(load(key));\n    }\n\n    /**\n     * Computes or retrieves the values corresponding to {@code keys}. This method is called by\n     * {@link LoadingCache#getAll}.\n     *\n     * <p>If the returned map doesn't contain all requested {@code keys} then the entries it does\n     * contain will be cached, but {@code getAll} will throw an exception. If the returned map\n     * contains extra keys not present in {@code keys} then all returned entries will be cached,\n     * but only the entries for {@code keys} will be returned from {@code getAll}.\n     *\n     * <p>This method should be overriden when bulk retrieval is significantly more efficient than\n     * many individual lookups. Note that {@link LoadingCache#getAll} will defer to individual calls\n     * to {@link LoadingCache#get} if this method is not overriden.\n     *\n     * @param keys the unique, non-null keys whose values should be loaded\n     * @return a map from each key in {@code keys} to the value associated with that key;\n     *     <b>may not contain null values</b>\n     * @throws Exception if unable to load the result\n     * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n     *     treated like any other {@code Exception} in all respects except that, when it is caught,\n     *     the thread's interrupt status is set\n     * @since 11.0\n     */\n    public Map<K, V> loadAll(Iterable<? extends K> keys) throws Exception {\n        // This will be caught by getAll(), causing it to fall back to multiple calls to\n        // LoadingCache.get\n        throw new UnsupportedLoadingOperationException();\n    }\n\n    /**\n     * Returns a cache loader based on an <i>existing</i> function instance. Note that there's no need\n     * to create a <i>new</i> function just to pass it in here; just subclass {@code CacheLoader} and\n     * implement {@link #load load} instead.\n     *\n     * @param function the function to be used for loading values; must never return {@code null}\n     * @return a cache loader that loads values by passing each key to {@code function}\n     */\n    public static <K, V> CacheLoader<K, V> from(Function<K, V> function) {\n        return new FunctionToCacheLoader<K, V>(function);\n    }\n\n    private static final class FunctionToCacheLoader<K, V> extends CacheLoader<K, V> implements Serializable {\n\n        private final Function<K, V> computingFunction;\n\n        public FunctionToCacheLoader(Function<K, V> computingFunction) {\n            this.computingFunction = checkNotNull(computingFunction);\n        }\n\n        @Override\n        public V load(K key) {\n            return computingFunction.apply(checkNotNull(key));\n        }\n\n        private static final long serialVersionUID = 0;\n    }\n\n    /**\n     * Returns a cache loader based on an <i>existing</i> supplier instance. Note that there's no need\n     * to create a <i>new</i> supplier just to pass it in here; just subclass {@code CacheLoader} and\n     * implement {@link #load load} instead.\n     *\n     * @param supplier the supplier to be used for loading values; must never return {@code null}\n     * @return a cache loader that loads values by calling {@link Supplier#get}, irrespective of the\n     *     key\n     */\n    public static <V> CacheLoader<Object, V> from(Supplier<V> supplier) {\n        return new SupplierToCacheLoader<V>(supplier);\n    }\n\n    /**\n     * Returns a {@code CacheLoader} which wraps {@code loader}, executing calls to\n     * {@link CacheLoader#reload} using {@code executor}.\n     *\n     * <p>This method is useful only when {@code loader.reload} has a synchronous implementation,\n     * such as {@linkplain #reload the default implementation}.\n     *\n     * @since 17.0\n     */\n    @GwtIncompatible(\"Executor + Futures\")\n    public static <K, V> CacheLoader<K, V> asyncReloading(final CacheLoader<K, V> loader, final Executor executor) {\n        checkNotNull(loader);\n        checkNotNull(executor);\n        return new CacheLoader<K, V>() {\n\n            @Override\n            public V load(K key) throws Exception {\n                return loader.load(key);\n            }\n\n            @Override\n            public ListenableFuture<V> reload(final K key, final V oldValue) throws Exception {\n                ListenableFutureTask<V> task = ListenableFutureTask.create(new Callable<V>() {\n\n                    @Override\n                    public V call() throws Exception {\n                        return loader.reload(key, oldValue).get();\n                    }\n                });\n                executor.execute(task);\n                return task;\n            }\n\n            @Override\n            public Map<K, V> loadAll(Iterable<? extends K> keys) throws Exception {\n                return loader.loadAll(keys);\n            }\n        };\n    }\n\n    private static final class SupplierToCacheLoader<V> extends CacheLoader<Object, V> implements Serializable {\n\n        private final Supplier<V> computingSupplier;\n\n        public SupplierToCacheLoader(Supplier<V> computingSupplier) {\n            this.computingSupplier = checkNotNull(computingSupplier);\n        }\n\n        @Override\n        public V load(Object key) {\n            checkNotNull(key);\n            return computingSupplier.get();\n        }\n\n        private static final long serialVersionUID = 0;\n    }\n\n    /**\n     * Exception thrown by {@code loadAll()} to indicate that it is not supported.\n     *\n     * @since 19.0\n     */\n    public static final class UnsupportedLoadingOperationException extends UnsupportedOperationException {\n\n        // Package-private because this should only be thrown by loadAll() when it is not overridden.\n        // Cache implementors may want to catch it but should not need to be able to throw it.\n        UnsupportedLoadingOperationException() {\n        }\n    }\n\n    /**\n     * Thrown to indicate that an invalid response was returned from a call to {@link CacheLoader}.\n     *\n     * @since 11.0\n     */\n    public static final class InvalidCacheLoadException extends RuntimeException {\n\n        public InvalidCacheLoadException(String message) {\n            super(message);\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "CacheLoader",
+        "parameters": [],
+        "javadoc": "/**\n * Constructor for use by subclasses.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructor for use by subclasses.\n */\nprotected CacheLoader() {\n}"
+      },
+      {
+        "type": "method",
+        "name": "load",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n * Computes or retrieves the value corresponding to {@code key}.\n *\n * @param key the non-null key whose value should be loaded\n * @return the value associated with {@code key}; <b>must not be null</b>\n * @throws Exception if unable to load the result\n * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n *     treated like any other {@code Exception} in all respects except that, when it is caught,\n *     the thread's interrupt status is set\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the non-null key whose value should be loaded",
+            "assertion": "assert (args[0]==null) == false;",
+            "description": "the non-null key whose value should be loaded"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value associated with {@code key}; <b>must not be null</b>",
+            "assertion": "assert methodResultID != null;",
+            "description": "value associated with {@code key}; <b>must not be null</b>"
+          },
+          {
+            "tag": "throws",
+            "name": "Exception",
+            "content": "if unable to load the result",
+            "assertion": "assert false;",
+            "description": "if unable to load the result"
+          },
+          {
+            "tag": "throws",
+            "name": "InterruptedException",
+            "content": "if this method is interrupted. {@code InterruptedException} is treated like any other {@code Exception} in all respects except that, when it is caught, the thread's interrupt status is set",
+            "assertion": "assert Thread.currentThread().isInterrupted();",
+            "description": "if this method is interrupted."
+          }
+        ],
+        "code": "/**\n * Computes or retrieves the value corresponding to {@code key}.\n *\n * @param key the non-null key whose value should be loaded\n * @return the value associated with {@code key}; <b>must not be null</b>\n * @throws Exception if unable to load the result\n * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n *     treated like any other {@code Exception} in all respects except that, when it is caught,\n *     the thread's interrupt status is set\n */\npublic abstract V load(K key) throws Exception;"
+      },
+      {
+        "type": "method",
+        "name": "reload",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ListenableFuture",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "oldValue"
+          }
+        ],
+        "javadoc": "/**\n * Computes or retrieves a replacement value corresponding to an already-cached {@code key}. This\n * method is called when an existing cache entry is refreshed by\n * {@link CacheBuilder#refreshAfterWrite}, or through a call to {@link LoadingCache#refresh}.\n *\n * <p>This implementation synchronously delegates to {@link #load}. It is recommended that it be\n * overridden with an asynchronous implementation when using\n * {@link CacheBuilder#refreshAfterWrite}.\n *\n * <p><b>Note:</b> <i>all exceptions thrown by this method will be logged and then swallowed</i>.\n *\n * @param key the non-null key whose value should be loaded\n * @param oldValue the non-null old value corresponding to {@code key}\n * @return the future new value associated with {@code key};\n *     <b>must not be null, must not return null</b>\n * @throws Exception if unable to reload the result\n * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n *     treated like any other {@code Exception} in all respects except that, when it is caught,\n *     the thread's interrupt status is set\n * @since 11.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the non-null key whose value should be loaded",
+            "assertion": "assert (args[0]==null) == false;",
+            "description": "the non-null key whose value should be loaded"
+          },
+          {
+            "tag": "param",
+            "name": "oldValue",
+            "content": "the non-null old value corresponding to {@code key}",
+            "assertion": "assert (args[1]==null) == false;",
+            "description": "the non-null old value corresponding to {@code key}"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "future new value associated with {@code key}; <b>must not be null, must not return null</b>",
+            "assertion": "assert methodResultID != null;",
+            "description": "future new value associated with {@code key}; <b>must not be null, must not return null</b>"
+          },
+          {
+            "tag": "throws",
+            "name": "Exception",
+            "content": "if unable to reload the result",
+            "assertion": "assert false;",
+            "description": "if unable to reload the result"
+          },
+          {
+            "tag": "throws",
+            "name": "InterruptedException",
+            "content": "if this method is interrupted. {@code InterruptedException} is treated like any other {@code Exception} in all respects except that, when it is caught, the thread's interrupt status is set",
+            "assertion": "assert Thread.currentThread().isInterrupted();",
+            "description": "if this method is interrupted."
+          },
+          {
+            "tag": "since",
+            "name": "11.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Computes or retrieves a replacement value corresponding to an already-cached {@code key}. This\n * method is called when an existing cache entry is refreshed by\n * {@link CacheBuilder#refreshAfterWrite}, or through a call to {@link LoadingCache#refresh}.\n *\n * <p>This implementation synchronously delegates to {@link #load}. It is recommended that it be\n * overridden with an asynchronous implementation when using\n * {@link CacheBuilder#refreshAfterWrite}.\n *\n * <p><b>Note:</b> <i>all exceptions thrown by this method will be logged and then swallowed</i>.\n *\n * @param key the non-null key whose value should be loaded\n * @param oldValue the non-null old value corresponding to {@code key}\n * @return the future new value associated with {@code key};\n *     <b>must not be null, must not return null</b>\n * @throws Exception if unable to reload the result\n * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n *     treated like any other {@code Exception} in all respects except that, when it is caught,\n *     the thread's interrupt status is set\n * @since 11.0\n */\n@GwtIncompatible(\"Futures\")\npublic ListenableFuture<V> reload(K key, V oldValue) throws Exception {\n    checkNotNull(key);\n    checkNotNull(oldValue);\n    return Futures.immediateFuture(load(key));\n}"
+      },
+      {
+        "type": "method",
+        "name": "loadAll",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Map",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "keys"
+          }
+        ],
+        "javadoc": "/**\n * Computes or retrieves the values corresponding to {@code keys}. This method is called by\n * {@link LoadingCache#getAll}.\n *\n * <p>If the returned map doesn't contain all requested {@code keys} then the entries it does\n * contain will be cached, but {@code getAll} will throw an exception. If the returned map\n * contains extra keys not present in {@code keys} then all returned entries will be cached,\n * but only the entries for {@code keys} will be returned from {@code getAll}.\n *\n * <p>This method should be overriden when bulk retrieval is significantly more efficient than\n * many individual lookups. Note that {@link LoadingCache#getAll} will defer to individual calls\n * to {@link LoadingCache#get} if this method is not overriden.\n *\n * @param keys the unique, non-null keys whose values should be loaded\n * @return a map from each key in {@code keys} to the value associated with that key;\n *     <b>may not contain null values</b>\n * @throws Exception if unable to load the result\n * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n *     treated like any other {@code Exception} in all respects except that, when it is caught,\n *     the thread's interrupt status is set\n * @since 11.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "keys",
+            "content": "the unique, non-null keys whose values should be loaded",
+            "assertion": "assert (args[0]==null) == false;",
+            "description": "the unique, non-null keys whose values should be loaded"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "map from each key in {@code keys} to the value associated with that key; <b>may not contain null values</b>",
+            "assertion": "assert methodResultID.size() == ((java.util.Iterable)args[0]).spliterator().estimateSize() && !methodResultID.containsValue(null);",
+            "description": "map from each key in {@code keys} to the value associated with that key; <b>may not contain null values</b>"
+          },
+          {
+            "tag": "throws",
+            "name": "Exception",
+            "content": "if unable to load the result",
+            "assertion": "assert !receiverObjectID.loadAll(args[0]).containsKey(((Iterable)args[0]).iterator().next());",
+            "description": "if unable to load the result"
+          },
+          {
+            "tag": "throws",
+            "name": "InterruptedException",
+            "content": "if this method is interrupted. {@code InterruptedException} is treated like any other {@code Exception} in all respects except that, when it is caught, the thread's interrupt status is set",
+            "assertion": "assert Thread.currentThread().isInterrupted();",
+            "description": "if this method is interrupted."
+          },
+          {
+            "tag": "since",
+            "name": "11.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Computes or retrieves the values corresponding to {@code keys}. This method is called by\n * {@link LoadingCache#getAll}.\n *\n * <p>If the returned map doesn't contain all requested {@code keys} then the entries it does\n * contain will be cached, but {@code getAll} will throw an exception. If the returned map\n * contains extra keys not present in {@code keys} then all returned entries will be cached,\n * but only the entries for {@code keys} will be returned from {@code getAll}.\n *\n * <p>This method should be overriden when bulk retrieval is significantly more efficient than\n * many individual lookups. Note that {@link LoadingCache#getAll} will defer to individual calls\n * to {@link LoadingCache#get} if this method is not overriden.\n *\n * @param keys the unique, non-null keys whose values should be loaded\n * @return a map from each key in {@code keys} to the value associated with that key;\n *     <b>may not contain null values</b>\n * @throws Exception if unable to load the result\n * @throws InterruptedException if this method is interrupted. {@code InterruptedException} is\n *     treated like any other {@code Exception} in all respects except that, when it is caught,\n *     the thread's interrupt status is set\n * @since 11.0\n */\npublic Map<K, V> loadAll(Iterable<? extends K> keys) throws Exception {\n    // This will be caught by getAll(), causing it to fall back to multiple calls to\n    // LoadingCache.get\n    throw new UnsupportedLoadingOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "from",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "CacheLoader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Function",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          }
+        ],
+        "javadoc": "/**\n * Returns a cache loader based on an <i>existing</i> function instance. Note that there's no need\n * to create a <i>new</i> function just to pass it in here; just subclass {@code CacheLoader} and\n * implement {@link #load load} instead.\n *\n * @param function the function to be used for loading values; must never return {@code null}\n * @return a cache loader that loads values by passing each key to {@code function}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "the function to be used for loading values; must never return {@code null}",
+            "assertion": "assert args[0] != null;",
+            "description": "the function to be used for loading values; must never return {@code null}"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "cache loader that loads values by passing each key to {@code function}",
+            "assertion": "assert methodResultID != null;",
+            "description": "a cache loader that loads values by passing each key to {@code function}"
+          }
+        ],
+        "code": "/**\n * Returns a cache loader based on an <i>existing</i> function instance. Note that there's no need\n * to create a <i>new</i> function just to pass it in here; just subclass {@code CacheLoader} and\n * implement {@link #load load} instead.\n *\n * @param function the function to be used for loading values; must never return {@code null}\n * @return a cache loader that loads values by passing each key to {@code function}\n */\npublic static <K, V> CacheLoader<K, V> from(Function<K, V> function) {\n    return new FunctionToCacheLoader<K, V>(function);\n}"
+      },
+      {
+        "type": "method",
+        "name": "from",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "CacheLoader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Supplier",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "supplier"
+          }
+        ],
+        "javadoc": "/**\n * Returns a cache loader based on an <i>existing</i> supplier instance. Note that there's no need\n * to create a <i>new</i> supplier just to pass it in here; just subclass {@code CacheLoader} and\n * implement {@link #load load} instead.\n *\n * @param supplier the supplier to be used for loading values; must never return {@code null}\n * @return a cache loader that loads values by calling {@link Supplier#get}, irrespective of the\n *     key\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "supplier",
+            "content": "the supplier to be used for loading values; must never return {@code null}",
+            "assertion": "assert args[0] != null && ((Supplier)args[0]).get() != null;",
+            "description": "the supplier to be used for loading values; must never return {@code null}"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "cache loader that loads values by calling {@link Supplier#get}, irrespective of the key",
+            "assertion": "assert methodResultID != null;",
+            "description": "a cache loader that loads values by calling {@link Supplier#get}, irrespective of the key"
+          }
+        ],
+        "code": "/**\n * Returns a cache loader based on an <i>existing</i> supplier instance. Note that there's no need\n * to create a <i>new</i> supplier just to pass it in here; just subclass {@code CacheLoader} and\n * implement {@link #load load} instead.\n *\n * @param supplier the supplier to be used for loading values; must never return {@code null}\n * @return a cache loader that loads values by calling {@link Supplier#get}, irrespective of the\n *     key\n */\npublic static <V> CacheLoader<Object, V> from(Supplier<V> supplier) {\n    return new SupplierToCacheLoader<V>(supplier);\n}"
+      },
+      {
+        "type": "method",
+        "name": "asyncReloading",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "CacheLoader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CacheLoader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "loader"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Executor",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "executor"
+          }
+        ],
+        "javadoc": "/**\n * Returns a {@code CacheLoader} which wraps {@code loader}, executing calls to\n * {@link CacheLoader#reload} using {@code executor}.\n *\n * <p>This method is useful only when {@code loader.reload} has a synchronous implementation,\n * such as {@linkplain #reload the default implementation}.\n *\n * @since 17.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "17.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a {@code CacheLoader} which wraps {@code loader}, executing calls to\n * {@link CacheLoader#reload} using {@code executor}.\n *\n * <p>This method is useful only when {@code loader.reload} has a synchronous implementation,\n * such as {@linkplain #reload the default implementation}.\n *\n * @since 17.0\n */\n@GwtIncompatible(\"Executor + Futures\")\npublic static <K, V> CacheLoader<K, V> asyncReloading(final CacheLoader<K, V> loader, final Executor executor) {\n    checkNotNull(loader);\n    checkNotNull(executor);\n    return new CacheLoader<K, V>() {\n\n        @Override\n        public V load(K key) throws Exception {\n            return loader.load(key);\n        }\n\n        @Override\n        public ListenableFuture<V> reload(final K key, final V oldValue) throws Exception {\n            ListenableFutureTask<V> task = ListenableFutureTask.create(new Callable<V>() {\n\n                @Override\n                public V call() throws Exception {\n                    return loader.reload(key, oldValue).get();\n                }\n            });\n            executor.execute(task);\n            return task;\n        }\n\n        @Override\n        public Map<K, V> loadAll(Iterable<? extends K> keys) throws Exception {\n            return loader.loadAll(keys);\n        }\n    };\n}"
+      }
+    ]
+  },
+  {
+    "name": "FunctionToCacheLoader",
+    "package": "com.google.common.cache",
+    "qualified_name": "com.google.common.cache.FunctionToCacheLoader",
+    "javadoc": null,
+    "code": "private static final class FunctionToCacheLoader<K, V> extends CacheLoader<K, V> implements Serializable {\n\n    private final Function<K, V> computingFunction;\n\n    public FunctionToCacheLoader(Function<K, V> computingFunction) {\n        this.computingFunction = checkNotNull(computingFunction);\n    }\n\n    @Override\n    public V load(K key) {\n        return computingFunction.apply(checkNotNull(key));\n    }\n\n    private static final long serialVersionUID = 0;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "FunctionToCacheLoader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Function",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "computingFunction"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public FunctionToCacheLoader(Function<K, V> computingFunction) {\n    this.computingFunction = checkNotNull(computingFunction);\n}"
+      },
+      {
+        "type": "method",
+        "name": "load",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic V load(K key) {\n    return computingFunction.apply(checkNotNull(key));\n}"
+      }
+    ]
+  },
+  {
+    "name": "SupplierToCacheLoader",
+    "package": "com.google.common.cache",
+    "qualified_name": "com.google.common.cache.SupplierToCacheLoader",
+    "javadoc": null,
+    "code": "private static final class SupplierToCacheLoader<V> extends CacheLoader<Object, V> implements Serializable {\n\n    private final Supplier<V> computingSupplier;\n\n    public SupplierToCacheLoader(Supplier<V> computingSupplier) {\n        this.computingSupplier = checkNotNull(computingSupplier);\n    }\n\n    @Override\n    public V load(Object key) {\n        checkNotNull(key);\n        return computingSupplier.get();\n    }\n\n    private static final long serialVersionUID = 0;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "SupplierToCacheLoader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Supplier",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "computingSupplier"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public SupplierToCacheLoader(Supplier<V> computingSupplier) {\n    this.computingSupplier = checkNotNull(computingSupplier);\n}"
+      },
+      {
+        "type": "method",
+        "name": "load",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic V load(Object key) {\n    checkNotNull(key);\n    return computingSupplier.get();\n}"
+      }
+    ]
+  },
+  {
+    "name": "UnsupportedLoadingOperationException",
+    "package": "com.google.common.cache",
+    "qualified_name": "com.google.common.cache.UnsupportedLoadingOperationException",
+    "javadoc": "/**\n * Exception thrown by {@code loadAll()} to indicate that it is not supported.\n *\n * @since 19.0\n */\n",
+    "code": "/**\n * Exception thrown by {@code loadAll()} to indicate that it is not supported.\n *\n * @since 19.0\n */\npublic static final class UnsupportedLoadingOperationException extends UnsupportedOperationException {\n\n    // Package-private because this should only be thrown by loadAll() when it is not overridden.\n    // Cache implementors may want to catch it but should not need to be able to throw it.\n    UnsupportedLoadingOperationException() {\n    }\n}",
+    "members": []
+  },
+  {
+    "name": "InvalidCacheLoadException",
+    "package": "com.google.common.cache",
+    "qualified_name": "com.google.common.cache.InvalidCacheLoadException",
+    "javadoc": "/**\n * Thrown to indicate that an invalid response was returned from a call to {@link CacheLoader}.\n *\n * @since 11.0\n */\n",
+    "code": "/**\n * Thrown to indicate that an invalid response was returned from a call to {@link CacheLoader}.\n *\n * @since 11.0\n */\npublic static final class InvalidCacheLoadException extends RuntimeException {\n\n    public InvalidCacheLoadException(String message) {\n        super(message);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "InvalidCacheLoadException",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "message"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public InvalidCacheLoadException(String message) {\n    super(message);\n}"
+      }
+    ]
+  }
+]

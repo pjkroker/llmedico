@@ -1,0 +1,255 @@
+[
+  {
+    "method": "CacheLoader",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "load",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the non-null key whose value should be loaded",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "key",
+          "content": "the non-null key whose value should be loaded"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "value associated with {@code key}; <b>must not be null</b>",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "value associated with {@code key}; <b>must not be null</b>"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if unable to load the result",
+          "assertion": "assert false;",
+          "name": "Exception",
+          "content": "if unable to load the result"
+        },
+        {
+          "description": "if this method is interrupted.",
+          "assertion": "assert Thread.currentThread().isInterrupted();",
+          "name": "InterruptedException",
+          "content": "if this method is interrupted. {@code InterruptedException} is treated like any other {@code Exception} in all respects except that, when it is caught, the thread's interrupt status is set"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reload",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "key"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "oldValue"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the non-null key whose value should be loaded",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "key",
+          "content": "the non-null key whose value should be loaded"
+        },
+        {
+          "description": "the non-null old value corresponding to {@code key}",
+          "assertion": "assert (args[1]==null) == false;",
+          "name": "oldValue",
+          "content": "the non-null old value corresponding to {@code key}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "future new value associated with {@code key}; <b>must not be null, must not return null</b>",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "future new value associated with {@code key}; <b>must not be null, must not return null</b>"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if unable to reload the result",
+          "assertion": "assert false;",
+          "name": "Exception",
+          "content": "if unable to reload the result"
+        },
+        {
+          "description": "if this method is interrupted.",
+          "assertion": "assert Thread.currentThread().isInterrupted();",
+          "name": "InterruptedException",
+          "content": "if this method is interrupted. {@code InterruptedException} is treated like any other {@code Exception} in all respects except that, when it is caught, the thread's interrupt status is set"
+        }
+      ]
+    }
+  },
+  {
+    "method": "loadAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "keys"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the unique, non-null keys whose values should be loaded",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "keys",
+          "content": "the unique, non-null keys whose values should be loaded"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "map from each key in {@code keys} to the value associated with that key; <b>may not contain null values</b>",
+          "assertion": "assert methodResultID.size() == ((java.util.Iterable)args[0]).spliterator().estimateSize() && !methodResultID.containsValue(null);",
+          "name": null,
+          "content": "map from each key in {@code keys} to the value associated with that key; <b>may not contain null values</b>"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if unable to load the result",
+          "assertion": "assert !receiverObjectID.loadAll(args[0]).containsKey(((Iterable)args[0]).iterator().next());",
+          "name": "Exception",
+          "content": "if unable to load the result"
+        },
+        {
+          "description": "if this method is interrupted.",
+          "assertion": "assert Thread.currentThread().isInterrupted();",
+          "name": "InterruptedException",
+          "content": "if this method is interrupted. {@code InterruptedException} is treated like any other {@code Exception} in all respects except that, when it is caught, the thread's interrupt status is set"
+        }
+      ]
+    }
+  },
+  {
+    "method": "from",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Function",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "function"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the function to be used for loading values; must never return {@code null}",
+          "assertion": "assert args[0] != null;",
+          "name": "function",
+          "content": "the function to be used for loading values; must never return {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a cache loader that loads values by passing each key to {@code function}",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "cache loader that loads values by passing each key to {@code function}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "from",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Supplier",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "supplier"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the supplier to be used for loading values; must never return {@code null}",
+          "assertion": "assert args[0] != null && ((Supplier)args[0]).get() != null;",
+          "name": "supplier",
+          "content": "the supplier to be used for loading values; must never return {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a cache loader that loads values by calling {@link Supplier#get}, irrespective of the key",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "a cache loader that loads values by calling {@link Supplier#get}, irrespective of the key"
+        }
+      ]
+    }
+  },
+  {
+    "method": "asyncReloading",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CacheLoader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "loader"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Executor",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "executor"
+      }
+    ],
+    "conditions": {}
+  }
+]

@@ -1,0 +1,1770 @@
+[
+  {
+    "name": "ImmutableSortedMap",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.ImmutableSortedMap",
+    "javadoc": "/**\n * A {@link NavigableMap} whose contents will never change, with many other important properties\n * detailed at {@link ImmutableCollection}.\n *\n * <p><b>Warning:</b> as with any sorted collection, you are strongly advised not to use a {@link\n * Comparator} or {@link Comparable} type whose comparison behavior is <i>inconsistent with\n * equals</i>. That is, {@code a.compareTo(b)} or {@code comparator.compare(a, b)} should equal zero\n * <i>if and only if</i> {@code a.equals(b)}. If this advice is not followed, the resulting map will\n * not correctly obey its specification.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/ImmutableCollectionsExplained\">\n * immutable collections</a>.\n *\n * @author Jared Levy\n * @author Louis Wasserman\n * @since 2.0 (implements {@code NavigableMap} since 12.0)\n */\n",
+    "code": "/**\n * A {@link NavigableMap} whose contents will never change, with many other important properties\n * detailed at {@link ImmutableCollection}.\n *\n * <p><b>Warning:</b> as with any sorted collection, you are strongly advised not to use a {@link\n * Comparator} or {@link Comparable} type whose comparison behavior is <i>inconsistent with\n * equals</i>. That is, {@code a.compareTo(b)} or {@code comparator.compare(a, b)} should equal zero\n * <i>if and only if</i> {@code a.equals(b)}. If this advice is not followed, the resulting map will\n * not correctly obey its specification.\n *\n * <p>See the Guava User Guide article on <a href=\n * \"https://github.com/google/guava/wiki/ImmutableCollectionsExplained\">\n * immutable collections</a>.\n *\n * @author Jared Levy\n * @author Louis Wasserman\n * @since 2.0 (implements {@code NavigableMap} since 12.0)\n */\n@GwtCompatible(serializable = true, emulated = true)\npublic final class ImmutableSortedMap<K, V> extends ImmutableSortedMapFauxverideShim<K, V> implements NavigableMap<K, V> {\n\n    /*\n   * TODO(kevinb): Confirm that ImmutableSortedMap is faster to construct and\n   * uses less memory than TreeMap; then say so in the class Javadoc.\n   */\n    private static final Comparator<Comparable> NATURAL_ORDER = Ordering.natural();\n\n    private static final ImmutableSortedMap<Comparable, Object> NATURAL_EMPTY_MAP = new ImmutableSortedMap<Comparable, Object>(ImmutableSortedSet.emptySet(Ordering.natural()), ImmutableList.<Object>of());\n\n    static <K, V> ImmutableSortedMap<K, V> emptyMap(Comparator<? super K> comparator) {\n        if (Ordering.natural().equals(comparator)) {\n            return of();\n        } else {\n            return new ImmutableSortedMap<K, V>(ImmutableSortedSet.emptySet(comparator), ImmutableList.<V>of());\n        }\n    }\n\n    /**\n     * Returns the empty sorted map.\n     */\n    @SuppressWarnings(\"unchecked\")\n    public static <// TODO(kevinb): evaluate whether or not of().comparator() should return null\n    K, V> ImmutableSortedMap<K, V> of() {\n        return (ImmutableSortedMap<K, V>) NATURAL_EMPTY_MAP;\n    }\n\n    /**\n     * Returns an immutable map containing a single entry.\n     */\n    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1) {\n        return of(Ordering.natural(), k1, v1);\n    }\n\n    /**\n     * Returns an immutable map containing a single entry.\n     */\n    private static <K, V> ImmutableSortedMap<K, V> of(Comparator<? super K> comparator, K k1, V v1) {\n        return new ImmutableSortedMap<K, V>(new RegularImmutableSortedSet<K>(ImmutableList.of(k1), checkNotNull(comparator)), ImmutableList.of(v1));\n    }\n\n    private static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> ofEntries(ImmutableMapEntry<K, V>... entries) {\n        return fromEntries(Ordering.natural(), false, entries, entries.length);\n    }\n\n    /**\n     * Returns an immutable sorted map containing the given entries, sorted by the\n     * natural ordering of their keys.\n     *\n     * @throws IllegalArgumentException if the two keys are equal according to\n     *     their natural ordering\n     */\n    @SuppressWarnings(\"unchecked\")\n    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2) {\n        return ofEntries(entryOf(k1, v1), entryOf(k2, v2));\n    }\n\n    /**\n     * Returns an immutable sorted map containing the given entries, sorted by the\n     * natural ordering of their keys.\n     *\n     * @throws IllegalArgumentException if any two keys are equal according to\n     *     their natural ordering\n     */\n    @SuppressWarnings(\"unchecked\")\n    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {\n        return ofEntries(entryOf(k1, v1), entryOf(k2, v2), entryOf(k3, v3));\n    }\n\n    /**\n     * Returns an immutable sorted map containing the given entries, sorted by the\n     * natural ordering of their keys.\n     *\n     * @throws IllegalArgumentException if any two keys are equal according to\n     *     their natural ordering\n     */\n    @SuppressWarnings(\"unchecked\")\n    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {\n        return ofEntries(entryOf(k1, v1), entryOf(k2, v2), entryOf(k3, v3), entryOf(k4, v4));\n    }\n\n    /**\n     * Returns an immutable sorted map containing the given entries, sorted by the\n     * natural ordering of their keys.\n     *\n     * @throws IllegalArgumentException if any two keys are equal according to\n     *     their natural ordering\n     */\n    @SuppressWarnings(\"unchecked\")\n    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {\n        return ofEntries(entryOf(k1, v1), entryOf(k2, v2), entryOf(k3, v3), entryOf(k4, v4), entryOf(k5, v5));\n    }\n\n    /**\n     * Returns an immutable map containing the same entries as {@code map}, sorted\n     * by the natural ordering of the keys.\n     *\n     * <p>Despite the method name, this method attempts to avoid actually copying\n     * the data when it is safe to do so. The exact circumstances under which a\n     * copy will or will not be performed are undocumented and subject to change.\n     *\n     * <p>This method is not type-safe, as it may be called on a map with keys\n     * that are not mutually comparable.\n     *\n     * @throws ClassCastException if the keys in {@code map} are not mutually\n     *         comparable\n     * @throws NullPointerException if any key or value in {@code map} is null\n     * @throws IllegalArgumentException if any two keys are equal according to\n     *         their natural ordering\n     */\n    public static <K, V> ImmutableSortedMap<K, V> copyOf(Map<? extends K, ? extends V> map) {\n        // Hack around K not being a subtype of Comparable.\n        // Unsafe, see ImmutableSortedSetFauxverideShim.\n        @SuppressWarnings(\"unchecked\")\n        Ordering<K> naturalOrder = (Ordering<K>) NATURAL_ORDER;\n        return copyOfInternal(map, naturalOrder);\n    }\n\n    /**\n     * Returns an immutable map containing the same entries as {@code map}, with\n     * keys sorted by the provided comparator.\n     *\n     * <p>Despite the method name, this method attempts to avoid actually copying\n     * the data when it is safe to do so. The exact circumstances under which a\n     * copy will or will not be performed are undocumented and subject to change.\n     *\n     * @throws NullPointerException if any key or value in {@code map} is null\n     * @throws IllegalArgumentException if any two keys are equal according to the\n     *         comparator\n     */\n    public static <K, V> ImmutableSortedMap<K, V> copyOf(Map<? extends K, ? extends V> map, Comparator<? super K> comparator) {\n        return copyOfInternal(map, checkNotNull(comparator));\n    }\n\n    /**\n     * Returns an immutable map containing the given entries, with keys sorted\n     * by the provided comparator.\n     *\n     * <p>This method is not type-safe, as it may be called on a map with keys\n     * that are not mutually comparable.\n     *\n     * @throws NullPointerException if any key or value in {@code map} is null\n     * @throws IllegalArgumentException if any two keys are equal according to the\n     *         comparator\n     * @since 19.0\n     */\n    @Beta\n    public static <K, V> ImmutableSortedMap<K, V> copyOf(Iterable<? extends Entry<? extends K, ? extends V>> entries) {\n        // Hack around K not being a subtype of Comparable.\n        // Unsafe, see ImmutableSortedSetFauxverideShim.\n        @SuppressWarnings(\"unchecked\")\n        Ordering<K> naturalOrder = (Ordering<K>) NATURAL_ORDER;\n        return copyOf(entries, naturalOrder);\n    }\n\n    /**\n     * Returns an immutable map containing the given entries, with keys sorted\n     * by the provided comparator.\n     *\n     * @throws NullPointerException if any key or value in {@code map} is null\n     * @throws IllegalArgumentException if any two keys are equal according to the\n     *         comparator\n     * @since 19.0\n     */\n    @Beta\n    public static <K, V> ImmutableSortedMap<K, V> copyOf(Iterable<? extends Entry<? extends K, ? extends V>> entries, Comparator<? super K> comparator) {\n        return fromEntries(checkNotNull(comparator), false, entries);\n    }\n\n    /**\n     * Returns an immutable map containing the same entries as the provided sorted\n     * map, with the same ordering.\n     *\n     * <p>Despite the method name, this method attempts to avoid actually copying\n     * the data when it is safe to do so. The exact circumstances under which a\n     * copy will or will not be performed are undocumented and subject to change.\n     *\n     * @throws NullPointerException if any key or value in {@code map} is null\n     */\n    @SuppressWarnings(\"unchecked\")\n    public static <K, V> ImmutableSortedMap<K, V> copyOfSorted(SortedMap<K, ? extends V> map) {\n        Comparator<? super K> comparator = map.comparator();\n        if (comparator == null) {\n            // If map has a null comparator, the keys should have a natural ordering,\n            // even though K doesn't explicitly implement Comparable.\n            comparator = (Comparator<? super K>) NATURAL_ORDER;\n        }\n        if (map instanceof ImmutableSortedMap) {\n            // TODO(kevinb): Prove that this cast is safe, even though\n            // Collections.unmodifiableSortedMap requires the same key type.\n            @SuppressWarnings(\"unchecked\")\n            ImmutableSortedMap<K, V> kvMap = (ImmutableSortedMap<K, V>) map;\n            if (!kvMap.isPartialView()) {\n                return kvMap;\n            }\n        }\n        return fromEntries(comparator, true, map.entrySet());\n    }\n\n    private static <K, V> ImmutableSortedMap<K, V> copyOfInternal(Map<? extends K, ? extends V> map, Comparator<? super K> comparator) {\n        boolean sameComparator = false;\n        if (map instanceof SortedMap) {\n            SortedMap<?, ?> sortedMap = (SortedMap<?, ?>) map;\n            Comparator<?> comparator2 = sortedMap.comparator();\n            sameComparator = (comparator2 == null) ? comparator == NATURAL_ORDER : comparator.equals(comparator2);\n        }\n        if (sameComparator && (map instanceof ImmutableSortedMap)) {\n            // TODO(kevinb): Prove that this cast is safe, even though\n            // Collections.unmodifiableSortedMap requires the same key type.\n            @SuppressWarnings(\"unchecked\")\n            ImmutableSortedMap<K, V> kvMap = (ImmutableSortedMap<K, V>) map;\n            if (!kvMap.isPartialView()) {\n                return kvMap;\n            }\n        }\n        return fromEntries(comparator, sameComparator, map.entrySet());\n    }\n\n    /**\n     * Accepts a collection of possibly-null entries.  If {@code sameComparator}, then it is assumed\n     * that they do not need to be sorted or checked for dupes.\n     */\n    private static <K, V> ImmutableSortedMap<K, V> fromEntries(Comparator<? super K> comparator, boolean sameComparator, Iterable<? extends Entry<? extends K, ? extends V>> entries) {\n        // \"adding\" type params to an array of a raw type should be safe as\n        // long as no one can ever cast that same array instance back to a\n        // raw type.\n        @SuppressWarnings(\"unchecked\")\n        Entry<K, V>[] entryArray = (Entry[]) Iterables.toArray(entries, EMPTY_ENTRY_ARRAY);\n        return fromEntries(comparator, sameComparator, entryArray, entryArray.length);\n    }\n\n    private static <K, V> ImmutableSortedMap<K, V> fromEntries(Comparator<? super K> comparator, boolean sameComparator, Entry<K, V>[] entryArray, int size) {\n        switch(size) {\n            case 0:\n                return emptyMap(comparator);\n            case 1:\n                return ImmutableSortedMap.<K, V>of(comparator, entryArray[0].getKey(), entryArray[0].getValue());\n            default:\n                Object[] keys = new Object[size];\n                Object[] values = new Object[size];\n                if (sameComparator) {\n                    // Need to check for nulls, but don't need to sort or validate.\n                    for (int i = 0; i < size; i++) {\n                        Object key = entryArray[i].getKey();\n                        Object value = entryArray[i].getValue();\n                        checkEntryNotNull(key, value);\n                        keys[i] = key;\n                        values[i] = value;\n                    }\n                } else {\n                    // Need to sort and check for nulls and dupes.\n                    Arrays.sort(entryArray, 0, size, Ordering.from(comparator).<K>onKeys());\n                    K prevKey = entryArray[0].getKey();\n                    keys[0] = prevKey;\n                    values[0] = entryArray[0].getValue();\n                    for (int i = 1; i < size; i++) {\n                        K key = entryArray[i].getKey();\n                        V value = entryArray[i].getValue();\n                        checkEntryNotNull(key, value);\n                        keys[i] = key;\n                        values[i] = value;\n                        checkNoConflict(comparator.compare(prevKey, key) != 0, \"key\", entryArray[i - 1], entryArray[i]);\n                        prevKey = key;\n                    }\n                }\n                return new ImmutableSortedMap<K, V>(new RegularImmutableSortedSet<K>(new RegularImmutableList<K>(keys), comparator), new RegularImmutableList<V>(values));\n        }\n    }\n\n    /**\n     * Returns a builder that creates immutable sorted maps whose keys are\n     * ordered by their natural ordering. The sorted maps use {@link\n     * Ordering#natural()} as the comparator.\n     */\n    public static <K extends Comparable<?>, V> Builder<K, V> naturalOrder() {\n        return new Builder<K, V>(Ordering.natural());\n    }\n\n    /**\n     * Returns a builder that creates immutable sorted maps with an explicit\n     * comparator. If the comparator has a more general type than the map's keys,\n     * such as creating a {@code SortedMap<Integer, String>} with a {@code\n     * Comparator<Number>}, use the {@link Builder} constructor instead.\n     *\n     * @throws NullPointerException if {@code comparator} is null\n     */\n    public static <K, V> Builder<K, V> orderedBy(Comparator<K> comparator) {\n        return new Builder<K, V>(comparator);\n    }\n\n    /**\n     * Returns a builder that creates immutable sorted maps whose keys are\n     * ordered by the reverse of their natural ordering.\n     */\n    public static <K extends Comparable<?>, V> Builder<K, V> reverseOrder() {\n        return new Builder<K, V>(Ordering.natural().reverse());\n    }\n\n    /**\n     * A builder for creating immutable sorted map instances, especially {@code\n     * public static final} maps (\"constant maps\"). Example: <pre>   {@code\n     *\n     *   static final ImmutableSortedMap<Integer, String> INT_TO_WORD =\n     *       new ImmutableSortedMap.Builder<Integer, String>(Ordering.natural())\n     *           .put(1, \"one\")\n     *           .put(2, \"two\")\n     *           .put(3, \"three\")\n     *           .build();}</pre>\n     *\n     * <p>For <i>small</i> immutable sorted maps, the {@code ImmutableSortedMap.of()}\n     * methods are even more convenient.\n     *\n     * <p>Builder instances can be reused - it is safe to call {@link #build}\n     * multiple times to build multiple maps in series. Each map is a superset of\n     * the maps created before it.\n     *\n     * @since 2.0\n     */\n    public static class Builder<K, V> extends ImmutableMap.Builder<K, V> {\n\n        private final Comparator<? super K> comparator;\n\n        /**\n         * Creates a new builder. The returned builder is equivalent to the builder\n         * generated by {@link ImmutableSortedMap#orderedBy}.\n         */\n        @SuppressWarnings(\"unchecked\")\n        public Builder(Comparator<? super K> comparator) {\n            this.comparator = checkNotNull(comparator);\n        }\n\n        /**\n         * Associates {@code key} with {@code value} in the built map. Duplicate\n         * keys, according to the comparator (which might be the keys' natural\n         * order), are not allowed, and will cause {@link #build} to fail.\n         */\n        @Override\n        public Builder<K, V> put(K key, V value) {\n            super.put(key, value);\n            return this;\n        }\n\n        /**\n         * Adds the given {@code entry} to the map, making it immutable if\n         * necessary. Duplicate keys, according to the comparator (which might be\n         * the keys' natural order), are not allowed, and will cause {@link #build}\n         * to fail.\n         *\n         * @since 11.0\n         */\n        @Override\n        public Builder<K, V> put(Entry<? extends K, ? extends V> entry) {\n            super.put(entry);\n            return this;\n        }\n\n        /**\n         * Associates all of the given map's keys and values in the built map.\n         * Duplicate keys, according to the comparator (which might be the keys'\n         * natural order), are not allowed, and will cause {@link #build} to fail.\n         *\n         * @throws NullPointerException if any key or value in {@code map} is null\n         */\n        @Override\n        public Builder<K, V> putAll(Map<? extends K, ? extends V> map) {\n            super.putAll(map);\n            return this;\n        }\n\n        /**\n         * Adds all the given entries to the built map.  Duplicate keys, according\n         * to the comparator (which might be the keys' natural order), are not\n         * allowed, and will cause {@link #build} to fail.\n         *\n         * @throws NullPointerException if any key, value, or entry is null\n         * @since 19.0\n         */\n        @Beta\n        @Override\n        public Builder<K, V> putAll(Iterable<? extends Entry<? extends K, ? extends V>> entries) {\n            super.putAll(entries);\n            return this;\n        }\n\n        /**\n         * Throws an {@code UnsupportedOperationException}.\n         *\n         * @since 19.0\n         * @deprecated Unsupported by ImmutableSortedMap.Builder.\n         */\n        @Beta\n        @Override\n        @Deprecated\n        public Builder<K, V> orderEntriesByValue(Comparator<? super V> valueComparator) {\n            throw new UnsupportedOperationException(\"Not available on ImmutableSortedMap.Builder\");\n        }\n\n        /**\n         * Returns a newly-created immutable sorted map.\n         *\n         * @throws IllegalArgumentException if any two keys are equal according to\n         *     the comparator (which might be the keys' natural order)\n         */\n        @Override\n        public ImmutableSortedMap<K, V> build() {\n            switch(size) {\n                case 0:\n                    return emptyMap(comparator);\n                case 1:\n                    return of(comparator, entries[0].getKey(), entries[0].getValue());\n                default:\n                    return fromEntries(comparator, false, entries, size);\n            }\n        }\n    }\n\n    private final transient RegularImmutableSortedSet<K> keySet;\n\n    private final transient ImmutableList<V> valueList;\n\n    private transient ImmutableSortedMap<K, V> descendingMap;\n\n    ImmutableSortedMap(RegularImmutableSortedSet<K> keySet, ImmutableList<V> valueList) {\n        this(keySet, valueList, null);\n    }\n\n    ImmutableSortedMap(RegularImmutableSortedSet<K> keySet, ImmutableList<V> valueList, ImmutableSortedMap<K, V> descendingMap) {\n        this.keySet = keySet;\n        this.valueList = valueList;\n        this.descendingMap = descendingMap;\n    }\n\n    @Override\n    public int size() {\n        return valueList.size();\n    }\n\n    @Override\n    public V get(@Nullable Object key) {\n        int index = keySet.indexOf(key);\n        return (index == -1) ? null : valueList.get(index);\n    }\n\n    @Override\n    boolean isPartialView() {\n        return keySet.isPartialView() || valueList.isPartialView();\n    }\n\n    /**\n     * Returns an immutable set of the mappings in this map, sorted by the key\n     * ordering.\n     */\n    @Override\n    public ImmutableSet<Entry<K, V>> entrySet() {\n        return super.entrySet();\n    }\n\n    @Override\n    ImmutableSet<Entry<K, V>> createEntrySet() {\n        @WeakOuter\n        class EntrySet extends ImmutableMapEntrySet<K, V> {\n\n            @Override\n            public UnmodifiableIterator<Entry<K, V>> iterator() {\n                return asList().iterator();\n            }\n\n            @Override\n            ImmutableList<Entry<K, V>> createAsList() {\n                return new ImmutableAsList<Entry<K, V>>() {\n\n                    @Override\n                    public Entry<K, V> get(int index) {\n                        return Maps.immutableEntry(keySet.asList().get(index), valueList.get(index));\n                    }\n\n                    @Override\n                    ImmutableCollection<Entry<K, V>> delegateCollection() {\n                        return EntrySet.this;\n                    }\n                };\n            }\n\n            @Override\n            ImmutableMap<K, V> map() {\n                return ImmutableSortedMap.this;\n            }\n        }\n        return isEmpty() ? ImmutableSet.<Entry<K, V>>of() : new EntrySet();\n    }\n\n    /**\n     * Returns an immutable sorted set of the keys in this map.\n     */\n    @Override\n    public ImmutableSortedSet<K> keySet() {\n        return keySet;\n    }\n\n    /**\n     * Returns an immutable collection of the values in this map, sorted by the\n     * ordering of the corresponding keys.\n     */\n    @Override\n    public ImmutableCollection<V> values() {\n        return valueList;\n    }\n\n    /**\n     * Returns the comparator that orders the keys, which is\n     * {@link Ordering#natural()} when the natural ordering of the keys is used.\n     * Note that its behavior is not consistent with {@link TreeMap#comparator()},\n     * which returns {@code null} to indicate natural ordering.\n     */\n    @Override\n    public Comparator<? super K> comparator() {\n        return keySet().comparator();\n    }\n\n    @Override\n    public K firstKey() {\n        return keySet().first();\n    }\n\n    @Override\n    public K lastKey() {\n        return keySet().last();\n    }\n\n    private ImmutableSortedMap<K, V> getSubMap(int fromIndex, int toIndex) {\n        if (fromIndex == 0 && toIndex == size()) {\n            return this;\n        } else if (fromIndex == toIndex) {\n            return emptyMap(comparator());\n        } else {\n            return new ImmutableSortedMap<K, V>(keySet.getSubSet(fromIndex, toIndex), valueList.subList(fromIndex, toIndex));\n        }\n    }\n\n    /**\n     * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n     * whose keys are less than {@code toKey}.\n     *\n     * <p>The {@link SortedMap#headMap} documentation states that a submap of a\n     * submap throws an {@link IllegalArgumentException} if passed a {@code toKey}\n     * greater than an earlier {@code toKey}. However, this method doesn't throw\n     * an exception in that situation, but instead keeps the original {@code\n     * toKey}.\n     */\n    @Override\n    public ImmutableSortedMap<K, V> headMap(K toKey) {\n        return headMap(toKey, false);\n    }\n\n    /**\n     * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n     * whose keys are less than (or equal to, if {@code inclusive}) {@code toKey}.\n     *\n     * <p>The {@link SortedMap#headMap} documentation states that a submap of a\n     * submap throws an {@link IllegalArgumentException} if passed a {@code toKey}\n     * greater than an earlier {@code toKey}. However, this method doesn't throw\n     * an exception in that situation, but instead keeps the original {@code\n     * toKey}.\n     *\n     * @since 12.0\n     */\n    @Override\n    public ImmutableSortedMap<K, V> headMap(K toKey, boolean inclusive) {\n        return getSubMap(0, keySet.headIndex(checkNotNull(toKey), inclusive));\n    }\n\n    /**\n     * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n     * whose keys ranges from {@code fromKey}, inclusive, to {@code toKey},\n     * exclusive.\n     *\n     * <p>The {@link SortedMap#subMap} documentation states that a submap of a\n     * submap throws an {@link IllegalArgumentException} if passed a {@code\n     * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n     * throw an exception in that situation, but instead keeps the original {@code\n     * fromKey}. Similarly, this method keeps the original {@code toKey}, instead\n     * of throwing an exception, if passed a {@code toKey} greater than an earlier\n     * {@code toKey}.\n     */\n    @Override\n    public ImmutableSortedMap<K, V> subMap(K fromKey, K toKey) {\n        return subMap(fromKey, true, toKey, false);\n    }\n\n    /**\n     * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n     * whose keys ranges from {@code fromKey} to {@code toKey}, inclusive or\n     * exclusive as indicated by the boolean flags.\n     *\n     * <p>The {@link SortedMap#subMap} documentation states that a submap of a\n     * submap throws an {@link IllegalArgumentException} if passed a {@code\n     * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n     * throw an exception in that situation, but instead keeps the original {@code\n     * fromKey}. Similarly, this method keeps the original {@code toKey}, instead\n     * of throwing an exception, if passed a {@code toKey} greater than an earlier\n     * {@code toKey}.\n     *\n     * @since 12.0\n     */\n    @Override\n    public ImmutableSortedMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {\n        checkNotNull(fromKey);\n        checkNotNull(toKey);\n        checkArgument(comparator().compare(fromKey, toKey) <= 0, \"expected fromKey <= toKey but %s > %s\", fromKey, toKey);\n        return headMap(toKey, toInclusive).tailMap(fromKey, fromInclusive);\n    }\n\n    /**\n     * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n     * whose keys are greater than or equals to {@code fromKey}.\n     *\n     * <p>The {@link SortedMap#tailMap} documentation states that a submap of a\n     * submap throws an {@link IllegalArgumentException} if passed a {@code\n     * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n     * throw an exception in that situation, but instead keeps the original {@code\n     * fromKey}.\n     */\n    @Override\n    public ImmutableSortedMap<K, V> tailMap(K fromKey) {\n        return tailMap(fromKey, true);\n    }\n\n    /**\n     * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n     * whose keys are greater than (or equal to, if {@code inclusive})\n     * {@code fromKey}.\n     *\n     * <p>The {@link SortedMap#tailMap} documentation states that a submap of a\n     * submap throws an {@link IllegalArgumentException} if passed a {@code\n     * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n     * throw an exception in that situation, but instead keeps the original {@code\n     * fromKey}.\n     *\n     * @since 12.0\n     */\n    @Override\n    public ImmutableSortedMap<K, V> tailMap(K fromKey, boolean inclusive) {\n        return getSubMap(keySet.tailIndex(checkNotNull(fromKey), inclusive), size());\n    }\n\n    @Override\n    public Entry<K, V> lowerEntry(K key) {\n        return headMap(key, false).lastEntry();\n    }\n\n    @Override\n    public K lowerKey(K key) {\n        return keyOrNull(lowerEntry(key));\n    }\n\n    @Override\n    public Entry<K, V> floorEntry(K key) {\n        return headMap(key, true).lastEntry();\n    }\n\n    @Override\n    public K floorKey(K key) {\n        return keyOrNull(floorEntry(key));\n    }\n\n    @Override\n    public Entry<K, V> ceilingEntry(K key) {\n        return tailMap(key, true).firstEntry();\n    }\n\n    @Override\n    public K ceilingKey(K key) {\n        return keyOrNull(ceilingEntry(key));\n    }\n\n    @Override\n    public Entry<K, V> higherEntry(K key) {\n        return tailMap(key, false).firstEntry();\n    }\n\n    @Override\n    public K higherKey(K key) {\n        return keyOrNull(higherEntry(key));\n    }\n\n    @Override\n    public Entry<K, V> firstEntry() {\n        return isEmpty() ? null : entrySet().asList().get(0);\n    }\n\n    @Override\n    public Entry<K, V> lastEntry() {\n        return isEmpty() ? null : entrySet().asList().get(size() - 1);\n    }\n\n    /**\n     * Guaranteed to throw an exception and leave the map unmodified.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated Unsupported operation.\n     */\n    @Deprecated\n    @Override\n    public final Entry<K, V> pollFirstEntry() {\n        throw new UnsupportedOperationException();\n    }\n\n    /**\n     * Guaranteed to throw an exception and leave the map unmodified.\n     *\n     * @throws UnsupportedOperationException always\n     * @deprecated Unsupported operation.\n     */\n    @Deprecated\n    @Override\n    public final Entry<K, V> pollLastEntry() {\n        throw new UnsupportedOperationException();\n    }\n\n    @Override\n    public ImmutableSortedMap<K, V> descendingMap() {\n        // TODO(kevinb): the descendingMap is never actually cached at all. Either it should be or the\n        // code below simplified.\n        ImmutableSortedMap<K, V> result = descendingMap;\n        if (result == null) {\n            if (isEmpty()) {\n                return result = emptyMap(Ordering.from(comparator()).reverse());\n            } else {\n                return result = new ImmutableSortedMap<K, V>((RegularImmutableSortedSet<K>) keySet.descendingSet(), valueList.reverse(), this);\n            }\n        }\n        return result;\n    }\n\n    @Override\n    public ImmutableSortedSet<K> navigableKeySet() {\n        return keySet;\n    }\n\n    @Override\n    public ImmutableSortedSet<K> descendingKeySet() {\n        return keySet.descendingSet();\n    }\n\n    /**\n     * Serialized type for all ImmutableSortedMap instances. It captures the\n     * logical contents and they are reconstructed using public factory methods.\n     * This ensures that the implementation types remain as implementation\n     * details.\n     */\n    private static class SerializedForm extends ImmutableMap.SerializedForm {\n\n        private final Comparator<Object> comparator;\n\n        @SuppressWarnings(\"unchecked\")\n        SerializedForm(ImmutableSortedMap<?, ?> sortedMap) {\n            super(sortedMap);\n            comparator = (Comparator<Object>) sortedMap.comparator();\n        }\n\n        @Override\n        Object readResolve() {\n            Builder<Object, Object> builder = new Builder<Object, Object>(comparator);\n            return createMap(builder);\n        }\n\n        private static final long serialVersionUID = 0;\n    }\n\n    @Override\n    Object writeReplace() {\n        return new SerializedForm(this);\n    }\n\n    // This class is never actually serialized directly, but we have to make the\n    // warning go away (and suppressing would suppress for all nested classes too)\n    private static final long serialVersionUID = 0;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "ImmutableSortedMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "RegularImmutableSortedSet",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "keySet"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ImmutableList",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "valueList"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "ImmutableSortedMap(RegularImmutableSortedSet<K> keySet, ImmutableList<V> valueList) {\n    this(keySet, valueList, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "ImmutableSortedMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "RegularImmutableSortedSet",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "keySet"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ImmutableList",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "valueList"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ImmutableSortedMap",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "descendingMap"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "ImmutableSortedMap(RegularImmutableSortedSet<K> keySet, ImmutableList<V> valueList, ImmutableSortedMap<K, V> descendingMap) {\n    this.keySet = keySet;\n    this.valueList = valueList;\n    this.descendingMap = descendingMap;\n}"
+      },
+      {
+        "type": "method",
+        "name": "emptyMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comparator"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "static <K, V> ImmutableSortedMap<K, V> emptyMap(Comparator<? super K> comparator) {\n    if (Ordering.natural().equals(comparator)) {\n        return of();\n    } else {\n        return new ImmutableSortedMap<K, V>(ImmutableSortedSet.emptySet(comparator), ImmutableList.<V>of());\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the empty sorted map.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns the empty sorted map.\n */\n@SuppressWarnings(\"unchecked\")\npublic static <// TODO(kevinb): evaluate whether or not of().comparator() should return null\nK, V> ImmutableSortedMap<K, V> of() {\n    return (ImmutableSortedMap<K, V>) NATURAL_EMPTY_MAP;\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable map containing a single entry.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns an immutable map containing a single entry.\n */\npublic static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1) {\n    return of(Ordering.natural(), k1, v1);\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if the two keys are equal according to\n *     their natural ordering\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if the two keys are equal according to their natural ordering",
+            "assertion": "assert ((Comparable)args[0]).compareTo(args[2]) == 0;",
+            "description": "if the two keys are equal according to their natural ordering"
+          }
+        ],
+        "code": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if the two keys are equal according to\n *     their natural ordering\n */\n@SuppressWarnings(\"unchecked\")\npublic static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2) {\n    return ofEntries(entryOf(k1, v1), entryOf(k2, v2));\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v3"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     their natural ordering\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to their natural ordering",
+            "assertion": "assert (((Comparable)args[0]).compareTo(args[2]) == 0 || ((Comparable)args[0]).compareTo(args[4]) == 0 || ((Comparable)args[2]).compareTo(args[4]) == 0);",
+            "description": "if any two keys are equal according to their natural ordering"
+          }
+        ],
+        "code": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     their natural ordering\n */\n@SuppressWarnings(\"unchecked\")\npublic static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {\n    return ofEntries(entryOf(k1, v1), entryOf(k2, v2), entryOf(k3, v3));\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k4"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v4"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     their natural ordering\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to their natural ordering",
+            "assertion": "assert !k1.equals(k2) && !k1.equals(k3) && !k1.equals(k4) && !k2.equals(k3) && !k2.equals(k4) && !k3.equals(k4);",
+            "description": "if any two keys are equal according to their natural ordering"
+          }
+        ],
+        "code": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     their natural ordering\n */\n@SuppressWarnings(\"unchecked\")\npublic static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {\n    return ofEntries(entryOf(k1, v1), entryOf(k2, v2), entryOf(k3, v3), entryOf(k4, v4));\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v2"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v3"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k4"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v4"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "k5"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "v5"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     their natural ordering\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to their natural ordering",
+            "assertion": "",
+            "description": "if any two keys are equal according to their natural ordering"
+          }
+        ],
+        "code": "/**\n * Returns an immutable sorted map containing the given entries, sorted by the\n * natural ordering of their keys.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     their natural ordering\n */\n@SuppressWarnings(\"unchecked\")\npublic static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {\n    return ofEntries(entryOf(k1, v1), entryOf(k2, v2), entryOf(k3, v3), entryOf(k4, v4), entryOf(k5, v5));\n}"
+      },
+      {
+        "type": "method",
+        "name": "copyOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "map"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable map containing the same entries as {@code map}, sorted\n * by the natural ordering of the keys.\n *\n * <p>Despite the method name, this method attempts to avoid actually copying\n * the data when it is safe to do so. The exact circumstances under which a\n * copy will or will not be performed are undocumented and subject to change.\n *\n * <p>This method is not type-safe, as it may be called on a map with keys\n * that are not mutually comparable.\n *\n * @throws ClassCastException if the keys in {@code map} are not mutually\n *         comparable\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to\n *         their natural ordering\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "ClassCastException",
+            "content": "if the keys in {@code map} are not mutually comparable",
+            "assertion": "assert !(args[0].keySet().iterator().next() instanceof Comparable);",
+            "description": "if the keys in map are not mutually comparable"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any key or value in {@code map} is null",
+            "assertion": "assert args[0].entrySet().stream().anyMatch(e -> e.getKey()==null || e.getValue()==null);",
+            "description": "if any key or value in map is null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to their natural ordering",
+            "assertion": "assert args[0].keySet().size() != new TreeSet<>(args[0].keySet()).size();",
+            "description": "if any two keys are equal according to their natural ordering"
+          }
+        ],
+        "code": "/**\n * Returns an immutable map containing the same entries as {@code map}, sorted\n * by the natural ordering of the keys.\n *\n * <p>Despite the method name, this method attempts to avoid actually copying\n * the data when it is safe to do so. The exact circumstances under which a\n * copy will or will not be performed are undocumented and subject to change.\n *\n * <p>This method is not type-safe, as it may be called on a map with keys\n * that are not mutually comparable.\n *\n * @throws ClassCastException if the keys in {@code map} are not mutually\n *         comparable\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to\n *         their natural ordering\n */\npublic static <K, V> ImmutableSortedMap<K, V> copyOf(Map<? extends K, ? extends V> map) {\n    // Hack around K not being a subtype of Comparable.\n    // Unsafe, see ImmutableSortedSetFauxverideShim.\n    @SuppressWarnings(\"unchecked\")\n    Ordering<K> naturalOrder = (Ordering<K>) NATURAL_ORDER;\n    return copyOfInternal(map, naturalOrder);\n}"
+      },
+      {
+        "type": "method",
+        "name": "copyOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "map"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comparator"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable map containing the same entries as {@code map}, with\n * keys sorted by the provided comparator.\n *\n * <p>Despite the method name, this method attempts to avoid actually copying\n * the data when it is safe to do so. The exact circumstances under which a\n * copy will or will not be performed are undocumented and subject to change.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to the\n *         comparator\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any key or value in {@code map} is null",
+            "assertion": "assert args[0].keySet().stream().anyMatch(Objects::isNull) || args[0].values().stream().anyMatch(Objects::isNull);",
+            "description": "if any key or value in map is null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to the comparator",
+            "assertion": "assert args[1].compare(args[0].keySet().stream().filter(k -> args[1].compare(k, k) == 0).findAny().orElse(null), args[0].keySet().stream().filter(k -> args[1].compare(k, k) == 0).findAny().orElse(null)) == 0;",
+            "description": "if any two keys are equal according to the comparator"
+          }
+        ],
+        "code": "/**\n * Returns an immutable map containing the same entries as {@code map}, with\n * keys sorted by the provided comparator.\n *\n * <p>Despite the method name, this method attempts to avoid actually copying\n * the data when it is safe to do so. The exact circumstances under which a\n * copy will or will not be performed are undocumented and subject to change.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to the\n *         comparator\n */\npublic static <K, V> ImmutableSortedMap<K, V> copyOf(Map<? extends K, ? extends V> map, Comparator<? super K> comparator) {\n    return copyOfInternal(map, checkNotNull(comparator));\n}"
+      },
+      {
+        "type": "method",
+        "name": "copyOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entries"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable map containing the given entries, with keys sorted\n * by the provided comparator.\n *\n * <p>This method is not type-safe, as it may be called on a map with keys\n * that are not mutually comparable.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to the\n *         comparator\n * @since 19.0\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any key or value in {@code map} is null",
+            "assertion": "assert args[0].iterator().hasNext() && Iterators.any(args[0].iterator(), Inputs.hasNullElement());",
+            "description": "if any key or value in map is null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to the comparator",
+            "assertion": "assert args[0].stream().anyMatch(e -> args[0].stream().anyMatch(f -> !e.equals(f) && comparator.compare(e.getKey(), f.getKey()) == 0));",
+            "description": "if any two keys are equal according to the comparator"
+          },
+          {
+            "tag": "since",
+            "name": "19.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns an immutable map containing the given entries, with keys sorted\n * by the provided comparator.\n *\n * <p>This method is not type-safe, as it may be called on a map with keys\n * that are not mutually comparable.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to the\n *         comparator\n * @since 19.0\n */\n@Beta\npublic static <K, V> ImmutableSortedMap<K, V> copyOf(Iterable<? extends Entry<? extends K, ? extends V>> entries) {\n    // Hack around K not being a subtype of Comparable.\n    // Unsafe, see ImmutableSortedSetFauxverideShim.\n    @SuppressWarnings(\"unchecked\")\n    Ordering<K> naturalOrder = (Ordering<K>) NATURAL_ORDER;\n    return copyOf(entries, naturalOrder);\n}"
+      },
+      {
+        "type": "method",
+        "name": "copyOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entries"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comparator"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable map containing the given entries, with keys sorted\n * by the provided comparator.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to the\n *         comparator\n * @since 19.0\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any key or value in {@code map} is null",
+            "assertion": "assert args[0].iterator().hasNext() && Iterators.any(args[0].iterator(), Inputs.hasNullElement());",
+            "description": "if any key or value in map is null"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to the comparator",
+            "assertion": "assert args[1] != null && Iterators.any(args[0].iterator(), new Predicate<java.util.Map.Entry>() { public boolean apply(java.util.Map.Entry entry) { for (java.util.Map.Entry other : args[0]) { if (args[1].compare(entry.getKey(), other.getKey()) == 0) return true; } return false; } });",
+            "description": "if any two keys are equal according to the comparator"
+          },
+          {
+            "tag": "since",
+            "name": "19.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns an immutable map containing the given entries, with keys sorted\n * by the provided comparator.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n * @throws IllegalArgumentException if any two keys are equal according to the\n *         comparator\n * @since 19.0\n */\n@Beta\npublic static <K, V> ImmutableSortedMap<K, V> copyOf(Iterable<? extends Entry<? extends K, ? extends V>> entries, Comparator<? super K> comparator) {\n    return fromEntries(checkNotNull(comparator), false, entries);\n}"
+      },
+      {
+        "type": "method",
+        "name": "copyOfSorted",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "SortedMap",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "map"
+          }
+        ],
+        "javadoc": "/**\n * Returns an immutable map containing the same entries as the provided sorted\n * map, with the same ordering.\n *\n * <p>Despite the method name, this method attempts to avoid actually copying\n * the data when it is safe to do so. The exact circumstances under which a\n * copy will or will not be performed are undocumented and subject to change.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any key or value in {@code map} is null",
+            "assertion": "assert args[0].containsKey(null) || args[0].containsValue(null);",
+            "description": "if any key or value in map is null"
+          }
+        ],
+        "code": "/**\n * Returns an immutable map containing the same entries as the provided sorted\n * map, with the same ordering.\n *\n * <p>Despite the method name, this method attempts to avoid actually copying\n * the data when it is safe to do so. The exact circumstances under which a\n * copy will or will not be performed are undocumented and subject to change.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n */\n@SuppressWarnings(\"unchecked\")\npublic static <K, V> ImmutableSortedMap<K, V> copyOfSorted(SortedMap<K, ? extends V> map) {\n    Comparator<? super K> comparator = map.comparator();\n    if (comparator == null) {\n        // If map has a null comparator, the keys should have a natural ordering,\n        // even though K doesn't explicitly implement Comparable.\n        comparator = (Comparator<? super K>) NATURAL_ORDER;\n    }\n    if (map instanceof ImmutableSortedMap) {\n        // TODO(kevinb): Prove that this cast is safe, even though\n        // Collections.unmodifiableSortedMap requires the same key type.\n        @SuppressWarnings(\"unchecked\")\n        ImmutableSortedMap<K, V> kvMap = (ImmutableSortedMap<K, V>) map;\n        if (!kvMap.isPartialView()) {\n            return kvMap;\n        }\n    }\n    return fromEntries(comparator, true, map.entrySet());\n}"
+      },
+      {
+        "type": "method",
+        "name": "naturalOrder",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a builder that creates immutable sorted maps whose keys are\n * ordered by their natural ordering. The sorted maps use {@link\n * Ordering#natural()} as the comparator.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns a builder that creates immutable sorted maps whose keys are\n * ordered by their natural ordering. The sorted maps use {@link\n * Ordering#natural()} as the comparator.\n */\npublic static <K extends Comparable<?>, V> Builder<K, V> naturalOrder() {\n    return new Builder<K, V>(Ordering.natural());\n}"
+      },
+      {
+        "type": "method",
+        "name": "orderedBy",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comparator"
+          }
+        ],
+        "javadoc": "/**\n * Returns a builder that creates immutable sorted maps with an explicit\n * comparator. If the comparator has a more general type than the map's keys,\n * such as creating a {@code SortedMap<Integer, String>} with a {@code\n * Comparator<Number>}, use the {@link Builder} constructor instead.\n *\n * @throws NullPointerException if {@code comparator} is null\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if {@code comparator} is null",
+            "assertion": "assert args[0]==null;",
+            "description": "if comparator is null"
+          }
+        ],
+        "code": "/**\n * Returns a builder that creates immutable sorted maps with an explicit\n * comparator. If the comparator has a more general type than the map's keys,\n * such as creating a {@code SortedMap<Integer, String>} with a {@code\n * Comparator<Number>}, use the {@link Builder} constructor instead.\n *\n * @throws NullPointerException if {@code comparator} is null\n */\npublic static <K, V> Builder<K, V> orderedBy(Comparator<K> comparator) {\n    return new Builder<K, V>(comparator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "reverseOrder",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a builder that creates immutable sorted maps whose keys are\n * ordered by the reverse of their natural ordering.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns a builder that creates immutable sorted maps whose keys are\n * ordered by the reverse of their natural ordering.\n */\npublic static <K extends Comparable<?>, V> Builder<K, V> reverseOrder() {\n    return new Builder<K, V>(Ordering.natural().reverse());\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int size() {\n    return valueList.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic V get(@Nullable Object key) {\n    int index = keySet.indexOf(key);\n    return (index == -1) ? null : valueList.get(index);\n}"
+      },
+      {
+        "type": "method",
+        "name": "isPartialView",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nboolean isPartialView() {\n    return keySet.isPartialView() || valueList.isPartialView();\n}"
+      },
+      {
+        "type": "method",
+        "name": "entrySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSet",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns an immutable set of the mappings in this map, sorted by the key\n * ordering.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns an immutable set of the mappings in this map, sorted by the key\n * ordering.\n */\n@Override\npublic ImmutableSet<Entry<K, V>> entrySet() {\n    return super.entrySet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "createEntrySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSet",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nImmutableSet<Entry<K, V>> createEntrySet() {\n    @WeakOuter\n    class EntrySet extends ImmutableMapEntrySet<K, V> {\n\n        @Override\n        public UnmodifiableIterator<Entry<K, V>> iterator() {\n            return asList().iterator();\n        }\n\n        @Override\n        ImmutableList<Entry<K, V>> createAsList() {\n            return new ImmutableAsList<Entry<K, V>>() {\n\n                @Override\n                public Entry<K, V> get(int index) {\n                    return Maps.immutableEntry(keySet.asList().get(index), valueList.get(index));\n                }\n\n                @Override\n                ImmutableCollection<Entry<K, V>> delegateCollection() {\n                    return EntrySet.this;\n                }\n            };\n        }\n\n        @Override\n        ImmutableMap<K, V> map() {\n            return ImmutableSortedMap.this;\n        }\n    }\n    return isEmpty() ? ImmutableSet.<Entry<K, V>>of() : new EntrySet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "keySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedSet",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns an immutable sorted set of the keys in this map.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns an immutable sorted set of the keys in this map.\n */\n@Override\npublic ImmutableSortedSet<K> keySet() {\n    return keySet;\n}"
+      },
+      {
+        "type": "method",
+        "name": "values",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableCollection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns an immutable collection of the values in this map, sorted by the\n * ordering of the corresponding keys.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns an immutable collection of the values in this map, sorted by the\n * ordering of the corresponding keys.\n */\n@Override\npublic ImmutableCollection<V> values() {\n    return valueList;\n}"
+      },
+      {
+        "type": "method",
+        "name": "comparator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the comparator that orders the keys, which is\n * {@link Ordering#natural()} when the natural ordering of the keys is used.\n * Note that its behavior is not consistent with {@link TreeMap#comparator()},\n * which returns {@code null} to indicate natural ordering.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns the comparator that orders the keys, which is\n * {@link Ordering#natural()} when the natural ordering of the keys is used.\n * Note that its behavior is not consistent with {@link TreeMap#comparator()},\n * which returns {@code null} to indicate natural ordering.\n */\n@Override\npublic Comparator<? super K> comparator() {\n    return keySet().comparator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "firstKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic K firstKey() {\n    return keySet().first();\n}"
+      },
+      {
+        "type": "method",
+        "name": "lastKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic K lastKey() {\n    return keySet().last();\n}"
+      },
+      {
+        "type": "method",
+        "name": "headMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toKey"
+          }
+        ],
+        "javadoc": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are less than {@code toKey}.\n *\n * <p>The {@link SortedMap#headMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code toKey}\n * greater than an earlier {@code toKey}. However, this method doesn't throw\n * an exception in that situation, but instead keeps the original {@code\n * toKey}.\n */\n",
+        "tags": [],
+        "code": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are less than {@code toKey}.\n *\n * <p>The {@link SortedMap#headMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code toKey}\n * greater than an earlier {@code toKey}. However, this method doesn't throw\n * an exception in that situation, but instead keeps the original {@code\n * toKey}.\n */\n@Override\npublic ImmutableSortedMap<K, V> headMap(K toKey) {\n    return headMap(toKey, false);\n}"
+      },
+      {
+        "type": "method",
+        "name": "headMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toKey"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "inclusive"
+          }
+        ],
+        "javadoc": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are less than (or equal to, if {@code inclusive}) {@code toKey}.\n *\n * <p>The {@link SortedMap#headMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code toKey}\n * greater than an earlier {@code toKey}. However, this method doesn't throw\n * an exception in that situation, but instead keeps the original {@code\n * toKey}.\n *\n * @since 12.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "12.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are less than (or equal to, if {@code inclusive}) {@code toKey}.\n *\n * <p>The {@link SortedMap#headMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code toKey}\n * greater than an earlier {@code toKey}. However, this method doesn't throw\n * an exception in that situation, but instead keeps the original {@code\n * toKey}.\n *\n * @since 12.0\n */\n@Override\npublic ImmutableSortedMap<K, V> headMap(K toKey, boolean inclusive) {\n    return getSubMap(0, keySet.headIndex(checkNotNull(toKey), inclusive));\n}"
+      },
+      {
+        "type": "method",
+        "name": "subMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromKey"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toKey"
+          }
+        ],
+        "javadoc": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys ranges from {@code fromKey}, inclusive, to {@code toKey},\n * exclusive.\n *\n * <p>The {@link SortedMap#subMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}. Similarly, this method keeps the original {@code toKey}, instead\n * of throwing an exception, if passed a {@code toKey} greater than an earlier\n * {@code toKey}.\n */\n",
+        "tags": [],
+        "code": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys ranges from {@code fromKey}, inclusive, to {@code toKey},\n * exclusive.\n *\n * <p>The {@link SortedMap#subMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}. Similarly, this method keeps the original {@code toKey}, instead\n * of throwing an exception, if passed a {@code toKey} greater than an earlier\n * {@code toKey}.\n */\n@Override\npublic ImmutableSortedMap<K, V> subMap(K fromKey, K toKey) {\n    return subMap(fromKey, true, toKey, false);\n}"
+      },
+      {
+        "type": "method",
+        "name": "subMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromKey"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromInclusive"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toKey"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toInclusive"
+          }
+        ],
+        "javadoc": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys ranges from {@code fromKey} to {@code toKey}, inclusive or\n * exclusive as indicated by the boolean flags.\n *\n * <p>The {@link SortedMap#subMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}. Similarly, this method keeps the original {@code toKey}, instead\n * of throwing an exception, if passed a {@code toKey} greater than an earlier\n * {@code toKey}.\n *\n * @since 12.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "12.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys ranges from {@code fromKey} to {@code toKey}, inclusive or\n * exclusive as indicated by the boolean flags.\n *\n * <p>The {@link SortedMap#subMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}. Similarly, this method keeps the original {@code toKey}, instead\n * of throwing an exception, if passed a {@code toKey} greater than an earlier\n * {@code toKey}.\n *\n * @since 12.0\n */\n@Override\npublic ImmutableSortedMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {\n    checkNotNull(fromKey);\n    checkNotNull(toKey);\n    checkArgument(comparator().compare(fromKey, toKey) <= 0, \"expected fromKey <= toKey but %s > %s\", fromKey, toKey);\n    return headMap(toKey, toInclusive).tailMap(fromKey, fromInclusive);\n}"
+      },
+      {
+        "type": "method",
+        "name": "tailMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromKey"
+          }
+        ],
+        "javadoc": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are greater than or equals to {@code fromKey}.\n *\n * <p>The {@link SortedMap#tailMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}.\n */\n",
+        "tags": [],
+        "code": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are greater than or equals to {@code fromKey}.\n *\n * <p>The {@link SortedMap#tailMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}.\n */\n@Override\npublic ImmutableSortedMap<K, V> tailMap(K fromKey) {\n    return tailMap(fromKey, true);\n}"
+      },
+      {
+        "type": "method",
+        "name": "tailMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromKey"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "inclusive"
+          }
+        ],
+        "javadoc": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are greater than (or equal to, if {@code inclusive})\n * {@code fromKey}.\n *\n * <p>The {@link SortedMap#tailMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}.\n *\n * @since 12.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "12.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * This method returns a {@code ImmutableSortedMap}, consisting of the entries\n * whose keys are greater than (or equal to, if {@code inclusive})\n * {@code fromKey}.\n *\n * <p>The {@link SortedMap#tailMap} documentation states that a submap of a\n * submap throws an {@link IllegalArgumentException} if passed a {@code\n * fromKey} less than an earlier {@code fromKey}. However, this method doesn't\n * throw an exception in that situation, but instead keeps the original {@code\n * fromKey}.\n *\n * @since 12.0\n */\n@Override\npublic ImmutableSortedMap<K, V> tailMap(K fromKey, boolean inclusive) {\n    return getSubMap(keySet.tailIndex(checkNotNull(fromKey), inclusive), size());\n}"
+      },
+      {
+        "type": "method",
+        "name": "lowerEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Entry<K, V> lowerEntry(K key) {\n    return headMap(key, false).lastEntry();\n}"
+      },
+      {
+        "type": "method",
+        "name": "lowerKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic K lowerKey(K key) {\n    return keyOrNull(lowerEntry(key));\n}"
+      },
+      {
+        "type": "method",
+        "name": "floorEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Entry<K, V> floorEntry(K key) {\n    return headMap(key, true).lastEntry();\n}"
+      },
+      {
+        "type": "method",
+        "name": "floorKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic K floorKey(K key) {\n    return keyOrNull(floorEntry(key));\n}"
+      },
+      {
+        "type": "method",
+        "name": "ceilingEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Entry<K, V> ceilingEntry(K key) {\n    return tailMap(key, true).firstEntry();\n}"
+      },
+      {
+        "type": "method",
+        "name": "ceilingKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic K ceilingKey(K key) {\n    return keyOrNull(ceilingEntry(key));\n}"
+      },
+      {
+        "type": "method",
+        "name": "higherEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Entry<K, V> higherEntry(K key) {\n    return tailMap(key, false).firstEntry();\n}"
+      },
+      {
+        "type": "method",
+        "name": "higherKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic K higherKey(K key) {\n    return keyOrNull(higherEntry(key));\n}"
+      },
+      {
+        "type": "method",
+        "name": "firstEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Entry<K, V> firstEntry() {\n    return isEmpty() ? null : entrySet().asList().get(0);\n}"
+      },
+      {
+        "type": "method",
+        "name": "lastEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic Entry<K, V> lastEntry() {\n    return isEmpty() ? null : entrySet().asList().get(size() - 1);\n}"
+      },
+      {
+        "type": "method",
+        "name": "pollFirstEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Guaranteed to throw an exception and leave the map unmodified.\n *\n * @throws UnsupportedOperationException always\n * @deprecated Unsupported operation.\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert true;",
+            "description": "always"
+          },
+          {
+            "tag": "deprecated",
+            "name": "Unsupported",
+            "content": "operation."
+          }
+        ],
+        "code": "/**\n * Guaranteed to throw an exception and leave the map unmodified.\n *\n * @throws UnsupportedOperationException always\n * @deprecated Unsupported operation.\n */\n@Deprecated\n@Override\npublic final Entry<K, V> pollFirstEntry() {\n    throw new UnsupportedOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "pollLastEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Guaranteed to throw an exception and leave the map unmodified.\n *\n * @throws UnsupportedOperationException always\n * @deprecated Unsupported operation.\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedOperationException",
+            "content": "always",
+            "assertion": "assert true;",
+            "description": "always"
+          },
+          {
+            "tag": "deprecated",
+            "name": "Unsupported",
+            "content": "operation."
+          }
+        ],
+        "code": "/**\n * Guaranteed to throw an exception and leave the map unmodified.\n *\n * @throws UnsupportedOperationException always\n * @deprecated Unsupported operation.\n */\n@Deprecated\n@Override\npublic final Entry<K, V> pollLastEntry() {\n    throw new UnsupportedOperationException();\n}"
+      },
+      {
+        "type": "method",
+        "name": "descendingMap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic ImmutableSortedMap<K, V> descendingMap() {\n    // TODO(kevinb): the descendingMap is never actually cached at all. Either it should be or the\n    // code below simplified.\n    ImmutableSortedMap<K, V> result = descendingMap;\n    if (result == null) {\n        if (isEmpty()) {\n            return result = emptyMap(Ordering.from(comparator()).reverse());\n        } else {\n            return result = new ImmutableSortedMap<K, V>((RegularImmutableSortedSet<K>) keySet.descendingSet(), valueList.reverse(), this);\n        }\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "navigableKeySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedSet",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic ImmutableSortedSet<K> navigableKeySet() {\n    return keySet;\n}"
+      },
+      {
+        "type": "method",
+        "name": "descendingKeySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedSet",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic ImmutableSortedSet<K> descendingKeySet() {\n    return keySet.descendingSet();\n}"
+      },
+      {
+        "type": "method",
+        "name": "writeReplace",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nObject writeReplace() {\n    return new SerializedForm(this);\n}"
+      }
+    ]
+  },
+  {
+    "name": "Builder",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.Builder",
+    "javadoc": "/**\n * A builder for creating immutable sorted map instances, especially {@code\n * public static final} maps (\"constant maps\"). Example: <pre>   {@code\n *\n *   static final ImmutableSortedMap<Integer, String> INT_TO_WORD =\n *       new ImmutableSortedMap.Builder<Integer, String>(Ordering.natural())\n *           .put(1, \"one\")\n *           .put(2, \"two\")\n *           .put(3, \"three\")\n *           .build();}</pre>\n *\n * <p>For <i>small</i> immutable sorted maps, the {@code ImmutableSortedMap.of()}\n * methods are even more convenient.\n *\n * <p>Builder instances can be reused - it is safe to call {@link #build}\n * multiple times to build multiple maps in series. Each map is a superset of\n * the maps created before it.\n *\n * @since 2.0\n */\n",
+    "code": "/**\n * A builder for creating immutable sorted map instances, especially {@code\n * public static final} maps (\"constant maps\"). Example: <pre>   {@code\n *\n *   static final ImmutableSortedMap<Integer, String> INT_TO_WORD =\n *       new ImmutableSortedMap.Builder<Integer, String>(Ordering.natural())\n *           .put(1, \"one\")\n *           .put(2, \"two\")\n *           .put(3, \"three\")\n *           .build();}</pre>\n *\n * <p>For <i>small</i> immutable sorted maps, the {@code ImmutableSortedMap.of()}\n * methods are even more convenient.\n *\n * <p>Builder instances can be reused - it is safe to call {@link #build}\n * multiple times to build multiple maps in series. Each map is a superset of\n * the maps created before it.\n *\n * @since 2.0\n */\npublic static class Builder<K, V> extends ImmutableMap.Builder<K, V> {\n\n    private final Comparator<? super K> comparator;\n\n    /**\n     * Creates a new builder. The returned builder is equivalent to the builder\n     * generated by {@link ImmutableSortedMap#orderedBy}.\n     */\n    @SuppressWarnings(\"unchecked\")\n    public Builder(Comparator<? super K> comparator) {\n        this.comparator = checkNotNull(comparator);\n    }\n\n    /**\n     * Associates {@code key} with {@code value} in the built map. Duplicate\n     * keys, according to the comparator (which might be the keys' natural\n     * order), are not allowed, and will cause {@link #build} to fail.\n     */\n    @Override\n    public Builder<K, V> put(K key, V value) {\n        super.put(key, value);\n        return this;\n    }\n\n    /**\n     * Adds the given {@code entry} to the map, making it immutable if\n     * necessary. Duplicate keys, according to the comparator (which might be\n     * the keys' natural order), are not allowed, and will cause {@link #build}\n     * to fail.\n     *\n     * @since 11.0\n     */\n    @Override\n    public Builder<K, V> put(Entry<? extends K, ? extends V> entry) {\n        super.put(entry);\n        return this;\n    }\n\n    /**\n     * Associates all of the given map's keys and values in the built map.\n     * Duplicate keys, according to the comparator (which might be the keys'\n     * natural order), are not allowed, and will cause {@link #build} to fail.\n     *\n     * @throws NullPointerException if any key or value in {@code map} is null\n     */\n    @Override\n    public Builder<K, V> putAll(Map<? extends K, ? extends V> map) {\n        super.putAll(map);\n        return this;\n    }\n\n    /**\n     * Adds all the given entries to the built map.  Duplicate keys, according\n     * to the comparator (which might be the keys' natural order), are not\n     * allowed, and will cause {@link #build} to fail.\n     *\n     * @throws NullPointerException if any key, value, or entry is null\n     * @since 19.0\n     */\n    @Beta\n    @Override\n    public Builder<K, V> putAll(Iterable<? extends Entry<? extends K, ? extends V>> entries) {\n        super.putAll(entries);\n        return this;\n    }\n\n    /**\n     * Throws an {@code UnsupportedOperationException}.\n     *\n     * @since 19.0\n     * @deprecated Unsupported by ImmutableSortedMap.Builder.\n     */\n    @Beta\n    @Override\n    @Deprecated\n    public Builder<K, V> orderEntriesByValue(Comparator<? super V> valueComparator) {\n        throw new UnsupportedOperationException(\"Not available on ImmutableSortedMap.Builder\");\n    }\n\n    /**\n     * Returns a newly-created immutable sorted map.\n     *\n     * @throws IllegalArgumentException if any two keys are equal according to\n     *     the comparator (which might be the keys' natural order)\n     */\n    @Override\n    public ImmutableSortedMap<K, V> build() {\n        switch(size) {\n            case 0:\n                return emptyMap(comparator);\n            case 1:\n                return of(comparator, entries[0].getKey(), entries[0].getValue());\n            default:\n                return fromEntries(comparator, false, entries, size);\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Builder",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comparator"
+          }
+        ],
+        "javadoc": "/**\n * Creates a new builder. The returned builder is equivalent to the builder\n * generated by {@link ImmutableSortedMap#orderedBy}.\n */\n",
+        "tags": [],
+        "code": "/**\n * Creates a new builder. The returned builder is equivalent to the builder\n * generated by {@link ImmutableSortedMap#orderedBy}.\n */\n@SuppressWarnings(\"unchecked\")\npublic Builder(Comparator<? super K> comparator) {\n    this.comparator = checkNotNull(comparator);\n}"
+      },
+      {
+        "type": "method",
+        "name": "put",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n * Associates {@code key} with {@code value} in the built map. Duplicate\n * keys, according to the comparator (which might be the keys' natural\n * order), are not allowed, and will cause {@link #build} to fail.\n */\n",
+        "tags": [],
+        "code": "/**\n * Associates {@code key} with {@code value} in the built map. Duplicate\n * keys, according to the comparator (which might be the keys' natural\n * order), are not allowed, and will cause {@link #build} to fail.\n */\n@Override\npublic Builder<K, V> put(K key, V value) {\n    super.put(key, value);\n    return this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "put",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Entry",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry"
+          }
+        ],
+        "javadoc": "/**\n * Adds the given {@code entry} to the map, making it immutable if\n * necessary. Duplicate keys, according to the comparator (which might be\n * the keys' natural order), are not allowed, and will cause {@link #build}\n * to fail.\n *\n * @since 11.0\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "11.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Adds the given {@code entry} to the map, making it immutable if\n * necessary. Duplicate keys, according to the comparator (which might be\n * the keys' natural order), are not allowed, and will cause {@link #build}\n * to fail.\n *\n * @since 11.0\n */\n@Override\npublic Builder<K, V> put(Entry<? extends K, ? extends V> entry) {\n    super.put(entry);\n    return this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "putAll",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "map"
+          }
+        ],
+        "javadoc": "/**\n * Associates all of the given map's keys and values in the built map.\n * Duplicate keys, according to the comparator (which might be the keys'\n * natural order), are not allowed, and will cause {@link #build} to fail.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any key or value in {@code map} is null"
+          }
+        ],
+        "code": "/**\n * Associates all of the given map's keys and values in the built map.\n * Duplicate keys, according to the comparator (which might be the keys'\n * natural order), are not allowed, and will cause {@link #build} to fail.\n *\n * @throws NullPointerException if any key or value in {@code map} is null\n */\n@Override\npublic Builder<K, V> putAll(Map<? extends K, ? extends V> map) {\n    super.putAll(map);\n    return this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "putAll",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Iterable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entries"
+          }
+        ],
+        "javadoc": "/**\n * Adds all the given entries to the built map.  Duplicate keys, according\n * to the comparator (which might be the keys' natural order), are not\n * allowed, and will cause {@link #build} to fail.\n *\n * @throws NullPointerException if any key, value, or entry is null\n * @since 19.0\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if any key, value, or entry is null"
+          },
+          {
+            "tag": "since",
+            "name": "19.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Adds all the given entries to the built map.  Duplicate keys, according\n * to the comparator (which might be the keys' natural order), are not\n * allowed, and will cause {@link #build} to fail.\n *\n * @throws NullPointerException if any key, value, or entry is null\n * @since 19.0\n */\n@Beta\n@Override\npublic Builder<K, V> putAll(Iterable<? extends Entry<? extends K, ? extends V>> entries) {\n    super.putAll(entries);\n    return this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "orderEntriesByValue",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Builder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Comparator",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "valueComparator"
+          }
+        ],
+        "javadoc": "/**\n * Throws an {@code UnsupportedOperationException}.\n *\n * @since 19.0\n * @deprecated Unsupported by ImmutableSortedMap.Builder.\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": "19.0",
+            "content": ""
+          },
+          {
+            "tag": "deprecated",
+            "name": "Unsupported",
+            "content": "by ImmutableSortedMap.Builder."
+          }
+        ],
+        "code": "/**\n * Throws an {@code UnsupportedOperationException}.\n *\n * @since 19.0\n * @deprecated Unsupported by ImmutableSortedMap.Builder.\n */\n@Beta\n@Override\n@Deprecated\npublic Builder<K, V> orderEntriesByValue(Comparator<? super V> valueComparator) {\n    throw new UnsupportedOperationException(\"Not available on ImmutableSortedMap.Builder\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "build",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableSortedMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns a newly-created immutable sorted map.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     the comparator (which might be the keys' natural order)\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if any two keys are equal according to the comparator (which might be the keys' natural order)"
+          }
+        ],
+        "code": "/**\n * Returns a newly-created immutable sorted map.\n *\n * @throws IllegalArgumentException if any two keys are equal according to\n *     the comparator (which might be the keys' natural order)\n */\n@Override\npublic ImmutableSortedMap<K, V> build() {\n    switch(size) {\n        case 0:\n            return emptyMap(comparator);\n        case 1:\n            return of(comparator, entries[0].getKey(), entries[0].getValue());\n        default:\n            return fromEntries(comparator, false, entries, size);\n    }\n}"
+      }
+    ]
+  },
+  {
+    "name": "EntrySet",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.EntrySet",
+    "javadoc": null,
+    "code": "@WeakOuter\nclass EntrySet extends ImmutableMapEntrySet<K, V> {\n\n    @Override\n    public UnmodifiableIterator<Entry<K, V>> iterator() {\n        return asList().iterator();\n    }\n\n    @Override\n    ImmutableList<Entry<K, V>> createAsList() {\n        return new ImmutableAsList<Entry<K, V>>() {\n\n            @Override\n            public Entry<K, V> get(int index) {\n                return Maps.immutableEntry(keySet.asList().get(index), valueList.get(index));\n            }\n\n            @Override\n            ImmutableCollection<Entry<K, V>> delegateCollection() {\n                return EntrySet.this;\n            }\n        };\n    }\n\n    @Override\n    ImmutableMap<K, V> map() {\n        return ImmutableSortedMap.this;\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "UnmodifiableIterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic UnmodifiableIterator<Entry<K, V>> iterator() {\n    return asList().iterator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "createAsList",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableList",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nImmutableList<Entry<K, V>> createAsList() {\n    return new ImmutableAsList<Entry<K, V>>() {\n\n        @Override\n        public Entry<K, V> get(int index) {\n            return Maps.immutableEntry(keySet.asList().get(index), valueList.get(index));\n        }\n\n        @Override\n        ImmutableCollection<Entry<K, V>> delegateCollection() {\n            return EntrySet.this;\n        }\n    };\n}"
+      },
+      {
+        "type": "method",
+        "name": "map",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ImmutableMap",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nImmutableMap<K, V> map() {\n    return ImmutableSortedMap.this;\n}"
+      }
+    ]
+  },
+  {
+    "name": "SerializedForm",
+    "package": "com.google.common.collect",
+    "qualified_name": "com.google.common.collect.SerializedForm",
+    "javadoc": "/**\n * Serialized type for all ImmutableSortedMap instances. It captures the\n * logical contents and they are reconstructed using public factory methods.\n * This ensures that the implementation types remain as implementation\n * details.\n */\n",
+    "code": "/**\n * Serialized type for all ImmutableSortedMap instances. It captures the\n * logical contents and they are reconstructed using public factory methods.\n * This ensures that the implementation types remain as implementation\n * details.\n */\nprivate static class SerializedForm extends ImmutableMap.SerializedForm {\n\n    private final Comparator<Object> comparator;\n\n    @SuppressWarnings(\"unchecked\")\n    SerializedForm(ImmutableSortedMap<?, ?> sortedMap) {\n        super(sortedMap);\n        comparator = (Comparator<Object>) sortedMap.comparator();\n    }\n\n    @Override\n    Object readResolve() {\n        Builder<Object, Object> builder = new Builder<Object, Object>(comparator);\n        return createMap(builder);\n    }\n\n    private static final long serialVersionUID = 0;\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "SerializedForm",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ImmutableSortedMap",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "sortedMap"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@SuppressWarnings(\"unchecked\")\nSerializedForm(ImmutableSortedMap<?, ?> sortedMap) {\n    super(sortedMap);\n    comparator = (Comparator<Object>) sortedMap.comparator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "readResolve",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\nObject readResolve() {\n    Builder<Object, Object> builder = new Builder<Object, Object>(comparator);\n    return createMap(builder);\n}"
+      }
+    ]
+  }
+]

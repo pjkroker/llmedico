@@ -1,0 +1,185 @@
+[
+  {
+    "name": "MultiGraph",
+    "package": "org.graphstream.graph.implementations",
+    "qualified_name": "org.graphstream.graph.implementations.MultiGraph",
+    "javadoc": "/**\n * A graph implementation that supports multiple edges between two nodes.\n */",
+    "code": "/**\n * A graph implementation that supports multiple edges between two nodes.\n */\npublic class MultiGraph extends AdjacencyListGraph {\n\n    /**\n     * Creates an empty graph.\n     *\n     * @param id\n     *            Unique identifier of the graph.\n     * @param strictChecking\n     *            If true any non-fatal error throws an exception.\n     * @param autoCreate\n     *            If true (and strict checking is false), nodes are\n     *            automatically created when referenced when creating a edge,\n     *            even if not yet inserted in the graph.\n     * @param initialNodeCapacity\n     *            Initial capacity of the node storage data structures. Use this\n     *            if you know the approximate maximum number of nodes of the\n     *            graph. The graph can grow beyond this limit, but storage\n     *            reallocation is expensive operation.\n     * @param initialEdgeCapacity\n     *            Initial capacity of the edge storage data structures. Use this\n     *            if you know the approximate maximum number of edges of the\n     *            graph. The graph can grow beyond this limit, but storage\n     *            reallocation is expensive operation.\n     */\n    public MultiGraph(String id, boolean strictChecking, boolean autoCreate, int initialNodeCapacity, int initialEdgeCapacity) {\n        super(id, strictChecking, autoCreate, initialNodeCapacity, initialEdgeCapacity);\n        // All we need to do is to change the node factory\n        setNodeFactory(new NodeFactory<MultiNode>() {\n\n            public MultiNode newInstance(String id, Graph graph) {\n                return new MultiNode((AbstractGraph) graph, id);\n            }\n        });\n    }\n\n    /**\n     * Creates an empty graph with default edge and node capacity.\n     *\n     * @param id\n     *            Unique identifier of the graph.\n     * @param strictChecking\n     *            If true any non-fatal error throws an exception.\n     * @param autoCreate\n     *            If true (and strict checking is false), nodes are\n     *            automatically created when referenced when creating a edge,\n     *            even if not yet inserted in the graph.\n     */\n    public MultiGraph(String id, boolean strictChecking, boolean autoCreate) {\n        this(id, strictChecking, autoCreate, DEFAULT_NODE_CAPACITY, DEFAULT_EDGE_CAPACITY);\n    }\n\n    /**\n     * Creates an empty graph with strict checking and without auto-creation.\n     *\n     * @param id\n     *            Unique identifier of the graph.\n     */\n    public MultiGraph(String id) {\n        this(id, true, false);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "MultiGraph",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "id"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "strictChecking"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "autoCreate"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialNodeCapacity"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialEdgeCapacity"
+          }
+        ],
+        "javadoc": "/**\n * Creates an empty graph.\n *\n * @param id\n *            Unique identifier of the graph.\n * @param strictChecking\n *            If true any non-fatal error throws an exception.\n * @param autoCreate\n *            If true (and strict checking is false), nodes are\n *            automatically created when referenced when creating a edge,\n *            even if not yet inserted in the graph.\n * @param initialNodeCapacity\n *            Initial capacity of the node storage data structures. Use this\n *            if you know the approximate maximum number of nodes of the\n *            graph. The graph can grow beyond this limit, but storage\n *            reallocation is expensive operation.\n * @param initialEdgeCapacity\n *            Initial capacity of the edge storage data structures. Use this\n *            if you know the approximate maximum number of edges of the\n *            graph. The graph can grow beyond this limit, but storage\n *            reallocation is expensive operation.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "id",
+            "content": "Unique identifier of the graph.",
+            "assertion": "assert id != null && !id.isEmpty();",
+            "description": "id must not be null or empty"
+          },
+          {
+            "tag": "param",
+            "name": "strictChecking",
+            "content": "If true any non-fatal error throws an exception.",
+            "assertion": "assert strictChecking == true || strictChecking == false;",
+            "description": "strictChecking must be a boolean value"
+          },
+          {
+            "tag": "param",
+            "name": "autoCreate",
+            "content": "If true (and strict checking is false), nodes are\n           automatically created when referenced when creating a edge,\n           even if not yet inserted in the graph.",
+            "assertion": "assert autoCreate == true || autoCreate == false;",
+            "description": "autoCreate must be a boolean value"
+          },
+          {
+            "tag": "param",
+            "name": "initialNodeCapacity",
+            "content": "Initial capacity of the node storage data structures. Use this\n           if you know the approximate maximum number of nodes of the\n           graph. The graph can grow beyond this limit, but storage\n           reallocation is expensive operation.",
+            "assertion": "assert initialNodeCapacity >= 0;",
+            "description": "initialNodeCapacity must be a non-negative integer"
+          },
+          {
+            "tag": "param",
+            "name": "initialEdgeCapacity",
+            "content": "Initial capacity of the edge storage data structures. Use this\n           if you know the approximate maximum number of edges of the\n           graph. The graph can grow beyond this limit, but storage\n           reallocation is expensive operation.",
+            "assertion": "assert initialEdgeCapacity >= 0;",
+            "description": "initialEdgeCapacity must be a non-negative integer"
+          }
+        ],
+        "code": "/**\n * Creates an empty graph.\n *\n * @param id\n *            Unique identifier of the graph.\n * @param strictChecking\n *            If true any non-fatal error throws an exception.\n * @param autoCreate\n *            If true (and strict checking is false), nodes are\n *            automatically created when referenced when creating a edge,\n *            even if not yet inserted in the graph.\n * @param initialNodeCapacity\n *            Initial capacity of the node storage data structures. Use this\n *            if you know the approximate maximum number of nodes of the\n *            graph. The graph can grow beyond this limit, but storage\n *            reallocation is expensive operation.\n * @param initialEdgeCapacity\n *            Initial capacity of the edge storage data structures. Use this\n *            if you know the approximate maximum number of edges of the\n *            graph. The graph can grow beyond this limit, but storage\n *            reallocation is expensive operation.\n */\npublic MultiGraph(String id, boolean strictChecking, boolean autoCreate, int initialNodeCapacity, int initialEdgeCapacity) {\n    super(id, strictChecking, autoCreate, initialNodeCapacity, initialEdgeCapacity);\n    // All we need to do is to change the node factory\n    setNodeFactory(new NodeFactory<MultiNode>() {\n\n        public MultiNode newInstance(String id, Graph graph) {\n            return new MultiNode((AbstractGraph) graph, id);\n        }\n    });\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "MultiGraph",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "id"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "strictChecking"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "autoCreate"
+          }
+        ],
+        "javadoc": "/**\n * Creates an empty graph with default edge and node capacity.\n *\n * @param id\n *            Unique identifier of the graph.\n * @param strictChecking\n *            If true any non-fatal error throws an exception.\n * @param autoCreate\n *            If true (and strict checking is false), nodes are\n *            automatically created when referenced when creating a edge,\n *            even if not yet inserted in the graph.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "id",
+            "content": "Unique identifier of the graph.",
+            "assertion": "assert args[0] != null;",
+            "description": "Unique identifier of the graph."
+          },
+          {
+            "tag": "param",
+            "name": "strictChecking",
+            "content": "If true any non-fatal error throws an exception.",
+            "assertion": "assert (args[1] == false) || (args[1] == true);",
+            "description": "If true any non-fatal error throws an exception."
+          },
+          {
+            "tag": "param",
+            "name": "autoCreate",
+            "content": "If true (and strict checking is false), nodes are\n           automatically created when referenced when creating a edge,\n           even if not yet inserted in the graph.",
+            "assertion": "assert (args[2] == false) || (args[2] == true);",
+            "description": "If true (and strict checking is false), nodes are\\n           automatically created when referenced when creating a edge,\\n           even if not yet inserted in the graph."
+          }
+        ],
+        "code": "/**\n * Creates an empty graph with default edge and node capacity.\n *\n * @param id\n *            Unique identifier of the graph.\n * @param strictChecking\n *            If true any non-fatal error throws an exception.\n * @param autoCreate\n *            If true (and strict checking is false), nodes are\n *            automatically created when referenced when creating a edge,\n *            even if not yet inserted in the graph.\n */\npublic MultiGraph(String id, boolean strictChecking, boolean autoCreate) {\n    this(id, strictChecking, autoCreate, DEFAULT_NODE_CAPACITY, DEFAULT_EDGE_CAPACITY);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "MultiGraph",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "id"
+          }
+        ],
+        "javadoc": "/**\n * Creates an empty graph with strict checking and without auto-creation.\n *\n * @param id\n *            Unique identifier of the graph.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "id",
+            "content": "Unique identifier of the graph.",
+            "assertion": "assert args[0] != null;",
+            "description": "Unique identifier of the graph."
+          }
+        ],
+        "code": "/**\n * Creates an empty graph with strict checking and without auto-creation.\n *\n * @param id\n *            Unique identifier of the graph.\n */\npublic MultiGraph(String id) {\n    this(id, true, false);\n}"
+      }
+    ]
+  }
+]

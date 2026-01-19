@@ -1,0 +1,419 @@
+[
+  {
+    "signature": "UnicodeEscaper()",
+    "name": "UnicodeEscaper",
+    "containingClass": {
+      "qualifiedName": "com.google.common.escape.UnicodeEscaper",
+      "name": "UnicodeEscaper",
+      "isArray": false
+    },
+    "targetClass": "com.google.common.escape.UnicodeEscaper",
+    "isVarArgs": false,
+    "parameters": [],
+    "paramTags": [],
+    "throwsTags": []
+  },
+  {
+    "signature": "escape(int cp)",
+    "name": "escape",
+    "containingClass": {
+      "qualifiedName": "com.google.common.escape.UnicodeEscaper",
+      "name": "UnicodeEscaper",
+      "isArray": false
+    },
+    "targetClass": "com.google.common.escape.UnicodeEscaper",
+    "isVarArgs": false,
+    "parameters": [
+      {
+        "type": {
+          "qualifiedName": "int",
+          "name": "int",
+          "isArray": false
+        },
+        "name": "cp"
+      }
+    ],
+    "returnType": {
+      "qualifiedName": "char",
+      "name": "char",
+      "isArray": true
+    },
+    "paramTags": [
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "int",
+            "name": "int",
+            "isArray": false
+          },
+          "name": "cp"
+        },
+        "comment": "the Unicode code point to escape if necessary",
+        "kind": "PARAM",
+        "condition": "(cp >= 0) && (cp <= Character.MAX_CODE_POINT)"
+      }
+    ],
+    "returnTag": {
+      "comment": "replacement characters, or {@code null} if no escaping was needed",
+      "kind": "RETURN",
+      "condition": "(methodResultID == null) || methodResultID.length > 0"
+    },
+    "throwsTags": []
+  },
+  {
+    "signature": "nextEscapeIndex(None csq,int start,int end)",
+    "name": "nextEscapeIndex",
+    "containingClass": {
+      "qualifiedName": "com.google.common.escape.UnicodeEscaper",
+      "name": "UnicodeEscaper",
+      "isArray": false
+    },
+    "targetClass": "com.google.common.escape.UnicodeEscaper",
+    "isVarArgs": false,
+    "parameters": [
+      {
+        "type": {
+          "qualifiedName": null,
+          "name": "CharSequence",
+          "isArray": false
+        },
+        "name": "csq"
+      },
+      {
+        "type": {
+          "qualifiedName": "int",
+          "name": "int",
+          "isArray": false
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualifiedName": "int",
+          "name": "int",
+          "isArray": false
+        },
+        "name": "end"
+      }
+    ],
+    "returnType": {
+      "qualifiedName": "int",
+      "name": "int",
+      "isArray": false
+    },
+    "paramTags": [
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": null,
+            "name": "CharSequence",
+            "isArray": false
+          },
+          "name": "csq"
+        },
+        "comment": "a sequence of characters",
+        "kind": "PARAM",
+        "condition": "csq != null"
+      },
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "int",
+            "name": "int",
+            "isArray": false
+          },
+          "name": "start"
+        },
+        "comment": "the index of the first character to be scanned",
+        "kind": "PARAM",
+        "condition": "start >= 0"
+      },
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "int",
+            "name": "int",
+            "isArray": false
+          },
+          "name": "end"
+        },
+        "comment": "the index immediately after the last character to be scanned",
+        "kind": "PARAM",
+        "condition": "end > 0 && end <= csq.length()"
+      }
+    ],
+    "throwsTags": [
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.IllegalArgumentException",
+          "name": "IllegalArgumentException",
+          "isArray": false
+        },
+        "codeTags": [
+          "csq"
+        ],
+        "comment": "if the scanned sub-sequence of {@code csq} contains invalid surrogate pairs",
+        "kind": "THROWS",
+        "condition": "!isValidSurrogatePair(args[0], args[1], args[2])"
+      }
+    ]
+  },
+  {
+    "signature": "escape(None string)",
+    "name": "escape",
+    "containingClass": {
+      "qualifiedName": "com.google.common.escape.UnicodeEscaper",
+      "name": "UnicodeEscaper",
+      "isArray": false
+    },
+    "targetClass": "com.google.common.escape.UnicodeEscaper",
+    "isVarArgs": false,
+    "parameters": [
+      {
+        "type": {
+          "qualifiedName": null,
+          "name": "String",
+          "isArray": false
+        },
+        "name": "string"
+      }
+    ],
+    "returnType": {
+      "qualifiedName": null,
+      "name": "String",
+      "isArray": false
+    },
+    "paramTags": [
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": null,
+            "name": "String",
+            "isArray": false
+          },
+          "name": "string"
+        },
+        "comment": "the literal string to be escaped",
+        "kind": "PARAM",
+        "condition": "(args[0] == null) == false"
+      }
+    ],
+    "returnTag": {
+      "comment": "the escaped form of {@code string}",
+      "kind": "RETURN",
+      "condition": "methodResultID != null && !methodResultID.equals(receiverObjectID.escape(string))"
+    },
+    "throwsTags": [
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.NullPointerException",
+          "name": "NullPointerException",
+          "isArray": false
+        },
+        "codeTags": [
+          "null",
+          "string"
+        ],
+        "comment": "if string is null",
+        "kind": "THROWS",
+        "condition": "args[0] == null"
+      },
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.IllegalArgumentException",
+          "name": "IllegalArgumentException",
+          "isArray": false
+        },
+        "codeTags": [],
+        "comment": "if invalid surrogate characters are encountered",
+        "kind": "THROWS",
+        "condition": "!isValidUtf16(args[0])"
+      }
+    ]
+  },
+  {
+    "signature": "escapeSlow(None s,int index)",
+    "name": "escapeSlow",
+    "containingClass": {
+      "qualifiedName": "com.google.common.escape.UnicodeEscaper",
+      "name": "UnicodeEscaper",
+      "isArray": false
+    },
+    "targetClass": "com.google.common.escape.UnicodeEscaper",
+    "isVarArgs": false,
+    "parameters": [
+      {
+        "type": {
+          "qualifiedName": null,
+          "name": "String",
+          "isArray": false
+        },
+        "name": "s"
+      },
+      {
+        "type": {
+          "qualifiedName": "int",
+          "name": "int",
+          "isArray": false
+        },
+        "name": "index"
+      }
+    ],
+    "returnType": {
+      "qualifiedName": null,
+      "name": "String",
+      "isArray": false
+    },
+    "paramTags": [
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": null,
+            "name": "String",
+            "isArray": false
+          },
+          "name": "s"
+        },
+        "comment": "the literal string to be escaped",
+        "kind": "PARAM",
+        "condition": ""
+      },
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "int",
+            "name": "int",
+            "isArray": false
+          },
+          "name": "index"
+        },
+        "comment": "the index to start escaping from",
+        "kind": "PARAM",
+        "condition": ""
+      }
+    ],
+    "returnTag": {
+      "comment": "the escaped form of {@code string}",
+      "kind": "RETURN",
+      "condition": "methodResultID != null"
+    },
+    "throwsTags": [
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.NullPointerException",
+          "name": "NullPointerException",
+          "isArray": false
+        },
+        "codeTags": [
+          "null",
+          "s"
+        ],
+        "comment": "if string is null",
+        "kind": "THROWS",
+        "condition": "args[0]==null"
+      },
+      {
+        "exceptionType": {
+          "qualifiedName": "java.lang.IllegalArgumentException",
+          "name": "IllegalArgumentException",
+          "isArray": false
+        },
+        "codeTags": [
+          "s"
+        ],
+        "comment": "if invalid surrogate characters are encountered",
+        "kind": "THROWS",
+        "condition": "!isValidSurrogateCharacters(args[0])"
+      }
+    ]
+  },
+  {
+    "signature": "codePointAt(None seq,int index,int end)",
+    "name": "codePointAt",
+    "containingClass": {
+      "qualifiedName": "com.google.common.escape.UnicodeEscaper",
+      "name": "UnicodeEscaper",
+      "isArray": false
+    },
+    "targetClass": "com.google.common.escape.UnicodeEscaper",
+    "isVarArgs": false,
+    "parameters": [
+      {
+        "type": {
+          "qualifiedName": null,
+          "name": "CharSequence",
+          "isArray": false
+        },
+        "name": "seq"
+      },
+      {
+        "type": {
+          "qualifiedName": "int",
+          "name": "int",
+          "isArray": false
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualifiedName": "int",
+          "name": "int",
+          "isArray": false
+        },
+        "name": "end"
+      }
+    ],
+    "returnType": {
+      "qualifiedName": "int",
+      "name": "int",
+      "isArray": false
+    },
+    "paramTags": [
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": null,
+            "name": "CharSequence",
+            "isArray": false
+          },
+          "name": "seq"
+        },
+        "comment": "the sequence of characters from which to decode the code point",
+        "kind": "PARAM",
+        "condition": ""
+      },
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "int",
+            "name": "int",
+            "isArray": false
+          },
+          "name": "index"
+        },
+        "comment": "the index of the first character to decode",
+        "kind": "PARAM",
+        "condition": ""
+      },
+      {
+        "parameter": {
+          "type": {
+            "qualifiedName": "int",
+            "name": "int",
+            "isArray": false
+          },
+          "name": "end"
+        },
+        "comment": "the index beyond the last valid character to decode",
+        "kind": "PARAM",
+        "condition": ""
+      }
+    ],
+    "returnTag": {
+      "comment": "Unicode code point for the given index or the negated value of the trailing high surrogate character at the end of the sequence",
+      "kind": "RETURN",
+      "condition": ""
+    },
+    "throwsTags": []
+  }
+]
