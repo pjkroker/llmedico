@@ -1,0 +1,19 @@
+class,method,kind_exp,name_exp,kind_gen,name_gen,expected,generated,relation,reason
+Strings,nullToEmpty(string),ConditionKind.PARAM,string,ConditionKind.PARAM,string,,assert args[0] != null;,AssertionRelation.UNEXPECTED,
+Strings,nullToEmpty(string),ConditionKind.RETURN,,ConditionKind.RETURN,,"assert args[0]!=null ? methodResultID.equals(args[0]) : methodResultID.equals("""") ;","assert methodResultID == (args[0] != null ? args[0] : """");",AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected token: )
+Strings,emptyToNull(string),ConditionKind.PARAM,string,ConditionKind.PARAM,string,,assert (args[0] == null) == false;,AssertionRelation.UNEXPECTED,
+Strings,emptyToNull(string),ConditionKind.RETURN,,ConditionKind.RETURN,,assert args[0]==null || args[0].isEmpty() ? methodResultID==null : methodResultID.equals(args[0]);,assert methodResultID == (args[0] != null && !args[0].isEmpty());,AssertionRelation.UNSUPPORTED,Variable 'methodResultID' used as both Type.REF and Type.BOOL
+Strings,isNullOrEmpty(string),ConditionKind.PARAM,string,ConditionKind.PARAM,string,,assert (args[0] == null) || args[0].isEmpty();,AssertionRelation.UNEXPECTED,
+Strings,isNullOrEmpty(string),ConditionKind.RETURN,,ConditionKind.RETURN,,assert args[0]==null || args[0].isEmpty() ? methodResultID==true;,assert methodResultID == (args[0] == null || args[0].isEmpty());,AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected end
+Strings,padStart(string minLength padChar),ConditionKind.PARAM,string,ConditionKind.PARAM,string,,assert (args[0] == null) == false;,AssertionRelation.UNEXPECTED,
+Strings,padStart(string minLength padChar),ConditionKind.PARAM,minLength,ConditionKind.PARAM,minLength,,assert (args[1] == null) == false;,AssertionRelation.UNEXPECTED,
+Strings,padStart(string minLength padChar),ConditionKind.PARAM,padChar,ConditionKind.PARAM,padChar,,assert (args[2] == null) == false;,AssertionRelation.UNEXPECTED,
+Strings,padStart(string minLength padChar),ConditionKind.RETURN,,ConditionKind.RETURN,,,"assert methodResultID == receiverObjectID.padStart(args[0], args[1], args[2]);",AssertionRelation.UNEXPECTED,
+Strings,padEnd(string minLength padChar),ConditionKind.PARAM,string,ConditionKind.PARAM,string,,assert (args[0] == null) == false;,AssertionRelation.UNEXPECTED,
+Strings,padEnd(string minLength padChar),ConditionKind.PARAM,minLength,ConditionKind.PARAM,minLength,,assert (args[1] < 0) == false;,AssertionRelation.UNEXPECTED,
+Strings,padEnd(string minLength padChar),ConditionKind.PARAM,padChar,ConditionKind.PARAM,padChar,,assert (args[2] == null) == false;,AssertionRelation.UNEXPECTED,
+Strings,padEnd(string minLength padChar),ConditionKind.RETURN,,ConditionKind.RETURN,,,"assert methodResultID == receiverObjectID.padEnd(args[0], args[1], args[2]);",AssertionRelation.UNEXPECTED,
+Strings,repeat(string count),ConditionKind.PARAM,string,ConditionKind.PARAM,string,assert args[0]!=null;,assert (args[0] == null) == false;,AssertionRelation.EQUIVALENT,
+Strings,repeat(string count),ConditionKind.PARAM,count,ConditionKind.PARAM,count,assert (args[1]<0) == false;,assert ((int) args[1] < 0) == false;,AssertionRelation.EQUIVALENT,
+Strings,repeat(string count),ConditionKind.THROWS,IllegalArgumentException,ConditionKind.THROWS,IllegalArgumentException,assert args[1]<0;,assert args[1] < 0;,AssertionRelation.IDENTICAL,
+Strings,repeat(string count),ConditionKind.RETURN,,ConditionKind.RETURN,,"assert args[1]==0 ? methodResultID.equals("""");","assert methodResultID.equals(receiverObjectID.repeat(args[0], args[1]));",AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected end

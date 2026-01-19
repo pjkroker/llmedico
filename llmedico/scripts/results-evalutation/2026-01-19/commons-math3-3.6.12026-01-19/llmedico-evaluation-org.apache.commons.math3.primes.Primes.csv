@@ -1,0 +1,9 @@
+class,method,kind_exp,name_exp,kind_gen,name_gen,expected,generated,relation,reason
+Primes,isPrime(n),ConditionKind.PARAM,n,ConditionKind.PARAM,n,,assert (args[0] < 2) == false;,AssertionRelation.UNEXPECTED,
+Primes,isPrime(n),ConditionKind.RETURN,,ConditionKind.RETURN,,assert args[0]<2 ? methodResultID==false;,assert methodResultID == (args[0] >= 2) && args[0] % (args[0] >= 2 ? 2 : nextPrime(args[0])) != 0;,AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected end
+Primes,nextPrime(n),ConditionKind.PARAM,n,ConditionKind.PARAM,n,assert args[0]>0;,assert (args[0] < 0) == false;,AssertionRelation.STRONGER,
+Primes,nextPrime(n),ConditionKind.THROWS,MathIllegalArgumentException,ConditionKind.THROWS,MathIllegalArgumentException,assert args[0]<0;,assert args[0] < 0;,AssertionRelation.IDENTICAL,
+Primes,nextPrime(n),ConditionKind.RETURN,,ConditionKind.RETURN,,assert true?methodResultID>=args[0];,assert methodResultID >= args[0];,AssertionRelation.UNSUPPORTED,Error during parsing: Unexpected end
+Primes,primeFactors(n),ConditionKind.PARAM,n,ConditionKind.PARAM,n,assert args[0]>=2;,assert args[0] >= 2;,AssertionRelation.IDENTICAL,
+Primes,primeFactors(n),ConditionKind.THROWS,MathIllegalArgumentException,ConditionKind.THROWS,MathIllegalArgumentException,assert args[0]<2;,assert args[0] < 2;,AssertionRelation.IDENTICAL,
+Primes,primeFactors(n),ConditionKind.RETURN,,ConditionKind.RETURN,,,assert methodResultID instanceof java.util.List && ((java.util.List)methodResultID).size() > 0; ,AssertionRelation.UNEXPECTED,
