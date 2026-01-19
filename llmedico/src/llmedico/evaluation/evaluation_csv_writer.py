@@ -1,8 +1,10 @@
 import csv
+import logging
+import re
 from pathlib import Path
 
 from llmedico.evaluation.evaluation_row import EvaluationRow
-
+logger = logging.getLogger(__name__)
 
 class EvaluationCSVWriter:
     def __init__(self, path: Path):
@@ -26,9 +28,19 @@ class EvaluationCSVWriter:
                 "relation",
                 "reason",
             ],
+            quoting=csv.QUOTE_ALL,
         )
         self._writer.writeheader()
         return self
+
+    CONTROL_CHARS = re.compile(
+        r"[\x00-\x08\x0B\x0C\x0E-\x1F\u2028\u2029]"
+    )
+
+    def sanitize(self, s: str) -> str:
+        sanitzed = self.CONTROL_CHARS.sub("", s)
+        if str != sanitzed: logger.debug(f"assertion contained an illegal character: {sanitzed}")
+        return sanitzed
 
     def write(self, row):
         self._writer.writerow({
@@ -39,9 +51,9 @@ class EvaluationCSVWriter:
             "kind_gen": row.kind_gen,
             "name_gen": row.name_gen,
             "expected": row.expected,
-            "generated": row.generated,
+            "generated": self.sanitize(row.generated),
             "relation": row.relation,
-            "reason": row.reason or "",
+            "reason": row.reason,
         })
 
     def __exit__(self, exc_type, exc, tb):
