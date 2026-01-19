@@ -51,23 +51,28 @@ class Z3Translator:
 
         return None
 
-    def translate(self, expr: Expr) -> BoolRef:
+    def translate(self, expr: Expr, return_type: model_ast=None) -> BoolRef:
+        if return_type is not None: # set return type once before entering recursive translation
+            self._expect_var_type(Var("methodResultID"), return_type)
+        return self._translate(expr)
+
+    def _translate(self, expr: Expr) -> BoolRef:
         if isinstance(expr, AstAnd):
             for op in (expr.left, expr.right):
                 if isinstance(op, Var):
                     self._expect_var_type(op, Type.BOOL)
-            return And(self.translate(expr.left), self.translate(expr.right))
+            return And(self._translate(expr.left), self._translate(expr.right))
 
         if isinstance(expr, AstOr):
             for op in (expr.left, expr.right):
                 if isinstance(op, Var):
                     self._expect_var_type(op, Type.BOOL)
-            return Or(self.translate(expr.left), self.translate(expr.right))
+            return Or(self._translate(expr.left), self._translate(expr.right))
 
         if isinstance(expr, AstNot):
             if isinstance(expr.expr, Var):
                 self._expect_var_type(expr.expr, Type.BOOL)
-            return Not(self.translate(expr.expr))
+            return Not(self._translate(expr.expr))
 
         if isinstance(expr, Var):
             #for lambda
@@ -99,50 +104,50 @@ class Z3Translator:
         if isinstance(expr, UnaryMinus):
             if isinstance(expr.expr, Var):
                 self._expect_var_type(expr.expr, Type.INT)
-            return -self.translate(expr.expr) #*-1
+            return -self._translate(expr.expr) #*-1
 
         if isinstance(expr, Add):
             expect(expr.left, Type.INT, self)
             expect(expr.right, Type.INT, self)
-            return self.translate(expr.left) + self.translate(expr.right)
+            return self._translate(expr.left) + self._translate(expr.right)
 
         if isinstance(expr, Sub):
             expect(expr.left, Type.INT, self)
             expect(expr.right, Type.INT, self)
-            return self.translate(expr.left) - self.translate(expr.right)
+            return self._translate(expr.left) - self._translate(expr.right)
 
         if isinstance(expr, Mul):
             expect(expr.left, Type.INT, self)
             expect(expr.right, Type.INT, self)
-            return self.translate(expr.left) * self.translate(expr.right)
+            return self._translate(expr.left) * self._translate(expr.right)
 
         if isinstance(expr, Div):
             expect(expr.left, Type.INT, self)
             expect(expr.right, Type.INT,self)
 
-            l = self.translate(expr.left)
-            r = self.translate(expr.right)
+            l = self._translate(expr.left)
+            r = self._translate(expr.right)
             return l / r  # Z3 Int division
 
         if isinstance(expr, AstMod):
             expect(expr.left, Type.INT, self)
             expect(expr.right, Type.INT, self)
 
-            l = self.translate(expr.left)
-            r = self.translate(expr.right)
+            l = self._translate(expr.left)
+            r = self._translate(expr.right)
 
             return l % r #Mod(l, r)
 
         if isinstance(expr, Method):
             #for lambda
             if expr.name == "stream" and len(expr.parameters) == 0:
-                return self.translate(expr.receiver)
+                return self._translate(expr.receiver)
             # anyMatch / allMatch / noneMatch
             if expr.name in MATCH_METHODS:
                 if len(expr.parameters) != 1 or not isinstance(expr.parameters[0], LambdaExpr):
                     raise TypeError(f"{expr.name} expects a single lambda")
 
-                collection = self.translate(expr.receiver)
+                collection = self._translate(expr.receiver)
                 lam: LambdaExpr = expr.parameters[0]
 
                 # fresh index variable
@@ -159,7 +164,7 @@ class Z3Translator:
 
                 self.ctx.push_env()
                 self.ctx.bind(lam.param, elem)
-                predicate = self.translate(lam.body)
+                predicate = self._translate(lam.body)
                 self.ctx.pop_env()
 
                 length = self.ctx.length(collection)
@@ -180,13 +185,13 @@ class Z3Translator:
                 if isinstance(arg, Var):
                     # heuristic: predicate methods usually take refs
                     self._expect_var_type(arg, Type.REF)
-            args = [self.translate(a) for a in expr.parameters]
+            args = [self._translate(a) for a in expr.parameters]
 
             if expr.receiver is not None and isinstance(expr.receiver, Var):
                 self._expect_var_type(expr.receiver, Type.REF)
             # translate receiver if present
             if expr.receiver is not None:
-                receiver = self.translate(expr.receiver)
+                receiver = self._translate(expr.receiver)
                 all_args = [receiver] + args
                 arg_sorts = [receiver.sort()] + [a.sort() for a in args]
             else:
@@ -240,8 +245,8 @@ class Z3Translator:
                     if isinstance(expr.right, Var):
                         expect(expr.right, Type.REF, self)
 
-                    l = self.translate(expr.left)
-                    r = self.translate(expr.right)
+                    l = self._translate(expr.left)
+                    r = self._translate(expr.right)
                     return l == r if expr.op == "==" else l != r
 
                 # If both sides have known (non-var) types they must match
@@ -254,16 +259,16 @@ class Z3Translator:
                 if rt is not None:
                     expect(expr.left, rt, self)
 
-                l = self.translate(expr.left)
-                r = self.translate(expr.right)
+                l = self._translate(expr.left)
+                r = self._translate(expr.right)
 
                 return l == r if expr.op == "==" else l != r
             else:  # < <= > >=
                 expect(expr.left, Type.INT, self)
                 expect(expr.right, Type.INT, self)
 
-                l = self.translate(expr.left)
-                r = self.translate(expr.right)
+                l = self._translate(expr.left)
+                r = self._translate(expr.right)
 
                 return {
                     "<": l < r,
@@ -283,15 +288,15 @@ class Z3Translator:
             if t_else is not None:
                 expect(expr.then, t_else, self)
 
-            c = self.translate(expr.cond)
-            t = self.translate(expr.then)
-            e = self.translate(expr.otherwise)
+            c = self._translate(expr.cond)
+            t = self._translate(expr.then)
+            e = self._translate(expr.otherwise)
 
             return If(c, t, e)
 
         if isinstance(expr, InstanceOf):
             expect(expr.expr, Type.REF, self)
-            obj = self.translate(expr.expr)
+            obj = self._translate(expr.expr)
 
             f = self.ctx.get_func(
                 f"instanceof_{expr.type_name.replace('.', '_')}",
