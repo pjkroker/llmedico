@@ -1,3 +1,5 @@
+from _ast import Constant
+
 from llmedico.z3_evaluation.model_ast import *
 import logging
 
@@ -6,7 +8,7 @@ logger = logging.getLogger(__name__)
 class UnsupportedAssertion(Exception):
     pass
 
-class Normalizer:
+class AstNormalizer:
 
     def normalize_expr(self, expr: Expr) -> Optional[Expr]:
 
@@ -15,11 +17,7 @@ class Normalizer:
 
             if expr.name == "Arrays" and isinstance(expr.receiver, Method) and expr.parameters == []: # java.utils.Array = Method=(receiver=(Method(receiver=Var(name='java'), name='util', parameters=[]), name='Arrays', parameters=[])
                 return self.normalize_expr(expr.receiver)
-                # normalized_reciever = self.normalize_expr(expr.receiver)
-                # if normalized_reciever is None:
-                #     return None
-                # else:
-                #     return normalized_reciever
+
 
             if expr.name == "util" and isinstance(expr.receiver, Var) and expr.receiver.name == "java": # java.utils = Method(receiver=Var(name='java'), name='util', parameters=[])
                 return None
@@ -31,12 +29,10 @@ class Normalizer:
 
                 if not receiver and parameters and len(parameters) == 1: #stream(args[0]) -> args[0].stream()
                     normalized_method = Method(receiver=parameters[0], name=expr.name, parameters=[])
-                    logger.warning(f"Normalized Arrays.stream()\nbefore: {expr}\nafter: {normalized_method}")
+                    logger.warning(f"Normalized java.utils.Arrays.stream()\nbefore: {expr}\nafter: {normalized_method}")
                     return normalized_method
                 elif receiver and parameters and len(parameters) == 1: # java.util.Arrays.stream(args[0])
-                    #normalized_receiver = self.normalize_expr(expr.receiver)
-                    # if receiver is None: # java.util.Arrays -> None (remove reciever)
-                    #     return None
+
                     return Method(receiver=receiver, name=expr.name, parameters=expr.parameters)
 
             elif isinstance(expr.receiver, Method): #java.utils.Arrays.stream(args[0]).anyMatch(e -> e==null)
@@ -45,19 +41,40 @@ class Normalizer:
 
             return expr
 
+        if isinstance(expr, InstanceOf):
+            logger.warning(f"Normalized FQN in instanceof operator: \n {expr}")
+            return InstanceOf(expr=expr.expr, type_name=expr.type_name.split(".")[-1])
 
-        # # Normalize rest
-        # if isinstance(expr, Conditional):
-        #     return Conditional(self.normalize_expr(expr.cond), self.normalize_expr(expr.then),
-        #                        self.normalize_expr(expr.otherwise))
-        #
-        # # Binary operators
-        # if isinstance(expr, (Add, Sub, Mul, Div, Mod, Compare, And, Or)):
-        #     return type(expr)(self.normalize_expr(expr.left), self.normalize_expr(expr.right))
-        #
-        # # Unary operators
-        # if isinstance(expr, (Not, UnaryMinus)):
-        #     return type(expr)(self.normalize_expr(expr.expr))
+        if isinstance(expr, Compare):
+            if expr.op == "==":
+                left = self.normalize_expr(expr.left)
+                right = self.normalize_expr(expr.right)
+                if isinstance(left, BoolConst) and (isinstance(right, BoolVar) or isinstance(right, Var) or isinstance(right, InstanceOf)):
+                    if left.value == True:
+                        return right
+                    if left.value == False:
+                        logger.warning(f"Normalized boolean comparison: Not(expr={right})")
+                        return Not(right)
+                if isinstance(right, BoolConst) and (isinstance(left, BoolVar) or isinstance(left, Var) or isinstance(left, InstanceOf)):
+                    if right.value == True:
+                        return left
+                    if right.value == False:
+                        logger.warning(f"Normalized boolean comparison: Not(expr={left})")
+                        return Not(left)
 
-        # Atoms (Var, Const, etc.)
+            return expr
+
+        if isinstance(expr, And):
+            return And(left=self.normalize_expr(expr.left), right=self.normalize_expr(expr.right))
+        if isinstance(expr, Or):
+            return Or(self.normalize_expr(expr.left), self.normalize_expr(expr.right))
+
+        if isinstance(expr, Not):
+            return Not(self.normalize_expr(expr.expr))
+
+        if isinstance(expr, Var) or isinstance(expr, BoolVar) or isinstance(expr, BoolConst) or isinstance(expr, IntConst):
+            return expr
+
+
+
         return expr
