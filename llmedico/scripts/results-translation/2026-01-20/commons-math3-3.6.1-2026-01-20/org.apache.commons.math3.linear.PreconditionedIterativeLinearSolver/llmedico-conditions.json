@@ -1,0 +1,559 @@
+[
+  {
+    "method": "PreconditionedIterativeLinearSolver",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maxIterations"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the maximum number of iterations",
+          "assertion": "assert args[0] >= 0;",
+          "name": "maxIterations",
+          "content": "the maximum number of iterations"
+        }
+      ]
+    }
+  },
+  {
+    "method": "PreconditionedIterativeLinearSolver",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "IterationManager",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "manager"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the custom iteration manager",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "manager",
+          "content": "the custom iteration manager"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if manager is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullArgumentException",
+          "content": "if {@code manager} is {@code null}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x0"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "the linear operator A of the system",
+          "assertion": "",
+          "description": "the linear operator A of the system"
+        },
+        {
+          "tag": "param",
+          "name": "m",
+          "content": "the preconditioner, M (can be {@code null})",
+          "assertion": "",
+          "description": "the preconditioner, M (can be {@code null})"
+        },
+        {
+          "tag": "param",
+          "name": "b",
+          "content": "the right-hand side vector",
+          "assertion": "",
+          "description": "the right-hand side vector"
+        },
+        {
+          "tag": "param",
+          "name": "x0",
+          "content": "the initial guess of the solution",
+          "assertion": "",
+          "description": "the initial guess of the solution"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new vector containing the solution",
+          "assertion": "assert methodResult instanceof RealVector;",
+          "name": null,
+          "content": "new vector containing the solution"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullArgumentException",
+          "content": "if one of the parameters is {@code null}",
+          "assertion": "",
+          "description": "if one of the parameters is {@code null}"
+        },
+        {
+          "tag": "throws",
+          "name": "NonSquareOperatorException",
+          "content": "if {@code a} or {@code m} is not square",
+          "assertion": "",
+          "description": "if {@code a} or {@code m} is not square"
+        },
+        {
+          "tag": "throws",
+          "name": "DimensionMismatchException",
+          "content": "if {@code m}, {@code b} or {@code x0} have dimensions inconsistent with {@code a}",
+          "assertion": "",
+          "description": "if {@code m}, {@code b} or {@code x0} have dimensions inconsistent with {@code a}"
+        },
+        {
+          "tag": "throws",
+          "name": "MaxCountExceededException",
+          "content": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}",
+          "assertion": "",
+          "description": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x0"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "checkParameters",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x0"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "the linear operator A of the system",
+          "assertion": "",
+          "description": "the linear operator A of the system"
+        },
+        {
+          "tag": "param",
+          "name": "m",
+          "content": "the preconditioner, M (can be {@code null})",
+          "assertion": "",
+          "description": "the preconditioner, M (can be {@code null})"
+        },
+        {
+          "tag": "param",
+          "name": "b",
+          "content": "the right-hand side vector",
+          "assertion": "",
+          "description": "the right-hand side vector"
+        },
+        {
+          "tag": "param",
+          "name": "x0",
+          "content": "the initial guess of the solution",
+          "assertion": "",
+          "description": "the initial guess of the solution"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if one of the parameters is null",
+          "assertion": "assert args[0]==null || args[1]==null || args[2]==null || args[3]==null;",
+          "name": "NullArgumentException",
+          "content": "if one of the parameters is {@code null}"
+        },
+        {
+          "description": "if a or m is not square",
+          "assertion": "assert !receiverObjectID.isSquare(args[0]) || !receiverObjectID.isSquare(args[1]);",
+          "name": "NonSquareOperatorException",
+          "content": "if {@code a} or {@code m} is not square"
+        },
+        {
+          "description": "if m, b or x0 have dimensions inconsistent with a",
+          "assertion": "assert receiverObjectID.dimensionMismatch(args[0], args[1]) || receiverObjectID.dimensionMismatch(args[0], args[2]) || receiverObjectID.dimensionMismatch(args[0], args[3]);",
+          "name": "DimensionMismatchException",
+          "content": "if {@code m}, {@code b} or {@code x0} have dimensions inconsistent with {@code a}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solve",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "the linear operator A of the system",
+          "assertion": "",
+          "description": "the linear operator A of the system"
+        },
+        {
+          "tag": "param",
+          "name": "m",
+          "content": "the preconditioner, M (can be {@code null})",
+          "assertion": "",
+          "description": "the preconditioner, M (can be {@code null})"
+        },
+        {
+          "tag": "param",
+          "name": "b",
+          "content": "the right-hand side vector",
+          "assertion": "",
+          "description": "the right-hand side vector"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new vector containing the solution",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "new vector containing the solution"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if one of the parameters is null",
+          "assertion": "assert a == null || m == null || b == null;",
+          "name": "NullArgumentException",
+          "content": "if one of the parameters is {@code null}"
+        },
+        {
+          "description": "if a or m is not square",
+          "assertion": "assert !a.isSquare() || !m.isSquare();",
+          "name": "NonSquareOperatorException",
+          "content": "if {@code a} or {@code m} is not square"
+        },
+        {
+          "description": "if m or b have dimensions inconsistent with a",
+          "assertion": "assert a.getRowDimension() != m.getRowDimension() || a.getColumnDimension() != m.getColumnDimension() || a.getRowDimension() != b.getDimension();",
+          "name": "DimensionMismatchException",
+          "content": "if {@code m} or {@code b} have dimensions inconsistent with {@code a}"
+        },
+        {
+          "description": "at exhaustion of the iteration count, unless a custom callback has been set at construction of the IterationManager",
+          "assertion": "assert iterationCountExceeded();",
+          "name": "MaxCountExceededException",
+          "content": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solveInPlace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x0"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "a",
+          "content": "the linear operator A of the system",
+          "assertion": "",
+          "description": "the linear operator A of the system"
+        },
+        {
+          "tag": "param",
+          "name": "m",
+          "content": "the preconditioner, M (can be {@code null})",
+          "assertion": "",
+          "description": "the preconditioner, M (can be {@code null})"
+        },
+        {
+          "tag": "param",
+          "name": "b",
+          "content": "the right-hand side vector",
+          "assertion": "",
+          "description": "the right-hand side vector"
+        },
+        {
+          "tag": "param",
+          "name": "x0",
+          "content": "the initial guess of the solution",
+          "assertion": "",
+          "description": "the initial guess of the solution"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "reference to x0 (shallow copy) updated with the solution",
+          "assertion": "assert methodResultID == args[3];",
+          "name": null,
+          "content": "reference to x0 (shallow copy) updated with the solution"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if one of the parameters is null",
+          "assertion": "assert a == null || m == null || b == null || x0 == null;",
+          "name": "NullArgumentException",
+          "content": "if one of the parameters is {@code null}"
+        },
+        {
+          "description": "if a or m is not square",
+          "assertion": "assert a.getRowDimension() != a.getColumnDimension() || m.getRowDimension() != m.getColumnDimension();",
+          "name": "NonSquareOperatorException",
+          "content": "if {@code a} or {@code m} is not square"
+        },
+        {
+          "description": "if m, b or x0 have dimensions inconsistent with a",
+          "assertion": "assert m.getDimension() != a.getRowDimension() || b.getDimension() != a.getRowDimension() || x0.getDimension() != a.getRowDimension();",
+          "name": "DimensionMismatchException",
+          "content": "if {@code m}, {@code b} or {@code x0} have dimensions inconsistent with {@code a}"
+        },
+        {
+          "description": "at exhaustion of the iteration count, unless a custom callback has been set at construction of the IterationManager",
+          "assertion": "assert iterationCount >= maxIterations || callback != null;",
+          "name": "MaxCountExceededException",
+          "content": "at exhaustion of the iteration count, unless a custom {@link org.apache.commons.math3.util.Incrementor.MaxCountExceededCallback callback} has been set at construction of the {@link IterationManager}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "solveInPlace",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealLinearOperator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RealVector",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x0"
+      }
+    ],
+    "conditions": {}
+  }
+]

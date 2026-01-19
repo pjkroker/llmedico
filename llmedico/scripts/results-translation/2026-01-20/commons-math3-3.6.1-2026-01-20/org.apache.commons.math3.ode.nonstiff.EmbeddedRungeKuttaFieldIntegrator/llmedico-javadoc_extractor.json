@@ -1,0 +1,690 @@
+[
+  {
+    "name": "EmbeddedRungeKuttaFieldIntegrator",
+    "package": "org.apache.commons.math3.ode.nonstiff",
+    "qualified_name": "org.apache.commons.math3.ode.nonstiff.EmbeddedRungeKuttaFieldIntegrator",
+    "javadoc": "/**\n * This class implements the common part of all embedded Runge-Kutta\n * integrators for Ordinary Differential Equations.\n *\n * <p>These methods are embedded explicit Runge-Kutta methods with two\n * sets of coefficients allowing to estimate the error, their Butcher\n * arrays are as follows :\n * <pre>\n *    0  |\n *   c2  | a21\n *   c3  | a31  a32\n *   ... |        ...\n *   cs  | as1  as2  ...  ass-1\n *       |--------------------------\n *       |  b1   b2  ...   bs-1  bs\n *       |  b'1  b'2 ...   b's-1 b's\n * </pre>\n * </p>\n *\n * <p>In fact, we rather use the array defined by ej = bj - b'j to\n * compute directly the error rather than computing two estimates and\n * then comparing them.</p>\n *\n * <p>Some methods are qualified as <i>fsal</i> (first same as last)\n * methods. This means the last evaluation of the derivatives in one\n * step is the same as the first in the next step. Then, this\n * evaluation can be reused from one step to the next one and the cost\n * of such a method is really s-1 evaluations despite the method still\n * has s stages. This behaviour is true only for successful steps, if\n * the step is rejected after the error estimation phase, no\n * evaluation is saved. For an <i>fsal</i> method, we have cs = 1 and\n * asi = bi for all i.</p>\n *\n * @param <T> the type of the field elements\n * @since 3.6\n */",
+    "code": "/**\n * This class implements the common part of all embedded Runge-Kutta\n * integrators for Ordinary Differential Equations.\n *\n * <p>These methods are embedded explicit Runge-Kutta methods with two\n * sets of coefficients allowing to estimate the error, their Butcher\n * arrays are as follows :\n * <pre>\n *    0  |\n *   c2  | a21\n *   c3  | a31  a32\n *   ... |        ...\n *   cs  | as1  as2  ...  ass-1\n *       |--------------------------\n *       |  b1   b2  ...   bs-1  bs\n *       |  b'1  b'2 ...   b's-1 b's\n * </pre>\n * </p>\n *\n * <p>In fact, we rather use the array defined by ej = bj - b'j to\n * compute directly the error rather than computing two estimates and\n * then comparing them.</p>\n *\n * <p>Some methods are qualified as <i>fsal</i> (first same as last)\n * methods. This means the last evaluation of the derivatives in one\n * step is the same as the first in the next step. Then, this\n * evaluation can be reused from one step to the next one and the cost\n * of such a method is really s-1 evaluations despite the method still\n * has s stages. This behaviour is true only for successful steps, if\n * the step is rejected after the error estimation phase, no\n * evaluation is saved. For an <i>fsal</i> method, we have cs = 1 and\n * asi = bi for all i.</p>\n *\n * @param <T> the type of the field elements\n * @since 3.6\n */\npublic abstract class EmbeddedRungeKuttaFieldIntegrator<T extends RealFieldElement<T>> extends AdaptiveStepsizeFieldIntegrator<T> implements FieldButcherArrayProvider<T> {\n\n    /**\n     * Index of the pre-computed derivative for <i>fsal</i> methods.\n     */\n    private final int fsal;\n\n    /**\n     * Time steps from Butcher array (without the first zero).\n     */\n    private final T[] c;\n\n    /**\n     * Internal weights from Butcher array (without the first empty row).\n     */\n    private final T[][] a;\n\n    /**\n     * External weights for the high order method from Butcher array.\n     */\n    private final T[] b;\n\n    /**\n     * Stepsize control exponent.\n     */\n    private final T exp;\n\n    /**\n     * Safety factor for stepsize control.\n     */\n    private T safety;\n\n    /**\n     * Minimal reduction factor for stepsize control.\n     */\n    private T minReduction;\n\n    /**\n     * Maximal growth factor for stepsize control.\n     */\n    private T maxGrowth;\n\n    /**\n     * Build a Runge-Kutta integrator with the given Butcher array.\n     * @param field field to which the time and state vector elements belong\n     * @param name name of the method\n     * @param fsal index of the pre-computed derivative for <i>fsal</i> methods\n     * or -1 if method is not <i>fsal</i>\n     * @param minStep minimal step (sign is irrelevant, regardless of\n     * integration direction, forward or backward), the last step can\n     * be smaller than this\n     * @param maxStep maximal step (sign is irrelevant, regardless of\n     * integration direction, forward or backward), the last step can\n     * be smaller than this\n     * @param scalAbsoluteTolerance allowed absolute error\n     * @param scalRelativeTolerance allowed relative error\n     */\n    protected EmbeddedRungeKuttaFieldIntegrator(final Field<T> field, final String name, final int fsal, final double minStep, final double maxStep, final double scalAbsoluteTolerance, final double scalRelativeTolerance) {\n        super(field, name, minStep, maxStep, scalAbsoluteTolerance, scalRelativeTolerance);\n        this.fsal = fsal;\n        this.c = getC();\n        this.a = getA();\n        this.b = getB();\n        exp = field.getOne().divide(-getOrder());\n        // set the default values of the algorithm control parameters\n        setSafety(field.getZero().add(0.9));\n        setMinReduction(field.getZero().add(0.2));\n        setMaxGrowth(field.getZero().add(10.0));\n    }\n\n    /**\n     * Build a Runge-Kutta integrator with the given Butcher array.\n     * @param field field to which the time and state vector elements belong\n     * @param name name of the method\n     * @param fsal index of the pre-computed derivative for <i>fsal</i> methods\n     * or -1 if method is not <i>fsal</i>\n     * @param minStep minimal step (must be positive even for backward\n     * integration), the last step can be smaller than this\n     * @param maxStep maximal step (must be positive even for backward\n     * integration)\n     * @param vecAbsoluteTolerance allowed absolute error\n     * @param vecRelativeTolerance allowed relative error\n     */\n    protected EmbeddedRungeKuttaFieldIntegrator(final Field<T> field, final String name, final int fsal, final double minStep, final double maxStep, final double[] vecAbsoluteTolerance, final double[] vecRelativeTolerance) {\n        super(field, name, minStep, maxStep, vecAbsoluteTolerance, vecRelativeTolerance);\n        this.fsal = fsal;\n        this.c = getC();\n        this.a = getA();\n        this.b = getB();\n        exp = field.getOne().divide(-getOrder());\n        // set the default values of the algorithm control parameters\n        setSafety(field.getZero().add(0.9));\n        setMinReduction(field.getZero().add(0.2));\n        setMaxGrowth(field.getZero().add(10.0));\n    }\n\n    /**\n     * Create a fraction.\n     * @param p numerator\n     * @param q denominator\n     * @return p/q computed in the instance field\n     */\n    protected T fraction(final int p, final int q) {\n        return getField().getOne().multiply(p).divide(q);\n    }\n\n    /**\n     * Create a fraction.\n     * @param p numerator\n     * @param q denominator\n     * @return p/q computed in the instance field\n     */\n    protected T fraction(final double p, final double q) {\n        return getField().getOne().multiply(p).divide(q);\n    }\n\n    /**\n     * Create an interpolator.\n     * @param forward integration direction indicator\n     * @param yDotK slopes at the intermediate points\n     * @param globalPreviousState start of the global step\n     * @param globalCurrentState end of the global step\n     * @param mapper equations mapper for the all equations\n     * @return external weights for the high order method from Butcher array\n     */\n    protected abstract RungeKuttaFieldStepInterpolator<T> createInterpolator(boolean forward, T[][] yDotK, final FieldODEStateAndDerivative<T> globalPreviousState, final FieldODEStateAndDerivative<T> globalCurrentState, FieldEquationsMapper<T> mapper);\n\n    /**\n     * Get the order of the method.\n     * @return order of the method\n     */\n    public abstract int getOrder();\n\n    /**\n     * Get the safety factor for stepsize control.\n     * @return safety factor\n     */\n    public T getSafety() {\n        return safety;\n    }\n\n    /**\n     * Set the safety factor for stepsize control.\n     * @param safety safety factor\n     */\n    public void setSafety(final T safety) {\n        this.safety = safety;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    public FieldODEStateAndDerivative<T> integrate(final FieldExpandableODE<T> equations, final FieldODEState<T> initialState, final T finalTime) throws NumberIsTooSmallException, DimensionMismatchException, MaxCountExceededException, NoBracketingException {\n        sanityChecks(initialState, finalTime);\n        final T t0 = initialState.getTime();\n        final T[] y0 = equations.getMapper().mapState(initialState);\n        setStepStart(initIntegration(equations, t0, y0, finalTime));\n        final boolean forward = finalTime.subtract(initialState.getTime()).getReal() > 0;\n        // create some internal working arrays\n        final int stages = c.length + 1;\n        T[] y = y0;\n        final T[][] yDotK = MathArrays.buildArray(getField(), stages, -1);\n        final T[] yTmp = MathArrays.buildArray(getField(), y0.length);\n        // set up integration control objects\n        T hNew = getField().getZero();\n        boolean firstTime = true;\n        // main integration loop\n        setIsLastStep(false);\n        do {\n            // iterate over step size, ensuring local normalized error is smaller than 1\n            T error = getField().getZero().add(10);\n            while (error.subtract(1.0).getReal() >= 0) {\n                // first stage\n                y = equations.getMapper().mapState(getStepStart());\n                yDotK[0] = equations.getMapper().mapDerivative(getStepStart());\n                if (firstTime) {\n                    final T[] scale = MathArrays.buildArray(getField(), mainSetDimension);\n                    if (vecAbsoluteTolerance == null) {\n                        for (int i = 0; i < scale.length; ++i) {\n                            scale[i] = y[i].abs().multiply(scalRelativeTolerance).add(scalAbsoluteTolerance);\n                        }\n                    } else {\n                        for (int i = 0; i < scale.length; ++i) {\n                            scale[i] = y[i].abs().multiply(vecRelativeTolerance[i]).add(vecAbsoluteTolerance[i]);\n                        }\n                    }\n                    hNew = initializeStep(forward, getOrder(), scale, getStepStart(), equations.getMapper());\n                    firstTime = false;\n                }\n                setStepSize(hNew);\n                if (forward) {\n                    if (getStepStart().getTime().add(getStepSize()).subtract(finalTime).getReal() >= 0) {\n                        setStepSize(finalTime.subtract(getStepStart().getTime()));\n                    }\n                } else {\n                    if (getStepStart().getTime().add(getStepSize()).subtract(finalTime).getReal() <= 0) {\n                        setStepSize(finalTime.subtract(getStepStart().getTime()));\n                    }\n                }\n                // next stages\n                for (int k = 1; k < stages; ++k) {\n                    for (int j = 0; j < y0.length; ++j) {\n                        T sum = yDotK[0][j].multiply(a[k - 1][0]);\n                        for (int l = 1; l < k; ++l) {\n                            sum = sum.add(yDotK[l][j].multiply(a[k - 1][l]));\n                        }\n                        yTmp[j] = y[j].add(getStepSize().multiply(sum));\n                    }\n                    yDotK[k] = computeDerivatives(getStepStart().getTime().add(getStepSize().multiply(c[k - 1])), yTmp);\n                }\n                // estimate the state at the end of the step\n                for (int j = 0; j < y0.length; ++j) {\n                    T sum = yDotK[0][j].multiply(b[0]);\n                    for (int l = 1; l < stages; ++l) {\n                        sum = sum.add(yDotK[l][j].multiply(b[l]));\n                    }\n                    yTmp[j] = y[j].add(getStepSize().multiply(sum));\n                }\n                // estimate the error at the end of the step\n                error = estimateError(yDotK, y, yTmp, getStepSize());\n                if (error.subtract(1.0).getReal() >= 0) {\n                    // reject the step and attempt to reduce error by stepsize control\n                    final T factor = MathUtils.min(maxGrowth, MathUtils.max(minReduction, safety.multiply(error.pow(exp))));\n                    hNew = filterStep(getStepSize().multiply(factor), forward, false);\n                }\n            }\n            final T stepEnd = getStepStart().getTime().add(getStepSize());\n            final T[] yDotTmp = (fsal >= 0) ? yDotK[fsal] : computeDerivatives(stepEnd, yTmp);\n            final FieldODEStateAndDerivative<T> stateTmp = new FieldODEStateAndDerivative<T>(stepEnd, yTmp, yDotTmp);\n            // local error is small enough: accept the step, trigger events and step handlers\n            System.arraycopy(yTmp, 0, y, 0, y0.length);\n            setStepStart(acceptStep(createInterpolator(forward, yDotK, getStepStart(), stateTmp, equations.getMapper()), finalTime));\n            if (!isLastStep()) {\n                // stepsize control for next step\n                final T factor = MathUtils.min(maxGrowth, MathUtils.max(minReduction, safety.multiply(error.pow(exp))));\n                final T scaledH = getStepSize().multiply(factor);\n                final T nextT = getStepStart().getTime().add(scaledH);\n                final boolean nextIsLast = forward ? nextT.subtract(finalTime).getReal() >= 0 : nextT.subtract(finalTime).getReal() <= 0;\n                hNew = filterStep(scaledH, forward, nextIsLast);\n                final T filteredNextT = getStepStart().getTime().add(hNew);\n                final boolean filteredNextIsLast = forward ? filteredNextT.subtract(finalTime).getReal() >= 0 : filteredNextT.subtract(finalTime).getReal() <= 0;\n                if (filteredNextIsLast) {\n                    hNew = finalTime.subtract(getStepStart().getTime());\n                }\n            }\n        } while (!isLastStep());\n        final FieldODEStateAndDerivative<T> finalState = getStepStart();\n        resetInternalState();\n        return finalState;\n    }\n\n    /**\n     * Get the minimal reduction factor for stepsize control.\n     * @return minimal reduction factor\n     */\n    public T getMinReduction() {\n        return minReduction;\n    }\n\n    /**\n     * Set the minimal reduction factor for stepsize control.\n     * @param minReduction minimal reduction factor\n     */\n    public void setMinReduction(final T minReduction) {\n        this.minReduction = minReduction;\n    }\n\n    /**\n     * Get the maximal growth factor for stepsize control.\n     * @return maximal growth factor\n     */\n    public T getMaxGrowth() {\n        return maxGrowth;\n    }\n\n    /**\n     * Set the maximal growth factor for stepsize control.\n     * @param maxGrowth maximal growth factor\n     */\n    public void setMaxGrowth(final T maxGrowth) {\n        this.maxGrowth = maxGrowth;\n    }\n\n    /**\n     * Compute the error ratio.\n     * @param yDotK derivatives computed during the first stages\n     * @param y0 estimate of the step at the start of the step\n     * @param y1 estimate of the step at the end of the step\n     * @param h  current step\n     * @return error ratio, greater than 1 if step should be rejected\n     */\n    protected abstract T estimateError(T[][] yDotK, T[] y0, T[] y1, T h);\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "EmbeddedRungeKuttaFieldIntegrator",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Field",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "field"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "name"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fsal"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "minStep"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxStep"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "scalAbsoluteTolerance"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "scalRelativeTolerance"
+          }
+        ],
+        "javadoc": "/**\n * Build a Runge-Kutta integrator with the given Butcher array.\n * @param field field to which the time and state vector elements belong\n * @param name name of the method\n * @param fsal index of the pre-computed derivative for <i>fsal</i> methods\n * or -1 if method is not <i>fsal</i>\n * @param minStep minimal step (sign is irrelevant, regardless of\n * integration direction, forward or backward), the last step can\n * be smaller than this\n * @param maxStep maximal step (sign is irrelevant, regardless of\n * integration direction, forward or backward), the last step can\n * be smaller than this\n * @param scalAbsoluteTolerance allowed absolute error\n * @param scalRelativeTolerance allowed relative error\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "field",
+            "content": "field to which the time and state vector elements belong"
+          },
+          {
+            "tag": "param",
+            "name": "name",
+            "content": "name of the method"
+          },
+          {
+            "tag": "param",
+            "name": "fsal",
+            "content": "index of the pre-computed derivative for <i>fsal</i> methods\nor -1 if method is not <i>fsal</i>"
+          },
+          {
+            "tag": "param",
+            "name": "minStep",
+            "content": "minimal step (sign is irrelevant, regardless of\nintegration direction, forward or backward), the last step can\nbe smaller than this"
+          },
+          {
+            "tag": "param",
+            "name": "maxStep",
+            "content": "maximal step (sign is irrelevant, regardless of\nintegration direction, forward or backward), the last step can\nbe smaller than this"
+          },
+          {
+            "tag": "param",
+            "name": "scalAbsoluteTolerance",
+            "content": "allowed absolute error"
+          },
+          {
+            "tag": "param",
+            "name": "scalRelativeTolerance",
+            "content": "allowed relative error"
+          }
+        ],
+        "code": "/**\n * Build a Runge-Kutta integrator with the given Butcher array.\n * @param field field to which the time and state vector elements belong\n * @param name name of the method\n * @param fsal index of the pre-computed derivative for <i>fsal</i> methods\n * or -1 if method is not <i>fsal</i>\n * @param minStep minimal step (sign is irrelevant, regardless of\n * integration direction, forward or backward), the last step can\n * be smaller than this\n * @param maxStep maximal step (sign is irrelevant, regardless of\n * integration direction, forward or backward), the last step can\n * be smaller than this\n * @param scalAbsoluteTolerance allowed absolute error\n * @param scalRelativeTolerance allowed relative error\n */\nprotected EmbeddedRungeKuttaFieldIntegrator(final Field<T> field, final String name, final int fsal, final double minStep, final double maxStep, final double scalAbsoluteTolerance, final double scalRelativeTolerance) {\n    super(field, name, minStep, maxStep, scalAbsoluteTolerance, scalRelativeTolerance);\n    this.fsal = fsal;\n    this.c = getC();\n    this.a = getA();\n    this.b = getB();\n    exp = field.getOne().divide(-getOrder());\n    // set the default values of the algorithm control parameters\n    setSafety(field.getZero().add(0.9));\n    setMinReduction(field.getZero().add(0.2));\n    setMaxGrowth(field.getZero().add(10.0));\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EmbeddedRungeKuttaFieldIntegrator",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Field",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "field"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "name"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fsal"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "minStep"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxStep"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "vecAbsoluteTolerance"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "vecRelativeTolerance"
+          }
+        ],
+        "javadoc": "/**\n * Build a Runge-Kutta integrator with the given Butcher array.\n * @param field field to which the time and state vector elements belong\n * @param name name of the method\n * @param fsal index of the pre-computed derivative for <i>fsal</i> methods\n * or -1 if method is not <i>fsal</i>\n * @param minStep minimal step (must be positive even for backward\n * integration), the last step can be smaller than this\n * @param maxStep maximal step (must be positive even for backward\n * integration)\n * @param vecAbsoluteTolerance allowed absolute error\n * @param vecRelativeTolerance allowed relative error\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "field",
+            "content": "field to which the time and state vector elements belong"
+          },
+          {
+            "tag": "param",
+            "name": "name",
+            "content": "name of the method"
+          },
+          {
+            "tag": "param",
+            "name": "fsal",
+            "content": "index of the pre-computed derivative for <i>fsal</i> methods\nor -1 if method is not <i>fsal</i>"
+          },
+          {
+            "tag": "param",
+            "name": "minStep",
+            "content": "minimal step (must be positive even for backward\nintegration), the last step can be smaller than this"
+          },
+          {
+            "tag": "param",
+            "name": "maxStep",
+            "content": "maximal step (must be positive even for backward\nintegration)"
+          },
+          {
+            "tag": "param",
+            "name": "vecAbsoluteTolerance",
+            "content": "allowed absolute error"
+          },
+          {
+            "tag": "param",
+            "name": "vecRelativeTolerance",
+            "content": "allowed relative error"
+          }
+        ],
+        "code": "/**\n * Build a Runge-Kutta integrator with the given Butcher array.\n * @param field field to which the time and state vector elements belong\n * @param name name of the method\n * @param fsal index of the pre-computed derivative for <i>fsal</i> methods\n * or -1 if method is not <i>fsal</i>\n * @param minStep minimal step (must be positive even for backward\n * integration), the last step can be smaller than this\n * @param maxStep maximal step (must be positive even for backward\n * integration)\n * @param vecAbsoluteTolerance allowed absolute error\n * @param vecRelativeTolerance allowed relative error\n */\nprotected EmbeddedRungeKuttaFieldIntegrator(final Field<T> field, final String name, final int fsal, final double minStep, final double maxStep, final double[] vecAbsoluteTolerance, final double[] vecRelativeTolerance) {\n    super(field, name, minStep, maxStep, vecAbsoluteTolerance, vecRelativeTolerance);\n    this.fsal = fsal;\n    this.c = getC();\n    this.a = getA();\n    this.b = getB();\n    exp = field.getOne().divide(-getOrder());\n    // set the default values of the algorithm control parameters\n    setSafety(field.getZero().add(0.9));\n    setMinReduction(field.getZero().add(0.2));\n    setMaxGrowth(field.getZero().add(10.0));\n}"
+      },
+      {
+        "type": "method",
+        "name": "fraction",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "q"
+          }
+        ],
+        "javadoc": "/**\n * Create a fraction.\n * @param p numerator\n * @param q denominator\n * @return p/q computed in the instance field\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p",
+            "content": "numerator"
+          },
+          {
+            "tag": "param",
+            "name": "q",
+            "content": "denominator"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "computed in the instance field"
+          }
+        ],
+        "code": "/**\n * Create a fraction.\n * @param p numerator\n * @param q denominator\n * @return p/q computed in the instance field\n */\nprotected T fraction(final int p, final int q) {\n    return getField().getOne().multiply(p).divide(q);\n}"
+      },
+      {
+        "type": "method",
+        "name": "fraction",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "p"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "q"
+          }
+        ],
+        "javadoc": "/**\n * Create a fraction.\n * @param p numerator\n * @param q denominator\n * @return p/q computed in the instance field\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "p",
+            "content": "numerator"
+          },
+          {
+            "tag": "param",
+            "name": "q",
+            "content": "denominator"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "computed in the instance field"
+          }
+        ],
+        "code": "/**\n * Create a fraction.\n * @param p numerator\n * @param q denominator\n * @return p/q computed in the instance field\n */\nprotected T fraction(final double p, final double q) {\n    return getField().getOne().multiply(p).divide(q);\n}"
+      },
+      {
+        "type": "method",
+        "name": "createInterpolator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "RungeKuttaFieldStepInterpolator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "forward"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 2
+            },
+            "name": "yDotK"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FieldODEStateAndDerivative",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "globalPreviousState"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FieldODEStateAndDerivative",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "globalCurrentState"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FieldEquationsMapper",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "mapper"
+          }
+        ],
+        "javadoc": "/**\n * Create an interpolator.\n * @param forward integration direction indicator\n * @param yDotK slopes at the intermediate points\n * @param globalPreviousState start of the global step\n * @param globalCurrentState end of the global step\n * @param mapper equations mapper for the all equations\n * @return external weights for the high order method from Butcher array\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "forward",
+            "content": "integration direction indicator"
+          },
+          {
+            "tag": "param",
+            "name": "yDotK",
+            "content": "slopes at the intermediate points"
+          },
+          {
+            "tag": "param",
+            "name": "globalPreviousState",
+            "content": "start of the global step"
+          },
+          {
+            "tag": "param",
+            "name": "globalCurrentState",
+            "content": "end of the global step"
+          },
+          {
+            "tag": "param",
+            "name": "mapper",
+            "content": "equations mapper for the all equations"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "weights for the high order method from Butcher array"
+          }
+        ],
+        "code": "/**\n * Create an interpolator.\n * @param forward integration direction indicator\n * @param yDotK slopes at the intermediate points\n * @param globalPreviousState start of the global step\n * @param globalCurrentState end of the global step\n * @param mapper equations mapper for the all equations\n * @return external weights for the high order method from Butcher array\n */\nprotected abstract RungeKuttaFieldStepInterpolator<T> createInterpolator(boolean forward, T[][] yDotK, final FieldODEStateAndDerivative<T> globalPreviousState, final FieldODEStateAndDerivative<T> globalCurrentState, FieldEquationsMapper<T> mapper);"
+      },
+      {
+        "type": "method",
+        "name": "getOrder",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the order of the method.\n * @return order of the method\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of the method"
+          }
+        ],
+        "code": "/**\n * Get the order of the method.\n * @return order of the method\n */\npublic abstract int getOrder();"
+      },
+      {
+        "type": "method",
+        "name": "getSafety",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the safety factor for stepsize control.\n * @return safety factor\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "factor"
+          }
+        ],
+        "code": "/**\n * Get the safety factor for stepsize control.\n * @return safety factor\n */\npublic T getSafety() {\n    return safety;\n}"
+      },
+      {
+        "type": "method",
+        "name": "setSafety",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "safety"
+          }
+        ],
+        "javadoc": "/**\n * Set the safety factor for stepsize control.\n * @param safety safety factor\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "safety",
+            "content": "safety factor"
+          }
+        ],
+        "code": "/**\n * Set the safety factor for stepsize control.\n * @param safety safety factor\n */\npublic void setSafety(final T safety) {\n    this.safety = safety;\n}"
+      },
+      {
+        "type": "method",
+        "name": "integrate",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "FieldODEStateAndDerivative",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FieldExpandableODE",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "equations"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FieldODEState",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialState"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "finalTime"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\npublic FieldODEStateAndDerivative<T> integrate(final FieldExpandableODE<T> equations, final FieldODEState<T> initialState, final T finalTime) throws NumberIsTooSmallException, DimensionMismatchException, MaxCountExceededException, NoBracketingException {\n    sanityChecks(initialState, finalTime);\n    final T t0 = initialState.getTime();\n    final T[] y0 = equations.getMapper().mapState(initialState);\n    setStepStart(initIntegration(equations, t0, y0, finalTime));\n    final boolean forward = finalTime.subtract(initialState.getTime()).getReal() > 0;\n    // create some internal working arrays\n    final int stages = c.length + 1;\n    T[] y = y0;\n    final T[][] yDotK = MathArrays.buildArray(getField(), stages, -1);\n    final T[] yTmp = MathArrays.buildArray(getField(), y0.length);\n    // set up integration control objects\n    T hNew = getField().getZero();\n    boolean firstTime = true;\n    // main integration loop\n    setIsLastStep(false);\n    do {\n        // iterate over step size, ensuring local normalized error is smaller than 1\n        T error = getField().getZero().add(10);\n        while (error.subtract(1.0).getReal() >= 0) {\n            // first stage\n            y = equations.getMapper().mapState(getStepStart());\n            yDotK[0] = equations.getMapper().mapDerivative(getStepStart());\n            if (firstTime) {\n                final T[] scale = MathArrays.buildArray(getField(), mainSetDimension);\n                if (vecAbsoluteTolerance == null) {\n                    for (int i = 0; i < scale.length; ++i) {\n                        scale[i] = y[i].abs().multiply(scalRelativeTolerance).add(scalAbsoluteTolerance);\n                    }\n                } else {\n                    for (int i = 0; i < scale.length; ++i) {\n                        scale[i] = y[i].abs().multiply(vecRelativeTolerance[i]).add(vecAbsoluteTolerance[i]);\n                    }\n                }\n                hNew = initializeStep(forward, getOrder(), scale, getStepStart(), equations.getMapper());\n                firstTime = false;\n            }\n            setStepSize(hNew);\n            if (forward) {\n                if (getStepStart().getTime().add(getStepSize()).subtract(finalTime).getReal() >= 0) {\n                    setStepSize(finalTime.subtract(getStepStart().getTime()));\n                }\n            } else {\n                if (getStepStart().getTime().add(getStepSize()).subtract(finalTime).getReal() <= 0) {\n                    setStepSize(finalTime.subtract(getStepStart().getTime()));\n                }\n            }\n            // next stages\n            for (int k = 1; k < stages; ++k) {\n                for (int j = 0; j < y0.length; ++j) {\n                    T sum = yDotK[0][j].multiply(a[k - 1][0]);\n                    for (int l = 1; l < k; ++l) {\n                        sum = sum.add(yDotK[l][j].multiply(a[k - 1][l]));\n                    }\n                    yTmp[j] = y[j].add(getStepSize().multiply(sum));\n                }\n                yDotK[k] = computeDerivatives(getStepStart().getTime().add(getStepSize().multiply(c[k - 1])), yTmp);\n            }\n            // estimate the state at the end of the step\n            for (int j = 0; j < y0.length; ++j) {\n                T sum = yDotK[0][j].multiply(b[0]);\n                for (int l = 1; l < stages; ++l) {\n                    sum = sum.add(yDotK[l][j].multiply(b[l]));\n                }\n                yTmp[j] = y[j].add(getStepSize().multiply(sum));\n            }\n            // estimate the error at the end of the step\n            error = estimateError(yDotK, y, yTmp, getStepSize());\n            if (error.subtract(1.0).getReal() >= 0) {\n                // reject the step and attempt to reduce error by stepsize control\n                final T factor = MathUtils.min(maxGrowth, MathUtils.max(minReduction, safety.multiply(error.pow(exp))));\n                hNew = filterStep(getStepSize().multiply(factor), forward, false);\n            }\n        }\n        final T stepEnd = getStepStart().getTime().add(getStepSize());\n        final T[] yDotTmp = (fsal >= 0) ? yDotK[fsal] : computeDerivatives(stepEnd, yTmp);\n        final FieldODEStateAndDerivative<T> stateTmp = new FieldODEStateAndDerivative<T>(stepEnd, yTmp, yDotTmp);\n        // local error is small enough: accept the step, trigger events and step handlers\n        System.arraycopy(yTmp, 0, y, 0, y0.length);\n        setStepStart(acceptStep(createInterpolator(forward, yDotK, getStepStart(), stateTmp, equations.getMapper()), finalTime));\n        if (!isLastStep()) {\n            // stepsize control for next step\n            final T factor = MathUtils.min(maxGrowth, MathUtils.max(minReduction, safety.multiply(error.pow(exp))));\n            final T scaledH = getStepSize().multiply(factor);\n            final T nextT = getStepStart().getTime().add(scaledH);\n            final boolean nextIsLast = forward ? nextT.subtract(finalTime).getReal() >= 0 : nextT.subtract(finalTime).getReal() <= 0;\n            hNew = filterStep(scaledH, forward, nextIsLast);\n            final T filteredNextT = getStepStart().getTime().add(hNew);\n            final boolean filteredNextIsLast = forward ? filteredNextT.subtract(finalTime).getReal() >= 0 : filteredNextT.subtract(finalTime).getReal() <= 0;\n            if (filteredNextIsLast) {\n                hNew = finalTime.subtract(getStepStart().getTime());\n            }\n        }\n    } while (!isLastStep());\n    final FieldODEStateAndDerivative<T> finalState = getStepStart();\n    resetInternalState();\n    return finalState;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getMinReduction",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the minimal reduction factor for stepsize control.\n * @return minimal reduction factor\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "reduction factor"
+          }
+        ],
+        "code": "/**\n * Get the minimal reduction factor for stepsize control.\n * @return minimal reduction factor\n */\npublic T getMinReduction() {\n    return minReduction;\n}"
+      },
+      {
+        "type": "method",
+        "name": "setMinReduction",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "minReduction"
+          }
+        ],
+        "javadoc": "/**\n * Set the minimal reduction factor for stepsize control.\n * @param minReduction minimal reduction factor\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "minReduction",
+            "content": "minimal reduction factor"
+          }
+        ],
+        "code": "/**\n * Set the minimal reduction factor for stepsize control.\n * @param minReduction minimal reduction factor\n */\npublic void setMinReduction(final T minReduction) {\n    this.minReduction = minReduction;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getMaxGrowth",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Get the maximal growth factor for stepsize control.\n * @return maximal growth factor\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "growth factor"
+          }
+        ],
+        "code": "/**\n * Get the maximal growth factor for stepsize control.\n * @return maximal growth factor\n */\npublic T getMaxGrowth() {\n    return maxGrowth;\n}"
+      },
+      {
+        "type": "method",
+        "name": "setMaxGrowth",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxGrowth"
+          }
+        ],
+        "javadoc": "/**\n * Set the maximal growth factor for stepsize control.\n * @param maxGrowth maximal growth factor\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxGrowth",
+            "content": "maximal growth factor"
+          }
+        ],
+        "code": "/**\n * Set the maximal growth factor for stepsize control.\n * @param maxGrowth maximal growth factor\n */\npublic void setMaxGrowth(final T maxGrowth) {\n    this.maxGrowth = maxGrowth;\n}"
+      },
+      {
+        "type": "method",
+        "name": "estimateError",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 2
+            },
+            "name": "yDotK"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "y0"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "y1"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "h"
+          }
+        ],
+        "javadoc": "/**\n * Compute the error ratio.\n * @param yDotK derivatives computed during the first stages\n * @param y0 estimate of the step at the start of the step\n * @param y1 estimate of the step at the end of the step\n * @param h  current step\n * @return error ratio, greater than 1 if step should be rejected\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "yDotK",
+            "content": "derivatives computed during the first stages"
+          },
+          {
+            "tag": "param",
+            "name": "y0",
+            "content": "estimate of the step at the start of the step"
+          },
+          {
+            "tag": "param",
+            "name": "y1",
+            "content": "estimate of the step at the end of the step"
+          },
+          {
+            "tag": "param",
+            "name": "h",
+            "content": "current step"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "ratio, greater than 1 if step should be rejected"
+          }
+        ],
+        "code": "/**\n * Compute the error ratio.\n * @param yDotK derivatives computed during the first stages\n * @param y0 estimate of the step at the start of the step\n * @param y1 estimate of the step at the end of the step\n * @param h  current step\n * @return error ratio, greater than 1 if step should be rejected\n */\nprotected abstract T estimateError(T[][] yDotK, T[] y0, T[] y1, T h);"
+      }
+    ]
+  }
+]

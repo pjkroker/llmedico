@@ -1,0 +1,334 @@
+[
+  {
+    "name": "IndianNationType",
+    "package": "net.sf.freecol.common.model",
+    "qualified_name": "net.sf.freecol.common.model.IndianNationType",
+    "javadoc": "/**\n * Represents one of the native nations present in the game.\n */\n",
+    "code": "/**\n * Represents one of the native nations present in the game.\n */\npublic class IndianNationType extends NationType {\n\n    /**\n     * Stores the ids of the skills taught by this Nation.\n     */\n    private List<RandomChoice<UnitType>> skills = null;\n\n    /**\n     * Identifiers for the regions that can be settled by this Nation.\n     */\n    private List<String> regions = null;\n\n    /**\n     * Create a new native nation type.\n     *\n     * @param id The object identifier.\n     * @param specification The <code>Specification</code> to refer to.\n     */\n    public IndianNationType(String id, Specification specification) {\n        super(id, specification);\n    }\n\n    /**\n     * Is this a European nation type?\n     *\n     * @return False.\n     */\n    @Override\n    public boolean isEuropean() {\n        return false;\n    }\n\n    /**\n     * Is this a native nation type?\n     *\n     * @return True.\n     */\n    @Override\n    public boolean isIndian() {\n        return true;\n    }\n\n    /**\n     * Is this a REF nation type?\n     *\n     * @return False.\n     */\n    @Override\n    public boolean isREF() {\n        return false;\n    }\n\n    /**\n     * Get a message id for the general type of settlements of this nation.\n     *\n     * @param plural Choose the plural form or not.\n     * @return A suitable message id.\n     */\n    public final String getSettlementTypeKey(boolean plural) {\n        return getSettlementType(false).getId() + ((plural) ? \".plural\" : \"\");\n    }\n\n    /**\n     * Gets the list of regions in which this tribe may settle.\n     *\n     * @return A list of regions identifiers.\n     */\n    public List<String> getRegionNames() {\n        return (regions == null) ? Collections.<String>emptyList() : regions;\n    }\n\n    /**\n     * Add a region identifier.\n     *\n     * @param id The object identifier.\n     */\n    private void addRegion(String id) {\n        if (regions == null)\n            regions = new ArrayList<>();\n        regions.add(id);\n    }\n\n    /**\n     * Can this Nation can settle the given Tile?\n     *\n     * @param tile a <code>Tile</code> value\n     * @return a <code>boolean</code> value\n     */\n    /*\n    public boolean canSettleTile(Tile tile) {\n        if (tile.getType().canSettle()) {\n            return canSettleRegion(tile.getRegion());\n        } else {\n            return false;\n        }\n    }\n    */\n    /**\n     * Can this Nation can settle the given Region?\n     *\n     * @param region a <code>Region</code> value\n     * @return a <code>boolean</code> value\n     */\n    /*\n    public boolean canSettleRegion(Region region) {\n        if (regions.isEmpty()) {\n            return true;\n        } else if (regions.contains(region.getId())) {\n            return true;\n        } else if (region.getParent() == null) {\n            return false;\n        } else {\n            return canSettleRegion(region.getParent());\n        }\n    }\n    */\n    /**\n     * Gets a list of this Nation's skills.\n     *\n     * @return A list of national skills.\n     */\n    public List<RandomChoice<UnitType>> getSkills() {\n        return (skills == null) ? Collections.<RandomChoice<UnitType>>emptyList() : skills;\n    }\n\n    /**\n     * Add a skill.\n     *\n     * @param unitType The <code>UnitType</code> skill taught.\n     * @param probability The probability of the skill.\n     */\n    private void addSkill(UnitType unitType, int probability) {\n        if (skills == null)\n            skills = new ArrayList<>();\n        skills.add(new RandomChoice<>(unitType, probability));\n    }\n\n    /**\n     * Generates choices for skill that could be taught from a settlement on\n     * a given Tile.\n     *\n     * @param tile The <code>Tile</code> where the settlement will be located.\n     * @return A random choice set of skills.\n     */\n    public List<RandomChoice<UnitType>> generateSkillsForTile(Tile tile) {\n        List<RandomChoice<UnitType>> skills = getSkills();\n        Map<GoodsType, Integer> scale = new HashMap<>();\n        for (RandomChoice<UnitType> skill : skills) {\n            scale.put(skill.getObject().getExpertProduction(), 1);\n        }\n        for (Tile t : tile.getSurroundingTiles(1)) {\n            for (Entry<GoodsType, Integer> entry : scale.entrySet()) {\n                GoodsType goodsType = entry.getKey();\n                scale.put(goodsType, entry.getValue() + t.getPotentialProduction(goodsType, null));\n            }\n        }\n        List<RandomChoice<UnitType>> scaledSkills = new ArrayList<>();\n        for (RandomChoice<UnitType> skill : skills) {\n            UnitType unitType = skill.getObject();\n            int scaleValue = scale.get(unitType.getExpertProduction());\n            scaledSkills.add(new RandomChoice<>(unitType, skill.getProbability() * scaleValue));\n        }\n        return scaledSkills;\n    }\n\n    // Serialization\n    private static final String PROBABILITY_TAG = \"probability\";\n\n    private static final String SKILL_TAG = \"skill\";\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void writeChildren(FreeColXMLWriter xw) throws XMLStreamException {\n        super.writeChildren(xw);\n        for (RandomChoice<UnitType> choice : getSkills()) {\n            xw.writeStartElement(SKILL_TAG);\n            xw.writeAttribute(ID_ATTRIBUTE_TAG, choice.getObject());\n            xw.writeAttribute(PROBABILITY_TAG, choice.getProbability());\n            xw.writeEndElement();\n        }\n        for (String region : getRegionNames()) {\n            xw.writeStartElement(Region.getXMLElementTagName());\n            xw.writeAttribute(ID_ATTRIBUTE_TAG, region);\n            xw.writeEndElement();\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void readChildren(FreeColXMLReader xr) throws XMLStreamException {\n        // Clear containers.\n        if (xr.shouldClearContainers()) {\n            skills = null;\n            regions = null;\n        }\n        final Specification spec = getSpecification();\n        IndianNationType parent = xr.getType(spec, EXTENDS_TAG, IndianNationType.class, this);\n        if (parent != this) {\n            if (parent.skills != null && !parent.skills.isEmpty()) {\n                if (skills == null)\n                    skills = new ArrayList<>();\n                skills.addAll(parent.skills);\n            }\n            if (parent.regions != null && !parent.regions.isEmpty()) {\n                if (regions == null)\n                    regions = new ArrayList<>();\n                regions.addAll(parent.regions);\n            }\n        }\n        super.readChildren(xr);\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    protected void readChild(FreeColXMLReader xr) throws XMLStreamException {\n        final Specification spec = getSpecification();\n        final String tag = xr.getLocalName();\n        if (SKILL_TAG.equals(tag)) {\n            addSkill(xr.getType(spec, ID_ATTRIBUTE_TAG, UnitType.class, (UnitType) null), xr.getAttribute(PROBABILITY_TAG, 0));\n            xr.closeTag(SKILL_TAG);\n        } else if (Region.getXMLElementTagName().equals(tag)) {\n            addRegion(xr.readId());\n            xr.closeTag(Region.getXMLElementTagName());\n        } else {\n            super.readChild(xr);\n        }\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public String getXMLTagName() {\n        return getXMLElementTagName();\n    }\n\n    /**\n     * Gets the tag name of the root element representing this object.\n     *\n     * @return \"indian-nation-type\".\n     */\n    public static String getXMLElementTagName() {\n        return \"indian-nation-type\";\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "IndianNationType",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "id"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Specification",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "specification"
+          }
+        ],
+        "javadoc": "/**\n * Create a new native nation type.\n *\n * @param id The object identifier.\n * @param specification The <code>Specification</code> to refer to.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "id",
+            "content": "The object identifier.",
+            "assertion": "assert args[0] != null;",
+            "description": "The object identifier."
+          },
+          {
+            "tag": "param",
+            "name": "specification",
+            "content": "The <code>Specification</code> to refer to.",
+            "assertion": "assert args[1] != null;",
+            "description": "The <code>Specification</code> to refer to."
+          }
+        ],
+        "code": "/**\n * Create a new native nation type.\n *\n * @param id The object identifier.\n * @param specification The <code>Specification</code> to refer to.\n */\npublic IndianNationType(String id, Specification specification) {\n    super(id, specification);\n}"
+      },
+      {
+        "type": "method",
+        "name": "isEuropean",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Is this a European nation type?\n *\n * @return False.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID == false;",
+            "description": "False."
+          }
+        ],
+        "code": "/**\n * Is this a European nation type?\n *\n * @return False.\n */\n@Override\npublic boolean isEuropean() {\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isIndian",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Is this a native nation type?\n *\n * @return True.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID == true;",
+            "description": "True."
+          }
+        ],
+        "code": "/**\n * Is this a native nation type?\n *\n * @return True.\n */\n@Override\npublic boolean isIndian() {\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isREF",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Is this a REF nation type?\n *\n * @return False.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID == false;",
+            "description": "False."
+          }
+        ],
+        "code": "/**\n * Is this a REF nation type?\n *\n * @return False.\n */\n@Override\npublic boolean isREF() {\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSettlementTypeKey",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "plural"
+          }
+        ],
+        "javadoc": "/**\n * Get a message id for the general type of settlements of this nation.\n *\n * @param plural Choose the plural form or not.\n * @return A suitable message id.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "plural",
+            "content": "Choose the plural form or not.",
+            "assertion": "assert args[0] == true || args[0] == false;",
+            "description": "Choose the plural form or not."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "suitable message id.",
+            "assertion": "assert methodResultID != null;",
+            "description": "A suitable message id."
+          }
+        ],
+        "code": "/**\n * Get a message id for the general type of settlements of this nation.\n *\n * @param plural Choose the plural form or not.\n * @return A suitable message id.\n */\npublic final String getSettlementTypeKey(boolean plural) {\n    return getSettlementType(false).getId() + ((plural) ? \".plural\" : \"\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "getRegionNames",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the list of regions in which this tribe may settle.\n *\n * @return A list of regions identifiers.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list of regions identifiers.",
+            "assertion": "assert methodResultID != null;",
+            "description": "A list of regions identifiers."
+          }
+        ],
+        "code": "/**\n * Gets the list of regions in which this tribe may settle.\n *\n * @return A list of regions identifiers.\n */\npublic List<String> getRegionNames() {\n    return (regions == null) ? Collections.<String>emptyList() : regions;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSkills",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets a list of this Nation's skills.\n *\n * @return A list of national skills.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "list of national skills.",
+            "assertion": "assert methodResultID != null;",
+            "description": "A list of national skills."
+          }
+        ],
+        "code": "/**\n * Can this Nation can settle the given Tile?\n *\n * @param tile a <code>Tile</code> value\n * @return a <code>boolean</code> value\n */\n/*\n    public boolean canSettleTile(Tile tile) {\n        if (tile.getType().canSettle()) {\n            return canSettleRegion(tile.getRegion());\n        } else {\n            return false;\n        }\n    }\n    */\n/**\n * Can this Nation can settle the given Region?\n *\n * @param region a <code>Region</code> value\n * @return a <code>boolean</code> value\n */\n/*\n    public boolean canSettleRegion(Region region) {\n        if (regions.isEmpty()) {\n            return true;\n        } else if (regions.contains(region.getId())) {\n            return true;\n        } else if (region.getParent() == null) {\n            return false;\n        } else {\n            return canSettleRegion(region.getParent());\n        }\n    }\n    */\n/**\n * Gets a list of this Nation's skills.\n *\n * @return A list of national skills.\n */\npublic List<RandomChoice<UnitType>> getSkills() {\n    return (skills == null) ? Collections.<RandomChoice<UnitType>>emptyList() : skills;\n}"
+      },
+      {
+        "type": "method",
+        "name": "generateSkillsForTile",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Tile",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "tile"
+          }
+        ],
+        "javadoc": "/**\n * Generates choices for skill that could be taught from a settlement on\n * a given Tile.\n *\n * @param tile The <code>Tile</code> where the settlement will be located.\n * @return A random choice set of skills.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "tile",
+            "content": "The <code>Tile</code> where the settlement will be located.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "The <code>Tile</code> where the settlement will be located."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "random choice set of skills.",
+            "assertion": "assert methodResultID != null;",
+            "description": "A random choice set of skills."
+          }
+        ],
+        "code": "/**\n * Generates choices for skill that could be taught from a settlement on\n * a given Tile.\n *\n * @param tile The <code>Tile</code> where the settlement will be located.\n * @return A random choice set of skills.\n */\npublic List<RandomChoice<UnitType>> generateSkillsForTile(Tile tile) {\n    List<RandomChoice<UnitType>> skills = getSkills();\n    Map<GoodsType, Integer> scale = new HashMap<>();\n    for (RandomChoice<UnitType> skill : skills) {\n        scale.put(skill.getObject().getExpertProduction(), 1);\n    }\n    for (Tile t : tile.getSurroundingTiles(1)) {\n        for (Entry<GoodsType, Integer> entry : scale.entrySet()) {\n            GoodsType goodsType = entry.getKey();\n            scale.put(goodsType, entry.getValue() + t.getPotentialProduction(goodsType, null));\n        }\n    }\n    List<RandomChoice<UnitType>> scaledSkills = new ArrayList<>();\n    for (RandomChoice<UnitType> skill : skills) {\n        UnitType unitType = skill.getObject();\n        int scaleValue = scale.get(unitType.getExpertProduction());\n        scaledSkills.add(new RandomChoice<>(unitType, skill.getProbability() * scaleValue));\n    }\n    return scaledSkills;\n}"
+      },
+      {
+        "type": "method",
+        "name": "writeChildren",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColXMLWriter",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "xw"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void writeChildren(FreeColXMLWriter xw) throws XMLStreamException {\n    super.writeChildren(xw);\n    for (RandomChoice<UnitType> choice : getSkills()) {\n        xw.writeStartElement(SKILL_TAG);\n        xw.writeAttribute(ID_ATTRIBUTE_TAG, choice.getObject());\n        xw.writeAttribute(PROBABILITY_TAG, choice.getProbability());\n        xw.writeEndElement();\n    }\n    for (String region : getRegionNames()) {\n        xw.writeStartElement(Region.getXMLElementTagName());\n        xw.writeAttribute(ID_ATTRIBUTE_TAG, region);\n        xw.writeEndElement();\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "readChildren",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColXMLReader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "xr"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void readChildren(FreeColXMLReader xr) throws XMLStreamException {\n    // Clear containers.\n    if (xr.shouldClearContainers()) {\n        skills = null;\n        regions = null;\n    }\n    final Specification spec = getSpecification();\n    IndianNationType parent = xr.getType(spec, EXTENDS_TAG, IndianNationType.class, this);\n    if (parent != this) {\n        if (parent.skills != null && !parent.skills.isEmpty()) {\n            if (skills == null)\n                skills = new ArrayList<>();\n            skills.addAll(parent.skills);\n        }\n        if (parent.regions != null && !parent.regions.isEmpty()) {\n            if (regions == null)\n                regions = new ArrayList<>();\n            regions.addAll(parent.regions);\n        }\n    }\n    super.readChildren(xr);\n}"
+      },
+      {
+        "type": "method",
+        "name": "readChild",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FreeColXMLReader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "xr"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\nprotected void readChild(FreeColXMLReader xr) throws XMLStreamException {\n    final Specification spec = getSpecification();\n    final String tag = xr.getLocalName();\n    if (SKILL_TAG.equals(tag)) {\n        addSkill(xr.getType(spec, ID_ATTRIBUTE_TAG, UnitType.class, (UnitType) null), xr.getAttribute(PROBABILITY_TAG, 0));\n        xr.closeTag(SKILL_TAG);\n    } else if (Region.getXMLElementTagName().equals(tag)) {\n        addRegion(xr.readId());\n        xr.closeTag(Region.getXMLElementTagName());\n    } else {\n        super.readChild(xr);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "getXMLTagName",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic String getXMLTagName() {\n    return getXMLElementTagName();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getXMLElementTagName",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the tag name of the root element representing this object.\n *\n * @return \"indian-nation-type\".\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "",
+            "assertion": "assert methodResultID.equals(\"indian-nation-type\");",
+            "description": " \"indian-nation-type\"."
+          }
+        ],
+        "code": "/**\n * Gets the tag name of the root element representing this object.\n *\n * @return \"indian-nation-type\".\n */\npublic static String getXMLElementTagName() {\n    return \"indian-nation-type\";\n}"
+      }
+    ]
+  }
+]

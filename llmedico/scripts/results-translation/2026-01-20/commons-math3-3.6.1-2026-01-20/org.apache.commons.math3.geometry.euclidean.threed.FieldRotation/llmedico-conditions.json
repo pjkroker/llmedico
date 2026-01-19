@@ -1,0 +1,1658 @@
+[
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "q0"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "q1"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "q2"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "q3"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "needsNormalization"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "q0",
+          "content": "scalar part of the quaternion",
+          "assertion": "",
+          "description": "scalar part of the quaternion"
+        },
+        {
+          "tag": "param",
+          "name": "q1",
+          "content": "first coordinate of the vectorial part of the quaternion",
+          "assertion": "",
+          "description": "first coordinate of the vectorial part of the quaternion"
+        },
+        {
+          "tag": "param",
+          "name": "q2",
+          "content": "second coordinate of the vectorial part of the quaternion",
+          "assertion": "",
+          "description": "second coordinate of the vectorial part of the quaternion"
+        },
+        {
+          "tag": "param",
+          "name": "q3",
+          "content": "third coordinate of the vectorial part of the quaternion",
+          "assertion": "",
+          "description": "third coordinate of the vectorial part of the quaternion"
+        },
+        {
+          "tag": "param",
+          "name": "needsNormalization",
+          "content": "if true, the coordinates are considered\nnot to be normalized, a normalization preprocessing step is performed\nbefore using them",
+          "assertion": "",
+          "description": "if true, the coordinates are considered\nnot to be normalized, a normalization preprocessing step is performed\nbefore using them"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "axis"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "angle"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "axis around which to rotate",
+          "assertion": "assert axis.norm() != 0;",
+          "name": "axis",
+          "content": "axis around which to rotate"
+        },
+        {
+          "description": "rotation angle",
+          "assertion": "assert angle != null;",
+          "name": "angle",
+          "content": "rotation angle."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the axis norm is zero",
+          "assertion": "assert ((FieldVector3D) args[0]).getNorm() == 0;",
+          "name": "MathIllegalArgumentException",
+          "content": "if the axis norm is zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "axis"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "angle"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "axis norm must be non-zero",
+          "assertion": "assert !axis.getNorm().equals(0);",
+          "name": "axis",
+          "content": "axis around which to rotate"
+        },
+        {
+          "description": "angle must not be null",
+          "assertion": "assert angle != null;",
+          "name": "angle",
+          "content": "rotation angle."
+        },
+        {
+          "description": "convention must not be null",
+          "assertion": "assert convention != null;",
+          "name": "convention",
+          "content": "convention to use for the semantics of the angle"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the axis norm is zero",
+          "assertion": "assert args[0].getNorm() == 0;",
+          "name": "MathIllegalArgumentException",
+          "content": "if the axis norm is zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 2
+        },
+        "name": "m"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "threshold"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation matrix",
+          "assertion": "assert m != null && m.length == 3 && m[0].length == 3;",
+          "name": "m",
+          "content": "rotation matrix"
+        },
+        {
+          "description": "convergence threshold for the iterative orthogonality correction (convergence is reached when the difference between two steps of the Frobenius norm of the correction is below this threshold)",
+          "assertion": "assert threshold > 0;",
+          "name": "threshold",
+          "content": "convergence threshold for the iterative orthogonality correction (convergence is reached when the difference between two steps of the Frobenius norm of the correction is below this threshold)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the matrix is not a 3X3 matrix, or if it cannot be transformed into an orthogonal matrix with the given threshold, or if the determinant of the resulting orthogonal matrix is negative.",
+          "assertion": "assert m.length != 3 || m[0].length != 3;",
+          "name": "NotARotationMatrixException",
+          "content": "if the matrix is not a 3X3\\nmatrix, or if it cannot be transformed into an orthogonal matrix\\nwith the given threshold, or if the determinant of the resulting\\northogonal matrix is negative"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u2"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "u1 must not be null",
+          "assertion": "assert u1 != null;",
+          "name": "u1",
+          "content": "first vector of the origin pair"
+        },
+        {
+          "description": "u2 must not be null",
+          "assertion": "assert u2 != null;",
+          "name": "u2",
+          "content": "second vector of the origin pair"
+        },
+        {
+          "description": "v1 must not be null",
+          "assertion": "assert v1 != null;",
+          "name": "v1",
+          "content": "desired image of u1 by the rotation"
+        },
+        {
+          "description": "v2 must not be null",
+          "assertion": "assert v2 != null;",
+          "name": "v2",
+          "content": "desired image of u2 by the rotation"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the norm of one of the vectors is zero, or if one of the pair is degenerated (i.e. the vectors of the pair are collinear)",
+          "assertion": "assert u1.getNorm() == 0 || u2.getNorm() == 0 || v1.getNorm() == 0 || v2.getNorm() == 0 || u1.scalarMultiply(u2) == 0 && u1.getNorm() != 0 && u2.getNorm() != 0 || v1.scalarMultiply(v2) == 0 && v1.getNorm() != 0 && v2.getNorm() != 0;",
+          "name": "MathArithmeticException",
+          "content": "if the norm of one of the vectors is zero, or if one of the pair is degenerated (i.e. the vectors of the pair are collinear)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "v"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "origin vector",
+          "assertion": "assert args[0] != null;",
+          "name": "u",
+          "content": "origin vector"
+        },
+        {
+          "description": "desired image of u by the rotation",
+          "assertion": "assert args[1] != null;",
+          "name": "v",
+          "content": "desired image of u by the rotation"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the norm of one of the vectors is zero",
+          "assertion": "assert args[0].getNorm() == 0 || args[1].getNorm() == 0;",
+          "name": "MathArithmeticException",
+          "content": "if the norm of one of the vectors is zero"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationOrder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "alpha1"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "alpha2"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "alpha3"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "order",
+          "content": "order of rotations to use",
+          "assertion": "",
+          "description": "order of rotations to use"
+        },
+        {
+          "tag": "param",
+          "name": "alpha1",
+          "content": "angle of the first elementary rotation",
+          "assertion": "",
+          "description": "angle of the first elementary rotation"
+        },
+        {
+          "tag": "param",
+          "name": "alpha2",
+          "content": "angle of the second elementary rotation",
+          "assertion": "",
+          "description": "angle of the second elementary rotation"
+        },
+        {
+          "tag": "param",
+          "name": "alpha3",
+          "content": "angle of the third elementary rotation",
+          "assertion": "",
+          "description": "angle of the third elementary rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "FieldRotation",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationOrder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "alpha1"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "alpha2"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "alpha3"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "order must not be null",
+          "assertion": "assert order != null;",
+          "name": "order",
+          "content": "order of rotations to compose, from left to right\n(i.e. we will use {@code r1.compose(r2.compose(r3, convention), convention)})"
+        },
+        {
+          "description": "convention must not be null",
+          "assertion": "assert convention != null;",
+          "name": "convention",
+          "content": "convention to use for the semantics of the angle"
+        },
+        {
+          "description": "alpha1 must not be null",
+          "assertion": "assert alpha1 != null;",
+          "name": "alpha1",
+          "content": "angle of the first elementary rotation"
+        },
+        {
+          "description": "alpha2 must not be null",
+          "assertion": "assert alpha2 != null;",
+          "name": "alpha2",
+          "content": "angle of the second elementary rotation"
+        },
+        {
+          "description": "alpha3 must not be null",
+          "assertion": "assert alpha3 != null;",
+          "name": "alpha3",
+          "content": "angle of the third elementary rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "revert",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new rotation whose effect is the reverse of the effect of the instance",
+          "assertion": "assert methodResultID != receiverObjectID;",
+          "name": null,
+          "content": "a new rotation whose effect is the reverse of the effect of the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getQ0",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "scalar coordinate of the quaternion",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "scalar coordinate of the quaternion"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getQ1",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "first coordinate of the vectorial part of the quaternion",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "first coordinate of the vectorial part of the quaternion"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getQ2",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "second coordinate of the vectorial part of the quaternion",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "second coordinate of the vectorial part of the quaternion"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getQ3",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "third coordinate of the vectorial part of the quaternion",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "third coordinate of the vectorial part of the quaternion"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAxis",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "normalized axis of the rotation",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "normalized axis of the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAxis",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "convention to use for the semantics of the angle",
+          "assertion": "assert (args[0] != null);",
+          "name": "convention",
+          "content": "convention to use for the semantics of the angle"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "normalized axis of the rotation",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "normalized axis of the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAngle",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "angle of the rotation (between 0 and π)",
+          "assertion": "assert methodResultID instanceof Number && ((Number)methodResultID).doubleValue() >= 0 && ((Number)methodResultID).doubleValue() <= Math.PI;",
+          "name": null,
+          "content": "angle of the rotation (between 0 and &pi;)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAngles",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationOrder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "order",
+          "content": "rotation order to use",
+          "assertion": "",
+          "description": "rotation order to use"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "array of three angles, in the order specified by the set",
+          "assertion": "assert Arrays.equals(getAngles(order), new Object[]{Math.PI + a1, Math.PI - a2, Math.PI + a3});",
+          "name": null,
+          "content": "array of three angles, in the order specified by the set"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the rotation is singular with respect to the angles set specified",
+          "assertion": "assert !((Math.abs(getAngle()) > Math.PI/2 - 1e-10) || (Math.abs(getAngle()) < 1e-10));",
+          "name": "CardanEulerSingularityException",
+          "content": "if the rotation is singular with respect to the angles set specified"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getAngles",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationOrder",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "order"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "order must be a valid rotation order",
+          "assertion": "assert order != null && RotationOrder.isValid(order);",
+          "name": "order",
+          "content": "rotation order to use"
+        },
+        {
+          "description": "convention must be a valid rotation convention",
+          "assertion": "assert convention != null && RotationConvention.isValid(convention);",
+          "name": "convention",
+          "content": "convention to use for the semantics of the angle"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "array of three angles, in the order specified by the set",
+          "assertion": "assert (order == RotationOrder.CARDAN && Math.abs(Math.PI/2 - ((Number) getQ2()).doubleValue()) < Math.PI/2) || (order == RotationOrder.EULER && ((Number) getAngle()).doubleValue() > 0 && ((Number) getAngle()).doubleValue() < Math.PI);",
+          "name": null,
+          "content": "array of three angles, in the order specified by the set"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the rotation is singular with respect to the angles set specified",
+          "assertion": "assert receiverObjectID.isSingular(args[0], args[1]);",
+          "name": "CardanEulerSingularityException",
+          "content": "if the rotation is singular with respect to the angles set specified"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMatrix",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the matrix corresponding to the instance",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the matrix corresponding to the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toRotation",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a constant vector",
+          "assertion": "assert methodResultID instanceof Rotation;",
+          "name": null,
+          "content": "a constant vector"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "vector to apply the rotation to",
+          "assertion": "assert args[0] != null;",
+          "name": "u",
+          "content": "vector to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new vector which is the image of u by the rotation",
+          "assertion": "assert methodResultID != null && !methodResultID.equals(receiverObjectID.applyTo(args[0]));",
+          "name": null,
+          "content": "new vector which is the image of u by the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "vector to apply the rotation to",
+          "assertion": "assert (args[0] != null);",
+          "name": "u",
+          "content": "vector to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector which is the image of u by the rotation",
+          "assertion": "assert methodResultID != null && !methodResultID.equals(receiverObjectID.applyTo(args[0]));",
+          "name": null,
+          "content": "a new vector which is the image of u by the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "out"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array with three items which stores vector to rotate",
+          "assertion": "assert (args[0] != null) && args[0].length == 3;",
+          "name": "in",
+          "content": "an array with three items which stores vector to rotate"
+        },
+        {
+          "description": "an array with three items to put result to (it can be the same array as in)",
+          "assertion": "assert (args[1] != null) && args[1].length == 3;",
+          "name": "out",
+          "content": "an array with three items to put result to (it can be the same array as in)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "out"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array with three items which stores vector to rotate",
+          "assertion": "assert (args[0].length == 3);",
+          "name": "in",
+          "content": "an array with three items which stores vector to rotate"
+        },
+        {
+          "description": "an array with three items to put result to",
+          "assertion": "assert (args[1].length == 3);",
+          "name": "out",
+          "content": "an array with three items to put result to"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply",
+          "assertion": "assert args[0] != null;",
+          "name": "r",
+          "content": "rotation to apply"
+        },
+        {
+          "description": "vector to apply the rotation to",
+          "assertion": "assert args[1] != null;",
+          "name": "u",
+          "content": "vector to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector which is the image of u by the rotation",
+          "assertion": "assert methodResultID != null && !methodResultID.equals(receiverObjectID.applyTo(args[1]));",
+          "name": null,
+          "content": "a new vector which is the image of u by the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "vector to apply the inverse of the rotation to",
+          "assertion": "assert args[0] != null;",
+          "name": "u",
+          "content": "vector to apply the inverse of the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector which such that u is its image by the rotation",
+          "assertion": "assert methodResultID.equals(receiverObjectID.applyTo(args[0]));",
+          "name": null,
+          "content": "a new vector which such that u is its image by the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Vector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "vector to apply the inverse of the rotation to",
+          "assertion": "assert args[0] != null;",
+          "name": "u",
+          "content": "vector to apply the inverse of the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector which such that u is its image by the rotation",
+          "assertion": "assert methodResultID.equals(receiverObjectID.applyTo(args[0]));",
+          "name": null,
+          "content": "a new vector which such that u is its image by the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "out"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array with three items which stores vector to rotate",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "in",
+          "content": "an array with three items which stores vector to rotate"
+        },
+        {
+          "description": "an array with three items to put result to (it can be the same array as in)",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "out",
+          "content": "an array with three items to put result to (it can be the same array as in)"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "out"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "an array with three items which stores vector to rotate",
+          "assertion": "assert (args[0].length == 3);",
+          "name": "in",
+          "content": "an array with three items which stores vector to rotate"
+        },
+        {
+          "description": "an array with three items to put result to",
+          "assertion": "assert (args[1].length == 3);",
+          "name": "out",
+          "content": "an array with three items to put result to"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldVector3D",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "u"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply",
+          "assertion": "assert args[0] != null;",
+          "name": "r",
+          "content": "rotation to apply"
+        },
+        {
+          "description": "vector to apply the inverse of the rotation to",
+          "assertion": "assert args[1] != null;",
+          "name": "u",
+          "content": "vector to apply the inverse of the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new vector which such that u is its image by the rotation",
+          "assertion": "assert methodResultID.equals(receiverObjectID.applyTo(u));",
+          "name": null,
+          "content": "a new vector which such that u is its image by the rotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "r",
+          "content": "rotation to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new rotation which is the composition of r by the instance",
+          "assertion": "assert methodResultID.equals(receiverObjectID.compose(args[0], RotationConvention.VECTOR_OPERATOR));",
+          "name": null,
+          "content": "a new rotation which is the composition of r by the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compose",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert r != null;",
+          "name": "r",
+          "content": "an object, not null"
+        },
+        {
+          "description": "convention to use for the semantics of the angle",
+          "assertion": "assert convention != null;",
+          "name": "convention",
+          "content": "a RotationConvention object, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new rotation which is the composition of r by the instance",
+          "assertion": "assert methodResultID.equals(receiverObjectID.compose(args[0], args[1]));",
+          "name": null,
+          "content": "new rotation which is the composition of r by the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "r",
+          "content": "rotation to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new rotation which is the composition of r by the instance",
+          "assertion": "assert methodResultID.equals(receiverObjectID.compose(args[0], RotationConvention.VECTOR_OPERATOR));",
+          "name": null,
+          "content": "a new rotation which is the composition of r by the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compose",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert r != null;",
+          "name": "r",
+          "content": "an object, not null"
+        },
+        {
+          "description": "convention to use for the semantics of the angle",
+          "assertion": "assert convention != null;",
+          "name": "convention",
+          "content": "an object, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new rotation which is the composition of r by the instance",
+          "assertion": "assert methodResultID instanceof FieldRotation && methodResultID.equals(compose(args[0], args[1]));",
+          "name": null,
+          "content": "new rotation which is the composition of r by the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rInner"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply",
+          "assertion": "assert args[0] != null;",
+          "name": "r1",
+          "content": "rotation to apply"
+        },
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert args[1] != null;",
+          "name": "rInner",
+          "content": "rotation to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new rotation which is the composition of r by the instance",
+          "assertion": "assert methodResultID instanceof FieldRotation && ((FieldRotation)methodResultID).equals(receiverObjectID.applyTo(args[0], args[1]));",
+          "name": null,
+          "content": "new rotation which is the composition of r by the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert args[0] != null;",
+          "name": "r",
+          "content": "rotation to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new rotation which is the composition of r by the inverse of the instance",
+          "assertion": "assert methodResultID.equals(receiverObjectID.composeInverse(args[0], null));",
+          "name": null,
+          "content": "a new rotation which is the composition of r by the inverse of the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "composeInverse",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert r != null;",
+          "name": "r",
+          "content": "rotation to apply the rotation to"
+        },
+        {
+          "description": "convention to use for the semantics of the angle",
+          "assertion": "assert convention != null;",
+          "name": "convention",
+          "content": "convention to use for the semantics of the angle"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new rotation which is the composition of r by the inverse of the instance",
+          "assertion": "assert methodResult.equals(revert().compose(r, convention));",
+          "name": null,
+          "content": "new rotation which is the composition of r by the inverse of the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert args[0] != null;",
+          "name": "r",
+          "content": "rotation to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new rotation which is the composition of r by the inverse of the instance",
+          "assertion": "assert methodResultID.equals(receiverObjectID.composeInverse(args[0], null));",
+          "name": null,
+          "content": "a new rotation which is the composition of r by the inverse of the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "composeInverse",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "RotationConvention",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "convention"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "r must not be null",
+          "assertion": "assert r != null;",
+          "name": "r",
+          "content": "rotation to apply the rotation to"
+        },
+        {
+          "description": "convention must not be null",
+          "assertion": "assert convention != null;",
+          "name": "convention",
+          "content": "convention to use for the semantics of the angle"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new rotation which is the composition of r by the inverse of the instance",
+          "assertion": "assert (r.applyTo(u).equals(this.revert().composeInverse(r, convention).applyTo(u)));",
+          "name": null,
+          "content": "new rotation which is the composition of r by the inverse of the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyInverseTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Rotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rOuter"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rInner"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert (args[0] != null);",
+          "name": "rOuter",
+          "content": "rotation to apply the rotation to"
+        },
+        {
+          "description": "rotation to apply the rotation to",
+          "assertion": "assert (args[1] != null);",
+          "name": "rInner",
+          "content": "rotation to apply the rotation to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "new rotation which is the composition of r by the inverse of the instance",
+          "assertion": "assert methodResultID.equals(receiverObjectID.composeInverseTo(rOuter, rInner));",
+          "name": null,
+          "content": "new rotation which is the composition of r by the inverse of the instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "distance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldRotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "r2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "first rotation",
+          "assertion": "assert r1 != null;",
+          "name": "r1",
+          "content": "first rotation"
+        },
+        {
+          "description": "second rotation",
+          "assertion": "assert r2 != null;",
+          "name": "r2",
+          "content": "second rotation"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "distance between r1 and r2",
+          "assertion": "assert Math.abs(((FieldRotation) r1).getAngle() - ((FieldRotation) r2).getAngle()) < 0.00001;",
+          "name": null,
+          "content": "between r1 and r2"
+        }
+      ]
+    }
+  }
+]
