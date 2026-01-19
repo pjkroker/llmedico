@@ -54,6 +54,7 @@ METRIC_DEFINITIONS = {
             AssertionRelation.EQUIVALENT,
             AssertionRelation.DUAL,
             AssertionRelation.STRONGER,
+            AssertionRelation.DUAL,
         },
         "wrong2": {
             AssertionRelation.WEAKER,
