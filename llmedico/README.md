@@ -2,6 +2,12 @@
 
 LLMedico generates assertions from the Javadoc documentation of a class.
 
+## Installation
+pip install .
+
+### Use config
+export LLMEDICO_CONFIG=/vol/fob-vol3/mi20/krokerpa/ba/llmedico/llmedico/config.toml
+
 ## Overview
 
 ## Learn more
