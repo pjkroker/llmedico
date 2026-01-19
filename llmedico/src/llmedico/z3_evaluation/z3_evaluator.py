@@ -1,4 +1,6 @@
 import z3
+
+from llmedico.z3_evaluation import model_ast
 from llmedico.z3_evaluation.z3_translator import Z3Translator
 from llmedico.evaluation.result import EvaluationResult, AssertionRelation
 from llmedico.z3_evaluation.model_ast import Expr
@@ -6,7 +8,7 @@ from llmedico.z3_evaluation.model_ast import Expr
 
 class AssertionEvaluatorZ:
 
-    def evaluate(self, expected: Expr, generated: Expr) -> EvaluationResult:
+    def evaluate(self, expected: Expr, generated: Expr, return_type: model_ast.Type=None) -> EvaluationResult:
         """
         Compare two logical AST expressions semantically.
         One evaluation == one Z3 context.
@@ -15,8 +17,8 @@ class AssertionEvaluatorZ:
         translator = Z3Translator()
 
         try:
-            A = translator.translate(expected)
-            B = translator.translate(generated)
+            A = translator.translate(expected, return_type)
+            B = translator.translate(generated, return_type)
         except Exception as e:
             # Includes type conflicts, unsupported constructs, etc.
             return EvaluationResult(
