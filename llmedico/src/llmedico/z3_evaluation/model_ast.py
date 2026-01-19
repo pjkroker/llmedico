@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
-from z3 import is_bool
+
 
 
 class Expr:
@@ -133,6 +133,7 @@ INT_RETURN_METHODS = {
 
 BOOL_RETURN_METHODS = {
     "isEmpty",
+    "empty",
     "equals",
     "contains",
     "is",
@@ -149,7 +150,7 @@ BOOL_RETURN_METHODS = {
 
 MATCH_METHODS = {"anyMatch", "allMatch", "noneMatch"} # for lambda ->
 
-def is_int(expr_name: str) -> bool:
+def is_bool(expr_name: str) -> bool:
     for name in BOOL_RETURN_METHODS:
         if name in expr_name:
             return True
