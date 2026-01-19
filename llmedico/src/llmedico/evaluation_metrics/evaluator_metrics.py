@@ -12,9 +12,9 @@ from llmedico.evaluation_metrics.evaluation_metrics_writer import EvaluationMetr
 
 
 class MetricMode(Enum):
-    JDOCTOR = "jdoctor" # identical + empty + equivalent
-    LLMEDICO = "llmedico"   # identical + empty + equivalent
-    RELAXED = "relaxed" # identical + emtpy + equivalent + stronger/weaker TODO find out wich one!!
+    JDOCTOR = "jdoctor" # identical
+    LLMEDICO = "llmedico"   # identical + equivalent + stronger
+    RELAXED = "relaxed" # identical + equivalent + stronger + dual
 
 METRIC_DEFINITIONS = {
     MetricMode.JDOCTOR: {
