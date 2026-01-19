@@ -58,7 +58,7 @@ def test_evaluate_expressions():
 
     result = _evaluate_assertions("x == 0", "x == true")
     assert result.relation == AssertionRelation.UNSUPPORTED
-    assert result.reason == "Variable 'x' used as both Type.INT and Type.BOOL"
+    assert result.reason == "Value cannot be converted into a Z3 Boolean value"
     #instanceof
     result = _evaluate_assertions("args[0] instanceof org.jgrapht.Graph", "args[0].getClass().getName() == 'org.jgrapht.Graph'")
     assert result.relation == AssertionRelation.INCOMPARABLE
