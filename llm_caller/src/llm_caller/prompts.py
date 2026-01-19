@@ -166,36 +166,60 @@ CONDITION_BASE_STRING = """You are a Java expert.
     A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
     B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
     Remember, that NOT "!" only works for boolean values!
-    BAD Example: assert !args[0].length == 0 && !args[1].length == 0;
-    GOOD Example: assert args[0].length != 0 && args[1].length != 0;
-    C. Only output JSON, no additional explanations or commentary.
-    D. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
-    E. Provide a short description for the generated assertion as shown in the example.
-    F. Refer to the parameters as args[0], and args[1] and so on.
-    G. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
-    H. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
-    I. Do NOT replace simple checks (null, boolean, numeric) with:
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
         -collection emptiness checks
         -iterator usage
         -size-based conditions
         -Preserve the original abstraction level of the condition.
-    J. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
-    K. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
-    L. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
-    M. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
-    N. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
-    O. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
-    P: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
         -Fewer method calls
         -Fewer operators
         -No receiver references
 """
 
 FINAL_INSTRUCTION = """
-Before outputting the assertion, verify:
-“Could this condition be expressed using args[i] alone?”
-If yes, do not use receiverObjectID
-Finally, ONLY return the List of JSON Elements like shown in the example. DO NOT return actual Java or Phyton Code!"""
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+"""
+
 PRE_CONDITION_PROMPT_JSON_STRING = """
     Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
     Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
