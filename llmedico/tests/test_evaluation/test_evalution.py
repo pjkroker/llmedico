@@ -67,6 +67,10 @@ def test_evaluate_expressions():
     result = _evaluate_assertions("args[1].stream().anyMatch(v -> v == null)", "args[0] == null")
     assert result.relation == AssertionRelation.INCOMPARABLE
 
+    #(args[1]==null)==false && args[1].contains(null)||args[1]==null
+    result = _evaluate_assertions("(args[1]==null)==false && args[1].contains(null)||args[1]==null", "args[1] == null || args[1].stream().anyMatch(Objects::isNull)")
+    assert result.relation == AssertionRelation.EQUIVALENT
+
 def test_evaluate_class():
     ...
 
