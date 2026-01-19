@@ -77,7 +77,8 @@ def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[Evaluati
             if return_type_model is None:
                 return_type = None
             else:
-                return_type = Type("bool") if return_type_model.simple_name == "boolean" else (Type("int") if return_type_model.simple_name == "int" else Type("ref")) # TODO check
+                logger.critical(f"return_type_model_name:{return_type_model.simple_name}")
+                return_type = Type("bool") if return_type_model.simple_name == "boolean" else (Type("int") if (return_type_model.simple_name == "int" or return_type_model.simple_name == "long" or return_type_model.simple_name == "double" or return_type_model.simple_name == "float" )else Type("ref")) # TODO check
 
             logger.critical(f"return_type:{return_type}")
             if len(method_exp.conditions) != len(generated.methods[i].conditions):
