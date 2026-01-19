@@ -238,3 +238,73 @@ def test_normalizer_after_parsing():
     result = evaluator.evaluate(expected_ast, generated_ast)
 
     assert result.relation == AssertionRelation.EQUIVALENT
+
+def test2():
+
+    ground_truth = "assert receiverObjectID.containsVertex(args[0]) ? methodResultID==true : methodResultID==false;"
+    llm = "assert methodResultID == (receiverObjectID.containsVertex(args[0]) && args[0] != null);"
+    expr = rewrite_method_references(normalize_expression(ground_truth))
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+    norm = AstNormalizer()
+    expected_ast = norm.normalize_expr(expected_ast)
+
+    expr = rewrite_method_references(normalize_expression(llm))
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    generated_ast = norm.normalize_expr(generated_ast)
+
+    evaluator = AssertionEvaluatorZ()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+
+    assert result.relation == AssertionRelation.INCOMPARABLE
+
+
+    #ConditionKind.RETURN,assert (receiverObjectID.containsVertex(args[0]))==false ? methodResultID==true:methodResultID==false;,assert methodResult == !receiverObjectID.containsVertex(args[0]);,AssertionRelation.INCOMPARABLE
+
+    ground_truth = "assert (receiverObjectID.containsVertex(args[0]))==false ? methodResultID==true:methodResultID==false;"
+    llm = "assert methodResultID == !receiverObjectID.containsVertex(args[0]);"
+    expr = rewrite_method_references(normalize_expression(ground_truth))
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+    norm = AstNormalizer()
+    expected_ast = norm.normalize_expr(expected_ast)
+
+    expr = rewrite_method_references(normalize_expression(llm))
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+
+    generated_ast = norm.normalize_expr(generated_ast)
+
+    evaluator = AssertionEvaluatorZ()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+
+    assert result.relation == AssertionRelation.EQUIVALENT
+
+    #assert (args[0] instanceof BinaryChromosome) == false;,assert !(args[0] instanceof BinaryChromosome);
+    ground_truth = "assert (args[0] instanceof BinaryChromosome) == false;"
+    llm = "assert !(args[0] instanceof BinaryChromosome);"
+    expr = rewrite_method_references(normalize_expression(ground_truth))
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    expected_ast = parser.parse()
+    print(expected_ast)
+    norm = AstNormalizer()
+    expected_ast = norm.normalize_expr(expected_ast)
+
+    expr = rewrite_method_references(normalize_expression(llm))
+    tokens = tokenize(expr)
+    parser = StringParser(tokens)
+    generated_ast = parser.parse()
+    print(generated_ast)
+    generated_ast = norm.normalize_expr(generated_ast)
+
+    evaluator = AssertionEvaluatorZ()
+    result = evaluator.evaluate(expected_ast, generated_ast)
+
+    assert result.relation == AssertionRelation.EQUIVALENT
