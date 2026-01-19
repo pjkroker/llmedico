@@ -1,0 +1,1036 @@
+[
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "InputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "charsetName"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comment_re_string"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "include_re_string"
+      }
+    ],
+    "conditions": {
+      "THROWS": [
+        {
+          "description": "if the charset encoding is not supported",
+          "assertion": "assert !java.nio.charset.Charset.isSupported(args[1]);",
+          "name": "UnsupportedEncodingException",
+          "content": "if the charset encoding is not supported"
+        }
+      ],
+      "PARAM": [
+        {
+          "description": "source from which to read entries",
+          "assertion": "assert args[0] != null;",
+          "name": "in",
+          "content": "source from which to read entries"
+        },
+        {
+          "description": "the character set to use",
+          "assertion": "assert args[1] != null;",
+          "name": "charsetName",
+          "content": "the character set to use"
+        },
+        {
+          "description": "non-null file name for stream being read",
+          "assertion": "assert args[2] != null;",
+          "name": "filename",
+          "content": "non-null file name for stream being read"
+        },
+        {
+          "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+          "assertion": "assert args[3] != null;",
+          "name": "comment_re_string",
+          "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+        },
+        {
+          "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+          "assertion": "assert args[4] != null;",
+          "name": "include_re_string",
+          "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "InputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "charsetName"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the InputStream",
+          "assertion": "assert args[0] != null;",
+          "name": "in",
+          "content": "the InputStream"
+        },
+        {
+          "description": "the character set to use",
+          "assertion": "assert args[1] != null;",
+          "name": "charsetName",
+          "content": "the character set to use"
+        },
+        {
+          "description": "the file name",
+          "assertion": "assert args[2] != null;",
+          "name": "filename",
+          "content": "the file name"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the charset encoding is not supported",
+          "assertion": "assert java.nio.charset.Charset.forName(args[1]).newDecoder().maxBytesPerChar() <= 0;",
+          "name": "UnsupportedEncodingException",
+          "content": "if the charset encoding is not supported"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "InputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comment_re_string"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "include_re_string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source from which to read entries",
+          "assertion": "assert in != null;",
+          "name": "in",
+          "content": "source from which to read entries"
+        },
+        {
+          "description": "non-null file name for stream being read",
+          "assertion": "assert filename != null;",
+          "name": "filename",
+          "content": "non-null file name for stream being read"
+        },
+        {
+          "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+          "assertion": "assert comment_re_string != null;",
+          "name": "comment_re_string",
+          "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+        },
+        {
+          "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+          "assertion": "assert include_re_string != null;",
+          "name": "include_re_string",
+          "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "InputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "in"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the InputStream",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "in",
+          "content": "the InputStream"
+        },
+        {
+          "description": "the file name",
+          "assertion": "assert (args[1]==null) == false;",
+          "name": "filename",
+          "content": "the file name"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "InputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "in"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the InputStream",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "in",
+          "content": "the InputStream"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Reader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "reader"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comment_re_string"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "include_re_string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source from which to read entries",
+          "assertion": "assert args[0] != null;",
+          "name": "reader",
+          "content": "source from which to read entries"
+        },
+        {
+          "description": "file name corresponding to reader, for use in error messages",
+          "assertion": "assert args[1] != null;",
+          "name": "filename",
+          "content": "file name corresponding to reader, for use in error messages"
+        },
+        {
+          "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored",
+          "assertion": "assert args[2] != null;",
+          "name": "comment_re_string",
+          "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored"
+        },
+        {
+          "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name",
+          "assertion": "assert args[3] != null;",
+          "name": "include_re_string",
+          "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Reader",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "reader"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source from which to read entries",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "reader",
+          "content": "source from which to read entries"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "File",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "file"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comment_re"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "include_re"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "initial file to read",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "file",
+          "content": "initial file to read"
+        },
+        {
+          "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "comment_re",
+          "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+        },
+        {
+          "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+          "assertion": "assert (args[2] == null) == false;",
+          "name": "include_re",
+          "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading the file",
+          "assertion": "assert !file.canRead();",
+          "name": "IOException",
+          "content": "if there is a problem reading the file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "File",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "file"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the file to read",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "file",
+          "content": "the file to read"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading the file",
+          "assertion": "assert !file.canRead();",
+          "name": "IOException",
+          "content": "if there is a problem reading the file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "File",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "file"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "charsetName"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the file to read",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "file",
+          "content": "the file to read"
+        },
+        {
+          "description": "the character set to use",
+          "assertion": "assert (args[1]==null) == false;",
+          "name": "charsetName",
+          "content": "the character set to use"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading the file",
+          "assertion": "assert !receiverObjectID.canRead(file);",
+          "name": "IOException",
+          "content": "if there is a problem reading the file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comment_re"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "include_re"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "initial file to read",
+          "assertion": "assert args[0] != null;",
+          "name": "filename",
+          "content": "initial file to read"
+        },
+        {
+          "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+          "assertion": "assert args[1] != null;",
+          "name": "comment_re",
+          "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+        },
+        {
+          "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+          "assertion": "assert args[2] != null;",
+          "name": "include_re",
+          "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading the file",
+          "assertion": "assert !new java.io.File(args[0]).canRead();",
+          "name": "IOException",
+          "content": "if there is a problem reading the file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source from which to read entries",
+          "assertion": "assert args[0] != null;",
+          "name": "filename",
+          "content": "source from which to read entries"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading the file",
+          "assertion": "assert !new java.io.File(args[0]).canRead();",
+          "name": "IOException",
+          "content": "if there is a problem reading the file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "EntryReader",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "charsetName"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "source from which to read entries",
+          "assertion": "assert args[0] != null;",
+          "name": "filename",
+          "content": "source from which to read entries"
+        },
+        {
+          "description": "the character set to use",
+          "assertion": "assert args[1] != null;",
+          "name": "charsetName",
+          "content": "the character set to use"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading the file",
+          "assertion": "assert !new java.io.FileInputStream(args[0]).getChannel().isOpen();",
+          "name": "IOException",
+          "content": "if there is a problem reading the file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "readLine",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the string that was read, or null at end of file",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the string that was read, or null at end of file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "iterator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a line-by-line iterator for this file",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "a line-by-line iterator for this file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hasNext",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "whether there is another line to read",
+          "assertion": "assert methodResultID;",
+          "name": null,
+          "content": "whether there is another line to read"
+        }
+      ]
+    }
+  },
+  {
+    "method": "next",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "next line in the multi-file Throws NoSuchElementException at end of file",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "next line in the multi-file Throws NoSuchElementException at end of file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "remove",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "get_entry",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "next entry (paragraph) in the file",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "next entry (paragraph) in the file"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading the file",
+          "assertion": "assert !receiverObjectID.hasNext();",
+          "name": "IOException",
+          "content": "if there is a problem reading the file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getFileName",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the current filename",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the current filename"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getLineNumber",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the current line number",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "the current line number"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setLineNumber",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lineNumber"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "new line number for the current file",
+          "assertion": "assert args[0] >= 0;",
+          "name": "lineNumber",
+          "content": "new line number for the current file"
+        }
+      ]
+    }
+  },
+  {
+    "method": "set_entry_start_stop",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry_start_re"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry_stop_re"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "regular expression that starts a long entry",
+          "assertion": "assert args[0] != null;",
+          "name": "entry_start_re",
+          "content": "regular expression that starts a long entry"
+        },
+        {
+          "description": "regular expression that ends a long entry",
+          "assertion": "assert args[1] != null;",
+          "name": "entry_stop_re",
+          "content": "regular expression that ends a long entry"
+        }
+      ]
+    }
+  },
+  {
+    "method": "set_entry_start_stop",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Pattern",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry_start_re"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Pattern",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "entry_stop_re"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "regular expression that starts a long entry",
+          "assertion": "assert args[0] != null;",
+          "name": "entry_start_re",
+          "content": "regular expression that starts a long entry"
+        },
+        {
+          "description": "regular expression that ends a long entry",
+          "assertion": "assert args[1] != null;",
+          "name": "entry_stop_re",
+          "content": "regular expression that ends a long entry"
+        }
+      ]
+    }
+  },
+  {
+    "method": "putback",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "line"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the line to be put back in the input",
+          "assertion": "assert args[0] != null;",
+          "name": "line",
+          "content": "the line to be put back in the input"
+        }
+      ]
+    }
+  },
+  {
+    "method": "mark",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "readAheadLimit"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "read",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "read",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "cbuf"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "off"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "len"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "reset",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "skip",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "n"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "main",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "args"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "command-line arguments: filename [comment_re [include_re]]",
+          "assertion": "assert args[0] != null;",
+          "name": "args",
+          "content": "command-line arguments: filename [comment_re [include_re]]"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if there is a problem reading a file",
+          "assertion": "assert false;",
+          "name": "IOException",
+          "content": "if there is a problem reading a file"
+        }
+      ]
+    }
+  }
+]

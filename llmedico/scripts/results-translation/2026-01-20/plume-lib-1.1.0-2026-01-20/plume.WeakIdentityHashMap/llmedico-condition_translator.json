@@ -1,0 +1,1482 @@
+[
+  {
+    "name": "WeakIdentityHashMap",
+    "package": "plume",
+    "qualified_name": "plume.WeakIdentityHashMap",
+    "javadoc": "/**\n * This class combines the features of {@link java.util.WeakHashMap} and\n * {@link java.util.IdentityHashMap}.\n * The implementation is a modified version of {@link java.util.WeakHashMap}\n * from JDK 1.5, which differs from the original in two ways:\n * <ul>\n *  <li> uses of hashCode() are replaced by System.identityHashCode()</li>\n *  <li> uses of object equality (.equals) are replaced by identity checks (==)</li>\n * </ul>\n * See {@link java.util.IdentityHashMap}\n * for more information on the changes made in an identity hash map..\n *\n * <hr>\n *\n * A hashtable-based <code>Map</code> implementation with <em>weak\n * keys</em>.  An entry in a <code>WeakIdentityHashMap</code> will\n * automatically be removed when its key is no longer in ordinary use.\n * More precisely, the presence of a mapping for a given key will not\n * prevent the key from being discarded by the garbage collector, that\n * is, made finalizable, finalized, and then reclaimed.  When a key\n * has been discarded its entry is effectively removed from the map,\n * so this class behaves somewhat differently than other <code>Map</code>\n * implementations.\n *\n * <p> Both null values and the null key are supported. This class has\n * performance characteristics similar to those of the <code>HashMap</code>\n * class, and has the same efficiency parameters of <em>initial capacity</em>\n * and <em>load factor</em>.\n *\n * <p> Like most collection classes, this class is not synchronized.  A\n * synchronized <code>WeakIdentityHashMap</code> may be constructed using the\n * <code>Collections.synchronizedMap</code> method.\n *\n * <p> The behavior of the <code>WeakIdentityHashMap</code> class depends\n * in part upon the actions of the garbage collector, so several\n * familiar (though not required) <code>Map</code> invariants do not hold\n * for this class.  Because the garbage collector may discard keys at\n * any time, a <code>WeakIdentityHashMap</code> may behave as though an\n * unknown thread is silently removing entries.  In particular, even\n * if you synchronize on a <code>WeakIdentityHashMap</code> instance and\n * invoke none of its mutator methods, it is possible for the\n * <code>size</code> method to return smaller values over time, for the\n * <code>isEmpty</code> method to return <code>false</code> and then\n * <code>true</code>, for the <code>containsKey</code> method to return\n * <code>true</code> and later <code>false</code> for a given key, for the\n * <code>get</code> method to return a value for a given key but later\n * return <code>null</code>, for the <code>put</code> method to return\n * <code>null</code> and the <code>remove</code> method to return\n * <code>false</code> for a key that previously appeared to be in the map,\n * and for successive examinations of the key set, the value set, and\n * the entry set to yield successively smaller numbers of elements.\n *\n * <p> Each key object in a <code>WeakIdentityHashMap</code> is stored\n * indirectly as the referent of a weak reference.  Therefore a key\n * will automatically be removed only after the weak references to it,\n * both inside and outside of the map, have been cleared by the\n * garbage collector.\n *\n * <p> <strong>Implementation note:</strong> The value objects in a\n * <code>WeakIdentityHashMap</code> are held by ordinary strong\n * references.  Thus care should be taken to ensure that value objects\n * do not strongly refer to their own keys, either directly or\n * indirectly, since that will prevent the keys from being discarded.\n * Note that a value object may refer indirectly to its key via the\n * <code>WeakIdentityHashMap</code> itself; that is, a value object may\n * strongly refer to some other key object whose associated value\n * object, in turn, strongly refers to the key of the first value\n * object.  One way to deal with this is to wrap values themselves\n * within <code>WeakReferences</code> before inserting, as in:\n * <code>m.put(key, new WeakReference(value))</code>, and then unwrapping\n * upon each <code>get</code>.\n *\n * <p>The iterators returned by all of this class's \"collection view methods\"\n * are <i>fail-fast</i>: if the map is structurally modified at any time after\n * the iterator is created, in any way except through the iterator's own\n * <code>remove</code> or <code>add</code> methods, the iterator will throw a\n * <code>ConcurrentModificationException</code>.  Thus, in the face of concurrent\n * modification, the iterator fails quickly and cleanly, rather than risking\n * arbitrary, non-deterministic behavior at an undetermined time in the\n * future.\n *\n * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed\n * as it is, generally speaking, impossible to make any hard guarantees in the\n * presence of unsynchronized concurrent modification.  Fail-fast iterators\n * throw <code>ConcurrentModificationException</code> on a best-effort basis.\n * Therefore, it would be wrong to write a program that depended on this\n * exception for its correctness:  <i>the fail-fast behavior of iterators\n * should be used only to detect bugs.</i>\n *\n * <p>This class is a member of the\n * <a href=\"{@docRoot}/../guide/collections/index.html\">\n * Java Collections Framework</a>.\n *\n * @version\t1.30, 02/19/04\n * @author      Doug Lea\n * @author      Josh Bloch\n * @author\tMark Reinhold\n * @since\t1.2\n * @see\t\tjava.util.HashMap\n * @see\t\tjava.lang.ref.WeakReference\n */\n",
+    "code": "/*>>>\nimport org.checkerframework.checker.nullness.qual.*;\nimport org.checkerframework.dataflow.qual.*;\n*/\n/**\n * This class combines the features of {@link java.util.WeakHashMap} and\n * {@link java.util.IdentityHashMap}.\n * The implementation is a modified version of {@link java.util.WeakHashMap}\n * from JDK 1.5, which differs from the original in two ways:\n * <ul>\n *  <li> uses of hashCode() are replaced by System.identityHashCode()</li>\n *  <li> uses of object equality (.equals) are replaced by identity checks (==)</li>\n * </ul>\n * See {@link java.util.IdentityHashMap}\n * for more information on the changes made in an identity hash map..\n *\n * <hr>\n *\n * A hashtable-based <code>Map</code> implementation with <em>weak\n * keys</em>.  An entry in a <code>WeakIdentityHashMap</code> will\n * automatically be removed when its key is no longer in ordinary use.\n * More precisely, the presence of a mapping for a given key will not\n * prevent the key from being discarded by the garbage collector, that\n * is, made finalizable, finalized, and then reclaimed.  When a key\n * has been discarded its entry is effectively removed from the map,\n * so this class behaves somewhat differently than other <code>Map</code>\n * implementations.\n *\n * <p> Both null values and the null key are supported. This class has\n * performance characteristics similar to those of the <code>HashMap</code>\n * class, and has the same efficiency parameters of <em>initial capacity</em>\n * and <em>load factor</em>.\n *\n * <p> Like most collection classes, this class is not synchronized.  A\n * synchronized <code>WeakIdentityHashMap</code> may be constructed using the\n * <code>Collections.synchronizedMap</code> method.\n *\n * <p> The behavior of the <code>WeakIdentityHashMap</code> class depends\n * in part upon the actions of the garbage collector, so several\n * familiar (though not required) <code>Map</code> invariants do not hold\n * for this class.  Because the garbage collector may discard keys at\n * any time, a <code>WeakIdentityHashMap</code> may behave as though an\n * unknown thread is silently removing entries.  In particular, even\n * if you synchronize on a <code>WeakIdentityHashMap</code> instance and\n * invoke none of its mutator methods, it is possible for the\n * <code>size</code> method to return smaller values over time, for the\n * <code>isEmpty</code> method to return <code>false</code> and then\n * <code>true</code>, for the <code>containsKey</code> method to return\n * <code>true</code> and later <code>false</code> for a given key, for the\n * <code>get</code> method to return a value for a given key but later\n * return <code>null</code>, for the <code>put</code> method to return\n * <code>null</code> and the <code>remove</code> method to return\n * <code>false</code> for a key that previously appeared to be in the map,\n * and for successive examinations of the key set, the value set, and\n * the entry set to yield successively smaller numbers of elements.\n *\n * <p> Each key object in a <code>WeakIdentityHashMap</code> is stored\n * indirectly as the referent of a weak reference.  Therefore a key\n * will automatically be removed only after the weak references to it,\n * both inside and outside of the map, have been cleared by the\n * garbage collector.\n *\n * <p> <strong>Implementation note:</strong> The value objects in a\n * <code>WeakIdentityHashMap</code> are held by ordinary strong\n * references.  Thus care should be taken to ensure that value objects\n * do not strongly refer to their own keys, either directly or\n * indirectly, since that will prevent the keys from being discarded.\n * Note that a value object may refer indirectly to its key via the\n * <code>WeakIdentityHashMap</code> itself; that is, a value object may\n * strongly refer to some other key object whose associated value\n * object, in turn, strongly refers to the key of the first value\n * object.  One way to deal with this is to wrap values themselves\n * within <code>WeakReferences</code> before inserting, as in:\n * <code>m.put(key, new WeakReference(value))</code>, and then unwrapping\n * upon each <code>get</code>.\n *\n * <p>The iterators returned by all of this class's \"collection view methods\"\n * are <i>fail-fast</i>: if the map is structurally modified at any time after\n * the iterator is created, in any way except through the iterator's own\n * <code>remove</code> or <code>add</code> methods, the iterator will throw a\n * <code>ConcurrentModificationException</code>.  Thus, in the face of concurrent\n * modification, the iterator fails quickly and cleanly, rather than risking\n * arbitrary, non-deterministic behavior at an undetermined time in the\n * future.\n *\n * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed\n * as it is, generally speaking, impossible to make any hard guarantees in the\n * presence of unsynchronized concurrent modification.  Fail-fast iterators\n * throw <code>ConcurrentModificationException</code> on a best-effort basis.\n * Therefore, it would be wrong to write a program that depended on this\n * exception for its correctness:  <i>the fail-fast behavior of iterators\n * should be used only to detect bugs.</i>\n *\n * <p>This class is a member of the\n * <a href=\"{@docRoot}/../guide/collections/index.html\">\n * Java Collections Framework</a>.\n *\n * @version\t1.30, 02/19/04\n * @author      Doug Lea\n * @author      Josh Bloch\n * @author\tMark Reinhold\n * @since\t1.2\n * @see\t\tjava.util.HashMap\n * @see\t\tjava.lang.ref.WeakReference\n */\n// old, non-typesafe Sun code, not worth annotating or checking\n@SuppressWarnings({ \"unchecked\", \"rawtypes\", \"keyfor\", \"interning\", \"lock\", \"nullness\", \"purity\", \"regex\" })\npublic class WeakIdentityHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {\n\n    /**\n     * The default initial capacity -- MUST be a power of two.\n     */\n    private static final int DEFAULT_INITIAL_CAPACITY = 16;\n\n    /**\n     * The maximum capacity, used if a higher value is implicitly specified\n     * by either of the constructors with arguments.\n     * MUST be a power of two <= 1<<30.\n     */\n    private static final int MAXIMUM_CAPACITY = 1 << 30;\n\n    /**\n     * The load fast used when none specified in constructor.\n     */\n    private static final float DEFAULT_LOAD_FACTOR = 0.75f;\n\n    /**\n     * The table, resized as necessary. Length MUST Always be a power of two.\n     */\n    private Entry<K, V>[] /*@Nullable*/\n    table;\n\n    /**\n     * The number of key-value mappings contained in this weak hash map.\n     */\n    private int size;\n\n    /**\n     * The next size value at which to resize (capacity * load factor).\n     */\n    private int threshold;\n\n    /**\n     * The load factor for the hash table.\n     */\n    private final float loadFactor;\n\n    /**\n     * Reference queue for cleared WeakEntries\n     */\n    private final ReferenceQueue<K> queue = new ReferenceQueue<K>();\n\n    /**\n     * The number of times this HashMap has been structurally modified\n     * Structural modifications are those that change the number of mappings in\n     * the HashMap or otherwise modify its internal structure (e.g.,\n     * rehash).  This field is used to make iterators on Collection-views of\n     * the HashMap fail-fast.  (See ConcurrentModificationException).\n     */\n    private volatile int modCount;\n\n    /**\n     * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n     * given initial capacity and the given load factor.\n     *\n     * @param  initialCapacity the initial capacity of the\n     *      <code>WeakIdentityHashMap</code>\n     * @param  loadFactor      the load factor of the\n     *      <code>WeakIdentityHashMap</code>\n     * @throws IllegalArgumentException  If the initial capacity is negative,\n     *      or if the load factor is nonpositive.\n     */\n    public WeakIdentityHashMap(int initialCapacity, float loadFactor) {\n        if (initialCapacity < 0)\n            throw new IllegalArgumentException(\"Illegal Initial Capacity: \" + initialCapacity);\n        if (initialCapacity > MAXIMUM_CAPACITY)\n            initialCapacity = MAXIMUM_CAPACITY;\n        if (loadFactor <= 0 || Float.isNaN(loadFactor))\n            throw new IllegalArgumentException(\"Illegal Load factor: \" + loadFactor);\n        int capacity = 1;\n        while (capacity < initialCapacity) capacity <<= 1;\n        @SuppressWarnings(\"unchecked\")\n        Entry<K, V>[] tmpTable = (Entry<K, V>[]) new Entry[capacity];\n        table = tmpTable;\n        this.loadFactor = loadFactor;\n        threshold = (int) (capacity * loadFactor);\n    }\n\n    /**\n     * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n     * given initial capacity and the default load factor, which is\n     * <code>0.75</code>.\n     *\n     * @param  initialCapacity the initial capacity of the\n     *      <code>WeakIdentityHashMap</code>\n     * @throws IllegalArgumentException  If the initial capacity is negative.\n     */\n    public WeakIdentityHashMap(int initialCapacity) {\n        this(initialCapacity, DEFAULT_LOAD_FACTOR);\n    }\n\n    /**\n     * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n     * default initial capacity (16) and the default load factor\n     * (0.75).\n     */\n    public WeakIdentityHashMap() {\n        this.loadFactor = DEFAULT_LOAD_FACTOR;\n        threshold = DEFAULT_INITIAL_CAPACITY;\n        @SuppressWarnings(\"unchecked\")\n        Entry<K, V>[] tmpTable = (Entry<K, V>[]) new Entry[DEFAULT_INITIAL_CAPACITY];\n        table = tmpTable;\n    }\n\n    /**\n     * Constructs a new <code>WeakIdentityHashMap</code> with the same\n     * mappings as the specified <code>Map</code>.  The\n     * <code>WeakIdentityHashMap</code> is created with default load\n     * factor, which is <code>0.75</code> and an initial capacity\n     * sufficient to hold the mappings in the specified <code>Map</code>.\n     *\n     * @param   t the map whose mappings are to be placed in this map.\n     * @throws  NullPointerException if the specified map is null.\n     * @since\t1.3\n     */\n    public WeakIdentityHashMap(Map<? extends K, ? extends V> t) {\n        this(Math.max((int) (t.size() / DEFAULT_LOAD_FACTOR) + 1, 16), DEFAULT_LOAD_FACTOR);\n        putAll(t);\n    }\n\n    // internal utilities\n    /**\n     * Value representing null keys inside tables.\n     */\n    // This is problematic because it isn't of the right type.\n    // We can't lie here to the type system by claiming it is of type K,\n    // because NULL_KEY is a static field but K is a per-instance type parameter.\n    private static final Object NULL_KEY = new Object();\n\n    /**\n     * Use NULL_KEY for key if it is null.\n     */\n    // not: \"private static <K> K maskNull(K key)\" because NULL_KEY isn't of type K.\n    /*@Pure*/\n    private static /*@NonNull*/\n    Object maskNull(/*@Nullable*/\n    Object key) {\n        return (key == null ? NULL_KEY : key);\n    }\n\n    /**\n     * Return internal representation of null key back to caller as null\n     */\n    // Argument is actually either of type K, or is NULL_KEY.\n    @SuppressWarnings(\"unchecked\")\n    private static </*@Pure*/\n    K> /*@Nullable*/\n    K unmaskNull(K key) {\n        return (key == NULL_KEY ? null : key);\n    }\n\n    /**\n     * Check for equality of non-null reference x and possibly-null y.  Uses\n     * identity equality.\n     */\n    /*@Pure*/\n    static boolean eq(Object x, /*@Nullable*/\n    Object y) {\n        return x == y;\n    }\n\n    /**\n     * Return the hash code for x\n     */\n    /*@Pure*/\n    static int hasher(Object x) {\n        return System.identityHashCode(x);\n    }\n\n    /**\n     * Return index for hash code h.\n     */\n    /*@Pure*/\n    static int indexFor(int h, int length) {\n        return h & (length - 1);\n    }\n\n    /**\n     * Expunge stale entries from the table.\n     */\n    // actually has side effects due to weak pointers\n    @SuppressWarnings(\"purity\")\n    private /*@SideEffectFree*/\n    void expungeStaleEntries() {\n        Entry<K, V> e;\n        // These types look wrong to me.\n        while ((e = (Entry<K, V>) queue.poll()) != null) {\n            // unchecked cast\n            int h = e.hash;\n            int i = indexFor(h, table.length);\n            Entry<K, V> prev = table[i];\n            Entry<K, V> p = prev;\n            while (p != null) {\n                Entry<K, V> next = p.next;\n                if (p == e) {\n                    if (prev == e)\n                        table[i] = next;\n                    else\n                        prev.next = next;\n                    // Help GC\n                    e.next = null;\n                    //  \"   \"\n                    e.value = null;\n                    size--;\n                    break;\n                }\n                prev = p;\n                p = next;\n            }\n        }\n    }\n\n    /**\n     * Return the table after first expunging stale entries\n     */\n    /*@Pure*/\n    private Entry<K, V>[] getTable() {\n        expungeStaleEntries();\n        return table;\n    }\n\n    /**\n     * Returns the number of key-value mappings in this map.\n     * This result is a snapshot, and may not reflect unprocessed\n     * entries that will be removed before next attempted access\n     * because they are no longer referenced.\n     */\n    /*@Pure*/\n    public int size() {\n        if (size == 0)\n            return 0;\n        expungeStaleEntries();\n        return size;\n    }\n\n    /**\n     * Returns <code>true</code> if this map contains no key-value mappings.\n     * This result is a snapshot, and may not reflect unprocessed\n     * entries that will be removed before next attempted access\n     * because they are no longer referenced.\n     */\n    /*@Pure*/\n    public boolean isEmpty() {\n        return size() == 0;\n    }\n\n    /**\n     * Returns the value to which the specified key is mapped in this weak\n     * hash map, or <code>null</code> if the map contains no mapping for\n     * this key.  A return value of <code>null</code> does not <i>necessarily</i>\n     * indicate that the map contains no mapping for the key; it is also\n     * possible that the map explicitly maps the key to <code>null</code>. The\n     * <code>containsKey</code> method may be used to distinguish these two\n     * cases.\n     *\n     * @param   key the key whose associated value is to be returned.\n     * @return  the value to which this map maps the specified key, or\n     *          <code>null</code> if the map contains no mapping for this key.\n     * @see #put(Object, Object)\n     */\n    /*@Pure*/\n    public /*@Nullable*/\n    V get(/*@Nullable*/\n    Object key) {\n        Object k = maskNull(key);\n        int h = hasher(k);\n        /*@Nullable*/\n        Entry<K, V>[] tab = getTable();\n        int index = indexFor(h, tab.length);\n        Entry<K, V> e = tab[index];\n        while (e != null) {\n            if (e.hash == h && eq(k, e.get()))\n                return e.value;\n            e = e.next;\n        }\n        return null;\n    }\n\n    /**\n     * Returns <code>true</code> if this map contains a mapping for the\n     * specified key.\n     *\n     * @param   key   the key whose presence in this map is to be tested\n     * @return  <code>true</code> if there is a mapping for <code>key</code>;\n     *          <code>false</code> otherwise\n     */\n    /*@Pure*/\n    public boolean containsKey(/*@Nullable*/\n    Object key) {\n        return getEntry(key) != null;\n    }\n\n    /**\n     * Returns the entry associated with the specified key in the HashMap.\n     * Returns null if the HashMap contains no mapping for this key.\n     */\n    /*@SideEffectFree*/\n    /*@Nullable*/\n    Entry<K, V> getEntry(/*@Nullable*/\n    Object key) {\n        Object k = maskNull(key);\n        int h = hasher(k);\n        /*@Nullable*/\n        Entry<K, V>[] tab = getTable();\n        int index = indexFor(h, tab.length);\n        Entry<K, V> e = tab[index];\n        while (e != null && !(e.hash == h && eq(k, e.get()))) e = e.next;\n        return e;\n    }\n\n    /**\n     *  Associates the specified value with the specified key in this map.\n     *  If the map previously contained a mapping for this key, the old\n     *  value is replaced.\n     *\n     *  @param key key with which the specified value is to be associated.\n     *  @param value value to be associated with the specified key.\n     *  @return previous value associated with specified key, or <code>null</code>\n     * \t       if there was no mapping for key.  A <code>null</code> return can\n     * \t       also indicate that the HashMap previously associated\n     * \t       <code>null</code> with the specified key.\n     */\n    public /*@Nullable*/\n    V put(K key, V value) {\n        @SuppressWarnings(\"unchecked\")\n        K k = (K) maskNull(key);\n        int h = System.identityHashCode(k);\n        /*@Nullable*/\n        Entry<K, V>[] tab = getTable();\n        int i = indexFor(h, tab.length);\n        for (Entry<K, V> e = tab[i]; e != null; e = e.next) {\n            if (h == e.hash && eq(k, e.get())) {\n                V oldValue = e.value;\n                if (value != oldValue)\n                    e.value = value;\n                return oldValue;\n            }\n        }\n        modCount++;\n        Entry<K, V> e = tab[i];\n        tab[i] = new Entry<K, V>(k, value, queue, h, e);\n        if (++size >= threshold)\n            resize(tab.length * 2);\n        return null;\n    }\n\n    /**\n     * Rehashes the contents of this map into a new array with a\n     * larger capacity.  This method is called automatically when the\n     * number of keys in this map reaches its threshold.\n     *\n     * If current capacity is MAXIMUM_CAPACITY, this method does not\n     * resize the map, but sets threshold to Integer.MAX_VALUE.\n     * This has the effect of preventing future calls.\n     *\n     * @param newCapacity the new capacity, MUST be a power of two;\n     *        must be greater than current capacity unless current\n     *        capacity is MAXIMUM_CAPACITY (in which case value\n     *        is irrelevant).\n     */\n    void resize(int newCapacity) {\n        /*@Nullable*/\n        Entry<K, V>[] oldTable = getTable();\n        int oldCapacity = oldTable.length;\n        if (oldCapacity == MAXIMUM_CAPACITY) {\n            threshold = Integer.MAX_VALUE;\n            return;\n        }\n        @SuppressWarnings(\"unchecked\")\n        Entry<K, V>[] newTable = (Entry<K, V>[]) new Entry[newCapacity];\n        transfer(oldTable, newTable);\n        table = newTable;\n        /*\n         * If ignoring null elements and processing ref queue caused massive\n         * shrinkage, then restore old table.  This should be rare, but avoids\n         * unbounded expansion of garbage-filled tables.\n         */\n        if (size >= threshold / 2) {\n            threshold = (int) (newCapacity * loadFactor);\n        } else {\n            expungeStaleEntries();\n            transfer(newTable, oldTable);\n            table = oldTable;\n        }\n    }\n\n    /**\n     * Transfer all entries from src to dest tables\n     */\n    private void transfer(/*@Nullable*/\n    Entry<K, V>[] src, /*@Nullable*/\n    Entry<K, V>[] dest) {\n        for (int j = 0; j < src.length; ++j) {\n            Entry<K, V> e = src[j];\n            // Help GC (?)\n            src[j] = null;\n            while (e != null) {\n                Entry<K, V> next = e.next;\n                Object key = e.get();\n                if (key == null) {\n                    // Help GC\n                    e.next = null;\n                    //  \"   \"\n                    e.value = null;\n                    size--;\n                } else {\n                    int i = indexFor(e.hash, dest.length);\n                    e.next = dest[i];\n                    dest[i] = e;\n                }\n                e = next;\n            }\n        }\n    }\n\n    /**\n     * Copies all of the mappings from the specified map to this map These\n     * mappings will replace any mappings that this map had for any of the\n     * keys currently in the specified map.<p>\n     *\n     * @param m mappings to be stored in this map.\n     * @throws  NullPointerException if the specified map is null.\n     */\n    public void putAll(Map<? extends K, ? extends V> m) {\n        int numKeysToBeAdded = m.size();\n        if (numKeysToBeAdded == 0)\n            return;\n        /*\n         * Expand the map if the map if the number of mappings to be added\n         * is greater than or equal to threshold.  This is conservative; the\n         * obvious condition is (m.size() + size) >= threshold, but this\n         * condition could result in a map with twice the appropriate capacity,\n         * if the keys to be added overlap with the keys already in this map.\n         * By using the conservative calculation, we subject ourself\n         * to at most one extra resize.\n         */\n        if (numKeysToBeAdded > threshold) {\n            int targetCapacity = (int) (numKeysToBeAdded / loadFactor + 1);\n            if (targetCapacity > MAXIMUM_CAPACITY)\n                targetCapacity = MAXIMUM_CAPACITY;\n            int newCapacity = table.length;\n            while (newCapacity < targetCapacity) newCapacity <<= 1;\n            if (newCapacity > table.length)\n                resize(newCapacity);\n        }\n        for (Iterator<? extends Map.Entry<? extends K, ? extends V>> i = m.entrySet().iterator(); i.hasNext(); ) {\n            Map.Entry<? extends K, ? extends V> e = i.next();\n            put(e.getKey(), e.getValue());\n        }\n    }\n\n    /**\n     *  Removes the mapping for this key from this map if present.\n     *\n     *  @param key key whose mapping is to be removed from the map.\n     *  @return previous value associated with specified key, or <code>null</code>\n     * \t       if there was no mapping for key.  A <code>null</code> return can\n     * \t       also indicate that the map previously associated <code>null</code>\n     * \t       with the specified key.\n     */\n    public /*@Nullable*/\n    V remove(Object key) {\n        Object k = maskNull(key);\n        int h = hasher(k);\n        /*@Nullable*/\n        Entry<K, V>[] tab = getTable();\n        int i = indexFor(h, tab.length);\n        Entry<K, V> prev = tab[i];\n        Entry<K, V> e = prev;\n        while (e != null) {\n            Entry<K, V> next = e.next;\n            if (h == e.hash && eq(k, e.get())) {\n                modCount++;\n                size--;\n                if (prev == e)\n                    tab[i] = next;\n                else\n                    prev.next = next;\n                return e.value;\n            }\n            prev = e;\n            e = next;\n        }\n        return null;\n    }\n\n    /**\n     * Special version of remove needed by Entry set\n     */\n    /*@Nullable*/\n    Entry<K, V> removeMapping(/*@Nullable*/\n    Object o) {\n        if (!(o instanceof Map.Entry))\n            return null;\n        /*@Nullable*/\n        Entry<K, V>[] tab = getTable();\n        Map.Entry<K, V> entry = (Map.Entry<K, V>) o;\n        Object k = maskNull(entry.getKey());\n        int h = hasher(k);\n        int i = indexFor(h, tab.length);\n        Entry<K, V> prev = tab[i];\n        Entry<K, V> e = prev;\n        while (e != null) {\n            Entry<K, V> next = e.next;\n            if (h == e.hash && e.equals(entry)) {\n                modCount++;\n                size--;\n                if (prev == e)\n                    tab[i] = next;\n                else\n                    prev.next = next;\n                return e;\n            }\n            prev = e;\n            e = next;\n        }\n        return null;\n    }\n\n    /**\n     * Removes all mappings from this map.\n     */\n    public void clear() {\n        // clear out ref queue. We don't need to expunge entries\n        // since table is getting cleared.\n        while (queue.poll() != null) ;\n        modCount++;\n        /*@Nullable*/\n        Entry<K, V>[] tab = table;\n        for (int i = 0; i < tab.length; ++i) // Help GC (?)\n        tab[i] = null;\n        size = 0;\n        // Allocation of array may have caused GC, which may have caused\n        // additional entries to go stale.  Removing these entries from the\n        // reference queue will make them eligible for reclamation.\n        while (queue.poll() != null) ;\n    }\n\n    /**\n     * Returns <code>true</code> if this map maps one or more keys to the\n     * specified value.\n     *\n     * @param value value whose presence in this map is to be tested.\n     * @return <code>true</code> if this map maps one or more keys to the\n     *         specified value.\n     */\n    /*@Pure*/\n    public boolean containsValue(/*@Nullable*/\n    Object value) {\n        if (value == null)\n            return containsNullValue();\n        /*@Nullable*/\n        Entry<K, V>[] tab = getTable();\n        for (int i = tab.length; i-- > 0; ) for (Entry e = tab[i]; e != null; e = e.next) if (value.equals(e.value))\n            return true;\n        return false;\n    }\n\n    /**\n     * Special-case code for containsValue with null argument\n     */\n    private boolean containsNullValue() {\n        /*@Nullable*/\n        Entry<K, V>[] tab = getTable();\n        for (int i = tab.length; i-- > 0; ) for (Entry e = tab[i]; e != null; e = e.next) if (e.value == null)\n            return true;\n        return false;\n    }\n\n    /**\n     * The entries in this hash table extend WeakReference, using its main ref\n     * field as the key.\n     */\n    private static class Entry<K, V> extends WeakReference<K> implements Map.Entry<K, V> {\n\n        private V value;\n\n        private final int hash;\n\n        private Entry<K, V> /*@Nullable*/\n        next;\n\n        /**\n         * Create new entry.\n         */\n        Entry(K key, V value, ReferenceQueue<K> queue, int hash, Entry<K, V> next) {\n            super(key, queue);\n            this.value = value;\n            this.hash = hash;\n            this.next = next;\n        }\n\n        /*@Pure*/\n        public K getKey() {\n            return WeakIdentityHashMap.<K>unmaskNull(get());\n        }\n\n        /*@Pure*/\n        public V getValue() {\n            return value;\n        }\n\n        public V setValue(V newValue) {\n            V oldValue = value;\n            value = newValue;\n            return oldValue;\n        }\n\n        // side effects on local state\n        @SuppressWarnings(\"purity\")\n        public /*@Pure*/\n        boolean equals(/*@Nullable*/\n        Object o) {\n            if (!(o instanceof Map.Entry))\n                return false;\n            Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n            Object k1 = getKey();\n            Object k2 = e.getKey();\n            if (eq(k1, k2)) {\n                Object v1 = getValue();\n                Object v2 = e.getValue();\n                if (v1 == v2 || (v1 != null && v1.equals(v2)))\n                    return true;\n            }\n            return false;\n        }\n\n        // side effects on local state\n        @SuppressWarnings(\"purity\")\n        public /*@Pure*/\n        int hashCode() {\n            Object k = getKey();\n            Object v = getValue();\n            return ((k == null ? 0 : hasher(k)) ^ (v == null ? 0 : v.hashCode()));\n        }\n\n        /*@SideEffectFree*/\n        public String toString() {\n            return getKey() + \"=\" + getValue();\n        }\n    }\n\n    private abstract class HashIterator<T> implements Iterator<T> {\n\n        int index;\n\n        /*@Nullable*/\n        Entry<K, V> entry = null;\n\n        /*@Nullable*/\n        Entry<K, V> lastReturned = null;\n\n        int expectedModCount = modCount;\n\n        /**\n         * Strong reference needed to avoid disappearance of key\n         * between hasNext and next\n         */\n        /*@Nullable*/\n        Object nextKey = null;\n\n        /**\n         * Strong reference needed to avoid disappearance of key\n         * between nextEntry() and any use of the entry\n         */\n        /*@Nullable*/\n        Object currentKey = null;\n\n        HashIterator() {\n            index = (size() != 0 ? table.length : 0);\n        }\n\n        public boolean hasNext() {\n            /*@Nullable*/\n            Entry<K, V>[] t = table;\n            while (nextKey == null) {\n                Entry<K, V> e = entry;\n                int i = index;\n                while (e == null && i > 0) e = t[--i];\n                entry = e;\n                index = i;\n                if (e == null) {\n                    currentKey = null;\n                    return false;\n                }\n                // hold on to key in strong ref\n                nextKey = e.get();\n                if (nextKey == null)\n                    entry = entry.next;\n            }\n            return true;\n        }\n\n        /**\n         * The common parts of next() across different types of iterators\n         */\n        protected Entry<K, V> nextEntry() {\n            if (modCount != expectedModCount)\n                throw new ConcurrentModificationException();\n            if (nextKey == null && !hasNext())\n                throw new NoSuchElementException();\n            lastReturned = entry;\n            entry = entry.next;\n            currentKey = nextKey;\n            nextKey = null;\n            return lastReturned;\n        }\n\n        public void remove() {\n            if (lastReturned == null)\n                throw new IllegalStateException();\n            if (modCount != expectedModCount)\n                throw new ConcurrentModificationException();\n            WeakIdentityHashMap.this.remove(currentKey);\n            expectedModCount = modCount;\n            lastReturned = null;\n            currentKey = null;\n        }\n    }\n\n    private class ValueIterator extends HashIterator<V> {\n\n        public V next() {\n            return nextEntry().value;\n        }\n    }\n\n    private class KeyIterator extends HashIterator<K> {\n\n        public K next() {\n            return nextEntry().getKey();\n        }\n    }\n\n    private class EntryIterator extends HashIterator<Map.Entry<K, V>> {\n\n        public Map.Entry<K, V> next() {\n            return nextEntry();\n        }\n    }\n\n    // Views\n    private transient Set<Map.Entry<K, V>> /*@Nullable*/\n    entrySet = null;\n\n    private transient volatile Set<K> /*@Nullable*/\n    our_keySet = null;\n\n    /**\n     * Returns a set view of the keys contained in this map.  The set is\n     * backed by the map, so changes to the map are reflected in the set, and\n     * vice-versa.  The set supports element removal, which removes the\n     * corresponding mapping from this map, via the <code>Iterator.remove</code>,\n     * <code>Set.remove</code>, <code>removeAll</code>, <code>retainAll</code>, and\n     * <code>clear</code> operations.  It does not support the <code>add</code> or\n     * <code>addAll</code> operations.\n     *\n     * @return a set view of the keys contained in this map.\n     */\n    /*@SideEffectFree*/\n    public Set<K> keySet() {\n        Set<K> ks = our_keySet;\n        return (ks != null ? ks : (our_keySet = new KeySet()));\n    }\n\n    private class KeySet extends AbstractSet<K> {\n\n        public Iterator<K> iterator() {\n            return new KeyIterator();\n        }\n\n        /*@Pure*/\n        public int size() {\n            return WeakIdentityHashMap.this.size();\n        }\n\n        /*@Pure*/\n        public boolean contains(/*@Nullable*/\n        Object o) {\n            return containsKey(o);\n        }\n\n        public boolean remove(/*@Nullable*/\n        Object o) {\n            if (containsKey(o)) {\n                WeakIdentityHashMap.this.remove(o);\n                return true;\n            } else\n                return false;\n        }\n\n        public void clear() {\n            WeakIdentityHashMap.this.clear();\n        }\n\n        public Object[] toArray() {\n            Collection<K> c = new ArrayList<K>(size());\n            for (Iterator<K> i = iterator(); i.hasNext(); ) c.add(i.next());\n            return c.toArray();\n        }\n\n        public <T> T[] toArray(T[] a) {\n            Collection<K> c = new ArrayList<K>(size());\n            for (Iterator<K> i = iterator(); i.hasNext(); ) c.add(i.next());\n            return c.toArray(a);\n        }\n    }\n\n    transient volatile Collection<V> /*@Nullable*/\n    our_values = null;\n\n    /**\n     * Returns a collection view of the values contained in this map.  The\n     * collection is backed by the map, so changes to the map are reflected in\n     * the collection, and vice-versa.  The collection supports element\n     * removal, which removes the corresponding mapping from this map, via the\n     * <code>Iterator.remove</code>, <code>Collection.remove</code>,\n     * <code>removeAll</code>, <code>retainAll</code>, and <code>clear</code> operations.\n     * It does not support the <code>add</code> or <code>addAll</code> operations.\n     *\n     * @return a collection view of the values contained in this map.\n     */\n    /*@SideEffectFree*/\n    public Collection<V> values() {\n        Collection<V> vs = our_values;\n        return (vs != null ? vs : (our_values = new Values()));\n    }\n\n    private class Values extends AbstractCollection<V> {\n\n        public Iterator<V> iterator() {\n            return new ValueIterator();\n        }\n\n        /*@Pure*/\n        public int size() {\n            return WeakIdentityHashMap.this.size();\n        }\n\n        /*@Pure*/\n        public boolean contains(/*@Nullable*/\n        Object o) {\n            return containsValue(o);\n        }\n\n        public void clear() {\n            WeakIdentityHashMap.this.clear();\n        }\n\n        public Object[] toArray() {\n            Collection<V> c = new ArrayList<V>(size());\n            for (Iterator<V> i = iterator(); i.hasNext(); ) c.add(i.next());\n            return c.toArray();\n        }\n\n        public <T> T[] toArray(T[] a) {\n            Collection<V> c = new ArrayList<V>(size());\n            for (Iterator<V> i = iterator(); i.hasNext(); ) c.add(i.next());\n            return c.toArray(a);\n        }\n    }\n\n    /**\n     * Returns a collection view of the mappings contained in this map.  Each\n     * element in the returned collection is a <code>Map.Entry</code>.  The\n     * collection is backed by the map, so changes to the map are reflected in\n     * the collection, and vice-versa.  The collection supports element\n     * removal, which removes the corresponding mapping from the map, via the\n     * <code>Iterator.remove</code>, <code>Collection.remove</code>,\n     * <code>removeAll</code>, <code>retainAll</code>, and <code>clear</code> operations.\n     * It does not support the <code>add</code> or <code>addAll</code> operations.\n     *\n     * @return a collection view of the mappings contained in this map.\n     * @see java.util.Map.Entry\n     */\n    /*@SideEffectFree*/\n    public Set<Map.Entry<K, V>> entrySet() {\n        Set<Map.Entry<K, V>> es = entrySet;\n        return (es != null ? es : (entrySet = new EntrySet()));\n    }\n\n    private class EntrySet extends AbstractSet<Map.Entry<K, V>> {\n\n        public Iterator<Map.Entry<K, V>> iterator() {\n            return new EntryIterator();\n        }\n\n        /*@Pure*/\n        public boolean contains(/*@Nullable*/\n        Object o) {\n            if (!(o instanceof Map.Entry))\n                return false;\n            Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n            Object k = e.getKey();\n            Entry candidate = getEntry(k);\n            return candidate != null && candidate.equals(e);\n        }\n\n        public boolean remove(/*@Nullable*/\n        Object o) {\n            return removeMapping(o) != null;\n        }\n\n        /*@Pure*/\n        public int size() {\n            return WeakIdentityHashMap.this.size();\n        }\n\n        public void clear() {\n            WeakIdentityHashMap.this.clear();\n        }\n\n        public Object[] toArray() {\n            Collection<Map.Entry<K, V>> c = new ArrayList<Map.Entry<K, V>>(size());\n            for (Iterator<Map.Entry<K, V>> i = iterator(); i.hasNext(); ) c.add(new OurSimpleEntry<K, V>(i.next()));\n            return c.toArray();\n        }\n\n        public <T> T[] toArray(T[] a) {\n            Collection<Map.Entry<K, V>> c = new ArrayList<Map.Entry<K, V>>(size());\n            for (Iterator<Map.Entry<K, V>> i = iterator(); i.hasNext(); ) c.add(new OurSimpleEntry<K, V>(i.next()));\n            return c.toArray(a);\n        }\n    }\n\n    /**\n     * Version copied from Abstract Map because it is not public\n     */\n    static class OurSimpleEntry<K, V> implements Map.Entry<K, V> {\n\n        K key;\n\n        V value;\n\n        public OurSimpleEntry(K key, V value) {\n            this.key = key;\n            this.value = value;\n        }\n\n        public OurSimpleEntry(Map.Entry<K, V> e) {\n            this.key = e.getKey();\n            this.value = e.getValue();\n        }\n\n        /*@Pure*/\n        public K getKey() {\n            return key;\n        }\n\n        /*@Pure*/\n        public V getValue() {\n            return value;\n        }\n\n        public V setValue(V value) {\n            V oldValue = this.value;\n            this.value = value;\n            return oldValue;\n        }\n\n        /*@Pure*/\n        public boolean equals(/*@Nullable*/\n        Object o) {\n            if (!(o instanceof Map.Entry))\n                return false;\n            Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n            return WeakIdentityHashMap.eq(key, e.getKey()) && eq(value, e.getValue());\n        }\n\n        /*@Pure*/\n        public int hashCode() {\n            return ((key == null) ? 0 : key.hashCode()) ^ ((value == null) ? 0 : value.hashCode());\n        }\n\n        /*@SideEffectFree*/\n        public String toString() {\n            return key + \"=\" + value;\n        }\n\n        private static boolean eq(/*@Nullable*/\n        Object o1, /*@Nullable*/\n        Object o2) {\n            return (o1 == null ? o2 == null : o1.equals(o2));\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "WeakIdentityHashMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialCapacity"
+          },
+          {
+            "type": {
+              "qualified_name": "float",
+              "simple_name": "float",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "loadFactor"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n * given initial capacity and the given load factor.\n *\n * @param  initialCapacity the initial capacity of the\n *      <code>WeakIdentityHashMap</code>\n * @param  loadFactor      the load factor of the\n *      <code>WeakIdentityHashMap</code>\n * @throws IllegalArgumentException  If the initial capacity is negative,\n *      or if the load factor is nonpositive.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "initialCapacity",
+            "content": "the initial capacity of the\n     <code>WeakIdentityHashMap</code>",
+            "assertion": "assert args[0] >= 0;",
+            "description": "the initial capacity of the\n     <code>WeakIdentityHashMap</code>"
+          },
+          {
+            "tag": "param",
+            "name": "loadFactor",
+            "content": "the load factor of the\n     <code>WeakIdentityHashMap</code>",
+            "assertion": "assert args[1] > 0;",
+            "description": "the load factor of the\n     <code>WeakIdentityHashMap</code>"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "If the initial capacity is negative,\n     or if the load factor is nonpositive.",
+            "assertion": "assert args[0] < 0 || args[1] <= 0;",
+            "description": "If the initial capacity is negative,\\n     or if the load factor is nonpositive."
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n * given initial capacity and the given load factor.\n *\n * @param  initialCapacity the initial capacity of the\n *      <code>WeakIdentityHashMap</code>\n * @param  loadFactor      the load factor of the\n *      <code>WeakIdentityHashMap</code>\n * @throws IllegalArgumentException  If the initial capacity is negative,\n *      or if the load factor is nonpositive.\n */\npublic WeakIdentityHashMap(int initialCapacity, float loadFactor) {\n    if (initialCapacity < 0)\n        throw new IllegalArgumentException(\"Illegal Initial Capacity: \" + initialCapacity);\n    if (initialCapacity > MAXIMUM_CAPACITY)\n        initialCapacity = MAXIMUM_CAPACITY;\n    if (loadFactor <= 0 || Float.isNaN(loadFactor))\n        throw new IllegalArgumentException(\"Illegal Load factor: \" + loadFactor);\n    int capacity = 1;\n    while (capacity < initialCapacity) capacity <<= 1;\n    @SuppressWarnings(\"unchecked\")\n    Entry<K, V>[] tmpTable = (Entry<K, V>[]) new Entry[capacity];\n    table = tmpTable;\n    this.loadFactor = loadFactor;\n    threshold = (int) (capacity * loadFactor);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "WeakIdentityHashMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initialCapacity"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n * given initial capacity and the default load factor, which is\n * <code>0.75</code>.\n *\n * @param  initialCapacity the initial capacity of the\n *      <code>WeakIdentityHashMap</code>\n * @throws IllegalArgumentException  If the initial capacity is negative.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "initialCapacity",
+            "content": "the initial capacity of the\n     <code>WeakIdentityHashMap</code>",
+            "assertion": "assert args[0] >= 0;",
+            "description": "the initial capacity of the\n     <code>WeakIdentityHashMap</code>"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "If the initial capacity is negative.",
+            "assertion": "assert args[0] < 0;",
+            "description": "If the initial capacity is negative."
+          }
+        ],
+        "code": "/**\n * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n * given initial capacity and the default load factor, which is\n * <code>0.75</code>.\n *\n * @param  initialCapacity the initial capacity of the\n *      <code>WeakIdentityHashMap</code>\n * @throws IllegalArgumentException  If the initial capacity is negative.\n */\npublic WeakIdentityHashMap(int initialCapacity) {\n    this(initialCapacity, DEFAULT_LOAD_FACTOR);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "WeakIdentityHashMap",
+        "parameters": [],
+        "javadoc": "/**\n * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n * default initial capacity (16) and the default load factor\n * (0.75).\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructs a new, empty <code>WeakIdentityHashMap</code> with the\n * default initial capacity (16) and the default load factor\n * (0.75).\n */\npublic WeakIdentityHashMap() {\n    this.loadFactor = DEFAULT_LOAD_FACTOR;\n    threshold = DEFAULT_INITIAL_CAPACITY;\n    @SuppressWarnings(\"unchecked\")\n    Entry<K, V>[] tmpTable = (Entry<K, V>[]) new Entry[DEFAULT_INITIAL_CAPACITY];\n    table = tmpTable;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "WeakIdentityHashMap",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "t"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new <code>WeakIdentityHashMap</code> with the same\n * mappings as the specified <code>Map</code>.  The\n * <code>WeakIdentityHashMap</code> is created with default load\n * factor, which is <code>0.75</code> and an initial capacity\n * sufficient to hold the mappings in the specified <code>Map</code>.\n *\n * @param   t the map whose mappings are to be placed in this map.\n * @throws  NullPointerException if the specified map is null.\n * @since\t1.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "t",
+            "content": "the map whose mappings are to be placed in this map.",
+            "assertion": "assert (args[0]==null) == false;",
+            "description": "the map whose mappings are to be placed in this map."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified map is null.",
+            "assertion": "assert args[0]==null;",
+            "description": "if the specified map is null."
+          },
+          {
+            "tag": "since",
+            "name": null,
+            "content": "1.3"
+          }
+        ],
+        "code": "/**\n * Constructs a new <code>WeakIdentityHashMap</code> with the same\n * mappings as the specified <code>Map</code>.  The\n * <code>WeakIdentityHashMap</code> is created with default load\n * factor, which is <code>0.75</code> and an initial capacity\n * sufficient to hold the mappings in the specified <code>Map</code>.\n *\n * @param   t the map whose mappings are to be placed in this map.\n * @throws  NullPointerException if the specified map is null.\n * @since\t1.3\n */\npublic WeakIdentityHashMap(Map<? extends K, ? extends V> t) {\n    this(Math.max((int) (t.size() / DEFAULT_LOAD_FACTOR) + 1, 16), DEFAULT_LOAD_FACTOR);\n    putAll(t);\n}"
+      },
+      {
+        "type": "method",
+        "name": "eq",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "y"
+          }
+        ],
+        "javadoc": "/**\n     * Check for equality of non-null reference x and possibly-null y.  Uses\n     * identity equality.\n     */",
+        "tags": [],
+        "code": "/**\n * Check for equality of non-null reference x and possibly-null y.  Uses\n * identity equality.\n */\n/*@Pure*/\nstatic boolean eq(Object x, /*@Nullable*/\nObject y) {\n    return x == y;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hasher",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x"
+          }
+        ],
+        "javadoc": "/** Return the hash code for x */",
+        "tags": [],
+        "code": "/**\n * Return the hash code for x\n */\n/*@Pure*/\nstatic int hasher(Object x) {\n    return System.identityHashCode(x);\n}"
+      },
+      {
+        "type": "method",
+        "name": "indexFor",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "h"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "length"
+          }
+        ],
+        "javadoc": "/**\n     * Return index for hash code h.\n     */",
+        "tags": [],
+        "code": "/**\n * Return index for hash code h.\n */\n/*@Pure*/\nstatic int indexFor(int h, int length) {\n    return h & (length - 1);\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n     * Returns the number of key-value mappings in this map.\n     * This result is a snapshot, and may not reflect unprocessed\n     * entries that will be removed before next attempted access\n     * because they are no longer referenced.\n     */",
+        "tags": [],
+        "code": "/**\n * Returns the number of key-value mappings in this map.\n * This result is a snapshot, and may not reflect unprocessed\n * entries that will be removed before next attempted access\n * because they are no longer referenced.\n */\n/*@Pure*/\npublic int size() {\n    if (size == 0)\n        return 0;\n    expungeStaleEntries();\n    return size;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isEmpty",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n     * Returns <code>true</code> if this map contains no key-value mappings.\n     * This result is a snapshot, and may not reflect unprocessed\n     * entries that will be removed before next attempted access\n     * because they are no longer referenced.\n     */",
+        "tags": [],
+        "code": "/**\n * Returns <code>true</code> if this map contains no key-value mappings.\n * This result is a snapshot, and may not reflect unprocessed\n * entries that will be removed before next attempted access\n * because they are no longer referenced.\n */\n/*@Pure*/\npublic boolean isEmpty() {\n    return size() == 0;\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n     * Returns the value to which the specified key is mapped in this weak\n     * hash map, or <code>null</code> if the map contains no mapping for\n     * this key.  A return value of <code>null</code> does not <i>necessarily</i>\n     * indicate that the map contains no mapping for the key; it is also\n     * possible that the map explicitly maps the key to <code>null</code>. The\n     * <code>containsKey</code> method may be used to distinguish these two\n     * cases.\n     *\n     * @param   key the key whose associated value is to be returned.\n     * @return  the value to which this map maps the specified key, or\n     *          <code>null</code> if the map contains no mapping for this key.\n     * @see #put(Object, Object)\n     */",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key whose associated value is to be returned.",
+            "assertion": "assert args[0] != null;",
+            "description": "the key whose associated value is to be returned."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value to which this map maps the specified key, or <code>null</code> if the map contains no mapping for this key.",
+            "assertion": "assert methodResultID == (receiverObjectID.containsKey(args[0]) ? receiverObjectID.getEntry(args[0]) : null);",
+            "description": "the value to which this map maps the specified key, or <code>null</code> if the map contains no mapping for this key."
+          },
+          {
+            "tag": "see",
+            "name": "#put(Object,",
+            "content": "Object)"
+          }
+        ],
+        "code": "/**\n * Returns the value to which the specified key is mapped in this weak\n * hash map, or <code>null</code> if the map contains no mapping for\n * this key.  A return value of <code>null</code> does not <i>necessarily</i>\n * indicate that the map contains no mapping for the key; it is also\n * possible that the map explicitly maps the key to <code>null</code>. The\n * <code>containsKey</code> method may be used to distinguish these two\n * cases.\n *\n * @param   key the key whose associated value is to be returned.\n * @return  the value to which this map maps the specified key, or\n *          <code>null</code> if the map contains no mapping for this key.\n * @see #put(Object, Object)\n */\n/*@Pure*/\npublic /*@Nullable*/\nV get(/*@Nullable*/\nObject key) {\n    Object k = maskNull(key);\n    int h = hasher(k);\n    /*@Nullable*/\n    Entry<K, V>[] tab = getTable();\n    int index = indexFor(h, tab.length);\n    Entry<K, V> e = tab[index];\n    while (e != null) {\n        if (e.hash == h && eq(k, e.get()))\n            return e.value;\n        e = e.next;\n    }\n    return null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsKey",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n     * Returns <code>true</code> if this map contains a mapping for the\n     * specified key.\n     *\n     * @param   key   the key whose presence in this map is to be tested\n     * @return  <code>true</code> if there is a mapping for <code>key</code>;\n     *          <code>false</code> otherwise\n     */",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "the key whose presence in this map is to be tested",
+            "assertion": "assert args[0] != null;",
+            "description": "the key whose presence in this map is to be tested"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if there is a mapping for <code>key</code>; <code>false</code> otherwise",
+            "assertion": "assert methodResultID == receiverObjectID.containsKey(args[0]);",
+            "description": "true if there is a mapping for key; false otherwise"
+          }
+        ],
+        "code": "/**\n * Returns <code>true</code> if this map contains a mapping for the\n * specified key.\n *\n * @param   key   the key whose presence in this map is to be tested\n * @return  <code>true</code> if there is a mapping for <code>key</code>;\n *          <code>false</code> otherwise\n */\n/*@Pure*/\npublic boolean containsKey(/*@Nullable*/\nObject key) {\n    return getEntry(key) != null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n     * Returns the entry associated with the specified key in the HashMap.\n     * Returns null if the HashMap contains no mapping for this key.\n     */",
+        "tags": [],
+        "code": "/**\n * Returns the entry associated with the specified key in the HashMap.\n * Returns null if the HashMap contains no mapping for this key.\n */\n/*@SideEffectFree*/\n/*@Nullable*/\nEntry<K, V> getEntry(/*@Nullable*/\nObject key) {\n    Object k = maskNull(key);\n    int h = hasher(k);\n    /*@Nullable*/\n    Entry<K, V>[] tab = getTable();\n    int index = indexFor(h, tab.length);\n    Entry<K, V> e = tab[index];\n    while (e != null && !(e.hash == h && eq(k, e.get()))) e = e.next;\n    return e;\n}"
+      },
+      {
+        "type": "method",
+        "name": "put",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n *  Associates the specified value with the specified key in this map.\n *  If the map previously contained a mapping for this key, the old\n *  value is replaced.\n *\n *  @param key key with which the specified value is to be associated.\n *  @param value value to be associated with the specified key.\n *  @return previous value associated with specified key, or <code>null</code>\n * \t       if there was no mapping for key.  A <code>null</code> return can\n * \t       also indicate that the HashMap previously associated\n * \t       <code>null</code> with the specified key.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "key with which the specified value is to be associated.",
+            "assertion": "assert args[0] != null;",
+            "description": "key with which the specified value is to be associated."
+          },
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "value to be associated with the specified key.",
+            "assertion": "assert args[1] != null;",
+            "description": "value to be associated with the specified key."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value associated with specified key, or <code>null</code> if there was no mapping for key.  A <code>null</code> return can also indicate that the HashMap previously associated <code>null</code> with the specified key.",
+            "assertion": "assert methodResultID == null ? !receiverObjectID.containsKey(args[0]) : receiverObjectID.get(args[0]) == methodResultID;",
+            "description": "previous value associated with specified key, or <code>null</code> if there was no mapping for key.  A <code>null</code> return can also indicate that the HashMap previously associated <code>null</code> with the specified key."
+          }
+        ],
+        "code": "/**\n *  Associates the specified value with the specified key in this map.\n *  If the map previously contained a mapping for this key, the old\n *  value is replaced.\n *\n *  @param key key with which the specified value is to be associated.\n *  @param value value to be associated with the specified key.\n *  @return previous value associated with specified key, or <code>null</code>\n * \t       if there was no mapping for key.  A <code>null</code> return can\n * \t       also indicate that the HashMap previously associated\n * \t       <code>null</code> with the specified key.\n */\npublic /*@Nullable*/\nV put(K key, V value) {\n    @SuppressWarnings(\"unchecked\")\n    K k = (K) maskNull(key);\n    int h = System.identityHashCode(k);\n    /*@Nullable*/\n    Entry<K, V>[] tab = getTable();\n    int i = indexFor(h, tab.length);\n    for (Entry<K, V> e = tab[i]; e != null; e = e.next) {\n        if (h == e.hash && eq(k, e.get())) {\n            V oldValue = e.value;\n            if (value != oldValue)\n                e.value = value;\n            return oldValue;\n        }\n    }\n    modCount++;\n    Entry<K, V> e = tab[i];\n    tab[i] = new Entry<K, V>(k, value, queue, h, e);\n    if (++size >= threshold)\n        resize(tab.length * 2);\n    return null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "resize",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newCapacity"
+          }
+        ],
+        "javadoc": "/**\n * Rehashes the contents of this map into a new array with a\n * larger capacity.  This method is called automatically when the\n * number of keys in this map reaches its threshold.\n *\n * If current capacity is MAXIMUM_CAPACITY, this method does not\n * resize the map, but sets threshold to Integer.MAX_VALUE.\n * This has the effect of preventing future calls.\n *\n * @param newCapacity the new capacity, MUST be a power of two;\n *        must be greater than current capacity unless current\n *        capacity is MAXIMUM_CAPACITY (in which case value\n *        is irrelevant).\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "newCapacity",
+            "content": "the new capacity, MUST be a power of two; must be greater than current capacity unless current capacity is MAXIMUM_CAPACITY (in which case value is irrelevant).",
+            "assertion": "assert ((args[0] & (args[0] - 1)) == 0) && (args[0] > size() || size() == MAXIMUM_CAPACITY);",
+            "description": "the new capacity, MUST be a power of two; must be greater than current capacity unless current capacity is MAXIMUM_CAPACITY (in which case value is irrelevant)."
+          }
+        ],
+        "code": "/**\n * Rehashes the contents of this map into a new array with a\n * larger capacity.  This method is called automatically when the\n * number of keys in this map reaches its threshold.\n *\n * If current capacity is MAXIMUM_CAPACITY, this method does not\n * resize the map, but sets threshold to Integer.MAX_VALUE.\n * This has the effect of preventing future calls.\n *\n * @param newCapacity the new capacity, MUST be a power of two;\n *        must be greater than current capacity unless current\n *        capacity is MAXIMUM_CAPACITY (in which case value\n *        is irrelevant).\n */\nvoid resize(int newCapacity) {\n    /*@Nullable*/\n    Entry<K, V>[] oldTable = getTable();\n    int oldCapacity = oldTable.length;\n    if (oldCapacity == MAXIMUM_CAPACITY) {\n        threshold = Integer.MAX_VALUE;\n        return;\n    }\n    @SuppressWarnings(\"unchecked\")\n    Entry<K, V>[] newTable = (Entry<K, V>[]) new Entry[newCapacity];\n    transfer(oldTable, newTable);\n    table = newTable;\n    /*\n         * If ignoring null elements and processing ref queue caused massive\n         * shrinkage, then restore old table.  This should be rare, but avoids\n         * unbounded expansion of garbage-filled tables.\n         */\n    if (size >= threshold / 2) {\n        threshold = (int) (newCapacity * loadFactor);\n    } else {\n        expungeStaleEntries();\n        transfer(newTable, oldTable);\n        table = oldTable;\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "putAll",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "m"
+          }
+        ],
+        "javadoc": "/**\n * Copies all of the mappings from the specified map to this map These\n * mappings will replace any mappings that this map had for any of the\n * keys currently in the specified map.<p>\n *\n * @param m mappings to be stored in this map.\n * @throws  NullPointerException if the specified map is null.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "m",
+            "content": "mappings to be stored in this map.",
+            "assertion": "assert (args[0]==null) == false;",
+            "description": "mappings to be stored in this map."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified map is null.",
+            "assertion": "assert args[0]==null;",
+            "description": "if the specified map is null."
+          }
+        ],
+        "code": "/**\n * Copies all of the mappings from the specified map to this map These\n * mappings will replace any mappings that this map had for any of the\n * keys currently in the specified map.<p>\n *\n * @param m mappings to be stored in this map.\n * @throws  NullPointerException if the specified map is null.\n */\npublic void putAll(Map<? extends K, ? extends V> m) {\n    int numKeysToBeAdded = m.size();\n    if (numKeysToBeAdded == 0)\n        return;\n    /*\n         * Expand the map if the map if the number of mappings to be added\n         * is greater than or equal to threshold.  This is conservative; the\n         * obvious condition is (m.size() + size) >= threshold, but this\n         * condition could result in a map with twice the appropriate capacity,\n         * if the keys to be added overlap with the keys already in this map.\n         * By using the conservative calculation, we subject ourself\n         * to at most one extra resize.\n         */\n    if (numKeysToBeAdded > threshold) {\n        int targetCapacity = (int) (numKeysToBeAdded / loadFactor + 1);\n        if (targetCapacity > MAXIMUM_CAPACITY)\n            targetCapacity = MAXIMUM_CAPACITY;\n        int newCapacity = table.length;\n        while (newCapacity < targetCapacity) newCapacity <<= 1;\n        if (newCapacity > table.length)\n            resize(newCapacity);\n    }\n    for (Iterator<? extends Map.Entry<? extends K, ? extends V>> i = m.entrySet().iterator(); i.hasNext(); ) {\n        Map.Entry<? extends K, ? extends V> e = i.next();\n        put(e.getKey(), e.getValue());\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          }
+        ],
+        "javadoc": "/**\n *  Removes the mapping for this key from this map if present.\n *\n *  @param key key whose mapping is to be removed from the map.\n *  @return previous value associated with specified key, or <code>null</code>\n * \t       if there was no mapping for key.  A <code>null</code> return can\n * \t       also indicate that the map previously associated <code>null</code>\n * \t       with the specified key.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "key whose mapping is to be removed from the map.",
+            "assertion": "assert args[0] != null;",
+            "description": "key whose mapping is to be removed from the map."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value associated with specified key, or <code>null</code> if there was no mapping for key.  A <code>null</code> return can also indicate that the map previously associated <code>null</code> with the specified key.",
+            "assertion": "assert methodResultID != null == receiverObjectID.containsKey(args[0]);",
+            "description": "previous value associated with specified key, or <code>null</code> if there was no mapping for key.  A <code>null</code> return can also indicate that the map previously associated <code>null</code> with the specified key."
+          }
+        ],
+        "code": "/**\n *  Removes the mapping for this key from this map if present.\n *\n *  @param key key whose mapping is to be removed from the map.\n *  @return previous value associated with specified key, or <code>null</code>\n * \t       if there was no mapping for key.  A <code>null</code> return can\n * \t       also indicate that the map previously associated <code>null</code>\n * \t       with the specified key.\n */\npublic /*@Nullable*/\nV remove(Object key) {\n    Object k = maskNull(key);\n    int h = hasher(k);\n    /*@Nullable*/\n    Entry<K, V>[] tab = getTable();\n    int i = indexFor(h, tab.length);\n    Entry<K, V> prev = tab[i];\n    Entry<K, V> e = prev;\n    while (e != null) {\n        Entry<K, V> next = e.next;\n        if (h == e.hash && eq(k, e.get())) {\n            modCount++;\n            size--;\n            if (prev == e)\n                tab[i] = next;\n            else\n                prev.next = next;\n            return e.value;\n        }\n        prev = e;\n        e = next;\n    }\n    return null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "removeMapping",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": "/** Special version of remove needed by Entry set */",
+        "tags": [],
+        "code": "/**\n * Special version of remove needed by Entry set\n */\n/*@Nullable*/\nEntry<K, V> removeMapping(/*@Nullable*/\nObject o) {\n    if (!(o instanceof Map.Entry))\n        return null;\n    /*@Nullable*/\n    Entry<K, V>[] tab = getTable();\n    Map.Entry<K, V> entry = (Map.Entry<K, V>) o;\n    Object k = maskNull(entry.getKey());\n    int h = hasher(k);\n    int i = indexFor(h, tab.length);\n    Entry<K, V> prev = tab[i];\n    Entry<K, V> e = prev;\n    while (e != null) {\n        Entry<K, V> next = e.next;\n        if (h == e.hash && e.equals(entry)) {\n            modCount++;\n            size--;\n            if (prev == e)\n                tab[i] = next;\n            else\n                prev.next = next;\n            return e;\n        }\n        prev = e;\n        e = next;\n    }\n    return null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "clear",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": "/**\n * Removes all mappings from this map.\n */\n",
+        "tags": [],
+        "code": "/**\n * Removes all mappings from this map.\n */\npublic void clear() {\n    // clear out ref queue. We don't need to expunge entries\n    // since table is getting cleared.\n    while (queue.poll() != null) ;\n    modCount++;\n    /*@Nullable*/\n    Entry<K, V>[] tab = table;\n    for (int i = 0; i < tab.length; ++i) // Help GC (?)\n    tab[i] = null;\n    size = 0;\n    // Allocation of array may have caused GC, which may have caused\n    // additional entries to go stale.  Removing these entries from the\n    // reference queue will make them eligible for reclamation.\n    while (queue.poll() != null) ;\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsValue",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": "/**\n     * Returns <code>true</code> if this map maps one or more keys to the\n     * specified value.\n     *\n     * @param value value whose presence in this map is to be tested.\n     * @return <code>true</code> if this map maps one or more keys to the\n     *         specified value.\n     */",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "value",
+            "content": "value whose presence in this map is to be tested.",
+            "assertion": "assert args[0] != null;",
+            "description": "value whose presence in this map is to be tested."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "if this map maps one or more keys to the specified value.",
+            "assertion": "assert methodResultID == receiverObjectID.containsValue(args[0]);",
+            "description": "true if this map maps one or more keys to the specified value."
+          }
+        ],
+        "code": "/**\n * Returns <code>true</code> if this map maps one or more keys to the\n * specified value.\n *\n * @param value value whose presence in this map is to be tested.\n * @return <code>true</code> if this map maps one or more keys to the\n *         specified value.\n */\n/*@Pure*/\npublic boolean containsValue(/*@Nullable*/\nObject value) {\n    if (value == null)\n        return containsNullValue();\n    /*@Nullable*/\n    Entry<K, V>[] tab = getTable();\n    for (int i = tab.length; i-- > 0; ) for (Entry e = tab[i]; e != null; e = e.next) if (value.equals(e.value))\n        return true;\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "keySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Set",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n     * Returns a set view of the keys contained in this map.  The set is\n     * backed by the map, so changes to the map are reflected in the set, and\n     * vice-versa.  The set supports element removal, which removes the\n     * corresponding mapping from this map, via the <code>Iterator.remove</code>,\n     * <code>Set.remove</code>, <code>removeAll</code>, <code>retainAll</code>, and\n     * <code>clear</code> operations.  It does not support the <code>add</code> or\n     * <code>addAll</code> operations.\n     *\n     * @return a set view of the keys contained in this map.\n     */",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "set view of the keys contained in this map.",
+            "assertion": "assert methodResultID != null;",
+            "description": "a set view of the keys contained in this map."
+          }
+        ],
+        "code": "/**\n * Returns a set view of the keys contained in this map.  The set is\n * backed by the map, so changes to the map are reflected in the set, and\n * vice-versa.  The set supports element removal, which removes the\n * corresponding mapping from this map, via the <code>Iterator.remove</code>,\n * <code>Set.remove</code>, <code>removeAll</code>, <code>retainAll</code>, and\n * <code>clear</code> operations.  It does not support the <code>add</code> or\n * <code>addAll</code> operations.\n *\n * @return a set view of the keys contained in this map.\n */\n/*@SideEffectFree*/\npublic Set<K> keySet() {\n    Set<K> ks = our_keySet;\n    return (ks != null ? ks : (our_keySet = new KeySet()));\n}"
+      },
+      {
+        "type": "method",
+        "name": "values",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n     * Returns a collection view of the values contained in this map.  The\n     * collection is backed by the map, so changes to the map are reflected in\n     * the collection, and vice-versa.  The collection supports element\n     * removal, which removes the corresponding mapping from this map, via the\n     * <code>Iterator.remove</code>, <code>Collection.remove</code>,\n     * <code>removeAll</code>, <code>retainAll</code>, and <code>clear</code> operations.\n     * It does not support the <code>add</code> or <code>addAll</code> operations.\n     *\n     * @return a collection view of the values contained in this map.\n     */",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "collection view of the values contained in this map.",
+            "assertion": "assert methodResultID != null;",
+            "description": "a collection view of the values contained in this map."
+          }
+        ],
+        "code": "/**\n * Returns a collection view of the values contained in this map.  The\n * collection is backed by the map, so changes to the map are reflected in\n * the collection, and vice-versa.  The collection supports element\n * removal, which removes the corresponding mapping from this map, via the\n * <code>Iterator.remove</code>, <code>Collection.remove</code>,\n * <code>removeAll</code>, <code>retainAll</code>, and <code>clear</code> operations.\n * It does not support the <code>add</code> or <code>addAll</code> operations.\n *\n * @return a collection view of the values contained in this map.\n */\n/*@SideEffectFree*/\npublic Collection<V> values() {\n    Collection<V> vs = our_values;\n    return (vs != null ? vs : (our_values = new Values()));\n}"
+      },
+      {
+        "type": "method",
+        "name": "entrySet",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Set",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n     * Returns a collection view of the mappings contained in this map.  Each\n     * element in the returned collection is a <code>Map.Entry</code>.  The\n     * collection is backed by the map, so changes to the map are reflected in\n     * the collection, and vice-versa.  The collection supports element\n     * removal, which removes the corresponding mapping from the map, via the\n     * <code>Iterator.remove</code>, <code>Collection.remove</code>,\n     * <code>removeAll</code>, <code>retainAll</code>, and <code>clear</code> operations.\n     * It does not support the <code>add</code> or <code>addAll</code> operations.\n     *\n     * @return a collection view of the mappings contained in this map.\n     * @see java.util.Map.Entry\n     */",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "collection view of the mappings contained in this map.",
+            "assertion": "assert methodResultID != null;",
+            "description": "a collection view of the mappings contained in this map."
+          },
+          {
+            "tag": "see",
+            "name": "java.util.Map.Entry",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Returns a collection view of the mappings contained in this map.  Each\n * element in the returned collection is a <code>Map.Entry</code>.  The\n * collection is backed by the map, so changes to the map are reflected in\n * the collection, and vice-versa.  The collection supports element\n * removal, which removes the corresponding mapping from the map, via the\n * <code>Iterator.remove</code>, <code>Collection.remove</code>,\n * <code>removeAll</code>, <code>retainAll</code>, and <code>clear</code> operations.\n * It does not support the <code>add</code> or <code>addAll</code> operations.\n *\n * @return a collection view of the mappings contained in this map.\n * @see java.util.Map.Entry\n */\n/*@SideEffectFree*/\npublic Set<Map.Entry<K, V>> entrySet() {\n    Set<Map.Entry<K, V>> es = entrySet;\n    return (es != null ? es : (entrySet = new EntrySet()));\n}"
+      }
+    ]
+  },
+  {
+    "name": "Entry",
+    "package": "plume",
+    "qualified_name": "plume.Entry",
+    "javadoc": "/**\n * The entries in this hash table extend WeakReference, using its main ref\n * field as the key.\n */\n",
+    "code": "/**\n * The entries in this hash table extend WeakReference, using its main ref\n * field as the key.\n */\nprivate static class Entry<K, V> extends WeakReference<K> implements Map.Entry<K, V> {\n\n    private V value;\n\n    private final int hash;\n\n    private Entry<K, V> /*@Nullable*/\n    next;\n\n    /**\n     * Create new entry.\n     */\n    Entry(K key, V value, ReferenceQueue<K> queue, int hash, Entry<K, V> next) {\n        super(key, queue);\n        this.value = value;\n        this.hash = hash;\n        this.next = next;\n    }\n\n    /*@Pure*/\n    public K getKey() {\n        return WeakIdentityHashMap.<K>unmaskNull(get());\n    }\n\n    /*@Pure*/\n    public V getValue() {\n        return value;\n    }\n\n    public V setValue(V newValue) {\n        V oldValue = value;\n        value = newValue;\n        return oldValue;\n    }\n\n    // side effects on local state\n    @SuppressWarnings(\"purity\")\n    public /*@Pure*/\n    boolean equals(/*@Nullable*/\n    Object o) {\n        if (!(o instanceof Map.Entry))\n            return false;\n        Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n        Object k1 = getKey();\n        Object k2 = e.getKey();\n        if (eq(k1, k2)) {\n            Object v1 = getValue();\n            Object v2 = e.getValue();\n            if (v1 == v2 || (v1 != null && v1.equals(v2)))\n                return true;\n        }\n        return false;\n    }\n\n    // side effects on local state\n    @SuppressWarnings(\"purity\")\n    public /*@Pure*/\n    int hashCode() {\n        Object k = getKey();\n        Object v = getValue();\n        return ((k == null ? 0 : hasher(k)) ^ (v == null ? 0 : v.hashCode()));\n    }\n\n    /*@SideEffectFree*/\n    public String toString() {\n        return getKey() + \"=\" + getValue();\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Entry",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ReferenceQueue",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "queue"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "hash"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Entry",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "next"
+          }
+        ],
+        "javadoc": "/**\n * Create new entry.\n */\n",
+        "tags": [],
+        "code": "/**\n * Create new entry.\n */\nEntry(K key, V value, ReferenceQueue<K> queue, int hash, Entry<K, V> next) {\n    super(key, queue);\n    this.value = value;\n    this.hash = hash;\n    this.next = next;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic K getKey() {\n    return WeakIdentityHashMap.<K>unmaskNull(get());\n}"
+      },
+      {
+        "type": "method",
+        "name": "getValue",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic V getValue() {\n    return value;\n}"
+      },
+      {
+        "type": "method",
+        "name": "setValue",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newValue"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public V setValue(V newValue) {\n    V oldValue = value;\n    value = newValue;\n    return oldValue;\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "/*@Pure*/\nboolean",
+          "simple_name": "/*@Pure*/\nboolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "// side effects on local state\n@SuppressWarnings(\"purity\")\npublic /*@Pure*/\nboolean equals(/*@Nullable*/\nObject o) {\n    if (!(o instanceof Map.Entry))\n        return false;\n    Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n    Object k1 = getKey();\n    Object k2 = e.getKey();\n    if (eq(k1, k2)) {\n        Object v1 = getValue();\n        Object v2 = e.getValue();\n        if (v1 == v2 || (v1 != null && v1.equals(v2)))\n            return true;\n    }\n    return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "/*@Pure*/\nint",
+          "simple_name": "/*@Pure*/\nint",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "// side effects on local state\n@SuppressWarnings(\"purity\")\npublic /*@Pure*/\nint hashCode() {\n    Object k = getKey();\n    Object v = getValue();\n    return ((k == null ? 0 : hasher(k)) ^ (v == null ? 0 : v.hashCode()));\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@SideEffectFree*/\npublic String toString() {\n    return getKey() + \"=\" + getValue();\n}"
+      }
+    ]
+  },
+  {
+    "name": "HashIterator",
+    "package": "plume",
+    "qualified_name": "plume.HashIterator",
+    "javadoc": null,
+    "code": "private abstract class HashIterator<T> implements Iterator<T> {\n\n    int index;\n\n    /*@Nullable*/\n    Entry<K, V> entry = null;\n\n    /*@Nullable*/\n    Entry<K, V> lastReturned = null;\n\n    int expectedModCount = modCount;\n\n    /**\n     * Strong reference needed to avoid disappearance of key\n     * between hasNext and next\n     */\n    /*@Nullable*/\n    Object nextKey = null;\n\n    /**\n     * Strong reference needed to avoid disappearance of key\n     * between nextEntry() and any use of the entry\n     */\n    /*@Nullable*/\n    Object currentKey = null;\n\n    HashIterator() {\n        index = (size() != 0 ? table.length : 0);\n    }\n\n    public boolean hasNext() {\n        /*@Nullable*/\n        Entry<K, V>[] t = table;\n        while (nextKey == null) {\n            Entry<K, V> e = entry;\n            int i = index;\n            while (e == null && i > 0) e = t[--i];\n            entry = e;\n            index = i;\n            if (e == null) {\n                currentKey = null;\n                return false;\n            }\n            // hold on to key in strong ref\n            nextKey = e.get();\n            if (nextKey == null)\n                entry = entry.next;\n        }\n        return true;\n    }\n\n    /**\n     * The common parts of next() across different types of iterators\n     */\n    protected Entry<K, V> nextEntry() {\n        if (modCount != expectedModCount)\n            throw new ConcurrentModificationException();\n        if (nextKey == null && !hasNext())\n            throw new NoSuchElementException();\n        lastReturned = entry;\n        entry = entry.next;\n        currentKey = nextKey;\n        nextKey = null;\n        return lastReturned;\n    }\n\n    public void remove() {\n        if (lastReturned == null)\n            throw new IllegalStateException();\n        if (modCount != expectedModCount)\n            throw new ConcurrentModificationException();\n        WeakIdentityHashMap.this.remove(currentKey);\n        expectedModCount = modCount;\n        lastReturned = null;\n        currentKey = null;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "HashIterator",
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "HashIterator() {\n    index = (size() != 0 ? table.length : 0);\n}"
+      },
+      {
+        "type": "method",
+        "name": "hasNext",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean hasNext() {\n    /*@Nullable*/\n    Entry<K, V>[] t = table;\n    while (nextKey == null) {\n        Entry<K, V> e = entry;\n        int i = index;\n        while (e == null && i > 0) e = t[--i];\n        entry = e;\n        index = i;\n        if (e == null) {\n            currentKey = null;\n            return false;\n        }\n        // hold on to key in strong ref\n        nextKey = e.get();\n        if (nextKey == null)\n            entry = entry.next;\n    }\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "nextEntry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * The common parts of next() across different types of iterators\n */\n",
+        "tags": [],
+        "code": "/**\n * The common parts of next() across different types of iterators\n */\nprotected Entry<K, V> nextEntry() {\n    if (modCount != expectedModCount)\n        throw new ConcurrentModificationException();\n    if (nextKey == null && !hasNext())\n        throw new NoSuchElementException();\n    lastReturned = entry;\n    entry = entry.next;\n    currentKey = nextKey;\n    nextKey = null;\n    return lastReturned;\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public void remove() {\n    if (lastReturned == null)\n        throw new IllegalStateException();\n    if (modCount != expectedModCount)\n        throw new ConcurrentModificationException();\n    WeakIdentityHashMap.this.remove(currentKey);\n    expectedModCount = modCount;\n    lastReturned = null;\n    currentKey = null;\n}"
+      }
+    ]
+  },
+  {
+    "name": "ValueIterator",
+    "package": "plume",
+    "qualified_name": "plume.ValueIterator",
+    "javadoc": null,
+    "code": "private class ValueIterator extends HashIterator<V> {\n\n    public V next() {\n        return nextEntry().value;\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "next",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public V next() {\n    return nextEntry().value;\n}"
+      }
+    ]
+  },
+  {
+    "name": "KeyIterator",
+    "package": "plume",
+    "qualified_name": "plume.KeyIterator",
+    "javadoc": null,
+    "code": "private class KeyIterator extends HashIterator<K> {\n\n    public K next() {\n        return nextEntry().getKey();\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "next",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public K next() {\n    return nextEntry().getKey();\n}"
+      }
+    ]
+  },
+  {
+    "name": "EntryIterator",
+    "package": "plume",
+    "qualified_name": "plume.EntryIterator",
+    "javadoc": null,
+    "code": "private class EntryIterator extends HashIterator<Map.Entry<K, V>> {\n\n    public Map.Entry<K, V> next() {\n        return nextEntry();\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "next",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Map.Entry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Map.Entry<K, V> next() {\n    return nextEntry();\n}"
+      }
+    ]
+  },
+  {
+    "name": "KeySet",
+    "package": "plume",
+    "qualified_name": "plume.KeySet",
+    "javadoc": null,
+    "code": "private class KeySet extends AbstractSet<K> {\n\n    public Iterator<K> iterator() {\n        return new KeyIterator();\n    }\n\n    /*@Pure*/\n    public int size() {\n        return WeakIdentityHashMap.this.size();\n    }\n\n    /*@Pure*/\n    public boolean contains(/*@Nullable*/\n    Object o) {\n        return containsKey(o);\n    }\n\n    public boolean remove(/*@Nullable*/\n    Object o) {\n        if (containsKey(o)) {\n            WeakIdentityHashMap.this.remove(o);\n            return true;\n        } else\n            return false;\n    }\n\n    public void clear() {\n        WeakIdentityHashMap.this.clear();\n    }\n\n    public Object[] toArray() {\n        Collection<K> c = new ArrayList<K>(size());\n        for (Iterator<K> i = iterator(); i.hasNext(); ) c.add(i.next());\n        return c.toArray();\n    }\n\n    public <T> T[] toArray(T[] a) {\n        Collection<K> c = new ArrayList<K>(size());\n        for (Iterator<K> i = iterator(); i.hasNext(); ) c.add(i.next());\n        return c.toArray(a);\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Iterator<K> iterator() {\n    return new KeyIterator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic int size() {\n    return WeakIdentityHashMap.this.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic boolean contains(/*@Nullable*/\nObject o) {\n    return containsKey(o);\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean remove(/*@Nullable*/\nObject o) {\n    if (containsKey(o)) {\n        WeakIdentityHashMap.this.remove(o);\n        return true;\n    } else\n        return false;\n}"
+      },
+      {
+        "type": "method",
+        "name": "clear",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public void clear() {\n    WeakIdentityHashMap.this.clear();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Object[] toArray() {\n    Collection<K> c = new ArrayList<K>(size());\n    for (Iterator<K> i = iterator(); i.hasNext(); ) c.add(i.next());\n    return c.toArray();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public <T> T[] toArray(T[] a) {\n    Collection<K> c = new ArrayList<K>(size());\n    for (Iterator<K> i = iterator(); i.hasNext(); ) c.add(i.next());\n    return c.toArray(a);\n}"
+      }
+    ]
+  },
+  {
+    "name": "Values",
+    "package": "plume",
+    "qualified_name": "plume.Values",
+    "javadoc": null,
+    "code": "private class Values extends AbstractCollection<V> {\n\n    public Iterator<V> iterator() {\n        return new ValueIterator();\n    }\n\n    /*@Pure*/\n    public int size() {\n        return WeakIdentityHashMap.this.size();\n    }\n\n    /*@Pure*/\n    public boolean contains(/*@Nullable*/\n    Object o) {\n        return containsValue(o);\n    }\n\n    public void clear() {\n        WeakIdentityHashMap.this.clear();\n    }\n\n    public Object[] toArray() {\n        Collection<V> c = new ArrayList<V>(size());\n        for (Iterator<V> i = iterator(); i.hasNext(); ) c.add(i.next());\n        return c.toArray();\n    }\n\n    public <T> T[] toArray(T[] a) {\n        Collection<V> c = new ArrayList<V>(size());\n        for (Iterator<V> i = iterator(); i.hasNext(); ) c.add(i.next());\n        return c.toArray(a);\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Iterator<V> iterator() {\n    return new ValueIterator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic int size() {\n    return WeakIdentityHashMap.this.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic boolean contains(/*@Nullable*/\nObject o) {\n    return containsValue(o);\n}"
+      },
+      {
+        "type": "method",
+        "name": "clear",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public void clear() {\n    WeakIdentityHashMap.this.clear();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Object[] toArray() {\n    Collection<V> c = new ArrayList<V>(size());\n    for (Iterator<V> i = iterator(); i.hasNext(); ) c.add(i.next());\n    return c.toArray();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public <T> T[] toArray(T[] a) {\n    Collection<V> c = new ArrayList<V>(size());\n    for (Iterator<V> i = iterator(); i.hasNext(); ) c.add(i.next());\n    return c.toArray(a);\n}"
+      }
+    ]
+  },
+  {
+    "name": "EntrySet",
+    "package": "plume",
+    "qualified_name": "plume.EntrySet",
+    "javadoc": null,
+    "code": "private class EntrySet extends AbstractSet<Map.Entry<K, V>> {\n\n    public Iterator<Map.Entry<K, V>> iterator() {\n        return new EntryIterator();\n    }\n\n    /*@Pure*/\n    public boolean contains(/*@Nullable*/\n    Object o) {\n        if (!(o instanceof Map.Entry))\n            return false;\n        Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n        Object k = e.getKey();\n        Entry candidate = getEntry(k);\n        return candidate != null && candidate.equals(e);\n    }\n\n    public boolean remove(/*@Nullable*/\n    Object o) {\n        return removeMapping(o) != null;\n    }\n\n    /*@Pure*/\n    public int size() {\n        return WeakIdentityHashMap.this.size();\n    }\n\n    public void clear() {\n        WeakIdentityHashMap.this.clear();\n    }\n\n    public Object[] toArray() {\n        Collection<Map.Entry<K, V>> c = new ArrayList<Map.Entry<K, V>>(size());\n        for (Iterator<Map.Entry<K, V>> i = iterator(); i.hasNext(); ) c.add(new OurSimpleEntry<K, V>(i.next()));\n        return c.toArray();\n    }\n\n    public <T> T[] toArray(T[] a) {\n        Collection<Map.Entry<K, V>> c = new ArrayList<Map.Entry<K, V>>(size());\n        for (Iterator<Map.Entry<K, V>> i = iterator(); i.hasNext(); ) c.add(new OurSimpleEntry<K, V>(i.next()));\n        return c.toArray(a);\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Iterator<Map.Entry<K, V>> iterator() {\n    return new EntryIterator();\n}"
+      },
+      {
+        "type": "method",
+        "name": "contains",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic boolean contains(/*@Nullable*/\nObject o) {\n    if (!(o instanceof Map.Entry))\n        return false;\n    Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n    Object k = e.getKey();\n    Entry candidate = getEntry(k);\n    return candidate != null && candidate.equals(e);\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public boolean remove(/*@Nullable*/\nObject o) {\n    return removeMapping(o) != null;\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic int size() {\n    return WeakIdentityHashMap.this.size();\n}"
+      },
+      {
+        "type": "method",
+        "name": "clear",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public void clear() {\n    WeakIdentityHashMap.this.clear();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "public Object[] toArray() {\n    Collection<Map.Entry<K, V>> c = new ArrayList<Map.Entry<K, V>>(size());\n    for (Iterator<Map.Entry<K, V>> i = iterator(); i.hasNext(); ) c.add(new OurSimpleEntry<K, V>(i.next()));\n    return c.toArray();\n}"
+      },
+      {
+        "type": "method",
+        "name": "toArray",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public <T> T[] toArray(T[] a) {\n    Collection<Map.Entry<K, V>> c = new ArrayList<Map.Entry<K, V>>(size());\n    for (Iterator<Map.Entry<K, V>> i = iterator(); i.hasNext(); ) c.add(new OurSimpleEntry<K, V>(i.next()));\n    return c.toArray(a);\n}"
+      }
+    ]
+  },
+  {
+    "name": "OurSimpleEntry",
+    "package": "plume",
+    "qualified_name": "plume.OurSimpleEntry",
+    "javadoc": "/**\n * Version copied from Abstract Map because it is not public\n */\n",
+    "code": "/**\n * Version copied from Abstract Map because it is not public\n */\nstatic class OurSimpleEntry<K, V> implements Map.Entry<K, V> {\n\n    K key;\n\n    V value;\n\n    public OurSimpleEntry(K key, V value) {\n        this.key = key;\n        this.value = value;\n    }\n\n    public OurSimpleEntry(Map.Entry<K, V> e) {\n        this.key = e.getKey();\n        this.value = e.getValue();\n    }\n\n    /*@Pure*/\n    public K getKey() {\n        return key;\n    }\n\n    /*@Pure*/\n    public V getValue() {\n        return value;\n    }\n\n    public V setValue(V value) {\n        V oldValue = this.value;\n        this.value = value;\n        return oldValue;\n    }\n\n    /*@Pure*/\n    public boolean equals(/*@Nullable*/\n    Object o) {\n        if (!(o instanceof Map.Entry))\n            return false;\n        Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n        return WeakIdentityHashMap.eq(key, e.getKey()) && eq(value, e.getValue());\n    }\n\n    /*@Pure*/\n    public int hashCode() {\n        return ((key == null) ? 0 : key.hashCode()) ^ ((value == null) ? 0 : value.hashCode());\n    }\n\n    /*@SideEffectFree*/\n    public String toString() {\n        return key + \"=\" + value;\n    }\n\n    private static boolean eq(/*@Nullable*/\n    Object o1, /*@Nullable*/\n    Object o2) {\n        return (o1 == null ? o2 == null : o1.equals(o2));\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "OurSimpleEntry",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public OurSimpleEntry(K key, V value) {\n    this.key = key;\n    this.value = value;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "OurSimpleEntry",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Map.Entry",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "e"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public OurSimpleEntry(Map.Entry<K, V> e) {\n    this.key = e.getKey();\n    this.value = e.getValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "getKey",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic K getKey() {\n    return key;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getValue",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic V getValue() {\n    return value;\n}"
+      },
+      {
+        "type": "method",
+        "name": "setValue",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "value"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "public V setValue(V value) {\n    V oldValue = this.value;\n    this.value = value;\n    return oldValue;\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "o"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic boolean equals(/*@Nullable*/\nObject o) {\n    if (!(o instanceof Map.Entry))\n        return false;\n    Map.Entry<K, V> e = (Map.Entry<K, V>) o;\n    return WeakIdentityHashMap.eq(key, e.getKey()) && eq(value, e.getValue());\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@Pure*/\npublic int hashCode() {\n    return ((key == null) ? 0 : key.hashCode()) ^ ((value == null) ? 0 : value.hashCode());\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "/*@SideEffectFree*/\npublic String toString() {\n    return key + \"=\" + value;\n}"
+      }
+    ]
+  }
+]

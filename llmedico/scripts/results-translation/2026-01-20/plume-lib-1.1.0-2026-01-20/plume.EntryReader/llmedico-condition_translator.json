@@ -1,0 +1,1608 @@
+[
+  {
+    "name": "EntryReader",
+    "package": "plume",
+    "qualified_name": "plume.EntryReader",
+    "javadoc": "/**\n * Class that reads \"entries\" from a file.  In the simplest case, entries\n * can be lines.  It supports:\n *   include files,\n *   comments, and\n *   multi-line entries (paragraphs).\n * The syntax of each of these is customizable.\n * <p>\n *\n * Example use:\n * <pre>\n *  // args are filename, comment regexp, include regexp\n *  try (EntryReader er = new EntryReader(filename, \"^#.*\", null)) {\n *    for (String line : er) {\n *      ...\n *    }\n *  } catch (IOException e) {\n *    System.err.println(\"Problem reading \" + filename + \": \" + e.getMessage());\n *    System.exit(2);\n *    throw new Error(\"This can't happen\"); // for definite assignment check\n *  }\n * </pre>\n *\n * @see #get_entry() and @see #set_entry_start_stop(String,String)\n */\n",
+    "code": "/*>>>\nimport org.checkerframework.checker.lock.qual.*;\nimport org.checkerframework.checker.nullness.qual.*;\nimport org.checkerframework.checker.regex.qual.*;\n*/\n// TODO:\n// EntryReader has a public concept of \"short entry\", but I don't think that\n// concept is logically part of EntryReader.  I think it would be better for\n// Lookup to make this decision itself, for instance by checking whether there\n// are any line separators in the entry that it gets back.\n//\n// Here are some useful features that EntryReader should have.\n//  * It should implement some unimplemented methods from LineNumberReader (see\n//    \"not yet implemented\" in this file).\n//  * It should have constructors that take an InputStream or Reader\n//    (in addition to the current BufferedReader, File, and String versions).\n//  * It should have a close method.\n//  * It should automatically close the underlying file/etc. when the\n//    iterator gets to the end (or the end is otherwise reached).\n/**\n * Class that reads \"entries\" from a file.  In the simplest case, entries\n * can be lines.  It supports:\n *   include files,\n *   comments, and\n *   multi-line entries (paragraphs).\n * The syntax of each of these is customizable.\n * <p>\n *\n * Example use:\n * <pre>\n *  // args are filename, comment regexp, include regexp\n *  try (EntryReader er = new EntryReader(filename, \"^#.*\", null)) {\n *    for (String line : er) {\n *      ...\n *    }\n *  } catch (IOException e) {\n *    System.err.println(\"Problem reading \" + filename + \": \" + e.getMessage());\n *    System.exit(2);\n *    throw new Error(\"This can't happen\"); // for definite assignment check\n *  }\n * </pre>\n *\n * @see #get_entry() and @see #set_entry_start_stop(String,String)\n */\npublic class EntryReader extends LineNumberReader implements Iterable<String>, Iterator<String> {\n\n    ///\n    /// User configuration variables\n    ///\n    /**\n     * Regular expression that specifies an include file.\n     */\n    private final Pattern /*@Nullable*/\n    /*@Regex(1)*/\n    include_re;\n\n    /**\n     * Regular expression that matches a comment.\n     */\n    private final Pattern /*@Nullable*/\n    comment_re;\n\n    /**\n     * Regular expression that starts a long entry.\n     * <p>\n     * If the first line of an entry matches this regexp, then the entry is\n     * terminated by:  entry_stop_re, another line that matches\n     * entry_start_re (even not following a newline), or the end of the\n     * current file.\n     * <p>\n     * Otherwise, the first line of an entry does NOT match this regexp (or\n     * the regexp is null), in which case the entry is terminated by a blank\n     * line or the end of the current file.\n     */\n    public Pattern /*@MonotonicNonNull*/\n    /*@Regex(1)*/\n    entry_start_re = null;\n\n    /**\n     * @see #entry_start_re\n     */\n    public Pattern /*@MonotonicNonNull*/\n    entry_stop_re = null;\n\n    ///\n    /// Internal implementation variables\n    ///\n    /**\n     * Stack of readers.  Used to support include files.\n     */\n    private final Stack<FlnReader> readers = new Stack<FlnReader>();\n\n    /**\n     * Line that is pushed back to be reread.\n     */\n    /*@Nullable*/\n    String pushback_line = null;\n\n    /**\n     * Platform-specific line separator.\n     */\n    private static final String lineSep = System.getProperty(\"line.separator\");\n\n    ///\n    /// Helper classes\n    ///\n    /**\n     * Like LineNumberReader, but also has a filename field.\n     * \"FlnReader\" stands for \"Filename and Line Number Reader\".\n     */\n    private static class FlnReader extends LineNumberReader {\n\n        /**\n         * The file being read.\n         */\n        public String filename;\n\n        /**\n         * Create a FlnReader.\n         * @param reader source from which to read entries\n         * @param filename file name corresponding to reader, for use in error messages.\n         *   Must be non-null; if there isn't a name, clients should provide a dummy value.\n         */\n        public FlnReader(Reader reader, String filename) {\n            super(reader);\n            this.filename = filename;\n        }\n\n        /**\n         * Create a FlnReader.\n         * @param filename file from which to read\n         */\n        public FlnReader(String filename) throws IOException {\n            super(UtilMDE.fileReader(filename));\n            this.filename = filename;\n        }\n    }\n\n    /**\n     * Descriptor for an entry (paragraph).\n     */\n    public static class Entry {\n\n        /**\n         * First line of the entry.\n         */\n        public String first_line;\n\n        /**\n         * Complete body of the entry including the first line.\n         */\n        public String body;\n\n        /**\n         * True if this is a short entry (blank-line-separated).\n         */\n        boolean short_entry;\n\n        /**\n         * Filename in which the entry was found.\n         */\n        String filename;\n\n        /**\n         * Line number of first line of entry.\n         */\n        long line_number;\n\n        /**\n         * Create an entry.\n         * @param first_line first line of the entry\n         * @param body complete body of the entry including the first line\n         * @param short_entry true if this is a short entry (blank-line-separated)\n         * @param filename filename in which the entry was found\n         * @param line_number line number of first line of entry\n         */\n        Entry(String first_line, String body, String filename, long line_number, boolean short_entry) {\n            this.first_line = first_line;\n            this.body = body;\n            this.filename = filename;\n            this.line_number = line_number;\n            this.short_entry = short_entry;\n        }\n\n        /**\n         * Return a substring of the entry body that matches the specified\n         * regular expression.  If no match is found, returns the first_line.\n         * @param re regex to match\n         * @return a substring that matches re\n         */\n        String get_description(/*@Nullable*/\n        Pattern re) {\n            if (re == null) {\n                return first_line;\n            }\n            Matcher descr = re.matcher(body);\n            if (descr.find()) {\n                return descr.group();\n            } else {\n                return first_line;\n            }\n        }\n    }\n\n    ///\n    /// Constructors\n    ///\n    /// Inputstream and charset constructors\n    /**\n     * Create a EntryReader that uses the given character set.\n     * @throws UnsupportedEncodingException if the charset encoding is not supported\n     * @param in source from which to read entries\n     * @param charsetName the character set to use\n     * @param filename non-null file name for stream being read\n     * @param comment_re_string regular expression that matches comments.\n     *                      Any text that matches comment_re is removed.\n     *                      A line that is entirely a comment is ignored.\n     * @param include_re_string regular expression that matches include directives.\n     *                      The expression should define one group that contains\n     *                      the include file name.\n     * @see #EntryReader(InputStream,String,String,String)\n     */\n    public EntryReader(InputStream in, String charsetName, String filename, /*@Nullable*/\n    /*@Regex*/\n    String comment_re_string, /*@Nullable*/\n    /*@Regex(1)*/\n    String include_re_string) throws UnsupportedEncodingException {\n        this(new InputStreamReader(in, charsetName), filename, comment_re_string, include_re_string);\n    }\n\n    /**\n     * Create a EntryReader that does not support comments or include directives.\n     * @param in the InputStream\n     * @param charsetName the character set to use\n     * @param filename the file name\n     * @throws UnsupportedEncodingException if the charset encoding is not supported\n     * @see #EntryReader(InputStream,String,String,String)\n     */\n    public EntryReader(InputStream in, String charsetName, String filename) throws UnsupportedEncodingException {\n        this(in, charsetName, filename, null, null);\n    }\n\n    /// Inputstream (no charset) constructors\n    /**\n     * Create a EntryReader.\n     *\n     *    @param in source from which to read entries\n     *    @param filename non-null file name for stream being read\n     *    @param comment_re_string regular expression that matches comments.\n     *                      Any text that matches comment_re is removed.\n     *                      A line that is entirely a comment is ignored.\n     *    @param include_re_string regular expression that matches include directives.\n     *                      The expression should define one group that contains\n     *                      the include file name.\n     */\n    public EntryReader(InputStream in, String filename, /*@Nullable*/\n    /*@Regex*/\n    String comment_re_string, /*@Nullable*/\n    /*@Regex(1)*/\n    String include_re_string) {\n        this(new InputStreamReader(in), filename, comment_re_string, include_re_string);\n    }\n\n    /**\n     * Create a EntryReader that uses the default character set and does not\n     * support comments or include directives.\n     * @param in the InputStream\n     * @param filename the file name\n     * @see #EntryReader(InputStream,String,String,String,String)\n     */\n    public EntryReader(InputStream in, String filename) {\n        this(in, filename, null, null);\n    }\n\n    /**\n     * Create a EntryReader that does not support comments or include directives.\n     * @param in the InputStream\n     * @see #EntryReader(InputStream,String,String,String)\n     */\n    public EntryReader(InputStream in) {\n        this(in, \"(InputStream)\", null, null);\n    }\n\n    /**\n     * A dummy Reader to be used when null is not acceptable.\n     */\n    private static class DummyReader extends Reader {\n\n        @Override\n        public void close() /*>>>@GuardSatisfied DummyReader this*/\n        {\n            // No error, because closing is OK if it appears in try-with-resources.\n            // Later maybe create two versions (with and without exception here).\n        }\n\n        @Override\n        public void mark(int readAheadLimit) {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public boolean markSupported() {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public int read() {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public int read(char[] cbuf) {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public int read(char[] cbuf, int off, int len) {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public int read(CharBuffer target) {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public boolean ready() {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public void reset() {\n            throw new Error(\"DummyReader\");\n        }\n\n        @Override\n        public long skip(long n) {\n            throw new Error(\"DummyReader\");\n        }\n    }\n\n    /**\n     * Create a EntryReader.\n     *\n     *    @param reader source from which to read entries\n     *    @param filename file name corresponding to reader, for use in error messages\n     *    @param comment_re_string regular expression that matches comments.\n     *                      Any text that matches comment_re is removed.\n     *                      A line that is entirely a comment is ignored\n     *    @param include_re_string regular expression that matches include directives.\n     *                      The expression should define one group that contains\n     *                      the include file name\n     */\n    public EntryReader(Reader reader, String filename, /*@Nullable*/\n    /*@Regex*/\n    String comment_re_string, /*@Nullable*/\n    /*@Regex(1)*/\n    String include_re_string) {\n        // we won't use superclass methods, but passing null as an argument\n        // leads to a NullPointerException.\n        super(new DummyReader());\n        readers.push(new FlnReader(reader, filename));\n        if (comment_re_string == null) {\n            comment_re = null;\n        } else {\n            comment_re = Pattern.compile(comment_re_string);\n        }\n        if (include_re_string == null) {\n            include_re = null;\n        } else {\n            include_re = Pattern.compile(include_re_string);\n        }\n    }\n\n    /**\n     * Create a EntryReader that does not support comments or include directives.\n     * @param reader source from which to read entries\n     * @see #EntryReader(Reader,String,String,String)\n     */\n    public EntryReader(Reader reader) {\n        this(reader, reader.toString(), null, null);\n    }\n\n    /// File Constructors\n    /**\n     * Create an EntryReader.\n     *\n     *    @param file       initial file to read\n     *    @param comment_re regular expression that matches comments.\n     *                      Any text that matches comment_re is removed.\n     *                      A line that is entirely a comment is ignored.\n     *    @param include_re regular expression that matches include directives.\n     *                      The expression should define one group that contains\n     *                      the include file name.\n     * @throws IOException if there is a problem reading the file\n     */\n    public EntryReader(File file, /*@Nullable*/\n    /*@Regex*/\n    String comment_re, /*@Nullable*/\n    /*@Regex(1)*/\n    String include_re) throws IOException {\n        this(UtilMDE.fileReader(file), file.toString(), comment_re, include_re);\n    }\n\n    /**\n     * Create a EntryReader that does not support comments or include directives.\n     * @param file the file to read\n     * @throws IOException if there is a problem reading the file\n     * @see #EntryReader(File,String,String)\n     */\n    public EntryReader(File file) throws IOException {\n        this(file, null, null);\n    }\n\n    /**\n     * Create a EntryReader that does not support comments or include directives.\n     * @param file the file to read\n     * @param charsetName the character set to use\n     * @throws IOException if there is a problem reading the file\n     * @see #EntryReader(File,String,String)\n     */\n    public EntryReader(File file, String charsetName) throws IOException {\n        this(UtilMDE.fileInputStream(file), charsetName, file.toString(), null, null);\n    }\n\n    /// Filename constructors\n    /**\n     * Create a new EntryReader starting with the specified file.\n     *\n     *    @param filename   initial file to read\n     *    @param comment_re regular expression that matches comments.\n     *                      Any text that matches comment_re is removed.\n     *                      A line that is entirely a comment is ignored.\n     *    @param include_re regular expression that matches include directives.\n     *                      The expression should define one group that contains\n     *                      the include file name.\n     *\n     * @throws IOException if there is a problem reading the file\n     *\n     * @see #EntryReader(File,String,String)\n     */\n    public EntryReader(String filename, /*@Nullable*/\n    /*@Regex*/\n    String comment_re, /*@Nullable*/\n    /*@Regex(1)*/\n    String include_re) throws IOException {\n        this(new File(filename), comment_re, include_re);\n    }\n\n    /**\n     * Create a EntryReader that does not support comments or include directives.\n     * @param filename source from which to read entries\n     * @throws IOException if there is a problem reading the file\n     * @see #EntryReader(String,String,String)\n     */\n    public EntryReader(String filename) throws IOException {\n        this(filename, null, null);\n    }\n\n    /**\n     * Create a EntryReader that does not support comments or include directives.\n     * @param filename source from which to read entries\n     * @param charsetName the character set to use\n     * @throws IOException if there is a problem reading the file\n     * @see #EntryReader(String,String,String)\n     */\n    public EntryReader(String filename, String charsetName) throws IOException {\n        this(new FileInputStream(filename), charsetName, filename, null, null);\n    }\n\n    ///\n    /// Methods\n    ///\n    /**\n     * Read a line, ignoring comments and processing includes.  Note that\n     * a line that is completely a comment is completely ignored (and\n     * not returned as a blank line).  Returns null at end of file.\n     * @return the string that was read, or null at end of file\n     */\n    @Override\n    public /*@Nullable*/\n    String readLine() throws IOException {\n        // System.out.printf (\"Entering size = %d%n\", readers.size());\n        // If a line has been pushed back, return it instead\n        if (pushback_line != null) {\n            String line = pushback_line;\n            pushback_line = null;\n            return line;\n        }\n        String line = get_next_line();\n        if (comment_re != null) {\n            while (line != null) {\n                Matcher cmatch = comment_re.matcher(line);\n                if (cmatch.find()) {\n                    line = cmatch.replaceFirst(\"\");\n                    if (line.length() > 0) {\n                        break;\n                    }\n                } else {\n                    break;\n                }\n                line = get_next_line();\n                // System.out.printf (\"get_next_line = %s%n\", line);\n            }\n        }\n        if (line == null) {\n            return null;\n        }\n        // Handle include files.  Non-absolute pathnames are relative\n        // to the including file (the current file)\n        if (include_re != null) {\n            Matcher m = include_re.matcher(line);\n            if (m.matches()) {\n                String filename_string = m.group(1);\n                if (filename_string == null) {\n                    throw new Error(String.format(\"include_re (%s) does not capture group 1 in %s\", include_re, line));\n                }\n                File filename = new File(UtilMDE.expandFilename(filename_string));\n                // System.out.printf (\"Trying to include filename %s%n\", filename);\n                if (!filename.isAbsolute()) {\n                    FlnReader reader = readers.peek();\n                    File current_filename = new File(reader.filename);\n                    File current_parent = current_filename.getParentFile();\n                    filename = new File(current_parent, filename.toString());\n                    // System.out.printf (\"absolute filename = %s %s %s%n\",\n                    //                     current_filename, current_parent, filename);\n                }\n                readers.push(new FlnReader(filename.getAbsolutePath()));\n                return readLine();\n            }\n        }\n        // System.out.printf (\"Returning [%d] '%s'%n\", readers.size(), line);\n        return (line);\n    }\n\n    /**\n     * Return a line-by-line iterator for this file.\n     * <p>\n     *\n     * <b>Warning:</b> This does not return a fresh iterator each time.  The\n     * iterator is a singleton, the same one is returned each time, and a new\n     * one can never be created after it is exhausted.\n     *\n     * @return a line-by-line iterator for this file\n     */\n    @Override\n    public Iterator<String> iterator() {\n        return this;\n    }\n\n    /**\n     * Returns whether or not there is another line to read.  Any IOExceptions\n     * are turned into errors (because the definition of hasNext() in Iterator\n     * doesn't throw any exceptions).\n     * @return whether there is another line to read\n     */\n    @Override\n    public boolean hasNext() {\n        if (pushback_line != null) {\n            return true;\n        }\n        String line = null;\n        try {\n            line = readLine();\n        } catch (IOException e) {\n            throw new Error(\"unexpected IOException: \", e);\n        }\n        if (line == null) {\n            return false;\n        }\n        putback(line);\n        return true;\n    }\n\n    /**\n     * Return the next line in the multi-file.\n     * @return the next line in the multi-file\n     * Throws NoSuchElementException at end of file\n     */\n    @Override\n    public String next() {\n        try {\n            String result = readLine();\n            if (result != null) {\n                return result;\n            } else {\n                throw new NoSuchElementException();\n            }\n        } catch (IOException e) {\n            throw new Error(\"unexpected IOException\", e);\n        }\n    }\n\n    /**\n     * remove() is not supported.\n     */\n    @Override\n    public void remove() {\n        throw new UnsupportedOperationException(\"can't remove lines from file\");\n    }\n\n    /**\n     * Returns the next entry (paragraph) in the file.  Entries are separated\n     * by blank lines unless the entry started with {@link #entry_start_re}\n     * (see {@link #set_entry_start_stop}).  If no more entries are\n     * available, returns null.\n     * @return the next entry (paragraph) in the file\n     * @throws IOException if there is a problem reading the file\n     */\n    public /*@Nullable*/\n    Entry get_entry() throws IOException {\n        // Skip any preceding blank lines\n        String line = readLine();\n        while ((line != null) && (line.trim().length() == 0)) {\n            line = readLine();\n        }\n        if (line == null) {\n            return (null);\n        }\n        StringBuilder body = new StringBuilder(10000);\n        Entry entry = null;\n        String filename = getFileName();\n        long line_number = getLineNumber();\n        // If first line matches entry_start_re, this is a long entry.\n        /*@Regex(1)*/\n        Matcher entry_match = null;\n        if (entry_start_re != null) {\n            entry_match = entry_start_re.matcher(line);\n        }\n        if ((entry_match != null) && entry_match.find()) {\n            assert entry_start_re != null : \"@AssumeAssertion(nullness): dependent: entry_match != null\";\n            assert entry_stop_re != null : \"@AssumeAssertion(nullness): dependent: entry_start_re != null\";\n            // Remove entry match from the line\n            if (entry_match.groupCount() > 0) {\n                @SuppressWarnings(// dependent: just checked that group 1 exists via groupCount(); https://code.google.com/p/checker-framework/issues/detail?id=291\n                \"nullness\")\n                String /*@NonNull*/\n                match_group_1 = entry_match.group(1);\n                line = entry_match.replaceFirst(match_group_1);\n            }\n            // Description is the first line\n            String description = line;\n            // Read until we find the termination of the entry\n            Matcher end_entry_match = entry_stop_re.matcher(line);\n            while ((line != null) && !entry_match.find() && !end_entry_match.find() && filename.equals(getFileName())) {\n                body.append(line);\n                body.append(lineSep);\n                line = readLine();\n                if (line == null) {\n                    // end of file serves as entry terminator\n                    break;\n                }\n                entry_match = entry_start_re.matcher(line);\n                end_entry_match = entry_stop_re.matcher(line);\n            }\n            // If this entry was terminated by the start of the next one,\n            // put that line back\n            if ((line != null) && (entry_match.find(0) || !filename.equals(getFileName()))) {\n                putback(line);\n            }\n            entry = new Entry(description, body.toString(), filename, line_number, false);\n        } else {\n            // blank-separated entry\n            String description = line;\n            // Read until we find another blank line\n            while ((line != null) && (line.trim().length() != 0) && filename.equals(getFileName())) {\n                body.append(line);\n                body.append(lineSep);\n                line = readLine();\n            }\n            // If this entry was terminated by the start of a new input file\n            // put that line back\n            if ((line != null) && !filename.equals(getFileName())) {\n                putback(line);\n            }\n            entry = new Entry(description, body.toString(), filename, line_number, true);\n        }\n        return (entry);\n    }\n\n    /**\n     * Reads the next line from the current reader.  If EOF is encountered\n     * pop out to the next reader.  Returns null if there is no more input.\n     * @return next line from the reader, or null if there is no more input\n     */\n    private /*@Nullable*/\n    String get_next_line() throws IOException {\n        if (readers.size() == 0) {\n            return (null);\n        }\n        FlnReader ri1 = readers.peek();\n        String line = ri1.readLine();\n        while (line == null) {\n            readers.pop();\n            if (readers.empty()) {\n                return (null);\n            }\n            FlnReader ri2 = readers.peek();\n            line = ri2.readLine();\n        }\n        return (line);\n    }\n\n    /**\n     * Returns the current filename.\n     * @return the current filename\n     */\n    public String getFileName() {\n        FlnReader ri = readers.peek();\n        if (ri == null) {\n            throw new Error(\"Past end of input\");\n        }\n        return ri.filename;\n    }\n\n    /**\n     * Return the current line number in the current file.\n     * @return the current line number\n     */\n    @Override\n    public int getLineNumber() {\n        FlnReader ri = readers.peek();\n        if (ri == null) {\n            throw new Error(\"Past end of input\");\n        }\n        return ri.getLineNumber();\n    }\n\n    /**\n     * Set the current line number in the current file.\n     * @param lineNumber new line number for the current file\n     */\n    @Override\n    public void setLineNumber(int lineNumber) {\n        FlnReader ri = readers.peek();\n        if (ri == null) {\n            throw new Error(\"Past end of input\");\n        }\n        ri.setLineNumber(lineNumber);\n    }\n\n    /**\n     * Set the regular expressions for the start and stop of long\n     * entries (multiple lines that are read as a group by get_entry()).\n     * @param entry_start_re regular expression that starts a long entry\n     * @param entry_stop_re regular expression that ends a long entry\n     */\n    public void set_entry_start_stop(/*@Regex(1)*/\n    String entry_start_re, /*@Regex*/\n    String entry_stop_re) {\n        this.entry_start_re = Pattern.compile(entry_start_re);\n        this.entry_stop_re = Pattern.compile(entry_stop_re);\n    }\n\n    /**\n     * Set the regular expressions for the start and stop of long\n     * entries (multiple lines that are read as a group by get_entry()).\n     * @param entry_start_re regular expression that starts a long entry\n     * @param entry_stop_re regular expression that ends a long entry\n     */\n    public void set_entry_start_stop(/*@Regex(1)*/\n    Pattern entry_start_re, Pattern entry_stop_re) {\n        this.entry_start_re = entry_start_re;\n        this.entry_stop_re = entry_stop_re;\n    }\n\n    /**\n     * Puts the specified line back in the input.  Only one line can be\n     * put back.\n     * @param line the line to be put back in the input\n     */\n    // TODO:  This would probably be better implemented with the \"mark\" mechanism\n    // of BufferedReader (which is also in LineNumberReader and FlnReader).\n    public void putback(String line) {\n        assert pushback_line == null : \"push back '\" + line + \"' when '\" + pushback_line + \"' already back\";\n        pushback_line = line;\n    }\n\n    /**\n     * Mark the present position in the stream.\n     */\n    @Override\n    public void mark(int readAheadLimit) {\n        throw new Error(\"not yet implemented\");\n    }\n\n    /**\n     * Read a single character.\n     */\n    @Override\n    public int read() {\n        throw new Error(\"not yet implemented\");\n    }\n\n    /**\n     * Read characters into a portion of an array.\n     */\n    @Override\n    public int read(char[] cbuf, int off, int len) {\n        throw new Error(\"not yet implemented\");\n    }\n\n    /**\n     * Reset the stream to the most recent mark.\n     */\n    @Override\n    public void reset() {\n        throw new Error(\"not yet implemented\");\n    }\n\n    /**\n     * Skip characters.\n     */\n    @Override\n    public long skip(long n) {\n        throw new Error(\"not yet implemented\");\n    }\n\n    /**\n     * Simple usage example.\n     * @param args command-line arguments: filename [comment_re [include_re]]\n     * @throws IOException if there is a problem reading a file\n     */\n    public static void main(String[] args) throws IOException {\n        if (args.length < 1 || args.length > 3) {\n            System.err.println(\"EntryReader sample program requires 1-3 args: filename [comment_re [include_re]]\");\n            System.exit(1);\n        }\n        String filename = args[0];\n        String comment_re = null;\n        String include_re = null;\n        if (args.length >= 2) {\n            comment_re = args[1];\n            if (!RegexUtil.isRegex(comment_re)) {\n                System.err.println(\"Error parsing comment regex \\\"\" + comment_re + \"\\\": \" + RegexUtil.regexError(comment_re));\n                System.exit(1);\n            }\n        }\n        if (args.length >= 3) {\n            include_re = args[2];\n            if (!RegexUtil.isRegex(include_re, 1)) {\n                System.err.println(\"Error parsing include regex \\\"\" + include_re + \"\\\": \" + RegexUtil.regexError(include_re));\n                System.exit(1);\n            }\n        }\n        EntryReader reader = new EntryReader(filename, comment_re, include_re);\n        String line = reader.readLine();\n        while (line != null) {\n            System.out.printf(\"%s: %d: %s%n\", reader.getFileName(), reader.getLineNumber(), line);\n            line = reader.readLine();\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "InputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "in"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "charsetName"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comment_re_string"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "include_re_string"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that uses the given character set.\n * @throws UnsupportedEncodingException if the charset encoding is not supported\n * @param in source from which to read entries\n * @param charsetName the character set to use\n * @param filename non-null file name for stream being read\n * @param comment_re_string regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n * @param include_re_string regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n * @see #EntryReader(InputStream,String,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "throws",
+            "name": "UnsupportedEncodingException",
+            "content": "if the charset encoding is not supported",
+            "assertion": "assert !java.nio.charset.Charset.isSupported(args[1]);",
+            "description": "if the charset encoding is not supported"
+          },
+          {
+            "tag": "param",
+            "name": "in",
+            "content": "source from which to read entries",
+            "assertion": "assert args[0] != null;",
+            "description": "source from which to read entries"
+          },
+          {
+            "tag": "param",
+            "name": "charsetName",
+            "content": "the character set to use",
+            "assertion": "assert args[1] != null;",
+            "description": "the character set to use"
+          },
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "non-null file name for stream being read",
+            "assertion": "assert args[2] != null;",
+            "description": "non-null file name for stream being read"
+          },
+          {
+            "tag": "param",
+            "name": "comment_re_string",
+            "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+            "assertion": "assert args[3] != null;",
+            "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+          },
+          {
+            "tag": "param",
+            "name": "include_re_string",
+            "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+            "assertion": "assert args[4] != null;",
+            "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(InputStream,String,String,String)"
+          }
+        ],
+        "code": "///\n/// Constructors\n///\n/// Inputstream and charset constructors\n/**\n * Create a EntryReader that uses the given character set.\n * @throws UnsupportedEncodingException if the charset encoding is not supported\n * @param in source from which to read entries\n * @param charsetName the character set to use\n * @param filename non-null file name for stream being read\n * @param comment_re_string regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n * @param include_re_string regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n * @see #EntryReader(InputStream,String,String,String)\n */\npublic EntryReader(InputStream in, String charsetName, String filename, /*@Nullable*/\n/*@Regex*/\nString comment_re_string, /*@Nullable*/\n/*@Regex(1)*/\nString include_re_string) throws UnsupportedEncodingException {\n    this(new InputStreamReader(in, charsetName), filename, comment_re_string, include_re_string);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "InputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "in"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "charsetName"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param in the InputStream\n * @param charsetName the character set to use\n * @param filename the file name\n * @throws UnsupportedEncodingException if the charset encoding is not supported\n * @see #EntryReader(InputStream,String,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "in",
+            "content": "the InputStream",
+            "assertion": "assert args[0] != null;",
+            "description": "the InputStream"
+          },
+          {
+            "tag": "param",
+            "name": "charsetName",
+            "content": "the character set to use",
+            "assertion": "assert args[1] != null;",
+            "description": "the character set to use"
+          },
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "the file name",
+            "assertion": "assert args[2] != null;",
+            "description": "the file name"
+          },
+          {
+            "tag": "throws",
+            "name": "UnsupportedEncodingException",
+            "content": "if the charset encoding is not supported",
+            "assertion": "assert java.nio.charset.Charset.forName(args[1]).newDecoder().maxBytesPerChar() <= 0;",
+            "description": "if the charset encoding is not supported"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(InputStream,String,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param in the InputStream\n * @param charsetName the character set to use\n * @param filename the file name\n * @throws UnsupportedEncodingException if the charset encoding is not supported\n * @see #EntryReader(InputStream,String,String,String)\n */\npublic EntryReader(InputStream in, String charsetName, String filename) throws UnsupportedEncodingException {\n    this(in, charsetName, filename, null, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "InputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "in"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comment_re_string"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "include_re_string"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader.\n *\n *    @param in source from which to read entries\n *    @param filename non-null file name for stream being read\n *    @param comment_re_string regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n *    @param include_re_string regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "in",
+            "content": "source from which to read entries",
+            "assertion": "assert in != null;",
+            "description": "source from which to read entries"
+          },
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "non-null file name for stream being read",
+            "assertion": "assert filename != null;",
+            "description": "non-null file name for stream being read"
+          },
+          {
+            "tag": "param",
+            "name": "comment_re_string",
+            "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+            "assertion": "assert comment_re_string != null;",
+            "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+          },
+          {
+            "tag": "param",
+            "name": "include_re_string",
+            "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+            "assertion": "assert include_re_string != null;",
+            "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+          }
+        ],
+        "code": "/// Inputstream (no charset) constructors\n/**\n * Create a EntryReader.\n *\n *    @param in source from which to read entries\n *    @param filename non-null file name for stream being read\n *    @param comment_re_string regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n *    @param include_re_string regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n */\npublic EntryReader(InputStream in, String filename, /*@Nullable*/\n/*@Regex*/\nString comment_re_string, /*@Nullable*/\n/*@Regex(1)*/\nString include_re_string) {\n    this(new InputStreamReader(in), filename, comment_re_string, include_re_string);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "InputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "in"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that uses the default character set and does not\n * support comments or include directives.\n * @param in the InputStream\n * @param filename the file name\n * @see #EntryReader(InputStream,String,String,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "in",
+            "content": "the InputStream",
+            "assertion": "assert (args[0]==null) == false;",
+            "description": "the InputStream"
+          },
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "the file name",
+            "assertion": "assert (args[1]==null) == false;",
+            "description": "the file name"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(InputStream,String,String,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that uses the default character set and does not\n * support comments or include directives.\n * @param in the InputStream\n * @param filename the file name\n * @see #EntryReader(InputStream,String,String,String,String)\n */\npublic EntryReader(InputStream in, String filename) {\n    this(in, filename, null, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "InputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "in"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param in the InputStream\n * @see #EntryReader(InputStream,String,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "in",
+            "content": "the InputStream",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the InputStream"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(InputStream,String,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param in the InputStream\n * @see #EntryReader(InputStream,String,String,String)\n */\npublic EntryReader(InputStream in) {\n    this(in, \"(InputStream)\", null, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Reader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "reader"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comment_re_string"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "include_re_string"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader.\n *\n *    @param reader source from which to read entries\n *    @param filename file name corresponding to reader, for use in error messages\n *    @param comment_re_string regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored\n *    @param include_re_string regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "reader",
+            "content": "source from which to read entries",
+            "assertion": "assert args[0] != null;",
+            "description": "source from which to read entries"
+          },
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "file name corresponding to reader, for use in error messages",
+            "assertion": "assert args[1] != null;",
+            "description": "file name corresponding to reader, for use in error messages"
+          },
+          {
+            "tag": "param",
+            "name": "comment_re_string",
+            "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored",
+            "assertion": "assert args[2] != null;",
+            "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored"
+          },
+          {
+            "tag": "param",
+            "name": "include_re_string",
+            "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name",
+            "assertion": "assert args[3] != null;",
+            "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader.\n *\n *    @param reader source from which to read entries\n *    @param filename file name corresponding to reader, for use in error messages\n *    @param comment_re_string regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored\n *    @param include_re_string regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name\n */\npublic EntryReader(Reader reader, String filename, /*@Nullable*/\n/*@Regex*/\nString comment_re_string, /*@Nullable*/\n/*@Regex(1)*/\nString include_re_string) {\n    // we won't use superclass methods, but passing null as an argument\n    // leads to a NullPointerException.\n    super(new DummyReader());\n    readers.push(new FlnReader(reader, filename));\n    if (comment_re_string == null) {\n        comment_re = null;\n    } else {\n        comment_re = Pattern.compile(comment_re_string);\n    }\n    if (include_re_string == null) {\n        include_re = null;\n    } else {\n        include_re = Pattern.compile(include_re_string);\n    }\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Reader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "reader"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param reader source from which to read entries\n * @see #EntryReader(Reader,String,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "reader",
+            "content": "source from which to read entries",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "source from which to read entries"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(Reader,String,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param reader source from which to read entries\n * @see #EntryReader(Reader,String,String,String)\n */\npublic EntryReader(Reader reader) {\n    this(reader, reader.toString(), null, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "File",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "file"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comment_re"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "include_re"
+          }
+        ],
+        "javadoc": "/**\n * Create an EntryReader.\n *\n *    @param file       initial file to read\n *    @param comment_re regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n *    @param include_re regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n * @throws IOException if there is a problem reading the file\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "file",
+            "content": "initial file to read",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "initial file to read"
+          },
+          {
+            "tag": "param",
+            "name": "comment_re",
+            "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+          },
+          {
+            "tag": "param",
+            "name": "include_re",
+            "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading the file",
+            "assertion": "assert !file.canRead();",
+            "description": "if there is a problem reading the file"
+          }
+        ],
+        "code": "/// File Constructors\n/**\n * Create an EntryReader.\n *\n *    @param file       initial file to read\n *    @param comment_re regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n *    @param include_re regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n * @throws IOException if there is a problem reading the file\n */\npublic EntryReader(File file, /*@Nullable*/\n/*@Regex*/\nString comment_re, /*@Nullable*/\n/*@Regex(1)*/\nString include_re) throws IOException {\n    this(UtilMDE.fileReader(file), file.toString(), comment_re, include_re);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "File",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "file"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param file the file to read\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(File,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "file",
+            "content": "the file to read",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the file to read"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading the file",
+            "assertion": "assert !file.canRead();",
+            "description": "if there is a problem reading the file"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(File,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param file the file to read\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(File,String,String)\n */\npublic EntryReader(File file) throws IOException {\n    this(file, null, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "File",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "file"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "charsetName"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param file the file to read\n * @param charsetName the character set to use\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(File,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "file",
+            "content": "the file to read",
+            "assertion": "assert (args[0]==null) == false;",
+            "description": "the file to read"
+          },
+          {
+            "tag": "param",
+            "name": "charsetName",
+            "content": "the character set to use",
+            "assertion": "assert (args[1]==null) == false;",
+            "description": "the character set to use"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading the file",
+            "assertion": "assert !receiverObjectID.canRead(file);",
+            "description": "if there is a problem reading the file"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(File,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param file the file to read\n * @param charsetName the character set to use\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(File,String,String)\n */\npublic EntryReader(File file, String charsetName) throws IOException {\n    this(UtilMDE.fileInputStream(file), charsetName, file.toString(), null, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "comment_re"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "include_re"
+          }
+        ],
+        "javadoc": "/**\n * Create a new EntryReader starting with the specified file.\n *\n *    @param filename   initial file to read\n *    @param comment_re regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n *    @param include_re regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n *\n * @throws IOException if there is a problem reading the file\n *\n * @see #EntryReader(File,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "initial file to read",
+            "assertion": "assert args[0] != null;",
+            "description": "initial file to read"
+          },
+          {
+            "tag": "param",
+            "name": "comment_re",
+            "content": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored.",
+            "assertion": "assert args[1] != null;",
+            "description": "regular expression that matches comments.\n                     Any text that matches comment_re is removed.\n                     A line that is entirely a comment is ignored."
+          },
+          {
+            "tag": "param",
+            "name": "include_re",
+            "content": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name.",
+            "assertion": "assert args[2] != null;",
+            "description": "regular expression that matches include directives.\n                     The expression should define one group that contains\n                     the include file name."
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading the file",
+            "assertion": "assert !new java.io.File(args[0]).canRead();",
+            "description": "if there is a problem reading the file"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(File,String,String)"
+          }
+        ],
+        "code": "/// Filename constructors\n/**\n * Create a new EntryReader starting with the specified file.\n *\n *    @param filename   initial file to read\n *    @param comment_re regular expression that matches comments.\n *                      Any text that matches comment_re is removed.\n *                      A line that is entirely a comment is ignored.\n *    @param include_re regular expression that matches include directives.\n *                      The expression should define one group that contains\n *                      the include file name.\n *\n * @throws IOException if there is a problem reading the file\n *\n * @see #EntryReader(File,String,String)\n */\npublic EntryReader(String filename, /*@Nullable*/\n/*@Regex*/\nString comment_re, /*@Nullable*/\n/*@Regex(1)*/\nString include_re) throws IOException {\n    this(new File(filename), comment_re, include_re);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param filename source from which to read entries\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(String,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "source from which to read entries",
+            "assertion": "assert args[0] != null;",
+            "description": "source from which to read entries"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading the file",
+            "assertion": "assert !new java.io.File(args[0]).canRead();",
+            "description": "if there is a problem reading the file"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(String,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param filename source from which to read entries\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(String,String,String)\n */\npublic EntryReader(String filename) throws IOException {\n    this(filename, null, null);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "EntryReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "charsetName"
+          }
+        ],
+        "javadoc": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param filename source from which to read entries\n * @param charsetName the character set to use\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(String,String,String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "source from which to read entries",
+            "assertion": "assert args[0] != null;",
+            "description": "source from which to read entries"
+          },
+          {
+            "tag": "param",
+            "name": "charsetName",
+            "content": "the character set to use",
+            "assertion": "assert args[1] != null;",
+            "description": "the character set to use"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading the file",
+            "assertion": "assert !new java.io.FileInputStream(args[0]).getChannel().isOpen();",
+            "description": "if there is a problem reading the file"
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "#EntryReader(String,String,String)"
+          }
+        ],
+        "code": "/**\n * Create a EntryReader that does not support comments or include directives.\n * @param filename source from which to read entries\n * @param charsetName the character set to use\n * @throws IOException if there is a problem reading the file\n * @see #EntryReader(String,String,String)\n */\npublic EntryReader(String filename, String charsetName) throws IOException {\n    this(new FileInputStream(filename), charsetName, filename, null, null);\n}"
+      },
+      {
+        "type": "method",
+        "name": "readLine",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "/*@Nullable*/\nString",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Read a line, ignoring comments and processing includes.  Note that\n * a line that is completely a comment is completely ignored (and\n * not returned as a blank line).  Returns null at end of file.\n * @return the string that was read, or null at end of file\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "string that was read, or null at end of file",
+            "assertion": "assert methodResultID != null;",
+            "description": "the string that was read, or null at end of file"
+          }
+        ],
+        "code": "///\n/// Methods\n///\n/**\n * Read a line, ignoring comments and processing includes.  Note that\n * a line that is completely a comment is completely ignored (and\n * not returned as a blank line).  Returns null at end of file.\n * @return the string that was read, or null at end of file\n */\n@Override\npublic /*@Nullable*/\nString readLine() throws IOException {\n    // System.out.printf (\"Entering size = %d%n\", readers.size());\n    // If a line has been pushed back, return it instead\n    if (pushback_line != null) {\n        String line = pushback_line;\n        pushback_line = null;\n        return line;\n    }\n    String line = get_next_line();\n    if (comment_re != null) {\n        while (line != null) {\n            Matcher cmatch = comment_re.matcher(line);\n            if (cmatch.find()) {\n                line = cmatch.replaceFirst(\"\");\n                if (line.length() > 0) {\n                    break;\n                }\n            } else {\n                break;\n            }\n            line = get_next_line();\n            // System.out.printf (\"get_next_line = %s%n\", line);\n        }\n    }\n    if (line == null) {\n        return null;\n    }\n    // Handle include files.  Non-absolute pathnames are relative\n    // to the including file (the current file)\n    if (include_re != null) {\n        Matcher m = include_re.matcher(line);\n        if (m.matches()) {\n            String filename_string = m.group(1);\n            if (filename_string == null) {\n                throw new Error(String.format(\"include_re (%s) does not capture group 1 in %s\", include_re, line));\n            }\n            File filename = new File(UtilMDE.expandFilename(filename_string));\n            // System.out.printf (\"Trying to include filename %s%n\", filename);\n            if (!filename.isAbsolute()) {\n                FlnReader reader = readers.peek();\n                File current_filename = new File(reader.filename);\n                File current_parent = current_filename.getParentFile();\n                filename = new File(current_parent, filename.toString());\n                // System.out.printf (\"absolute filename = %s %s %s%n\",\n                //                     current_filename, current_parent, filename);\n            }\n            readers.push(new FlnReader(filename.getAbsolutePath()));\n            return readLine();\n        }\n    }\n    // System.out.printf (\"Returning [%d] '%s'%n\", readers.size(), line);\n    return (line);\n}"
+      },
+      {
+        "type": "method",
+        "name": "iterator",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Return a line-by-line iterator for this file.\n * <p>\n *\n * <b>Warning:</b> This does not return a fresh iterator each time.  The\n * iterator is a singleton, the same one is returned each time, and a new\n * one can never be created after it is exhausted.\n *\n * @return a line-by-line iterator for this file\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "line-by-line iterator for this file",
+            "assertion": "assert methodResultID != null;",
+            "description": "a line-by-line iterator for this file"
+          }
+        ],
+        "code": "/**\n * Return a line-by-line iterator for this file.\n * <p>\n *\n * <b>Warning:</b> This does not return a fresh iterator each time.  The\n * iterator is a singleton, the same one is returned each time, and a new\n * one can never be created after it is exhausted.\n *\n * @return a line-by-line iterator for this file\n */\n@Override\npublic Iterator<String> iterator() {\n    return this;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hasNext",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns whether or not there is another line to read.  Any IOExceptions\n * are turned into errors (because the definition of hasNext() in Iterator\n * doesn't throw any exceptions).\n * @return whether there is another line to read\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "there is another line to read",
+            "assertion": "assert methodResultID;",
+            "description": "whether there is another line to read"
+          }
+        ],
+        "code": "/**\n * Returns whether or not there is another line to read.  Any IOExceptions\n * are turned into errors (because the definition of hasNext() in Iterator\n * doesn't throw any exceptions).\n * @return whether there is another line to read\n */\n@Override\npublic boolean hasNext() {\n    if (pushback_line != null) {\n        return true;\n    }\n    String line = null;\n    try {\n        line = readLine();\n    } catch (IOException e) {\n        throw new Error(\"unexpected IOException: \", e);\n    }\n    if (line == null) {\n        return false;\n    }\n    putback(line);\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "next",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Return the next line in the multi-file.\n * @return the next line in the multi-file\n * Throws NoSuchElementException at end of file\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "next line in the multi-file Throws NoSuchElementException at end of file",
+            "assertion": "assert methodResultID != null;",
+            "description": "next line in the multi-file Throws NoSuchElementException at end of file"
+          }
+        ],
+        "code": "/**\n * Return the next line in the multi-file.\n * @return the next line in the multi-file\n * Throws NoSuchElementException at end of file\n */\n@Override\npublic String next() {\n    try {\n        String result = readLine();\n        if (result != null) {\n            return result;\n        } else {\n            throw new NoSuchElementException();\n        }\n    } catch (IOException e) {\n        throw new Error(\"unexpected IOException\", e);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "remove",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": "/**\n * remove() is not supported.\n */\n",
+        "tags": [],
+        "code": "/**\n * remove() is not supported.\n */\n@Override\npublic void remove() {\n    throw new UnsupportedOperationException(\"can't remove lines from file\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "get_entry",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "/*@Nullable*/\nEntry",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the next entry (paragraph) in the file.  Entries are separated\n * by blank lines unless the entry started with {@link #entry_start_re}\n * (see {@link #set_entry_start_stop}).  If no more entries are\n * available, returns null.\n * @return the next entry (paragraph) in the file\n * @throws IOException if there is a problem reading the file\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "next entry (paragraph) in the file",
+            "assertion": "assert methodResultID != null;",
+            "description": "next entry (paragraph) in the file"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading the file",
+            "assertion": "assert !receiverObjectID.hasNext();",
+            "description": "if there is a problem reading the file"
+          }
+        ],
+        "code": "/**\n * Returns the next entry (paragraph) in the file.  Entries are separated\n * by blank lines unless the entry started with {@link #entry_start_re}\n * (see {@link #set_entry_start_stop}).  If no more entries are\n * available, returns null.\n * @return the next entry (paragraph) in the file\n * @throws IOException if there is a problem reading the file\n */\npublic /*@Nullable*/\nEntry get_entry() throws IOException {\n    // Skip any preceding blank lines\n    String line = readLine();\n    while ((line != null) && (line.trim().length() == 0)) {\n        line = readLine();\n    }\n    if (line == null) {\n        return (null);\n    }\n    StringBuilder body = new StringBuilder(10000);\n    Entry entry = null;\n    String filename = getFileName();\n    long line_number = getLineNumber();\n    // If first line matches entry_start_re, this is a long entry.\n    /*@Regex(1)*/\n    Matcher entry_match = null;\n    if (entry_start_re != null) {\n        entry_match = entry_start_re.matcher(line);\n    }\n    if ((entry_match != null) && entry_match.find()) {\n        assert entry_start_re != null : \"@AssumeAssertion(nullness): dependent: entry_match != null\";\n        assert entry_stop_re != null : \"@AssumeAssertion(nullness): dependent: entry_start_re != null\";\n        // Remove entry match from the line\n        if (entry_match.groupCount() > 0) {\n            @SuppressWarnings(// dependent: just checked that group 1 exists via groupCount(); https://code.google.com/p/checker-framework/issues/detail?id=291\n            \"nullness\")\n            String /*@NonNull*/\n            match_group_1 = entry_match.group(1);\n            line = entry_match.replaceFirst(match_group_1);\n        }\n        // Description is the first line\n        String description = line;\n        // Read until we find the termination of the entry\n        Matcher end_entry_match = entry_stop_re.matcher(line);\n        while ((line != null) && !entry_match.find() && !end_entry_match.find() && filename.equals(getFileName())) {\n            body.append(line);\n            body.append(lineSep);\n            line = readLine();\n            if (line == null) {\n                // end of file serves as entry terminator\n                break;\n            }\n            entry_match = entry_start_re.matcher(line);\n            end_entry_match = entry_stop_re.matcher(line);\n        }\n        // If this entry was terminated by the start of the next one,\n        // put that line back\n        if ((line != null) && (entry_match.find(0) || !filename.equals(getFileName()))) {\n            putback(line);\n        }\n        entry = new Entry(description, body.toString(), filename, line_number, false);\n    } else {\n        // blank-separated entry\n        String description = line;\n        // Read until we find another blank line\n        while ((line != null) && (line.trim().length() != 0) && filename.equals(getFileName())) {\n            body.append(line);\n            body.append(lineSep);\n            line = readLine();\n        }\n        // If this entry was terminated by the start of a new input file\n        // put that line back\n        if ((line != null) && !filename.equals(getFileName())) {\n            putback(line);\n        }\n        entry = new Entry(description, body.toString(), filename, line_number, true);\n    }\n    return (entry);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getFileName",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the current filename.\n * @return the current filename\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "current filename",
+            "assertion": "assert methodResultID != null;",
+            "description": "the current filename"
+          }
+        ],
+        "code": "/**\n * Returns the current filename.\n * @return the current filename\n */\npublic String getFileName() {\n    FlnReader ri = readers.peek();\n    if (ri == null) {\n        throw new Error(\"Past end of input\");\n    }\n    return ri.filename;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getLineNumber",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Return the current line number in the current file.\n * @return the current line number\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "current line number",
+            "assertion": "assert methodResultID >= 0;",
+            "description": "the current line number"
+          }
+        ],
+        "code": "/**\n * Return the current line number in the current file.\n * @return the current line number\n */\n@Override\npublic int getLineNumber() {\n    FlnReader ri = readers.peek();\n    if (ri == null) {\n        throw new Error(\"Past end of input\");\n    }\n    return ri.getLineNumber();\n}"
+      },
+      {
+        "type": "method",
+        "name": "setLineNumber",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lineNumber"
+          }
+        ],
+        "javadoc": "/**\n * Set the current line number in the current file.\n * @param lineNumber new line number for the current file\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "lineNumber",
+            "content": "new line number for the current file",
+            "assertion": "assert args[0] >= 0;",
+            "description": "new line number for the current file"
+          }
+        ],
+        "code": "/**\n * Set the current line number in the current file.\n * @param lineNumber new line number for the current file\n */\n@Override\npublic void setLineNumber(int lineNumber) {\n    FlnReader ri = readers.peek();\n    if (ri == null) {\n        throw new Error(\"Past end of input\");\n    }\n    ri.setLineNumber(lineNumber);\n}"
+      },
+      {
+        "type": "method",
+        "name": "set_entry_start_stop",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry_start_re"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry_stop_re"
+          }
+        ],
+        "javadoc": "/**\n * Set the regular expressions for the start and stop of long\n * entries (multiple lines that are read as a group by get_entry()).\n * @param entry_start_re regular expression that starts a long entry\n * @param entry_stop_re regular expression that ends a long entry\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "entry_start_re",
+            "content": "regular expression that starts a long entry",
+            "assertion": "assert args[0] != null;",
+            "description": "regular expression that starts a long entry"
+          },
+          {
+            "tag": "param",
+            "name": "entry_stop_re",
+            "content": "regular expression that ends a long entry",
+            "assertion": "assert args[1] != null;",
+            "description": "regular expression that ends a long entry"
+          }
+        ],
+        "code": "/**\n * Set the regular expressions for the start and stop of long\n * entries (multiple lines that are read as a group by get_entry()).\n * @param entry_start_re regular expression that starts a long entry\n * @param entry_stop_re regular expression that ends a long entry\n */\npublic void set_entry_start_stop(/*@Regex(1)*/\nString entry_start_re, /*@Regex*/\nString entry_stop_re) {\n    this.entry_start_re = Pattern.compile(entry_start_re);\n    this.entry_stop_re = Pattern.compile(entry_stop_re);\n}"
+      },
+      {
+        "type": "method",
+        "name": "set_entry_start_stop",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Pattern",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry_start_re"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Pattern",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "entry_stop_re"
+          }
+        ],
+        "javadoc": "/**\n * Set the regular expressions for the start and stop of long\n * entries (multiple lines that are read as a group by get_entry()).\n * @param entry_start_re regular expression that starts a long entry\n * @param entry_stop_re regular expression that ends a long entry\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "entry_start_re",
+            "content": "regular expression that starts a long entry",
+            "assertion": "assert args[0] != null;",
+            "description": "regular expression that starts a long entry"
+          },
+          {
+            "tag": "param",
+            "name": "entry_stop_re",
+            "content": "regular expression that ends a long entry",
+            "assertion": "assert args[1] != null;",
+            "description": "regular expression that ends a long entry"
+          }
+        ],
+        "code": "/**\n * Set the regular expressions for the start and stop of long\n * entries (multiple lines that are read as a group by get_entry()).\n * @param entry_start_re regular expression that starts a long entry\n * @param entry_stop_re regular expression that ends a long entry\n */\npublic void set_entry_start_stop(/*@Regex(1)*/\nPattern entry_start_re, Pattern entry_stop_re) {\n    this.entry_start_re = entry_start_re;\n    this.entry_stop_re = entry_stop_re;\n}"
+      },
+      {
+        "type": "method",
+        "name": "putback",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line"
+          }
+        ],
+        "javadoc": "/**\n   * Puts the specified line back in the input.  Only one line can be\n   * put back.\n   * @param line the line to be put back in the input\n   */",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "line",
+            "content": "the line to be put back in the input",
+            "assertion": "assert args[0] != null;",
+            "description": "the line to be put back in the input"
+          }
+        ],
+        "code": "/**\n * Puts the specified line back in the input.  Only one line can be\n * put back.\n * @param line the line to be put back in the input\n */\n// TODO:  This would probably be better implemented with the \"mark\" mechanism\n// of BufferedReader (which is also in LineNumberReader and FlnReader).\npublic void putback(String line) {\n    assert pushback_line == null : \"push back '\" + line + \"' when '\" + pushback_line + \"' already back\";\n    pushback_line = line;\n}"
+      },
+      {
+        "type": "method",
+        "name": "mark",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "readAheadLimit"
+          }
+        ],
+        "javadoc": "/**\n * Mark the present position in the stream.\n */\n",
+        "tags": [],
+        "code": "/**\n * Mark the present position in the stream.\n */\n@Override\npublic void mark(int readAheadLimit) {\n    throw new Error(\"not yet implemented\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "read",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Read a single character.\n */\n",
+        "tags": [],
+        "code": "/**\n * Read a single character.\n */\n@Override\npublic int read() {\n    throw new Error(\"not yet implemented\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "read",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "cbuf"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "off"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "len"
+          }
+        ],
+        "javadoc": "/**\n * Read characters into a portion of an array.\n */\n",
+        "tags": [],
+        "code": "/**\n * Read characters into a portion of an array.\n */\n@Override\npublic int read(char[] cbuf, int off, int len) {\n    throw new Error(\"not yet implemented\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "reset",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": "/**\n * Reset the stream to the most recent mark.\n */\n",
+        "tags": [],
+        "code": "/**\n * Reset the stream to the most recent mark.\n */\n@Override\npublic void reset() {\n    throw new Error(\"not yet implemented\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "skip",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": "/**\n * Skip characters.\n */\n",
+        "tags": [],
+        "code": "/**\n * Skip characters.\n */\n@Override\npublic long skip(long n) {\n    throw new Error(\"not yet implemented\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "main",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "args"
+          }
+        ],
+        "javadoc": "/**\n * Simple usage example.\n * @param args command-line arguments: filename [comment_re [include_re]]\n * @throws IOException if there is a problem reading a file\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "args",
+            "content": "command-line arguments: filename [comment_re [include_re]]",
+            "assertion": "assert args[0] != null;",
+            "description": "command-line arguments: filename [comment_re [include_re]]"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if there is a problem reading a file",
+            "assertion": "assert false;",
+            "description": "if there is a problem reading a file"
+          }
+        ],
+        "code": "/**\n * Simple usage example.\n * @param args command-line arguments: filename [comment_re [include_re]]\n * @throws IOException if there is a problem reading a file\n */\npublic static void main(String[] args) throws IOException {\n    if (args.length < 1 || args.length > 3) {\n        System.err.println(\"EntryReader sample program requires 1-3 args: filename [comment_re [include_re]]\");\n        System.exit(1);\n    }\n    String filename = args[0];\n    String comment_re = null;\n    String include_re = null;\n    if (args.length >= 2) {\n        comment_re = args[1];\n        if (!RegexUtil.isRegex(comment_re)) {\n            System.err.println(\"Error parsing comment regex \\\"\" + comment_re + \"\\\": \" + RegexUtil.regexError(comment_re));\n            System.exit(1);\n        }\n    }\n    if (args.length >= 3) {\n        include_re = args[2];\n        if (!RegexUtil.isRegex(include_re, 1)) {\n            System.err.println(\"Error parsing include regex \\\"\" + include_re + \"\\\": \" + RegexUtil.regexError(include_re));\n            System.exit(1);\n        }\n    }\n    EntryReader reader = new EntryReader(filename, comment_re, include_re);\n    String line = reader.readLine();\n    while (line != null) {\n        System.out.printf(\"%s: %d: %s%n\", reader.getFileName(), reader.getLineNumber(), line);\n        line = reader.readLine();\n    }\n}"
+      }
+    ]
+  },
+  {
+    "name": "FlnReader",
+    "package": "plume",
+    "qualified_name": "plume.FlnReader",
+    "javadoc": "/**\n * Like LineNumberReader, but also has a filename field.\n * \"FlnReader\" stands for \"Filename and Line Number Reader\".\n */\n",
+    "code": "///\n/// Helper classes\n///\n/**\n * Like LineNumberReader, but also has a filename field.\n * \"FlnReader\" stands for \"Filename and Line Number Reader\".\n */\nprivate static class FlnReader extends LineNumberReader {\n\n    /**\n     * The file being read.\n     */\n    public String filename;\n\n    /**\n     * Create a FlnReader.\n     * @param reader source from which to read entries\n     * @param filename file name corresponding to reader, for use in error messages.\n     *   Must be non-null; if there isn't a name, clients should provide a dummy value.\n     */\n    public FlnReader(Reader reader, String filename) {\n        super(reader);\n        this.filename = filename;\n    }\n\n    /**\n     * Create a FlnReader.\n     * @param filename file from which to read\n     */\n    public FlnReader(String filename) throws IOException {\n        super(UtilMDE.fileReader(filename));\n        this.filename = filename;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "FlnReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Reader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "reader"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          }
+        ],
+        "javadoc": "/**\n * Create a FlnReader.\n * @param reader source from which to read entries\n * @param filename file name corresponding to reader, for use in error messages.\n *   Must be non-null; if there isn't a name, clients should provide a dummy value.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "reader",
+            "content": "source from which to read entries"
+          },
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "file name corresponding to reader, for use in error messages.\n  Must be non-null; if there isn't a name, clients should provide a dummy value."
+          }
+        ],
+        "code": "/**\n * Create a FlnReader.\n * @param reader source from which to read entries\n * @param filename file name corresponding to reader, for use in error messages.\n *   Must be non-null; if there isn't a name, clients should provide a dummy value.\n */\npublic FlnReader(Reader reader, String filename) {\n    super(reader);\n    this.filename = filename;\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "FlnReader",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          }
+        ],
+        "javadoc": "/**\n * Create a FlnReader.\n * @param filename file from which to read\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "file from which to read"
+          }
+        ],
+        "code": "/**\n * Create a FlnReader.\n * @param filename file from which to read\n */\npublic FlnReader(String filename) throws IOException {\n    super(UtilMDE.fileReader(filename));\n    this.filename = filename;\n}"
+      }
+    ]
+  },
+  {
+    "name": "Entry",
+    "package": "plume",
+    "qualified_name": "plume.Entry",
+    "javadoc": "/**\n * Descriptor for an entry (paragraph).\n */\n",
+    "code": "/**\n * Descriptor for an entry (paragraph).\n */\npublic static class Entry {\n\n    /**\n     * First line of the entry.\n     */\n    public String first_line;\n\n    /**\n     * Complete body of the entry including the first line.\n     */\n    public String body;\n\n    /**\n     * True if this is a short entry (blank-line-separated).\n     */\n    boolean short_entry;\n\n    /**\n     * Filename in which the entry was found.\n     */\n    String filename;\n\n    /**\n     * Line number of first line of entry.\n     */\n    long line_number;\n\n    /**\n     * Create an entry.\n     * @param first_line first line of the entry\n     * @param body complete body of the entry including the first line\n     * @param short_entry true if this is a short entry (blank-line-separated)\n     * @param filename filename in which the entry was found\n     * @param line_number line number of first line of entry\n     */\n    Entry(String first_line, String body, String filename, long line_number, boolean short_entry) {\n        this.first_line = first_line;\n        this.body = body;\n        this.filename = filename;\n        this.line_number = line_number;\n        this.short_entry = short_entry;\n    }\n\n    /**\n     * Return a substring of the entry body that matches the specified\n     * regular expression.  If no match is found, returns the first_line.\n     * @param re regex to match\n     * @return a substring that matches re\n     */\n    String get_description(/*@Nullable*/\n    Pattern re) {\n        if (re == null) {\n            return first_line;\n        }\n        Matcher descr = re.matcher(body);\n        if (descr.find()) {\n            return descr.group();\n        } else {\n            return first_line;\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "Entry",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "first_line"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "body"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "filename"
+          },
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "line_number"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "short_entry"
+          }
+        ],
+        "javadoc": "/**\n * Create an entry.\n * @param first_line first line of the entry\n * @param body complete body of the entry including the first line\n * @param short_entry true if this is a short entry (blank-line-separated)\n * @param filename filename in which the entry was found\n * @param line_number line number of first line of entry\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "first_line",
+            "content": "first line of the entry"
+          },
+          {
+            "tag": "param",
+            "name": "body",
+            "content": "complete body of the entry including the first line"
+          },
+          {
+            "tag": "param",
+            "name": "short_entry",
+            "content": "true if this is a short entry (blank-line-separated)"
+          },
+          {
+            "tag": "param",
+            "name": "filename",
+            "content": "filename in which the entry was found"
+          },
+          {
+            "tag": "param",
+            "name": "line_number",
+            "content": "line number of first line of entry"
+          }
+        ],
+        "code": "/**\n * Create an entry.\n * @param first_line first line of the entry\n * @param body complete body of the entry including the first line\n * @param short_entry true if this is a short entry (blank-line-separated)\n * @param filename filename in which the entry was found\n * @param line_number line number of first line of entry\n */\nEntry(String first_line, String body, String filename, long line_number, boolean short_entry) {\n    this.first_line = first_line;\n    this.body = body;\n    this.filename = filename;\n    this.line_number = line_number;\n    this.short_entry = short_entry;\n}"
+      },
+      {
+        "type": "method",
+        "name": "get_description",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Pattern",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "re"
+          }
+        ],
+        "javadoc": "/**\n * Return a substring of the entry body that matches the specified\n * regular expression.  If no match is found, returns the first_line.\n * @param re regex to match\n * @return a substring that matches re\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "re",
+            "content": "regex to match"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "substring that matches re"
+          }
+        ],
+        "code": "/**\n * Return a substring of the entry body that matches the specified\n * regular expression.  If no match is found, returns the first_line.\n * @param re regex to match\n * @return a substring that matches re\n */\nString get_description(/*@Nullable*/\nPattern re) {\n    if (re == null) {\n        return first_line;\n    }\n    Matcher descr = re.matcher(body);\n    if (descr.find()) {\n        return descr.group();\n    } else {\n        return first_line;\n    }\n}"
+      }
+    ]
+  },
+  {
+    "name": "DummyReader",
+    "package": "plume",
+    "qualified_name": "plume.DummyReader",
+    "javadoc": "/**\n * A dummy Reader to be used when null is not acceptable.\n */\n",
+    "code": "/**\n * A dummy Reader to be used when null is not acceptable.\n */\nprivate static class DummyReader extends Reader {\n\n    @Override\n    public void close() /*>>>@GuardSatisfied DummyReader this*/\n    {\n        // No error, because closing is OK if it appears in try-with-resources.\n        // Later maybe create two versions (with and without exception here).\n    }\n\n    @Override\n    public void mark(int readAheadLimit) {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public boolean markSupported() {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public int read() {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public int read(char[] cbuf) {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public int read(char[] cbuf, int off, int len) {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public int read(CharBuffer target) {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public boolean ready() {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public void reset() {\n        throw new Error(\"DummyReader\");\n    }\n\n    @Override\n    public long skip(long n) {\n        throw new Error(\"DummyReader\");\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "close",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic void close() /*>>>@GuardSatisfied DummyReader this*/\n{\n    // No error, because closing is OK if it appears in try-with-resources.\n    // Later maybe create two versions (with and without exception here).\n}"
+      },
+      {
+        "type": "method",
+        "name": "mark",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "readAheadLimit"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic void mark(int readAheadLimit) {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "markSupported",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean markSupported() {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "read",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int read() {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "read",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "cbuf"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int read(char[] cbuf) {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "read",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "cbuf"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "off"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "len"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int read(char[] cbuf, int off, int len) {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "read",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharBuffer",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "target"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic int read(CharBuffer target) {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "ready",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic boolean ready() {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "reset",
+        "return_type": null,
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic void reset() {\n    throw new Error(\"DummyReader\");\n}"
+      },
+      {
+        "type": "method",
+        "name": "skip",
+        "return_type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "n"
+          }
+        ],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic long skip(long n) {\n    throw new Error(\"DummyReader\");\n}"
+      }
+    ]
+  }
+]

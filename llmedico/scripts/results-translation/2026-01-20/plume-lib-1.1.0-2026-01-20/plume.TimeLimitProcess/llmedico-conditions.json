@@ -1,0 +1,223 @@
+[
+  {
+    "method": "TimeLimitProcess",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Process",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeLimit"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "non-null Process to limit the execution of",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "p",
+          "content": "non-null Process to limit the execution of"
+        },
+        {
+          "description": "in milliseconds",
+          "assertion": "assert args[1] >= 0;",
+          "name": "timeLimit",
+          "content": "in milliseconds"
+        }
+      ]
+    }
+  },
+  {
+    "method": "TimeLimitProcess",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Process",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeLimit"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "cacheStdout"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "non-null Process to limit the execution of",
+          "assertion": "assert p != null;",
+          "name": "p",
+          "content": "non-null Process to limit the execution of"
+        },
+        {
+          "description": "in milliseconds",
+          "assertion": "assert true;",
+          "name": "timeLimit",
+          "content": "in milliseconds"
+        },
+        {
+          "description": "If true, causes the TimeLimitProcess to consume the standard output of the underlying process, and to cache it.  After the process terminates (on its own or by being timed out), the output is available via the cached_stdout method.  This is necessary because when a Java process is terminated, its standard output is no longer available.",
+          "assertion": "assert true;",
+          "name": "cacheStdout",
+          "content": "If true, causes the TimeLimitProcess to consume the standard output of the underlying process, and to cache it.  After the process terminates (on its own or by being timed out), the output is available via the cached_stdout method.  This is necessary because when a Java process is terminated, its standard output is no longer available."
+        }
+      ]
+    }
+  },
+  {
+    "method": "timed_out",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true iff the process has timed out",
+          "assertion": "assert methodResultID == timeout_msecs() > 0;",
+          "name": null,
+          "content": "true iff the process has timed out"
+        }
+      ]
+    }
+  },
+  {
+    "method": "timeout_msecs",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the timeout time in msecs",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "timeout time in msecs"
+        }
+      ]
+    }
+  },
+  {
+    "method": "destroy",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "exitValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the exit value for the subprocess",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "the exit value for the subprocess"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getErrorStream",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the error stream",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the error stream"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInputStream",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the input stream",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the input stream"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getOutputStream",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the output stream",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the output stream"
+        }
+      ]
+    }
+  },
+  {
+    "method": "waitFor",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the exit value of the subprocess",
+          "assertion": "assert methodResultID == receiverObjectID.exitValue();",
+          "name": null,
+          "content": "exit value of the subprocess"
+        }
+      ]
+    }
+  },
+  {
+    "method": "finished",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "true if the process if finished, false otherwise",
+          "assertion": "assert methodResultID;",
+          "name": null,
+          "content": "true if the process if finished, false otherwise"
+        }
+      ]
+    }
+  }
+]
