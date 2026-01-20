@@ -41,6 +41,11 @@ class AstNormalizer:
 
             return expr
 
+        if isinstance(expr, BitWiseShift):
+            norm_shift = Method(receiver=None, name=expr.op, parameters=[expr.left, expr.right])
+            logger.critical(f"Normalized {expr} to canonical uninterpreted {norm_shift}")
+            return norm_shift
+
         if isinstance(expr, InstanceOf):
             logger.warning(f"Normalized FQN in instanceof operator: \n {expr}")
             return InstanceOf(expr=expr.expr, type_name=expr.type_name.split(".")[-1])
