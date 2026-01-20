@@ -45,6 +45,20 @@ class AstNormalizer:
             logger.warning(f"Normalized FQN in instanceof operator: \n {expr}")
             return InstanceOf(expr=expr.expr, type_name=expr.type_name.split(".")[-1])
 
+        if isinstance(expr, Conditional):
+            cond = self.normalize_expr(expr.cond)
+            then = self.normalize_expr(expr.then)
+
+            if expr.otherwise is None:
+                # (c ? t)  ==>  (!c || t)
+                norm_expr = Or(Not(cond), then)
+                logger.critical(f"Normalized invalid Conditional Expression: \n {expr} -> {norm_expr}")
+                return norm_expr
+
+            otherwise = self.normalize_expr(expr.otherwise)
+            return Conditional(cond, then, otherwise)
+
+
         if isinstance(expr, Compare):
             if expr.op == "==":
                 left = self.normalize_expr(expr.left)

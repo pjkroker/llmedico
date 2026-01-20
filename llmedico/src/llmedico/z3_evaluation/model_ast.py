@@ -89,7 +89,7 @@ class Method(Expr):
 class Conditional(Expr):
     cond: Expr
     then: Expr
-    otherwise: Expr
+    otherwise: Optional[Expr]
 
 @dataclass(frozen=True)
 class LambdaExpr(Expr):

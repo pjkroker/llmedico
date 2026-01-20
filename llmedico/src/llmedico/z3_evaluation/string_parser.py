@@ -68,12 +68,20 @@ class StringParser:
     #?
     def _parse_terniary(self) -> Expr:
         expr = self._parse_or()
+
         if self.peek() == "?":
             self.consume("?")
             then = self.parse_expr()
-            self.consume(":")
-            otherwise = self.parse_expr()
+
+            if self.peek() == ":":
+                self.consume(":")
+                otherwise = self.parse_expr()
+            else:
+                logger.critical(f"Incomplete ternary '?:' operator. Found no else branch")
+                otherwise = None  # incomplete ternary
+
             return Conditional(expr, then, otherwise)
+
         return expr
 
     # OR
