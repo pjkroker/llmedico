@@ -1,0 +1,260 @@
+[
+  {
+    "name": "AbstractPathElementList",
+    "package": "org.jgrapht.alg",
+    "qualified_name": "org.jgrapht.alg.AbstractPathElementList",
+    "javadoc": "/**\n * List of paths <code>AbstractPathElement</code> with same target vertex.\n *\n * @author Guillaume Boulmier\n * @since July 5, 2007\n */\n",
+    "code": "/**\n * List of paths <code>AbstractPathElement</code> with same target vertex.\n *\n * @author Guillaume Boulmier\n * @since July 5, 2007\n */\nabstract class AbstractPathElementList<V, E, T extends AbstractPathElement<V, E>> extends AbstractList<T> {\n\n    protected Graph<V, E> graph;\n\n    /**\n     * Max number of stored paths.\n     */\n    protected int maxSize;\n\n    /**\n     * Stored paths, list of <code>AbstractPathElement</code>.\n     */\n    protected ArrayList<T> pathElements = new ArrayList<T>();\n\n    /**\n     * Target vertex of the paths.\n     */\n    protected V vertex;\n\n    /**\n     * Creates paths obtained by concatenating the specified edge to the\n     * specified paths.\n     *\n     * @param maxSize maximum number of paths the list is able to store.\n     * @param elementList paths, list of <code>AbstractPathElement</code>.\n     * @param edge edge reaching the end vertex of the created paths.\n     *\n     * @throws NullPointerException if the specified prevPathElementList or edge\n     * is <code>null</code>.\n     * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n     * 0.\n     */\n    protected AbstractPathElementList(Graph<V, E> graph, int maxSize, AbstractPathElementList<V, E, T> elementList, E edge) {\n        if (maxSize <= 0) {\n            throw new IllegalArgumentException(\"maxSize is negative or 0\");\n        }\n        if (elementList == null) {\n            throw new NullPointerException(\"elementList is null\");\n        }\n        if (edge == null) {\n            throw new NullPointerException(\"edge is null\");\n        }\n        this.graph = graph;\n        this.maxSize = maxSize;\n        this.vertex = Graphs.getOppositeVertex(graph, edge, elementList.getVertex());\n    }\n\n    /**\n     * Creates a list with an empty path. The list size is 1.\n     *\n     * @param maxSize maximum number of paths the list is able to store.\n     *\n     * @throws NullPointerException if the specified path-element is <code>\n     * null</code>.\n     * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n     * 0.\n     * @throws IllegalArgumentException if <code>pathElement</code> is not\n     * empty.\n     */\n    protected AbstractPathElementList(Graph<V, E> graph, int maxSize, T pathElement) {\n        if (maxSize <= 0) {\n            throw new IllegalArgumentException(\"maxSize is negative or 0\");\n        }\n        if (pathElement == null) {\n            throw new NullPointerException(\"pathElement is null\");\n        }\n        if (pathElement.getPrevEdge() != null) {\n            throw new IllegalArgumentException(\"path must be empty\");\n        }\n        this.graph = graph;\n        this.maxSize = maxSize;\n        this.vertex = pathElement.getVertex();\n        this.pathElements.add(pathElement);\n    }\n\n    /**\n     * Creates an empty list. The list size is 0.\n     *\n     * @param maxSize maximum number of paths the list is able to store.\n     *\n     * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n     * 0.\n     */\n    protected AbstractPathElementList(Graph<V, E> graph, int maxSize, V vertex) {\n        if (maxSize <= 0) {\n            throw new IllegalArgumentException(\"maxSize is negative or 0\");\n        }\n        this.graph = graph;\n        this.maxSize = maxSize;\n        this.vertex = vertex;\n    }\n\n    /**\n     * Returns path <code>AbstractPathElement</code> stored at the specified\n     * index.\n     */\n    @Override\n    public T get(int index) {\n        return this.pathElements.get(index);\n    }\n\n    /**\n     * Returns target vertex.\n     */\n    public V getVertex() {\n        return this.vertex;\n    }\n\n    /**\n     * Returns the number of paths stored in the list.\n     */\n    @Override\n    public int size() {\n        return this.pathElements.size();\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "AbstractPathElementList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "graph"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "AbstractPathElementList",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "elementList"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "edge"
+          }
+        ],
+        "javadoc": "/**\n * Creates paths obtained by concatenating the specified edge to the\n * specified paths.\n *\n * @param maxSize maximum number of paths the list is able to store.\n * @param elementList paths, list of <code>AbstractPathElement</code>.\n * @param edge edge reaching the end vertex of the created paths.\n *\n * @throws NullPointerException if the specified prevPathElementList or edge\n * is <code>null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "maximum number of paths the list is able to store.",
+            "assertion": "assert args[1] > 0;",
+            "description": "maximum number of paths the list is able to store."
+          },
+          {
+            "tag": "param",
+            "name": "elementList",
+            "content": "paths, list of <code>AbstractPathElement</code>.",
+            "assertion": "assert (args[2] == null) == false;",
+            "description": "paths, list of <code>AbstractPathElement</code>."
+          },
+          {
+            "tag": "param",
+            "name": "edge",
+            "content": "edge reaching the end vertex of the created paths.",
+            "assertion": "assert (args[3] == null) == false;",
+            "description": "edge reaching the end vertex of the created paths."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified prevPathElementList or edge\nis <code>null</code>.",
+            "assertion": "assert args[2]==null || args[3]==null;",
+            "description": "if the specified prevPathElementList or edge is null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>maxSize</code> is negative or\n0.",
+            "assertion": "assert args[1] <= 0;",
+            "description": "if maxSize is negative or 0."
+          }
+        ],
+        "code": "/**\n * Creates paths obtained by concatenating the specified edge to the\n * specified paths.\n *\n * @param maxSize maximum number of paths the list is able to store.\n * @param elementList paths, list of <code>AbstractPathElement</code>.\n * @param edge edge reaching the end vertex of the created paths.\n *\n * @throws NullPointerException if the specified prevPathElementList or edge\n * is <code>null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\nprotected AbstractPathElementList(Graph<V, E> graph, int maxSize, AbstractPathElementList<V, E, T> elementList, E edge) {\n    if (maxSize <= 0) {\n        throw new IllegalArgumentException(\"maxSize is negative or 0\");\n    }\n    if (elementList == null) {\n        throw new NullPointerException(\"elementList is null\");\n    }\n    if (edge == null) {\n        throw new NullPointerException(\"edge is null\");\n    }\n    this.graph = graph;\n    this.maxSize = maxSize;\n    this.vertex = Graphs.getOppositeVertex(graph, edge, elementList.getVertex());\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "AbstractPathElementList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "graph"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pathElement"
+          }
+        ],
+        "javadoc": "/**\n * Creates a list with an empty path. The list size is 1.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws NullPointerException if the specified path-element is <code>\n * null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n * @throws IllegalArgumentException if <code>pathElement</code> is not\n * empty.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "maximum number of paths the list is able to store.",
+            "assertion": "assert args[1] > 0;",
+            "description": "maximum number of paths the list is able to store."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if the specified path-element is <code>\nnull</code>.",
+            "assertion": "assert args[2]==null;",
+            "description": "if the specified path-element is null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>maxSize</code> is negative or\n0.",
+            "assertion": "assert args[1] <= 0;",
+            "description": "if maxSize is negative or 0."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>pathElement</code> is not\nempty.",
+            "assertion": "assert !(args[2] instanceof java.util.Collection) || !((java.util.Collection) args[2]).isEmpty();",
+            "description": "if pathElement is not empty."
+          }
+        ],
+        "code": "/**\n * Creates a list with an empty path. The list size is 1.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws NullPointerException if the specified path-element is <code>\n * null</code>.\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n * @throws IllegalArgumentException if <code>pathElement</code> is not\n * empty.\n */\nprotected AbstractPathElementList(Graph<V, E> graph, int maxSize, T pathElement) {\n    if (maxSize <= 0) {\n        throw new IllegalArgumentException(\"maxSize is negative or 0\");\n    }\n    if (pathElement == null) {\n        throw new NullPointerException(\"pathElement is null\");\n    }\n    if (pathElement.getPrevEdge() != null) {\n        throw new IllegalArgumentException(\"path must be empty\");\n    }\n    this.graph = graph;\n    this.maxSize = maxSize;\n    this.vertex = pathElement.getVertex();\n    this.pathElements.add(pathElement);\n}"
+      },
+      {
+        "type": "constructor",
+        "name": "AbstractPathElementList",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Graph",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "graph"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxSize"
+          },
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "vertex"
+          }
+        ],
+        "javadoc": "/**\n * Creates an empty list. The list size is 0.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxSize",
+            "content": "maximum number of paths the list is able to store.",
+            "assertion": "assert args[1] > 0;",
+            "description": "maximum number of paths the list is able to store."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if <code>maxSize</code> is negative or\n0.",
+            "assertion": "assert args[1] <= 0;",
+            "description": "if maxSize is negative or 0."
+          }
+        ],
+        "code": "/**\n * Creates an empty list. The list size is 0.\n *\n * @param maxSize maximum number of paths the list is able to store.\n *\n * @throws IllegalArgumentException if <code>maxSize</code> is negative or\n * 0.\n */\nprotected AbstractPathElementList(Graph<V, E> graph, int maxSize, V vertex) {\n    if (maxSize <= 0) {\n        throw new IllegalArgumentException(\"maxSize is negative or 0\");\n    }\n    this.graph = graph;\n    this.maxSize = maxSize;\n    this.vertex = vertex;\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "index"
+          }
+        ],
+        "javadoc": "/**\n * Returns path <code>AbstractPathElement</code> stored at the specified\n * index.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns path <code>AbstractPathElement</code> stored at the specified\n * index.\n */\n@Override\npublic T get(int index) {\n    return this.pathElements.get(index);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getVertex",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns target vertex.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns target vertex.\n */\npublic V getVertex() {\n    return this.vertex;\n}"
+      },
+      {
+        "type": "method",
+        "name": "size",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Returns the number of paths stored in the list.\n */\n",
+        "tags": [],
+        "code": "/**\n * Returns the number of paths stored in the list.\n */\n@Override\npublic int size() {\n    return this.pathElements.size();\n}"
+      }
+    ]
+  }
+]

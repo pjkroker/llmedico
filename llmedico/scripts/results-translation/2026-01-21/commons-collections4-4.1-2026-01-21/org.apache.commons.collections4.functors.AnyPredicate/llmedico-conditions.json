@@ -1,0 +1,154 @@
+[
+  {
+    "method": "AnyPredicate",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicates to check, not cloned, not null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "predicates",
+          "content": "the predicates to check, not cloned, not null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "anyPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicates to check, cloned, not null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "predicates",
+          "content": "the predicates to check, cloned, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>any</code> predicate",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the <code>any</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicates array is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the predicates array is null"
+        },
+        {
+          "description": "if any predicate in the array is null",
+          "assertion": "assert java.util.Arrays.stream(args[0]).anyMatch(predicate -> predicate == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "anyPredicate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the predicates to check, cloned, not null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "predicates",
+          "content": "the predicates to check, cloned, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the <code>all</code> predicate",
+          "assertion": "assert (args[0].size() == 0) ? methodResultID.evaluate(null) == false : ((args[0].size() == 1) ? methodResultID.equals(args[0].iterator().next()) : true);",
+          "name": null,
+          "content": "the <code>all</code> predicate"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the predicates array is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the predicates array is null"
+        },
+        {
+          "description": "if any predicate in the array is null",
+          "assertion": "assert ((Collection)args[0]).stream().anyMatch(predicate -> predicate == null);",
+          "name": "NullPointerException",
+          "content": "if any predicate in the array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "evaluate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the input object",
+          "assertion": "assert args[0] != null;",
+          "name": "object",
+          "content": "the input object"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if any decorated predicate return true",
+          "assertion": "assert methodResultID;",
+          "name": null,
+          "content": "true if any decorated predicate return true"
+        }
+      ]
+    }
+  }
+]

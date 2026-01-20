@@ -1,0 +1,277 @@
+[
+  {
+    "method": "UnicodeEscaper",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "escape",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "cp"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the Unicode code point to escape if necessary",
+          "assertion": "assert (args[0] >= 0 && args[0] <= Character.MAX_CODE_POINT);",
+          "name": "cp",
+          "content": "the Unicode code point to escape if necessary"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "replacement characters, or {@code null} if no escaping was needed",
+          "assertion": "",
+          "description": "replacement characters, or {@code null} if no escaping was needed"
+        }
+      ]
+    }
+  },
+  {
+    "method": "nextEscapeIndex",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "csq"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "start"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "csq",
+          "content": "a sequence of characters"
+        },
+        {
+          "description": "start index is not negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "start",
+          "content": "the index of the first character to be scanned"
+        },
+        {
+          "description": "end index is not negative and end index is greater than start index",
+          "assertion": "assert args[2] >= 0 && args[2] > args[1];",
+          "name": "end",
+          "content": "the index immediately after the last character to be scanned"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the scanned sub-sequence of {@code csq} contains invalid surrogate pairs",
+          "assertion": "assert !isValidSurrogatePair(args[0], args[1], args[2]);",
+          "name": "IllegalArgumentException",
+          "content": "if the scanned sub-sequence of {@code csq} contains invalid surrogate pairs"
+        }
+      ]
+    }
+  },
+  {
+    "method": "escape",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "string"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the literal string to be escaped",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "string",
+          "content": "the literal string to be escaped"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the escaped form of the input string",
+          "assertion": "assert methodResultID.equals(receiverObjectID.escape(args[0]));",
+          "name": null,
+          "content": "the escaped form of the input string"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if string is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if {@code string} is null"
+        },
+        {
+          "description": "if invalid surrogate characters are encountered",
+          "assertion": "assert receiverObjectID.nextEscapeIndex(args[0], 0, args[0].length()) != -1;",
+          "name": "IllegalArgumentException",
+          "content": "if invalid surrogate characters are encountered"
+        }
+      ]
+    }
+  },
+  {
+    "method": "escapeSlow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "s"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the literal string to be escaped",
+          "assertion": "assert args[0] != null;",
+          "name": "s",
+          "content": "the literal string to be escaped"
+        },
+        {
+          "description": "the index to start escaping from",
+          "assertion": "assert args[1] >= 0;",
+          "name": "index",
+          "content": "the index to start escaping from"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the escaped form of {@code string}",
+          "assertion": "assert methodResultID.equals(escapeSlow(args[0], args[1]));",
+          "name": null,
+          "content": "the escaped form of {@code string}"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if string is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if {@code string} is null"
+        },
+        {
+          "description": "if invalid surrogate characters are encountered",
+          "assertion": "assert !Character.isValidCodePoint(codePointAt(args[0], args[1], args[0].length()));",
+          "name": "IllegalArgumentException",
+          "content": "if invalid surrogate characters are encountered"
+        }
+      ]
+    }
+  },
+  {
+    "method": "codePointAt",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "CharSequence",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "seq"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "end"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "seq",
+          "content": "the sequence of characters from which to decode the code point"
+        },
+        {
+          "description": "index is within bounds",
+          "assertion": "assert args[1] >= 0 && args[1] < args[2];",
+          "name": "index",
+          "content": "the index of the first character to decode"
+        },
+        {
+          "description": "end is greater than index",
+          "assertion": "assert args[2] > args[1];",
+          "name": "end",
+          "content": "the index beyond the last valid character to decode"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the Unicode code point for the given index or the negated value of the trailing high surrogate character at the end of the sequence",
+          "assertion": "assert methodResultID == receiverObjectID.codePointAt(args[0], args[1], args[2]);",
+          "name": null,
+          "content": "the Unicode code point for the given index or the negated value of the trailing high surrogate character at the end of the sequence"
+        }
+      ]
+    }
+  }
+]

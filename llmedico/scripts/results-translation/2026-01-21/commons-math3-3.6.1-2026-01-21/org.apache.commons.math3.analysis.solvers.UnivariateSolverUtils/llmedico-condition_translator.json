@@ -1,0 +1,1102 @@
+[
+  {
+    "name": "UnivariateSolverUtils",
+    "package": "org.apache.commons.math3.analysis.solvers",
+    "qualified_name": "org.apache.commons.math3.analysis.solvers.UnivariateSolverUtils",
+    "javadoc": "/**\n * Utility routines for {@link UnivariateSolver} objects.\n */\n",
+    "code": "/**\n * Utility routines for {@link UnivariateSolver} objects.\n */\npublic class UnivariateSolverUtils {\n\n    /**\n     * Class contains only static methods.\n     */\n    private UnivariateSolverUtils() {\n    }\n\n    /**\n     * Convenience method to find a zero of a univariate real function.  A default\n     * solver is used.\n     *\n     * @param function Function.\n     * @param x0 Lower bound for the interval.\n     * @param x1 Upper bound for the interval.\n     * @return a value where the function is zero.\n     * @throws NoBracketingException if the function has the same sign at the\n     * endpoints.\n     * @throws NullArgumentException if {@code function} is {@code null}.\n     */\n    public static double solve(UnivariateFunction function, double x0, double x1) throws NullArgumentException, NoBracketingException {\n        if (function == null) {\n            throw new NullArgumentException(LocalizedFormats.FUNCTION);\n        }\n        final UnivariateSolver solver = new BrentSolver();\n        return solver.solve(Integer.MAX_VALUE, function, x0, x1);\n    }\n\n    /**\n     * Convenience method to find a zero of a univariate real function.  A default\n     * solver is used.\n     *\n     * @param function Function.\n     * @param x0 Lower bound for the interval.\n     * @param x1 Upper bound for the interval.\n     * @param absoluteAccuracy Accuracy to be used by the solver.\n     * @return a value where the function is zero.\n     * @throws NoBracketingException if the function has the same sign at the\n     * endpoints.\n     * @throws NullArgumentException if {@code function} is {@code null}.\n     */\n    public static double solve(UnivariateFunction function, double x0, double x1, double absoluteAccuracy) throws NullArgumentException, NoBracketingException {\n        if (function == null) {\n            throw new NullArgumentException(LocalizedFormats.FUNCTION);\n        }\n        final UnivariateSolver solver = new BrentSolver(absoluteAccuracy);\n        return solver.solve(Integer.MAX_VALUE, function, x0, x1);\n    }\n\n    /**\n     * Force a root found by a non-bracketing solver to lie on a specified side,\n     * as if the solver were a bracketing one.\n     *\n     * @param maxEval maximal number of new evaluations of the function\n     * (evaluations already done for finding the root should have already been subtracted\n     * from this number)\n     * @param f function to solve\n     * @param bracketing bracketing solver to use for shifting the root\n     * @param baseRoot original root found by a previous non-bracketing solver\n     * @param min minimal bound of the search interval\n     * @param max maximal bound of the search interval\n     * @param allowedSolution the kind of solutions that the root-finding algorithm may\n     * accept as solutions.\n     * @return a root approximation, on the specified side of the exact root\n     * @throws NoBracketingException if the function has the same sign at the\n     * endpoints.\n     */\n    public static double forceSide(final int maxEval, final UnivariateFunction f, final BracketedUnivariateSolver<UnivariateFunction> bracketing, final double baseRoot, final double min, final double max, final AllowedSolution allowedSolution) throws NoBracketingException {\n        if (allowedSolution == AllowedSolution.ANY_SIDE) {\n            // no further bracketing required\n            return baseRoot;\n        }\n        // find a very small interval bracketing the root\n        final double step = FastMath.max(bracketing.getAbsoluteAccuracy(), FastMath.abs(baseRoot * bracketing.getRelativeAccuracy()));\n        double xLo = FastMath.max(min, baseRoot - step);\n        double fLo = f.value(xLo);\n        double xHi = FastMath.min(max, baseRoot + step);\n        double fHi = f.value(xHi);\n        int remainingEval = maxEval - 2;\n        while (remainingEval > 0) {\n            if ((fLo >= 0 && fHi <= 0) || (fLo <= 0 && fHi >= 0)) {\n                // compute the root on the selected side\n                return bracketing.solve(remainingEval, f, xLo, xHi, baseRoot, allowedSolution);\n            }\n            // try increasing the interval\n            boolean changeLo = false;\n            boolean changeHi = false;\n            if (fLo < fHi) {\n                // increasing function\n                if (fLo >= 0) {\n                    changeLo = true;\n                } else {\n                    changeHi = true;\n                }\n            } else if (fLo > fHi) {\n                // decreasing function\n                if (fLo <= 0) {\n                    changeLo = true;\n                } else {\n                    changeHi = true;\n                }\n            } else {\n                // unknown variation\n                changeLo = true;\n                changeHi = true;\n            }\n            // update the lower bound\n            if (changeLo) {\n                xLo = FastMath.max(min, xLo - step);\n                fLo = f.value(xLo);\n                remainingEval--;\n            }\n            // update the higher bound\n            if (changeHi) {\n                xHi = FastMath.min(max, xHi + step);\n                fHi = f.value(xHi);\n                remainingEval--;\n            }\n        }\n        throw new NoBracketingException(LocalizedFormats.FAILED_BRACKETING, xLo, xHi, fLo, fHi, maxEval - remainingEval, maxEval, baseRoot, min, max);\n    }\n\n    /**\n     * This method simply calls {@link #bracket(UnivariateFunction, double, double, double,\n     * double, double, int) bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)}\n     * with {@code q} and {@code r} set to 1.0 and {@code maximumIterations} set to {@code Integer.MAX_VALUE}.\n     * <p>\n     * <strong>Note: </strong> this method can take {@code Integer.MAX_VALUE}\n     * iterations to throw a {@code ConvergenceException.}  Unless you are\n     * confident that there is a root between {@code lowerBound} and\n     * {@code upperBound} near {@code initial}, it is better to use\n     * {@link #bracket(UnivariateFunction, double, double, double, double,double, int)\n     * bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)},\n     * explicitly specifying the maximum number of iterations.</p>\n     *\n     * @param function Function.\n     * @param initial Initial midpoint of interval being expanded to\n     * bracket a root.\n     * @param lowerBound Lower bound (a is never lower than this value)\n     * @param upperBound Upper bound (b never is greater than this\n     * value).\n     * @return a two-element array holding a and b.\n     * @throws NoBracketingException if a root cannot be bracketted.\n     * @throws NotStrictlyPositiveException if {@code maximumIterations <= 0}.\n     * @throws NullArgumentException if {@code function} is {@code null}.\n     */\n    public static double[] bracket(UnivariateFunction function, double initial, double lowerBound, double upperBound) throws NullArgumentException, NotStrictlyPositiveException, NoBracketingException {\n        return bracket(function, initial, lowerBound, upperBound, 1.0, 1.0, Integer.MAX_VALUE);\n    }\n\n    /**\n     * This method simply calls {@link #bracket(UnivariateFunction, double, double, double,\n     * double, double, int) bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)}\n     * with {@code q} and {@code r} set to 1.0.\n     * @param function Function.\n     * @param initial Initial midpoint of interval being expanded to\n     * bracket a root.\n     * @param lowerBound Lower bound (a is never lower than this value).\n     * @param upperBound Upper bound (b never is greater than this\n     * value).\n     * @param maximumIterations Maximum number of iterations to perform\n     * @return a two element array holding a and b.\n     * @throws NoBracketingException if the algorithm fails to find a and b\n     * satisfying the desired conditions.\n     * @throws NotStrictlyPositiveException if {@code maximumIterations <= 0}.\n     * @throws NullArgumentException if {@code function} is {@code null}.\n     */\n    public static double[] bracket(UnivariateFunction function, double initial, double lowerBound, double upperBound, int maximumIterations) throws NullArgumentException, NotStrictlyPositiveException, NoBracketingException {\n        return bracket(function, initial, lowerBound, upperBound, 1.0, 1.0, maximumIterations);\n    }\n\n    /**\n     * This method attempts to find two values a and b satisfying <ul>\n     * <li> {@code lowerBound <= a < initial < b <= upperBound} </li>\n     * <li> {@code f(a) * f(b) <= 0} </li>\n     * </ul>\n     * If {@code f} is continuous on {@code [a,b]}, this means that {@code a}\n     * and {@code b} bracket a root of {@code f}.\n     * <p>\n     * The algorithm checks the sign of \\( f(l_k) \\) and \\( f(u_k) \\) for increasing\n     * values of k, where \\( l_k = max(lower, initial - \\delta_k) \\),\n     * \\( u_k = min(upper, initial + \\delta_k) \\), using recurrence\n     * \\( \\delta_{k+1} = r \\delta_k + q, \\delta_0 = 0\\) and starting search with \\( k=1 \\).\n     * The algorithm stops when one of the following happens: <ul>\n     * <li> at least one positive and one negative value have been found --  success!</li>\n     * <li> both endpoints have reached their respective limits -- NoBracketingException </li>\n     * <li> {@code maximumIterations} iterations elapse -- NoBracketingException </li></ul>\n     * <p>\n     * If different signs are found at first iteration ({@code k=1}), then the returned\n     * interval will be \\( [a, b] = [l_1, u_1] \\). If different signs are found at a later\n     * iteration {@code k>1}, then the returned interval will be either\n     * \\( [a, b] = [l_{k+1}, l_{k}] \\) or \\( [a, b] = [u_{k}, u_{k+1}] \\). A root solver called\n     * with these parameters will therefore start with the smallest bracketing interval known\n     * at this step.\n     * </p>\n     * <p>\n     * Interval expansion rate is tuned by changing the recurrence parameters {@code r} and\n     * {@code q}. When the multiplicative factor {@code r} is set to 1, the sequence is a\n     * simple arithmetic sequence with linear increase. When the multiplicative factor {@code r}\n     * is larger than 1, the sequence has an asymptotically exponential rate. Note than the\n     * additive parameter {@code q} should never be set to zero, otherwise the interval would\n     * degenerate to the single initial point for all values of {@code k}.\n     * </p>\n     * <p>\n     * As a rule of thumb, when the location of the root is expected to be approximately known\n     * within some error margin, {@code r} should be set to 1 and {@code q} should be set to the\n     * order of magnitude of the error margin. When the location of the root is really a wild guess,\n     * then {@code r} should be set to a value larger than 1 (typically 2 to double the interval\n     * length at each iteration) and {@code q} should be set according to half the initial\n     * search interval length.\n     * </p>\n     * <p>\n     * As an example, if we consider the trivial function {@code f(x) = 1 - x} and use\n     * {@code initial = 4}, {@code r = 1}, {@code q = 2}, the algorithm will compute\n     * {@code f(4-2) = f(2) = -1} and {@code f(4+2) = f(6) = -5} for {@code k = 1}, then\n     * {@code f(4-4) = f(0) = +1} and {@code f(4+4) = f(8) = -7} for {@code k = 2}. Then it will\n     * return the interval {@code [0, 2]} as the smallest one known to be bracketing the root.\n     * As shown by this example, the initial value (here {@code 4}) may lie outside of the returned\n     * bracketing interval.\n     * </p>\n     * @param function function to check\n     * @param initial Initial midpoint of interval being expanded to\n     * bracket a root.\n     * @param lowerBound Lower bound (a is never lower than this value).\n     * @param upperBound Upper bound (b never is greater than this\n     * value).\n     * @param q additive offset used to compute bounds sequence (must be strictly positive)\n     * @param r multiplicative factor used to compute bounds sequence\n     * @param maximumIterations Maximum number of iterations to perform\n     * @return a two element array holding the bracketing values.\n     * @exception NoBracketingException if function cannot be bracketed in the search interval\n     */\n    public static double[] bracket(final UnivariateFunction function, final double initial, final double lowerBound, final double upperBound, final double q, final double r, final int maximumIterations) throws NoBracketingException {\n        if (function == null) {\n            throw new NullArgumentException(LocalizedFormats.FUNCTION);\n        }\n        if (q <= 0) {\n            throw new NotStrictlyPositiveException(q);\n        }\n        if (maximumIterations <= 0) {\n            throw new NotStrictlyPositiveException(LocalizedFormats.INVALID_MAX_ITERATIONS, maximumIterations);\n        }\n        verifySequence(lowerBound, initial, upperBound);\n        // initialize the recurrence\n        double a = initial;\n        double b = initial;\n        double fa = Double.NaN;\n        double fb = Double.NaN;\n        double delta = 0;\n        for (int numIterations = 0; (numIterations < maximumIterations) && (a > lowerBound || b < upperBound); ++numIterations) {\n            final double previousA = a;\n            final double previousFa = fa;\n            final double previousB = b;\n            final double previousFb = fb;\n            delta = r * delta + q;\n            a = FastMath.max(initial - delta, lowerBound);\n            b = FastMath.min(initial + delta, upperBound);\n            fa = function.value(a);\n            fb = function.value(b);\n            if (numIterations == 0) {\n                // at first iteration, we don't have a previous interval\n                // we simply compare both sides of the initial interval\n                if (fa * fb <= 0) {\n                    // the first interval already brackets a root\n                    return new double[] { a, b };\n                }\n            } else {\n                // we have a previous interval with constant sign and expand it,\n                // we expect sign changes to occur at boundaries\n                if (fa * previousFa <= 0) {\n                    // sign change detected at near lower bound\n                    return new double[] { a, previousA };\n                } else if (fb * previousFb <= 0) {\n                    // sign change detected at near upper bound\n                    return new double[] { previousB, b };\n                }\n            }\n        }\n        // no bracketing found\n        throw new NoBracketingException(a, b, fa, fb);\n    }\n\n    /**\n     * Compute the midpoint of two values.\n     *\n     * @param a first value.\n     * @param b second value.\n     * @return the midpoint.\n     */\n    public static double midpoint(double a, double b) {\n        return (a + b) * 0.5;\n    }\n\n    /**\n     * Check whether the interval bounds bracket a root. That is, if the\n     * values at the endpoints are not equal to zero, then the function takes\n     * opposite signs at the endpoints.\n     *\n     * @param function Function.\n     * @param lower Lower endpoint.\n     * @param upper Upper endpoint.\n     * @return {@code true} if the function values have opposite signs at the\n     * given points.\n     * @throws NullArgumentException if {@code function} is {@code null}.\n     */\n    public static boolean isBracketing(UnivariateFunction function, final double lower, final double upper) throws NullArgumentException {\n        if (function == null) {\n            throw new NullArgumentException(LocalizedFormats.FUNCTION);\n        }\n        final double fLo = function.value(lower);\n        final double fHi = function.value(upper);\n        return (fLo >= 0 && fHi <= 0) || (fLo <= 0 && fHi >= 0);\n    }\n\n    /**\n     * Check whether the arguments form a (strictly) increasing sequence.\n     *\n     * @param start First number.\n     * @param mid Second number.\n     * @param end Third number.\n     * @return {@code true} if the arguments form an increasing sequence.\n     */\n    public static boolean isSequence(final double start, final double mid, final double end) {\n        return (start < mid) && (mid < end);\n    }\n\n    /**\n     * Check that the endpoints specify an interval.\n     *\n     * @param lower Lower endpoint.\n     * @param upper Upper endpoint.\n     * @throws NumberIsTooLargeException if {@code lower >= upper}.\n     */\n    public static void verifyInterval(final double lower, final double upper) throws NumberIsTooLargeException {\n        if (lower >= upper) {\n            throw new NumberIsTooLargeException(LocalizedFormats.ENDPOINTS_NOT_AN_INTERVAL, lower, upper, false);\n        }\n    }\n\n    /**\n     * Check that {@code lower < initial < upper}.\n     *\n     * @param lower Lower endpoint.\n     * @param initial Initial value.\n     * @param upper Upper endpoint.\n     * @throws NumberIsTooLargeException if {@code lower >= initial} or\n     * {@code initial >= upper}.\n     */\n    public static void verifySequence(final double lower, final double initial, final double upper) throws NumberIsTooLargeException {\n        verifyInterval(lower, initial);\n        verifyInterval(initial, upper);\n    }\n\n    /**\n     * Check that the endpoints specify an interval and the end points\n     * bracket a root.\n     *\n     * @param function Function.\n     * @param lower Lower endpoint.\n     * @param upper Upper endpoint.\n     * @throws NoBracketingException if the function has the same sign at the\n     * endpoints.\n     * @throws NullArgumentException if {@code function} is {@code null}.\n     */\n    public static void verifyBracketing(UnivariateFunction function, final double lower, final double upper) throws NullArgumentException, NoBracketingException {\n        if (function == null) {\n            throw new NullArgumentException(LocalizedFormats.FUNCTION);\n        }\n        verifyInterval(lower, upper);\n        if (!isBracketing(function, lower, upper)) {\n            throw new NoBracketingException(lower, upper, function.value(lower), function.value(upper));\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "solve",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x0"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x1"
+          }
+        ],
+        "javadoc": "/**\n * Convenience method to find a zero of a univariate real function.  A default\n * solver is used.\n *\n * @param function Function.\n * @param x0 Lower bound for the interval.\n * @param x1 Upper bound for the interval.\n * @return a value where the function is zero.\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "Function.",
+            "assertion": "assert args[0] != null;",
+            "description": "Function."
+          },
+          {
+            "tag": "param",
+            "name": "x0",
+            "content": "Lower bound for the interval.",
+            "assertion": "assert !Double.isNaN(args[1]);",
+            "description": "Lower bound for the interval."
+          },
+          {
+            "tag": "param",
+            "name": "x1",
+            "content": "Upper bound for the interval.",
+            "assertion": "assert !Double.isNaN(args[2]);",
+            "description": "Upper bound for the interval."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value where the function is zero.",
+            "assertion": "assert Math.abs(methodResultID - args[0].value(args[0].midpoint(args[1], args[2]))) < 1e-6;",
+            "description": "a value where the function is zero."
+          },
+          {
+            "tag": "throws",
+            "name": "NoBracketingException",
+            "content": "if the function has the same sign at the endpoints.",
+            "assertion": "assert !receiverObjectID.isBracketing(args[0], args[1], args[2]);",
+            "description": "if the function has the same sign at the endpoints."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code function} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": "if function is null."
+          }
+        ],
+        "code": "/**\n * Convenience method to find a zero of a univariate real function.  A default\n * solver is used.\n *\n * @param function Function.\n * @param x0 Lower bound for the interval.\n * @param x1 Upper bound for the interval.\n * @return a value where the function is zero.\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\npublic static double solve(UnivariateFunction function, double x0, double x1) throws NullArgumentException, NoBracketingException {\n    if (function == null) {\n        throw new NullArgumentException(LocalizedFormats.FUNCTION);\n    }\n    final UnivariateSolver solver = new BrentSolver();\n    return solver.solve(Integer.MAX_VALUE, function, x0, x1);\n}"
+      },
+      {
+        "type": "method",
+        "name": "solve",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x0"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "x1"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "absoluteAccuracy"
+          }
+        ],
+        "javadoc": "/**\n * Convenience method to find a zero of a univariate real function.  A default\n * solver is used.\n *\n * @param function Function.\n * @param x0 Lower bound for the interval.\n * @param x1 Upper bound for the interval.\n * @param absoluteAccuracy Accuracy to be used by the solver.\n * @return a value where the function is zero.\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "Function.",
+            "assertion": "assert args[0] != null;",
+            "description": "not null"
+          },
+          {
+            "tag": "param",
+            "name": "x0",
+            "content": "Lower bound for the interval.",
+            "assertion": "assert args[1] <= args[2];",
+            "description": "lower bound is not greater than upper bound"
+          },
+          {
+            "tag": "param",
+            "name": "x1",
+            "content": "Upper bound for the interval.",
+            "assertion": "assert args[2] >= args[1];",
+            "description": "upper bound is not less than lower bound"
+          },
+          {
+            "tag": "param",
+            "name": "absoluteAccuracy",
+            "content": "Accuracy to be used by the solver.",
+            "assertion": "assert args[3] >= 0;",
+            "description": "accuracy is non-negative"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "value where the function is zero.",
+            "assertion": "",
+            "description": "value where the function is zero."
+          },
+          {
+            "tag": "throws",
+            "name": "NoBracketingException",
+            "content": "if the function has the same sign at the endpoints.",
+            "assertion": "assert !receiverObjectID.isBracketing(args[0], args[1], args[2]);",
+            "description": "if the function has the same sign at the endpoints."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code function} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": "if function is null."
+          }
+        ],
+        "code": "/**\n * Convenience method to find a zero of a univariate real function.  A default\n * solver is used.\n *\n * @param function Function.\n * @param x0 Lower bound for the interval.\n * @param x1 Upper bound for the interval.\n * @param absoluteAccuracy Accuracy to be used by the solver.\n * @return a value where the function is zero.\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\npublic static double solve(UnivariateFunction function, double x0, double x1, double absoluteAccuracy) throws NullArgumentException, NoBracketingException {\n    if (function == null) {\n        throw new NullArgumentException(LocalizedFormats.FUNCTION);\n    }\n    final UnivariateSolver solver = new BrentSolver(absoluteAccuracy);\n    return solver.solve(Integer.MAX_VALUE, function, x0, x1);\n}"
+      },
+      {
+        "type": "method",
+        "name": "forceSide",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maxEval"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "f"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "BracketedUnivariateSolver",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bracketing"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "baseRoot"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "min"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "max"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "AllowedSolution",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "allowedSolution"
+          }
+        ],
+        "javadoc": "/**\n * Force a root found by a non-bracketing solver to lie on a specified side,\n * as if the solver were a bracketing one.\n *\n * @param maxEval maximal number of new evaluations of the function\n * (evaluations already done for finding the root should have already been subtracted\n * from this number)\n * @param f function to solve\n * @param bracketing bracketing solver to use for shifting the root\n * @param baseRoot original root found by a previous non-bracketing solver\n * @param min minimal bound of the search interval\n * @param max maximal bound of the search interval\n * @param allowedSolution the kind of solutions that the root-finding algorithm may\n * accept as solutions.\n * @return a root approximation, on the specified side of the exact root\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "maxEval",
+            "content": "maximal number of new evaluations of the function (evaluations already done for finding the root should have already been subtracted from this number)",
+            "assertion": "",
+            "description": "maximal number of new evaluations of the function (evaluations already done for finding the root should have already been subtracted from this number)"
+          },
+          {
+            "tag": "param",
+            "name": "f",
+            "content": "function to solve",
+            "assertion": "",
+            "description": "function to solve"
+          },
+          {
+            "tag": "param",
+            "name": "bracketing",
+            "content": "bracketing solver to use for shifting the root",
+            "assertion": "",
+            "description": "bracketing solver to use for shifting the root"
+          },
+          {
+            "tag": "param",
+            "name": "baseRoot",
+            "content": "original root found by a previous non-bracketing solver",
+            "assertion": "",
+            "description": "original root found by a previous non-bracketing solver"
+          },
+          {
+            "tag": "param",
+            "name": "min",
+            "content": "minimal bound of the search interval",
+            "assertion": "",
+            "description": "minimal bound of the search interval"
+          },
+          {
+            "tag": "param",
+            "name": "max",
+            "content": "maximal bound of the search interval",
+            "assertion": "",
+            "description": "maximal bound of the search interval"
+          },
+          {
+            "tag": "param",
+            "name": "allowedSolution",
+            "content": "the kind of solutions that the root-finding algorithm may accept as solutions.",
+            "assertion": "",
+            "description": "the kind of solutions that the root-finding algorithm may accept as solutions."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "root approximation, on the specified side of the exact root",
+            "assertion": "assert Math.abs(methodResultID - args[3]) < 1e-6;",
+            "description": "a root approximation, on the specified side of the exact root"
+          },
+          {
+            "tag": "throws",
+            "name": "NoBracketingException",
+            "content": "if the function has the same sign at the endpoints.",
+            "assertion": "assert args[1].value(args[4]) * args[1].value(args[5]) > 0;",
+            "description": "if the function has the same sign at the endpoints."
+          }
+        ],
+        "code": "/**\n * Force a root found by a non-bracketing solver to lie on a specified side,\n * as if the solver were a bracketing one.\n *\n * @param maxEval maximal number of new evaluations of the function\n * (evaluations already done for finding the root should have already been subtracted\n * from this number)\n * @param f function to solve\n * @param bracketing bracketing solver to use for shifting the root\n * @param baseRoot original root found by a previous non-bracketing solver\n * @param min minimal bound of the search interval\n * @param max maximal bound of the search interval\n * @param allowedSolution the kind of solutions that the root-finding algorithm may\n * accept as solutions.\n * @return a root approximation, on the specified side of the exact root\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n */\npublic static double forceSide(final int maxEval, final UnivariateFunction f, final BracketedUnivariateSolver<UnivariateFunction> bracketing, final double baseRoot, final double min, final double max, final AllowedSolution allowedSolution) throws NoBracketingException {\n    if (allowedSolution == AllowedSolution.ANY_SIDE) {\n        // no further bracketing required\n        return baseRoot;\n    }\n    // find a very small interval bracketing the root\n    final double step = FastMath.max(bracketing.getAbsoluteAccuracy(), FastMath.abs(baseRoot * bracketing.getRelativeAccuracy()));\n    double xLo = FastMath.max(min, baseRoot - step);\n    double fLo = f.value(xLo);\n    double xHi = FastMath.min(max, baseRoot + step);\n    double fHi = f.value(xHi);\n    int remainingEval = maxEval - 2;\n    while (remainingEval > 0) {\n        if ((fLo >= 0 && fHi <= 0) || (fLo <= 0 && fHi >= 0)) {\n            // compute the root on the selected side\n            return bracketing.solve(remainingEval, f, xLo, xHi, baseRoot, allowedSolution);\n        }\n        // try increasing the interval\n        boolean changeLo = false;\n        boolean changeHi = false;\n        if (fLo < fHi) {\n            // increasing function\n            if (fLo >= 0) {\n                changeLo = true;\n            } else {\n                changeHi = true;\n            }\n        } else if (fLo > fHi) {\n            // decreasing function\n            if (fLo <= 0) {\n                changeLo = true;\n            } else {\n                changeHi = true;\n            }\n        } else {\n            // unknown variation\n            changeLo = true;\n            changeHi = true;\n        }\n        // update the lower bound\n        if (changeLo) {\n            xLo = FastMath.max(min, xLo - step);\n            fLo = f.value(xLo);\n            remainingEval--;\n        }\n        // update the higher bound\n        if (changeHi) {\n            xHi = FastMath.min(max, xHi + step);\n            fHi = f.value(xHi);\n            remainingEval--;\n        }\n    }\n    throw new NoBracketingException(LocalizedFormats.FAILED_BRACKETING, xLo, xHi, fLo, fHi, maxEval - remainingEval, maxEval, baseRoot, min, max);\n}"
+      },
+      {
+        "type": "method",
+        "name": "bracket",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initial"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lowerBound"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upperBound"
+          }
+        ],
+        "javadoc": "/**\n * This method simply calls {@link #bracket(UnivariateFunction, double, double, double,\n * double, double, int) bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)}\n * with {@code q} and {@code r} set to 1.0 and {@code maximumIterations} set to {@code Integer.MAX_VALUE}.\n * <p>\n * <strong>Note: </strong> this method can take {@code Integer.MAX_VALUE}\n * iterations to throw a {@code ConvergenceException.}  Unless you are\n * confident that there is a root between {@code lowerBound} and\n * {@code upperBound} near {@code initial}, it is better to use\n * {@link #bracket(UnivariateFunction, double, double, double, double,double, int)\n * bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)},\n * explicitly specifying the maximum number of iterations.</p>\n *\n * @param function Function.\n * @param initial Initial midpoint of interval being expanded to\n * bracket a root.\n * @param lowerBound Lower bound (a is never lower than this value)\n * @param upperBound Upper bound (b never is greater than this\n * value).\n * @return a two-element array holding a and b.\n * @throws NoBracketingException if a root cannot be bracketted.\n * @throws NotStrictlyPositiveException if {@code maximumIterations <= 0}.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "Function.",
+            "assertion": "assert args[0] != null;",
+            "description": "not null"
+          },
+          {
+            "tag": "param",
+            "name": "initial",
+            "content": "Initial midpoint of interval being expanded to bracket a root.",
+            "assertion": "assert args[2] <= args[1] && args[1] <= args[3];",
+            "description": "initial value must be within the given bounds"
+          },
+          {
+            "tag": "param",
+            "name": "lowerBound",
+            "content": "Lower bound (a is never lower than this value)"
+          },
+          {
+            "tag": "param",
+            "name": "upperBound",
+            "content": "Upper bound (b never is greater than this value)."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "two-element array holding a and b.",
+            "assertion": "assert methodResultID.length == 2;",
+            "description": "a two-element array holding a and b."
+          },
+          {
+            "tag": "throws",
+            "name": "NoBracketingException",
+            "content": "if a root cannot be bracketted.",
+            "assertion": "assert !receiverObjectID.isBracketing(args[0], args[2], args[3]);",
+            "description": "if a root cannot be bracketted."
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code maximumIterations <= 0}.",
+            "assertion": "assert Integer.MAX_VALUE <= 0;",
+            "description": ""
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code function} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": ""
+          }
+        ],
+        "code": "/**\n * This method simply calls {@link #bracket(UnivariateFunction, double, double, double,\n * double, double, int) bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)}\n * with {@code q} and {@code r} set to 1.0 and {@code maximumIterations} set to {@code Integer.MAX_VALUE}.\n * <p>\n * <strong>Note: </strong> this method can take {@code Integer.MAX_VALUE}\n * iterations to throw a {@code ConvergenceException.}  Unless you are\n * confident that there is a root between {@code lowerBound} and\n * {@code upperBound} near {@code initial}, it is better to use\n * {@link #bracket(UnivariateFunction, double, double, double, double,double, int)\n * bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)},\n * explicitly specifying the maximum number of iterations.</p>\n *\n * @param function Function.\n * @param initial Initial midpoint of interval being expanded to\n * bracket a root.\n * @param lowerBound Lower bound (a is never lower than this value)\n * @param upperBound Upper bound (b never is greater than this\n * value).\n * @return a two-element array holding a and b.\n * @throws NoBracketingException if a root cannot be bracketted.\n * @throws NotStrictlyPositiveException if {@code maximumIterations <= 0}.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\npublic static double[] bracket(UnivariateFunction function, double initial, double lowerBound, double upperBound) throws NullArgumentException, NotStrictlyPositiveException, NoBracketingException {\n    return bracket(function, initial, lowerBound, upperBound, 1.0, 1.0, Integer.MAX_VALUE);\n}"
+      },
+      {
+        "type": "method",
+        "name": "bracket",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initial"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lowerBound"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upperBound"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maximumIterations"
+          }
+        ],
+        "javadoc": "/**\n * This method simply calls {@link #bracket(UnivariateFunction, double, double, double,\n * double, double, int) bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)}\n * with {@code q} and {@code r} set to 1.0.\n * @param function Function.\n * @param initial Initial midpoint of interval being expanded to\n * bracket a root.\n * @param lowerBound Lower bound (a is never lower than this value).\n * @param upperBound Upper bound (b never is greater than this\n * value).\n * @param maximumIterations Maximum number of iterations to perform\n * @return a two element array holding a and b.\n * @throws NoBracketingException if the algorithm fails to find a and b\n * satisfying the desired conditions.\n * @throws NotStrictlyPositiveException if {@code maximumIterations <= 0}.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "Function.",
+            "assertion": "assert args[0] != null;",
+            "description": "not null"
+          },
+          {
+            "tag": "param",
+            "name": "initial",
+            "content": "Initial midpoint of interval being expanded to bracket a root.",
+            "assertion": "assert !Double.isNaN(args[1]);",
+            "description": "initial value is a number"
+          },
+          {
+            "tag": "param",
+            "name": "lowerBound",
+            "content": "Lower bound (a is never lower than this value).",
+            "assertion": "assert args[2] <= args[3];",
+            "description": "lower bound is not greater than upper bound"
+          },
+          {
+            "tag": "param",
+            "name": "upperBound",
+            "content": "Upper bound (b never is greater than this value).",
+            "assertion": "assert args[3] > args[2];",
+            "description": "upper bound is greater than lower bound"
+          },
+          {
+            "tag": "param",
+            "name": "maximumIterations",
+            "content": "Maximum number of iterations to perform",
+            "assertion": "assert args[4] > 0;",
+            "description": "maximum iterations is strictly positive"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "two element array holding a and b.",
+            "assertion": "assert java.util.Arrays.equals(methodResultID, new double[]{args[1], args[3]});",
+            "description": "a two element array holding a and b"
+          },
+          {
+            "tag": "throws",
+            "name": "NoBracketingException",
+            "content": "if the algorithm fails to find a and b satisfying the desired conditions.",
+            "assertion": "assert !receiverObjectID.isBracketing(args[0], args[2], args[3]);",
+            "description": "if the algorithm fails to find a and b satisfying the desired conditions."
+          },
+          {
+            "tag": "throws",
+            "name": "NotStrictlyPositiveException",
+            "content": "if {@code maximumIterations <= 0}.",
+            "assertion": "assert args[4] <= 0;",
+            "description": "if maximumIterations <= 0."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code function} is {@code null}.",
+            "assertion": "assert args[0]==null;",
+            "description": "if function is null."
+          }
+        ],
+        "code": "/**\n * This method simply calls {@link #bracket(UnivariateFunction, double, double, double,\n * double, double, int) bracket(function, initial, lowerBound, upperBound, q, r, maximumIterations)}\n * with {@code q} and {@code r} set to 1.0.\n * @param function Function.\n * @param initial Initial midpoint of interval being expanded to\n * bracket a root.\n * @param lowerBound Lower bound (a is never lower than this value).\n * @param upperBound Upper bound (b never is greater than this\n * value).\n * @param maximumIterations Maximum number of iterations to perform\n * @return a two element array holding a and b.\n * @throws NoBracketingException if the algorithm fails to find a and b\n * satisfying the desired conditions.\n * @throws NotStrictlyPositiveException if {@code maximumIterations <= 0}.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\npublic static double[] bracket(UnivariateFunction function, double initial, double lowerBound, double upperBound, int maximumIterations) throws NullArgumentException, NotStrictlyPositiveException, NoBracketingException {\n    return bracket(function, initial, lowerBound, upperBound, 1.0, 1.0, maximumIterations);\n}"
+      },
+      {
+        "type": "method",
+        "name": "bracket",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initial"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lowerBound"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upperBound"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "q"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "r"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "maximumIterations"
+          }
+        ],
+        "javadoc": "/**\n * This method attempts to find two values a and b satisfying <ul>\n * <li> {@code lowerBound <= a < initial < b <= upperBound} </li>\n * <li> {@code f(a) * f(b) <= 0} </li>\n * </ul>\n * If {@code f} is continuous on {@code [a,b]}, this means that {@code a}\n * and {@code b} bracket a root of {@code f}.\n * <p>\n * The algorithm checks the sign of \\( f(l_k) \\) and \\( f(u_k) \\) for increasing\n * values of k, where \\( l_k = max(lower, initial - \\delta_k) \\),\n * \\( u_k = min(upper, initial + \\delta_k) \\), using recurrence\n * \\( \\delta_{k+1} = r \\delta_k + q, \\delta_0 = 0\\) and starting search with \\( k=1 \\).\n * The algorithm stops when one of the following happens: <ul>\n * <li> at least one positive and one negative value have been found --  success!</li>\n * <li> both endpoints have reached their respective limits -- NoBracketingException </li>\n * <li> {@code maximumIterations} iterations elapse -- NoBracketingException </li></ul>\n * <p>\n * If different signs are found at first iteration ({@code k=1}), then the returned\n * interval will be \\( [a, b] = [l_1, u_1] \\). If different signs are found at a later\n * iteration {@code k>1}, then the returned interval will be either\n * \\( [a, b] = [l_{k+1}, l_{k}] \\) or \\( [a, b] = [u_{k}, u_{k+1}] \\). A root solver called\n * with these parameters will therefore start with the smallest bracketing interval known\n * at this step.\n * </p>\n * <p>\n * Interval expansion rate is tuned by changing the recurrence parameters {@code r} and\n * {@code q}. When the multiplicative factor {@code r} is set to 1, the sequence is a\n * simple arithmetic sequence with linear increase. When the multiplicative factor {@code r}\n * is larger than 1, the sequence has an asymptotically exponential rate. Note than the\n * additive parameter {@code q} should never be set to zero, otherwise the interval would\n * degenerate to the single initial point for all values of {@code k}.\n * </p>\n * <p>\n * As a rule of thumb, when the location of the root is expected to be approximately known\n * within some error margin, {@code r} should be set to 1 and {@code q} should be set to the\n * order of magnitude of the error margin. When the location of the root is really a wild guess,\n * then {@code r} should be set to a value larger than 1 (typically 2 to double the interval\n * length at each iteration) and {@code q} should be set according to half the initial\n * search interval length.\n * </p>\n * <p>\n * As an example, if we consider the trivial function {@code f(x) = 1 - x} and use\n * {@code initial = 4}, {@code r = 1}, {@code q = 2}, the algorithm will compute\n * {@code f(4-2) = f(2) = -1} and {@code f(4+2) = f(6) = -5} for {@code k = 1}, then\n * {@code f(4-4) = f(0) = +1} and {@code f(4+4) = f(8) = -7} for {@code k = 2}. Then it will\n * return the interval {@code [0, 2]} as the smallest one known to be bracketing the root.\n * As shown by this example, the initial value (here {@code 4}) may lie outside of the returned\n * bracketing interval.\n * </p>\n * @param function function to check\n * @param initial Initial midpoint of interval being expanded to\n * bracket a root.\n * @param lowerBound Lower bound (a is never lower than this value).\n * @param upperBound Upper bound (b never is greater than this\n * value).\n * @param q additive offset used to compute bounds sequence (must be strictly positive)\n * @param r multiplicative factor used to compute bounds sequence\n * @param maximumIterations Maximum number of iterations to perform\n * @return a two element array holding the bracketing values.\n * @exception NoBracketingException if function cannot be bracketed in the search interval\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "function to check",
+            "assertion": "",
+            "description": "function to check"
+          },
+          {
+            "tag": "param",
+            "name": "initial",
+            "content": "Initial midpoint of interval being expanded to bracket a root.",
+            "assertion": "",
+            "description": "Initial midpoint of interval being expanded to bracket a root."
+          },
+          {
+            "tag": "param",
+            "name": "lowerBound",
+            "content": "Lower bound (a is never lower than this value).",
+            "assertion": "",
+            "description": "Lower bound (a is never lower than this value)."
+          },
+          {
+            "tag": "param",
+            "name": "upperBound",
+            "content": "Upper bound (b never is greater than this value).",
+            "assertion": "",
+            "description": "Upper bound (b never is greater than this value)."
+          },
+          {
+            "tag": "param",
+            "name": "q",
+            "content": "additive offset used to compute bounds sequence (must be strictly positive)",
+            "assertion": "",
+            "description": "additive offset used to compute bounds sequence (must be strictly positive)"
+          },
+          {
+            "tag": "param",
+            "name": "r",
+            "content": "multiplicative factor used to compute bounds sequence",
+            "assertion": "",
+            "description": "multiplicative factor used to compute bounds sequence"
+          },
+          {
+            "tag": "param",
+            "name": "maximumIterations",
+            "content": "Maximum number of iterations to perform",
+            "assertion": "",
+            "description": "Maximum number of iterations to perform"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "two element array holding the bracketing values.",
+            "assertion": "",
+            "description": "two element array holding the bracketing values."
+          },
+          {
+            "tag": "throws",
+            "name": "NoBracketingException",
+            "content": "if function cannot be bracketed in the search interval",
+            "assertion": "",
+            "description": "if function cannot be bracketed in the search interval"
+          }
+        ],
+        "code": "/**\n * This method attempts to find two values a and b satisfying <ul>\n * <li> {@code lowerBound <= a < initial < b <= upperBound} </li>\n * <li> {@code f(a) * f(b) <= 0} </li>\n * </ul>\n * If {@code f} is continuous on {@code [a,b]}, this means that {@code a}\n * and {@code b} bracket a root of {@code f}.\n * <p>\n * The algorithm checks the sign of \\( f(l_k) \\) and \\( f(u_k) \\) for increasing\n * values of k, where \\( l_k = max(lower, initial - \\delta_k) \\),\n * \\( u_k = min(upper, initial + \\delta_k) \\), using recurrence\n * \\( \\delta_{k+1} = r \\delta_k + q, \\delta_0 = 0\\) and starting search with \\( k=1 \\).\n * The algorithm stops when one of the following happens: <ul>\n * <li> at least one positive and one negative value have been found --  success!</li>\n * <li> both endpoints have reached their respective limits -- NoBracketingException </li>\n * <li> {@code maximumIterations} iterations elapse -- NoBracketingException </li></ul>\n * <p>\n * If different signs are found at first iteration ({@code k=1}), then the returned\n * interval will be \\( [a, b] = [l_1, u_1] \\). If different signs are found at a later\n * iteration {@code k>1}, then the returned interval will be either\n * \\( [a, b] = [l_{k+1}, l_{k}] \\) or \\( [a, b] = [u_{k}, u_{k+1}] \\). A root solver called\n * with these parameters will therefore start with the smallest bracketing interval known\n * at this step.\n * </p>\n * <p>\n * Interval expansion rate is tuned by changing the recurrence parameters {@code r} and\n * {@code q}. When the multiplicative factor {@code r} is set to 1, the sequence is a\n * simple arithmetic sequence with linear increase. When the multiplicative factor {@code r}\n * is larger than 1, the sequence has an asymptotically exponential rate. Note than the\n * additive parameter {@code q} should never be set to zero, otherwise the interval would\n * degenerate to the single initial point for all values of {@code k}.\n * </p>\n * <p>\n * As a rule of thumb, when the location of the root is expected to be approximately known\n * within some error margin, {@code r} should be set to 1 and {@code q} should be set to the\n * order of magnitude of the error margin. When the location of the root is really a wild guess,\n * then {@code r} should be set to a value larger than 1 (typically 2 to double the interval\n * length at each iteration) and {@code q} should be set according to half the initial\n * search interval length.\n * </p>\n * <p>\n * As an example, if we consider the trivial function {@code f(x) = 1 - x} and use\n * {@code initial = 4}, {@code r = 1}, {@code q = 2}, the algorithm will compute\n * {@code f(4-2) = f(2) = -1} and {@code f(4+2) = f(6) = -5} for {@code k = 1}, then\n * {@code f(4-4) = f(0) = +1} and {@code f(4+4) = f(8) = -7} for {@code k = 2}. Then it will\n * return the interval {@code [0, 2]} as the smallest one known to be bracketing the root.\n * As shown by this example, the initial value (here {@code 4}) may lie outside of the returned\n * bracketing interval.\n * </p>\n * @param function function to check\n * @param initial Initial midpoint of interval being expanded to\n * bracket a root.\n * @param lowerBound Lower bound (a is never lower than this value).\n * @param upperBound Upper bound (b never is greater than this\n * value).\n * @param q additive offset used to compute bounds sequence (must be strictly positive)\n * @param r multiplicative factor used to compute bounds sequence\n * @param maximumIterations Maximum number of iterations to perform\n * @return a two element array holding the bracketing values.\n * @exception NoBracketingException if function cannot be bracketed in the search interval\n */\npublic static double[] bracket(final UnivariateFunction function, final double initial, final double lowerBound, final double upperBound, final double q, final double r, final int maximumIterations) throws NoBracketingException {\n    if (function == null) {\n        throw new NullArgumentException(LocalizedFormats.FUNCTION);\n    }\n    if (q <= 0) {\n        throw new NotStrictlyPositiveException(q);\n    }\n    if (maximumIterations <= 0) {\n        throw new NotStrictlyPositiveException(LocalizedFormats.INVALID_MAX_ITERATIONS, maximumIterations);\n    }\n    verifySequence(lowerBound, initial, upperBound);\n    // initialize the recurrence\n    double a = initial;\n    double b = initial;\n    double fa = Double.NaN;\n    double fb = Double.NaN;\n    double delta = 0;\n    for (int numIterations = 0; (numIterations < maximumIterations) && (a > lowerBound || b < upperBound); ++numIterations) {\n        final double previousA = a;\n        final double previousFa = fa;\n        final double previousB = b;\n        final double previousFb = fb;\n        delta = r * delta + q;\n        a = FastMath.max(initial - delta, lowerBound);\n        b = FastMath.min(initial + delta, upperBound);\n        fa = function.value(a);\n        fb = function.value(b);\n        if (numIterations == 0) {\n            // at first iteration, we don't have a previous interval\n            // we simply compare both sides of the initial interval\n            if (fa * fb <= 0) {\n                // the first interval already brackets a root\n                return new double[] { a, b };\n            }\n        } else {\n            // we have a previous interval with constant sign and expand it,\n            // we expect sign changes to occur at boundaries\n            if (fa * previousFa <= 0) {\n                // sign change detected at near lower bound\n                return new double[] { a, previousA };\n            } else if (fb * previousFb <= 0) {\n                // sign change detected at near upper bound\n                return new double[] { previousB, b };\n            }\n        }\n    }\n    // no bracketing found\n    throw new NoBracketingException(a, b, fa, fb);\n}"
+      },
+      {
+        "type": "method",
+        "name": "midpoint",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "b"
+          }
+        ],
+        "javadoc": "/**\n * Compute the midpoint of two values.\n *\n * @param a first value.\n * @param b second value.\n * @return the midpoint.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a",
+            "content": "first value.",
+            "assertion": "assert true;",
+            "description": "first value."
+          },
+          {
+            "tag": "param",
+            "name": "b",
+            "content": "second value.",
+            "assertion": "assert true;",
+            "description": "second value."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "midpoint.",
+            "assertion": "assert methodResultID == (args[0] + args[1]) / 2.0;",
+            "description": "the midpoint."
+          }
+        ],
+        "code": "/**\n * Compute the midpoint of two values.\n *\n * @param a first value.\n * @param b second value.\n * @return the midpoint.\n */\npublic static double midpoint(double a, double b) {\n    return (a + b) * 0.5;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isBracketing",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lower"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upper"
+          }
+        ],
+        "javadoc": "/**\n * Check whether the interval bounds bracket a root. That is, if the\n * values at the endpoints are not equal to zero, then the function takes\n * opposite signs at the endpoints.\n *\n * @param function Function.\n * @param lower Lower endpoint.\n * @param upper Upper endpoint.\n * @return {@code true} if the function values have opposite signs at the\n * given points.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "Function.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "Function."
+          },
+          {
+            "tag": "param",
+            "name": "lower",
+            "content": "Lower endpoint.",
+            "assertion": "assert !Double.isNaN(args[1]);",
+            "description": "Lower endpoint."
+          },
+          {
+            "tag": "param",
+            "name": "upper",
+            "content": "Upper endpoint.",
+            "assertion": "assert !Double.isNaN(args[2]);",
+            "description": "Upper endpoint."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if the function values have opposite signs at the given points.",
+            "assertion": "assert methodResultID == (args[0].value(args[1]) * args[0].value(args[2]) < 0);",
+            "description": "true if the function values have opposite signs at the given points."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code function} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": "if function is null."
+          }
+        ],
+        "code": "/**\n * Check whether the interval bounds bracket a root. That is, if the\n * values at the endpoints are not equal to zero, then the function takes\n * opposite signs at the endpoints.\n *\n * @param function Function.\n * @param lower Lower endpoint.\n * @param upper Upper endpoint.\n * @return {@code true} if the function values have opposite signs at the\n * given points.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\npublic static boolean isBracketing(UnivariateFunction function, final double lower, final double upper) throws NullArgumentException {\n    if (function == null) {\n        throw new NullArgumentException(LocalizedFormats.FUNCTION);\n    }\n    final double fLo = function.value(lower);\n    final double fHi = function.value(upper);\n    return (fLo >= 0 && fHi <= 0) || (fLo <= 0 && fHi >= 0);\n}"
+      },
+      {
+        "type": "method",
+        "name": "isSequence",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "start"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "mid"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "end"
+          }
+        ],
+        "javadoc": "/**\n * Check whether the arguments form a (strictly) increasing sequence.\n *\n * @param start First number.\n * @param mid Second number.\n * @param end Third number.\n * @return {@code true} if the arguments form an increasing sequence.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "start",
+            "content": "First number.",
+            "assertion": "assert args[0] >= Double.NEGATIVE_INFINITY;",
+            "description": "First number."
+          },
+          {
+            "tag": "param",
+            "name": "mid",
+            "content": "Second number.",
+            "assertion": "assert args[1] >= Double.NEGATIVE_INFINITY;",
+            "description": "Second number."
+          },
+          {
+            "tag": "param",
+            "name": "end",
+            "content": "Third number.",
+            "assertion": "assert args[2] >= Double.NEGATIVE_INFINITY;",
+            "description": "Third number."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if the arguments form an increasing sequence.",
+            "assertion": "assert methodResultID == (args[0] < args[1] && args[1] < args[2]);",
+            "description": "true if the arguments form an increasing sequence."
+          }
+        ],
+        "code": "/**\n * Check whether the arguments form a (strictly) increasing sequence.\n *\n * @param start First number.\n * @param mid Second number.\n * @param end Third number.\n * @return {@code true} if the arguments form an increasing sequence.\n */\npublic static boolean isSequence(final double start, final double mid, final double end) {\n    return (start < mid) && (mid < end);\n}"
+      },
+      {
+        "type": "method",
+        "name": "verifyInterval",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lower"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upper"
+          }
+        ],
+        "javadoc": "/**\n * Check that the endpoints specify an interval.\n *\n * @param lower Lower endpoint.\n * @param upper Upper endpoint.\n * @throws NumberIsTooLargeException if {@code lower >= upper}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "lower",
+            "content": "Lower endpoint.",
+            "assertion": "assert args[0] < args[1];",
+            "description": "Lower endpoint."
+          },
+          {
+            "tag": "param",
+            "name": "upper",
+            "content": "Upper endpoint.",
+            "assertion": "assert args[1] > args[0];",
+            "description": "Upper endpoint."
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooLargeException",
+            "content": "if {@code lower >= upper}.",
+            "assertion": "assert args[0] >= args[1];",
+            "description": "if lower >= upper."
+          }
+        ],
+        "code": "/**\n * Check that the endpoints specify an interval.\n *\n * @param lower Lower endpoint.\n * @param upper Upper endpoint.\n * @throws NumberIsTooLargeException if {@code lower >= upper}.\n */\npublic static void verifyInterval(final double lower, final double upper) throws NumberIsTooLargeException {\n    if (lower >= upper) {\n        throw new NumberIsTooLargeException(LocalizedFormats.ENDPOINTS_NOT_AN_INTERVAL, lower, upper, false);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "verifySequence",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lower"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "initial"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upper"
+          }
+        ],
+        "javadoc": "/**\n * Check that {@code lower < initial < upper}.\n *\n * @param lower Lower endpoint.\n * @param initial Initial value.\n * @param upper Upper endpoint.\n * @throws NumberIsTooLargeException if {@code lower >= initial} or\n * {@code initial >= upper}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "lower",
+            "content": "Lower endpoint.",
+            "assertion": "assert args[0] < args[1];",
+            "description": "Lower endpoint."
+          },
+          {
+            "tag": "param",
+            "name": "initial",
+            "content": "Initial value.",
+            "assertion": "assert args[1] < args[2];",
+            "description": "Initial value."
+          },
+          {
+            "tag": "param",
+            "name": "upper",
+            "content": "Upper endpoint.",
+            "assertion": "assert args[0] < args[2];",
+            "description": "Upper endpoint."
+          },
+          {
+            "tag": "throws",
+            "name": "NumberIsTooLargeException",
+            "content": "if {@code lower >= initial} or {@code initial >= upper}.",
+            "assertion": "assert args[0] >= args[1] || args[1] >= args[2];",
+            "description": "if lower >= initial or initial >= upper."
+          }
+        ],
+        "code": "/**\n * Check that {@code lower < initial < upper}.\n *\n * @param lower Lower endpoint.\n * @param initial Initial value.\n * @param upper Upper endpoint.\n * @throws NumberIsTooLargeException if {@code lower >= initial} or\n * {@code initial >= upper}.\n */\npublic static void verifySequence(final double lower, final double initial, final double upper) throws NumberIsTooLargeException {\n    verifyInterval(lower, initial);\n    verifyInterval(initial, upper);\n}"
+      },
+      {
+        "type": "method",
+        "name": "verifyBracketing",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "UnivariateFunction",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "function"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "lower"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "upper"
+          }
+        ],
+        "javadoc": "/**\n * Check that the endpoints specify an interval and the end points\n * bracket a root.\n *\n * @param function Function.\n * @param lower Lower endpoint.\n * @param upper Upper endpoint.\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "function",
+            "content": "Function.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "Function."
+          },
+          {
+            "tag": "param",
+            "name": "lower",
+            "content": "Lower endpoint.",
+            "assertion": "assert !Double.isNaN(args[1]);",
+            "description": "Lower endpoint."
+          },
+          {
+            "tag": "param",
+            "name": "upper",
+            "content": "Upper endpoint.",
+            "assertion": "assert !Double.isNaN(args[2]);",
+            "description": "Upper endpoint."
+          },
+          {
+            "tag": "throws",
+            "name": "NoBracketingException",
+            "content": "if the function has the same sign at the endpoints.",
+            "assertion": "assert args[0].value(args[1]) * args[0].value(args[2]) > 0;",
+            "description": "if the function has the same sign at the endpoints."
+          },
+          {
+            "tag": "throws",
+            "name": "NullArgumentException",
+            "content": "if {@code function} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": "if function is null."
+          }
+        ],
+        "code": "/**\n * Check that the endpoints specify an interval and the end points\n * bracket a root.\n *\n * @param function Function.\n * @param lower Lower endpoint.\n * @param upper Upper endpoint.\n * @throws NoBracketingException if the function has the same sign at the\n * endpoints.\n * @throws NullArgumentException if {@code function} is {@code null}.\n */\npublic static void verifyBracketing(UnivariateFunction function, final double lower, final double upper) throws NullArgumentException, NoBracketingException {\n    if (function == null) {\n        throw new NullArgumentException(LocalizedFormats.FUNCTION);\n    }\n    verifyInterval(lower, upper);\n    if (!isBracketing(function, lower, upper)) {\n        throw new NoBracketingException(lower, upper, function.value(lower), function.value(upper));\n    }\n}"
+      }
+    ]
+  }
+]

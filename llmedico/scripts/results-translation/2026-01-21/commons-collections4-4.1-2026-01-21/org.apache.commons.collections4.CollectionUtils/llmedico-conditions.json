@@ -1,0 +1,3435 @@
+[
+  {
+    "method": "emptyCollection",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "immutable empty collection",
+          "assertion": "assert methodResultID.isEmpty(receiverObjectID.emptyCollection());",
+          "name": null,
+          "content": "immutable empty collection"
+        }
+      ]
+    }
+  },
+  {
+    "method": "emptyIfNull",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection, possibly <code>null</code>",
+          "assertion": "assert args[0] == null || true;",
+          "name": "collection",
+          "content": "the collection, possibly <code>null</code>"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an immutable empty collection if the argument is null, or the argument itself otherwise.",
+          "assertion": "assert (args[0] == null && methodResult.isEmpty()) || args[0] == methodResult;",
+          "name": null,
+          "content": "an immutable empty collection if the argument is null, or the argument itself otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "union",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first collection, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "the second collection, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the union of the two collections",
+          "assertion": "assert methodResultID.size() == args[0].size() + args[1].size();",
+          "name": null,
+          "content": "the union of the two collections"
+        }
+      ]
+    }
+  },
+  {
+    "method": "intersection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first collection, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "the second collection, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the intersection of the two collections",
+          "assertion": "assert methodResultID.size() == a.size() && methodResultID.containsAll(a) && methodResultID.containsAll(b);",
+          "name": null,
+          "content": "the intersection of the two collections"
+        }
+      ]
+    }
+  },
+  {
+    "method": "disjunction",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "b is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "symmetric difference of the two collections",
+          "assertion": "",
+          "description": "symmetric difference of the two collections"
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to subtract from, must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the collection to subtract from, must not be null"
+        },
+        {
+          "description": "the collection to subtract, must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the collection to subtract, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "new collection with the results",
+          "assertion": "",
+          "description": "new collection with the results"
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the collection to subtract from, must not be null"
+        },
+        {
+          "description": "must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the collection to subtract, must not be null"
+        },
+        {
+          "description": "must not be null",
+          "assertion": "assert args[2] != null;",
+          "name": "p",
+          "content": "the condition used to determine which elements of b are subtracted."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new collection containing a minus a subset of b",
+          "assertion": "assert methodResultID.size() == args[0].size();",
+          "name": null,
+          "content": "new collection with the results"
+        }
+      ]
+    }
+  },
+  {
+    "method": "containsAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "coll1",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "coll2",
+          "content": "the second collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "iff the intersection of the collections has the same cardinality as the set of unique elements from the second collection",
+          "assertion": "assert methodResultID == receiverObjectID.intersection(args[0], args[1]).cardinality() == new java.util.HashSet(args[1]).size();",
+          "name": null,
+          "content": "iff the intersection of the collections has the same cardinality as the set of unique elements from the second collection"
+        }
+      ]
+    }
+  },
+  {
+    "method": "containsAny",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first collection, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "coll1",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "the second collection, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "coll2",
+          "content": "the second collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "iff the intersection of the collections is non-empty",
+          "assertion": "",
+          "description": "iff the intersection of the collections is non-empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getCardinalityMap",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the cardinality map for, must not be null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "coll",
+          "content": "the collection to get the cardinality map for, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a map where each key is a unique element from the collection and each value is the number of occurrences of that element",
+          "assertion": "assert methodResultID.size() == new java.util.HashSet(args[0]).size();",
+          "name": null,
+          "content": "a map where each key is a unique element from the collection and each value is the number of occurrences of that element"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isSubCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first (sub?) collection, must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the first (sub?) collection, must not be null"
+        },
+        {
+          "description": "the second (super?) collection, must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the second (super?) collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "iff <i>a</i> is a sub-collection of <i>b</i>",
+          "assertion": "",
+          "description": "iff <i>a</i> is a sub-collection of <i>b</i>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isProperSubCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the first (sub?) collection, must not be null"
+        },
+        {
+          "description": "b is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the second (super?) collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "iff a is a proper sub-collection of b",
+          "assertion": "assert methodResultID == (a.size() < b.size() && a.containsAll(b));",
+          "name": null,
+          "content": "iff a is a proper sub-collection of b"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEqualCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first collection, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "the second collection, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "iff the collections contain the same elements with the same cardinalities.",
+          "assertion": "",
+          "description": "iff the collections contain the same elements with the same cardinalities."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEqualCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Equator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "equator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        },
+        {
+          "description": "must not be null",
+          "assertion": "assert args[2] != null;",
+          "name": "equator",
+          "content": "the Equator used for testing equality"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the collections contain the same elements with the same cardinalities.",
+          "assertion": "assert methodResultID == receiverObjectID.isEqualCollection(args[0], args[1], args[2]);",
+          "name": null,
+          "content": "true if the collections contain the same elements with the same cardinalities."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the equator is null",
+          "assertion": "assert args[2] == null;",
+          "name": "NullPointerException",
+          "content": "if the equator is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "cardinality",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to find the cardinality of",
+          "assertion": "assert args[0] != null;",
+          "name": "obj",
+          "content": "the object to find the cardinality of"
+        },
+        {
+          "description": "the {@link Iterable} to search",
+          "assertion": "assert args[1] != null;",
+          "name": "coll",
+          "content": "the {@link Iterable} to search"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the number of occurrences of obj in coll",
+          "assertion": "assert methodResultID == IterableUtils.frequency(args[1], args[0]);",
+          "name": null,
+          "content": "the number of occurrences of obj in coll"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if coll is null",
+          "assertion": "assert args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if coll is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "find",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to search, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof java.lang.Iterable;",
+          "name": "collection",
+          "content": "the collection to search, may be null"
+        },
+        {
+          "description": "the predicate to use, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof java.util.function.Predicate;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "first element of the collection which matches the predicate or null if none could be found",
+          "assertion": "",
+          "description": "first element of the collection which matches the predicate or null if none could be found"
+        }
+      ]
+    }
+  },
+  {
+    "method": "forAllDo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof Iterable;",
+          "name": "collection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "the closure to perform, may be null",
+          "assertion": "assert args[1] == null;",
+          "name": "closure",
+          "content": "the closure to perform, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the closure passed to this method",
+          "assertion": "assert methodResultID == args[1];",
+          "name": null,
+          "content": "the closure passed to this method"
+        }
+      ]
+    }
+  },
+  {
+    "method": "forAllDo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "iterator"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the iterator to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof Iterator;",
+          "name": "iterator",
+          "content": "the iterator to get the input from, may be null"
+        },
+        {
+          "description": "the closure to perform, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof Closure;",
+          "name": "closure",
+          "content": "the closure to perform, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "closure if it is not null, otherwise null",
+          "assertion": "assert (args[1] != null) == (methodResultID != null);",
+          "name": null,
+          "content": "closure if it is not null, otherwise null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "forAllButLastDo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof Iterable;",
+          "name": "collection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "the closure to perform, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof Closure;",
+          "name": "closure",
+          "content": "the closure to perform, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "last element in the collection, or null if either collection or closure is null",
+          "assertion": "",
+          "description": "last element in the collection, or null if either collection or closure is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "forAllButLastDo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "iterator"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "closure"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the iterator to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof Iterator;",
+          "name": "iterator",
+          "content": "the iterator to get the input from, may be null"
+        },
+        {
+          "description": "the closure to perform, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof Closure;",
+          "name": "closure",
+          "content": "the closure to perform, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "last element in the collection, or null if either iterator or closure is null",
+          "assertion": "",
+          "description": "last element in the collection, or null if either iterator or closure is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "filter",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the input from, may be null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "the predicate to use as a filter, may be null",
+          "assertion": "assert args[1] != null;",
+          "name": "predicate",
+          "content": "the predicate to use as a filter, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the collection is modified by this call, false otherwise.",
+          "assertion": "assert methodResultID == (args[0] != null && args[1] != null);",
+          "name": null,
+          "content": "if the collection is modified by this call, false otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "filterInverse",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof Iterable;",
+          "name": "collection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "the predicate to use as a filter, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof Predicate;",
+          "name": "predicate",
+          "content": "the predicate to use as a filter, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the collection is modified by this call, false otherwise.",
+          "assertion": "assert methodResultID == (args[0] != null && args[1] != null);",
+          "name": null,
+          "content": "if the collection is modified by this call, false otherwise."
+        }
+      ]
+    }
+  },
+  {
+    "method": "transform",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the {@link Collection} to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof java.util.Collection;",
+          "name": "collection",
+          "content": "the {@link Collection} to get the input from, may be null"
+        },
+        {
+          "description": "the transformer to perform, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof Transformer;",
+          "name": "transformer",
+          "content": "the transformer to perform, may be null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "countMatches",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "input"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the {@link Iterable} to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof java.lang.Iterable;",
+          "name": "input",
+          "content": "the {@link Iterable} to get the input from, may be null"
+        },
+        {
+          "description": "the predicate to use, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof java.util.function.Predicate;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "number of matches for the predicate in the collection",
+          "assertion": "assert methodResultID == IterableUtils.countMatches(args[0], args[1]);",
+          "name": null,
+          "content": "number of matches for the predicate in the collection"
+        }
+      ]
+    }
+  },
+  {
+    "method": "exists",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "input"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the {@link Iterable} to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof java.lang.Iterable;",
+          "name": "input",
+          "content": "the {@link Iterable} to get the input from, may be null"
+        },
+        {
+          "description": "the predicate to use, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof java.util.function.Predicate;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if at least one element of the collection matches the predicate",
+          "assertion": "assert methodResultID == (args[0] != null && args[1] != null && receiverObjectID.find(args[0], args[1]) != null);",
+          "name": null,
+          "content": "true if at least one element of the collection matches the predicate"
+        }
+      ]
+    }
+  },
+  {
+    "method": "matchesAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "input"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the {@link Iterable} to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof Iterable;",
+          "name": "input",
+          "content": "the {@link Iterable} to get the input from, may be null"
+        },
+        {
+          "description": "the predicate to use, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof Predicate;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "if every element of the collection matches the predicate or if the collection is empty, false otherwise",
+          "assertion": "",
+          "description": "if every element of the collection matches the predicate or if the collection is empty, false otherwise"
+        }
+      ]
+    }
+  },
+  {
+    "method": "select",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the input from, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "inputCollection",
+          "content": "the collection to get the input from, may not be null"
+        },
+        {
+          "description": "the predicate to use, may be null",
+          "assertion": "assert args[1] != null || args[1] == null;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new collection containing all elements from inputCollection that match the given predicate",
+          "assertion": "assert methodResultID.size() == inputCollection.size() && methodResultID.stream().allMatch(args[1]::test);",
+          "name": null,
+          "content": "elements matching the predicate (new list)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the input collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the input collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "select",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "outputCollection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "may be null",
+          "assertion": "assert args[0] == null || args[0] != null;",
+          "name": "inputCollection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "may be null",
+          "assertion": "assert args[1] == null || args[1] != null;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        },
+        {
+          "description": "not null if inputCollection and predicate are not null",
+          "assertion": "assert (args[0] == null || args[1] == null) || args[2] != null;",
+          "name": "outputCollection",
+          "content": "the collection to output into, may not be null if the inputCollection and predicate or not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the outputCollection with all elements from inputCollection which match the given predicate",
+          "assertion": "assert methodResultID == args[2];",
+          "name": null,
+          "content": "the outputCollection with all elements from inputCollection which match the given predicate"
+        }
+      ]
+    }
+  },
+  {
+    "method": "select",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "outputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rejectedCollection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "inputCollection is null or not null",
+          "assertion": "assert args[0] != null;",
+          "name": "inputCollection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "predicate is null or not null",
+          "assertion": "assert args[1] != null;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        },
+        {
+          "description": "outputCollection is not null if inputCollection and predicate are not null",
+          "assertion": "assert args[0] != null && args[1] != null && args[2] != null;",
+          "name": "outputCollection",
+          "content": "the collection to output selected elements into, may not be null if the inputCollection and predicate are not null"
+        },
+        {
+          "description": "rejectedCollection is not null if inputCollection or predicate are not null",
+          "assertion": "assert (args[0] != null || args[1] != null) && args[3] != null;",
+          "name": "rejectedCollection",
+          "content": "the collection to output rejected elements into, may not be null if the inputCollection or predicate are not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the outputCollection",
+          "assertion": "assert methodResultID == args[2];",
+          "name": null,
+          "content": "the outputCollection"
+        }
+      ]
+    }
+  },
+  {
+    "method": "selectRejected",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the input from, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "inputCollection",
+          "content": "the collection to get the input from, may not be null"
+        },
+        {
+          "description": "the predicate to use, may be null",
+          "assertion": "assert args[1] != null || args[1] == null;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "elements <b>not</b> matching the predicate (new list)",
+          "assertion": "",
+          "description": "elements <b>not</b> matching the predicate (new list)"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the input collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the input collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "selectRejected",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "outputCollection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "may be null",
+          "assertion": "assert args[0] == null || args[0] != null;",
+          "name": "inputCollection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "may be null",
+          "assertion": "assert args[1] == null || args[1] != null;",
+          "name": "predicate",
+          "content": "the predicate to use, may be null"
+        },
+        {
+          "description": "not null if inputCollection and predicate are not null",
+          "assertion": "assert (args[0] == null || args[1] == null) || args[2] != null;",
+          "name": "outputCollection",
+          "content": "the collection to output into, may not be null if the inputCollection and predicate or not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "",
+          "assertion": "",
+          "description": ""
+        }
+      ]
+    }
+  },
+  {
+    "method": "collect",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to get the input from, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "inputCollection",
+          "content": "the collection to get the input from, may not be null"
+        },
+        {
+          "description": "the transformer to use, may be null",
+          "assertion": "assert (args[1] != null) || (args[1] == null);",
+          "name": "transformer",
+          "content": "the transformer to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new collection containing all elements of the input collection transformed by the given transformer",
+          "assertion": "assert methodResultID.isEmpty() == (args[0] == null || args[1] == null);",
+          "name": null,
+          "content": "a new collection containing all elements of the input collection transformed by the given transformer"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the input collection is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the input collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collect",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputIterator"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the iterator to get the input from, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof Iterator;",
+          "name": "inputIterator",
+          "content": "the iterator to get the input from, may be null"
+        },
+        {
+          "description": "the transformer to use, may be null",
+          "assertion": "assert args[1] == null || args[1] instanceof Transformer;",
+          "name": "transformer",
+          "content": "the transformer to use, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new collection containing the transformed result",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "a new collection containing the transformed result"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collect",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputCollection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "outputCollection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "may be null",
+          "assertion": "assert args[0] == null || args[0] != null;",
+          "name": "inputCollection",
+          "content": "the collection to get the input from, may be null"
+        },
+        {
+          "description": "may be null",
+          "assertion": "assert args[1] == null || args[1] != null;",
+          "name": "transformer",
+          "content": "the transformer to use, may be null"
+        },
+        {
+          "description": "not null if inputCollection and transformer are not null",
+          "assertion": "assert (args[0] == null || args[1] == null) || args[2] != null;",
+          "name": "outputCollection",
+          "content": "the collection to output into, may not be null if inputCollection and transformer are not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "output collection with the transformed input added",
+          "assertion": "",
+          "description": "output collection with the transformed input added"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the outputCollection is null and both, inputCollection and transformer are not null",
+          "assertion": "assert args[2] == null && args[0] != null && args[1] != null;",
+          "name": "NullPointerException",
+          "content": "if the outputCollection is null and both, inputCollection and transformer are not null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collect",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputIterator"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "outputCollection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "may be null",
+          "assertion": "assert args[0] == null || args[0] != null;",
+          "name": "inputIterator",
+          "content": "the iterator to get the input from, may be null"
+        },
+        {
+          "description": "may be null",
+          "assertion": "assert args[1] == null || args[1] != null;",
+          "name": "transformer",
+          "content": "the transformer to use, may be null"
+        },
+        {
+          "description": "not null if inputIterator and transformer are not null",
+          "assertion": "assert (args[0] == null || args[1] == null) || args[2] != null;",
+          "name": "outputCollection",
+          "content": "the collection to output into, may not be null if inputIterator and transformer are not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "outputCollection with the transformed input added",
+          "assertion": "",
+          "description": "outputCollection with the transformed input added"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the output collection is null and both, inputIterator and transformer are not null",
+          "assertion": "assert args[2] == null && args[0] != null && args[1] != null;",
+          "name": "NullPointerException",
+          "content": "if the output collection is null and both, inputIterator and transformer are not null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addIgnoreNull",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to add to, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "the collection to add to, must not be null"
+        },
+        {
+          "description": "the object to add, if null it will not be added",
+          "assertion": "assert (args[1] == null);",
+          "name": "object",
+          "content": "the object to add, if null it will not be added"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the collection changed",
+          "assertion": "assert methodResultID == (args[0].size() != args[0].size() + 1 || !args[0].contains(args[1])) && args[1] != null;",
+          "name": null,
+          "content": "if the collection changed"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "iterable"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to add to, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "the collection to add to, must not be null"
+        },
+        {
+          "description": "the iterable of elements to add, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "iterable",
+          "content": "the iterable of elements to add, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "boolean indicating whether the collection has changed or not.",
+          "assertion": "assert methodResultID == (args[0].size() != collection.size() || !collection.containsAll(args[1]));",
+          "name": null,
+          "content": "boolean indicating whether the collection has changed or not."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection or iterator is null",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if the collection or iterator is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "iterator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to add to, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "the collection to add to, must not be null"
+        },
+        {
+          "description": "the iterator of elements to add, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "iterator",
+          "content": "the iterator of elements to add, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "boolean indicating whether the collection has changed or not.",
+          "assertion": "assert methodResultID == (args[0].size() != collection.size() || !args[0].containsAll(collection));",
+          "name": null,
+          "content": "boolean indicating whether the collection has changed or not."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection or iterator is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if the collection or iterator is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Enumeration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "enumeration"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to add to, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "the collection to add to, must not be null"
+        },
+        {
+          "description": "the enumeration of elements to add, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "enumeration",
+          "content": "the enumeration of elements to add, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the collection was changed, false otherwise",
+          "assertion": "assert methodResultID == !args[0].equals(args[0]) || args[0].isEmpty();",
+          "name": null,
+          "content": "true if the collections was changed, false otherwise"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection or enumeration is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if the collection or enumeration is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "addAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "elements"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to add to, must not be null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "collection",
+          "content": "the collection to add to, must not be null"
+        },
+        {
+          "description": "the array of elements to add, must not be null",
+          "assertion": "assert (args[1]==null) == false;",
+          "name": "elements",
+          "content": "the array of elements to add, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the collection was changed, false otherwise",
+          "assertion": "assert methodResultID == !args[0].equals(args[0]) || args[1].length > 0;",
+          "name": null,
+          "content": "true if the collection was changed, false otherwise"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection or array is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if the collection or array is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "iterator"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the iterator to get a value from",
+          "assertion": "assert args[0] != null;",
+          "name": "iterator",
+          "content": "the iterator to get a value from"
+        },
+        {
+          "description": "the index to get",
+          "assertion": "assert args[1] >= 0;",
+          "name": "index",
+          "content": "the index to get"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "object at the specified index",
+          "assertion": "",
+          "description": "object at the specified index"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the index is invalid",
+          "assertion": "assert args[1] < 0 || args[1] >= ((java.util.Iterator)args[0]).size();",
+          "name": "IndexOutOfBoundsException",
+          "content": "if the index is invalid"
+        },
+        {
+          "description": "if the object type is invalid",
+          "assertion": "assert !(args[0] instanceof java.util.Iterator);",
+          "name": "IllegalArgumentException",
+          "content": "if the object type is invalid"
+        }
+      ]
+    }
+  },
+  {
+    "method": "checkIndexBounds",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the index to check.",
+          "assertion": "assert args[0] >= 0;",
+          "name": "index",
+          "content": "the index to check."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the index is negative.",
+          "assertion": "assert args[0] < 0;",
+          "name": "IndexOutOfBoundsException",
+          "content": "if the index is negative."
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "iterable"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the {@link Iterable} to get a value from",
+          "assertion": "assert args[0] != null;",
+          "name": "iterable",
+          "content": "the {@link Iterable} to get a value from"
+        },
+        {
+          "description": "the index to get",
+          "assertion": "assert args[1] >= 0;",
+          "name": "index",
+          "content": "the index to get"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "object at the specified index",
+          "assertion": "",
+          "description": "object at the specified index"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the index is invalid",
+          "assertion": "assert args[1] < 0 || (args[0] instanceof java.util.List && args[1] >= ((java.util.List)args[0]).size()) || (args[0] instanceof java.util.Collection && args[1] >= ((java.util.Collection)args[0]).size());",
+          "name": "IndexOutOfBoundsException",
+          "content": "if the index is invalid"
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "object",
+          "content": "the object to get a value from"
+        },
+        {
+          "description": "index is non-negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "index",
+          "content": "the index to get"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "object at the specified index",
+          "assertion": "assert methodResultID == ((args[0] instanceof Map) ? ((Map) args[0]).entrySet().toArray()[args[1]] : (args[0] instanceof List) ? ((List) args[0]).get(args[1]) : (args[0] instanceof Object[]) ? ((Object[]) args[0])[args[1]] : (args[0] instanceof Collection) ? getCollectionValue((Collection) args[0], args[1]) : (args[0] instanceof Iterator) ? getIteratorValue((Iterator) args[0], args[1]) : (args[0] instanceof Enumeration) ? getEnumerationValue((Enumeration) args[0], args[1]) : null);",
+          "name": null,
+          "content": "object at the specified index"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the index is invalid",
+          "assertion": "assert args[1] < 0 || (args[0] instanceof java.util.Collection && args[1] >= ((java.util.Collection)args[0]).size()) || (args[0] instanceof java.util.List && args[1] >= ((java.util.List)args[0]).size()) || (args[0] instanceof Object[] && args[1] >= ((Object[])args[0]).length);",
+          "name": "IndexOutOfBoundsException",
+          "content": "if the index is invalid"
+        },
+        {
+          "description": "if the object type is invalid",
+          "assertion": "assert !(args[0] instanceof java.util.Map) && !(args[0] instanceof java.util.List) && !(args[0] instanceof Object[]) && !(args[0] instanceof java.util.Collection) && !(args[0] instanceof java.util.Iterator) && !(args[0] instanceof java.util.Enumeration);",
+          "name": "IllegalArgumentException",
+          "content": "if the object type is invalid"
+        }
+      ]
+    }
+  },
+  {
+    "method": "get",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Map",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "map"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "index"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to get a value from",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "map",
+          "content": "the object to get a value from"
+        },
+        {
+          "description": "the index to get",
+          "assertion": "assert args[1] >= 0;",
+          "name": "index",
+          "content": "the index to get"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the object at the specified index",
+          "assertion": "assert methodResultID == receiverObjectID.get(args[0], args[1]);",
+          "name": null,
+          "content": "the object at the specified index"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the index is invalid",
+          "assertion": "assert args[1] < 0 || args[1] >= ((java.util.Set)args[0].entrySet()).size();",
+          "name": "IndexOutOfBoundsException",
+          "content": "if the index is invalid"
+        }
+      ]
+    }
+  },
+  {
+    "method": "size",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to get the size of, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof java.util.Collection || args[0] instanceof java.util.Map || args[0] instanceof java.lang.Iterable || args[0] instanceof java.util.Enumeration || args[0] instanceof java.lang.Object[];",
+          "name": "object",
+          "content": "the object to get the size of, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "size of the specified collection or 0 if the object was null",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "size of the specified collection or 0 if the object was null"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "object is not recognised",
+          "assertion": "assert !(args[0] instanceof java.util.Collection) && !(args[0] instanceof java.util.Map) && !(args[0] instanceof java.lang.Iterable) && !(args[0] instanceof java.util.Enumeration) && !(args[0].getClass().isArray());",
+          "name": "IllegalArgumentException",
+          "content": "thrown if object is not recognised"
+        }
+      ]
+    }
+  },
+  {
+    "method": "sizeIsEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to get the size of, may be null",
+          "assertion": "assert args[0] == null || args[0] instanceof java.util.Collection || args[0] instanceof java.util.Map || args[0] instanceof java.lang.Iterable || args[0].getClass().isArray() || args[0] instanceof java.util.Enumeration;",
+          "name": "object",
+          "content": "the object to get the size of, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if object is empty or null",
+          "assertion": "assert methodResultID == (args[0] == null || isEmpty(args[0]));",
+          "name": null,
+          "content": "true if object is empty or null"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "thrown if object is not recognised",
+          "assertion": "assert !(object instanceof java.util.Collection) && !(object instanceof java.util.Map) && !(object instanceof Object[]) && !(object instanceof java.util.Iterator) && !(object instanceof java.util.Enumeration);",
+          "name": "IllegalArgumentException",
+          "content": "thrown if object is not recognised"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to check, may be null",
+          "assertion": "assert args[0] != null || true;",
+          "name": "coll",
+          "content": "the collection to check, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if empty or null",
+          "assertion": "assert methodResultID == (args[0] == null || args[0].isEmpty());",
+          "name": null,
+          "content": "true if empty or null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isNotEmpty",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to check, may be null",
+          "assertion": "assert args[0] != null || true;",
+          "name": "coll",
+          "content": "the collection to check, may be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if non-null and non-empty",
+          "assertion": "assert methodResultID == (args[0] != null && !receiverObjectID.isEmpty(args[0]));",
+          "name": null,
+          "content": "true if non-null and non-empty"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reverseArray",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "array"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the array to reverse",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "array",
+          "content": "the array to reverse"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isFull",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to check",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "coll",
+          "content": "the collection to check"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the collection is full",
+          "assertion": "assert methodResultID == ((com.google.common.collect.BoundedCollection) args[0]).isAtCapacity();",
+          "name": null,
+          "content": "if the BoundedCollection is full"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "maxSize",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "coll"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to check",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "coll",
+          "content": "the collection to check"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the maximum size of the BoundedCollection, -1 if no maximum size",
+          "assertion": "assert methodResultID == (coll instanceof BoundedCollection ? ((BoundedCollection) coll).maxSize() : -1);",
+          "name": null,
+          "content": "the maximum size of the BoundedCollection, -1 if no maximum size"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first collection, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "the second collection, must not be null",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "new sorted List, containing the elements of Collection a and b",
+          "assertion": "",
+          "description": "new sorted List, containing the elements of Collection a and b"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either collection is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if either collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "includeDuplicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "b is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        },
+        {
+          "description": "includeDuplicates is a boolean value",
+          "assertion": "assert args[2] == true || args[2] == false;",
+          "name": "includeDuplicates",
+          "content": "if {@code true} duplicate elements will be retained, otherwise they will be removed in the output collection"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "new sorted List, containing the elements of Collection a and b",
+          "assertion": "",
+          "description": "new sorted List, containing the elements of Collection a and b"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either collection is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if either collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "c"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "b is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        },
+        {
+          "description": "c is not null",
+          "assertion": "assert args[2] != null;",
+          "name": "c",
+          "content": "the comparator to use for the merge."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "new sorted List, containing the elements of Collection a and b",
+          "assertion": "",
+          "description": "new sorted List, containing the elements of Collection a and b"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either collection or the comparator is null",
+          "assertion": "assert args[0]==null || args[1]==null || args[2]==null;",
+          "name": "NullPointerException",
+          "content": "if either collection or the comparator is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "collate",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "b"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "c"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "includeDuplicates"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "a",
+          "content": "the first collection, must not be null"
+        },
+        {
+          "description": "b is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "b",
+          "content": "the second collection, must not be null"
+        },
+        {
+          "description": "c is not null",
+          "assertion": "assert args[2] != null;",
+          "name": "c",
+          "content": "the comparator to use for the merge."
+        },
+        {
+          "description": "includeDuplicates is a boolean value",
+          "assertion": "assert args[3] == true || args[3] == false;",
+          "name": "includeDuplicates",
+          "content": "if {@code true} duplicate elements will be retained, otherwise they will be removed in the output collection"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "new sorted List, containing the elements of Collection a and b",
+          "assertion": "",
+          "description": "new sorted List, containing the elements of Collection a and b"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either collection or the comparator is null",
+          "assertion": "assert args[0] == null || args[1] == null || args[2] == null;",
+          "name": "NullPointerException",
+          "content": "if either collection or the comparator is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "permutations",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to create permutations for, may not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "the collection to create permutations for, may not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "unordered collection of all permutations of the input collection",
+          "assertion": "",
+          "description": "unordered collection of all permutations of the input collection"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if collection is <code>null</code>"
+        }
+      ]
+    }
+  },
+  {
+    "method": "retainAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "retain"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "collection is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection whose contents are the target of the #retailAll operation"
+        },
+        {
+          "description": "retain is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "retain",
+          "content": "the collection containing the elements to be retained in the returned collection"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a Collection containing all the elements of collection that occur at least once in retain.",
+          "assertion": "assert args[0].containsAll(args[1]);",
+          "name": null,
+          "content": "a Collection containing all the elements of collection that occur at least once in retain."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either parameter is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if either parameter is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "retainAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "retain"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Equator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "equator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "true if null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection whose contents are the target of the {@code retainAll} operation"
+        },
+        {
+          "description": "true if null",
+          "assertion": "assert args[1] != null;",
+          "name": "retain",
+          "content": "the collection containing the elements to be retained in the returned collection"
+        },
+        {
+          "description": "true if null",
+          "assertion": "assert args[2] != null;",
+          "name": "equator",
+          "content": "the Equator used for testing equality"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a Collection containing all the elements of collection that occur at least once in retain according to the equator",
+          "assertion": "assert methodResultID.size() == collection(args[0], args[1], args[2]).size();",
+          "name": null,
+          "content": "a Collection containing all the elements of collection that occur at least once in retain according to the equator"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if any of the parameters is null",
+          "assertion": "assert args[0]==null || args[1]==null || args[2]==null;",
+          "name": "NullPointerException",
+          "content": "if any of the parameters is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "remove"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection from which items are removed (in the returned collection)"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "remove",
+          "content": "the items to be removed from the returned collection"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a Collection containing all the elements of collection except any elements that also occur in remove.",
+          "assertion": "assert methodResultID.size() == collection.size() - remove.size();",
+          "name": null,
+          "content": "a Collection containing all the elements of collection except any elements that also occur in remove."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either parameter is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if either parameter is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "removeAll",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Iterable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "remove"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Equator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "equator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "collection is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection from which items are removed (in the returned collection)"
+        },
+        {
+          "description": "remove is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "remove",
+          "content": "the items to be removed from the returned collection"
+        },
+        {
+          "description": "equator is not null",
+          "assertion": "assert args[2] != null;",
+          "name": "equator",
+          "content": "the Equator used for testing equality"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a Collection containing all the elements of collection except any element that if equal according to the equator",
+          "assertion": "assert methodResultID.size() == args[0].size() - args[1].size();",
+          "name": null,
+          "content": "a Collection containing all the elements of collection except any element that if equal according to the equator"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if any of the parameters is null",
+          "assertion": "assert args[0]==null || args[1]==null || args[2]==null;",
+          "name": "NullPointerException",
+          "content": "if any of the parameters is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "synchronizedCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to synchronize, must not be null",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "collection",
+          "content": "the collection to synchronize, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "synchronized collection backed by the given collection",
+          "assertion": "",
+          "description": "synchronized collection backed by the given collection"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "unmodifiableCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to make unmodifiable, must not be null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "the collection to make unmodifiable, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "unmodifiable collection backed by the given collection",
+          "assertion": "",
+          "description": "unmodifiable collection backed by the given collection"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "predicatedCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Predicate",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "predicate"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to predicate, must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection to predicate, must not be null"
+        },
+        {
+          "description": "the predicate for the collection, must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "predicate",
+          "content": "the predicate for the collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "predicated collection backed by the given collection",
+          "assertion": "",
+          "description": "predicated collection backed by the given collection"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the Collection is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "transformingCollection",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Transformer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "transformer"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the collection to predicate, must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "collection",
+          "content": "the collection to predicate, must not be null"
+        },
+        {
+          "description": "the transformer for the collection, must not be null",
+          "assertion": "assert args[1] != null;",
+          "name": "transformer",
+          "content": "the transformer for the collection, must not be null"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "transformed collection backed by the given collection",
+          "assertion": "",
+          "description": "transformed collection backed by the given collection"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Collection or Transformer is null",
+          "assertion": "assert args[0]==null || args[1]==null;",
+          "name": "NullPointerException",
+          "content": "if the Collection or Transformer is null"
+        }
+      ]
+    }
+  },
+  {
+    "method": "extractSingleton",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "collection"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "to read",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "collection",
+          "content": "to read"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "sole member of collection",
+          "assertion": "assert methodResultID == find(args[0], null);",
+          "name": null,
+          "content": "sole member of collection"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if collection is null",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if collection is null"
+        },
+        {
+          "description": "if collection is empty or contains more than one element",
+          "assertion": "assert isEmpty(args[0]) || cardinality(args[0], null) > 1;",
+          "name": "IllegalArgumentException",
+          "content": "if collection is empty or contains more than one element"
+        }
+      ]
+    }
+  }
+]

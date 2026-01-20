@@ -1,0 +1,207 @@
+[
+  {
+    "method": "PSquarePercentile",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the percentile",
+          "assertion": "assert (args[0] > 0) && (args[0] <= 100);",
+          "name": "p",
+          "content": "the percentile"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if p is not greater than 0 and less than or equal to 100",
+          "assertion": "assert args[0] <= 0 || args[0] > 100;",
+          "name": "OutOfRangeException",
+          "content": "if p is not greater than 0 and less\nthan or equal to 100"
+        }
+      ]
+    }
+  },
+  {
+    "method": "PSquarePercentile",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "o"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "object to compare",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "o",
+          "content": "object to compare"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if {@code o} is a {@code PSquarePercentile} with equivalent internal state",
+          "assertion": "assert methodResultID == (o instanceof PSquarePercentile && ((PSquarePercentile)o).getResult() == receiverObjectID.getResult() && ((PSquarePercentile)o).getN() == receiverObjectID.getN());",
+          "name": null,
+          "content": "true if {@code o} is a {@code PSquarePercentile} with equivalent internal state"
+        }
+      ]
+    }
+  },
+  {
+    "method": "increment",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "observation"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the observation currently being added.",
+          "assertion": "assert true;",
+          "name": "observation",
+          "content": "the observation currently being added."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "string representation of state data",
+          "assertion": "assert methodResultID != null && !methodResultID.isEmpty();",
+          "name": null,
+          "content": "string representation of state data"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getN",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "copy",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "quantile",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "quantile estimated by {@link #getResult()}",
+          "assertion": "assert methodResultID >= 0.0 && methodResultID <= 1.0;",
+          "name": null,
+          "content": "quantile estimated by {@link #getResult()}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "clear",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "getResult",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "newMarkers",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "List",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "initialFive"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "p"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "list of initial five elements",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "initialFive",
+          "content": "list of initial five elements"
+        },
+        {
+          "description": "the quantile desired",
+          "assertion": "assert args[1] >= 0.0 && args[1] <= 1.0;",
+          "name": "p",
+          "content": "the quantile desired"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "an instance of PSquareMarkers",
+          "assertion": "assert methodResultID instanceof PSquareMarkers;",
+          "name": null,
+          "content": "an instance of PSquareMarkers"
+        }
+      ]
+    }
+  }
+]

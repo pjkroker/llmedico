@@ -1,0 +1,84 @@
+[
+  {
+    "method": "StepFunction",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "x"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "y"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Domain values where the function changes value.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "x",
+          "content": "Domain values where the function changes value."
+        },
+        {
+          "description": "Values of the function.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "y",
+          "content": "Values of the function."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the x array is not sorted in strictly increasing order.",
+          "assertion": "assert !isSorted(args[0]);",
+          "name": "NonMonotonicSequenceException",
+          "content": "if the {@code x} array is not sorted in strictly increasing order."
+        },
+        {
+          "description": "if x or y are null.",
+          "assertion": "assert args[0] == null || args[1] == null;",
+          "name": "NullArgumentException",
+          "content": "if {@code x} or {@code y} are {@code null}."
+        },
+        {
+          "description": "if x or y are zero-length.",
+          "assertion": "assert args[0].length == 0 || args[1].length == 0;",
+          "name": "NoDataException",
+          "content": "if {@code x} or {@code y} are zero-length."
+        },
+        {
+          "description": "if x and y do not have the same length.",
+          "assertion": "assert args[0].length != args[1].length;",
+          "name": "DimensionMismatchException",
+          "content": "if {@code x} and {@code y} do not\\nhave the same length."
+        }
+      ]
+    }
+  },
+  {
+    "method": "value",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "x"
+      }
+    ],
+    "conditions": {}
+  }
+]

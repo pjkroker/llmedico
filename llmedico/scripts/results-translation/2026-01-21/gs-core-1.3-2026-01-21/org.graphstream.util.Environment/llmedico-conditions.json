@@ -1,0 +1,663 @@
+[
+  {
+    "method": "getGlobalEnvironment",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "A singleton instance of the global environment.",
+          "assertion": "assert methodResultID == receiverObjectID.getGlobalEnvironment();",
+          "name": null,
+          "content": "A singleton instance of the global environment."
+        }
+      ]
+    }
+  },
+  {
+    "method": "isLocked",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "True if the environment is locked.",
+          "assertion": "assert methodResultID == receiverObjectID.isLocked();",
+          "name": null,
+          "content": "True if the environment is locked."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getParameter",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameter"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The parameter name.",
+          "assertion": "assert args[0] != null;",
+          "name": "parameter",
+          "content": "The parameter name."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "The parameter value (empty string if not set).",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getParameter(args[0])) || (methodResultID.isEmpty() && !receiverObjectID.hasParameter(args[0]));",
+          "name": null,
+          "content": "The parameter value (empty string if not set)."
+        }
+      ]
+    }
+  },
+  {
+    "method": "hasParameter",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameter"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The parameter name.",
+          "assertion": "assert args[0] != null;",
+          "name": "parameter",
+          "content": "The parameter name."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "True if the given paramter exist.",
+          "assertion": "assert methodResultID == receiverObjectID.getParameter(args[0]) != null;",
+          "name": null,
+          "content": "True if the given paramter name points to a value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getBooleanParameter",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameter"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The parameter name.",
+          "assertion": "assert args[0] != null;",
+          "name": "parameter",
+          "content": "The parameter name."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "True if the parameter value means \"true\", false for any other value or if the parameter does not exist.",
+          "assertion": "assert methodResultID == (receiverObjectID.hasParameter(args[0]) && (\"1\".equalsIgnoreCase(receiverObjectID.getParameter(args[0])) || \"true\".equalsIgnoreCase(receiverObjectID.getParameter(args[0])) || \"on\".equalsIgnoreCase(receiverObjectID.getParameter(args[0])) || \"yes\".equalsIgnoreCase(receiverObjectID.getParameter(args[0]))));",
+          "name": null,
+          "content": "True if the parameter value means \"true\", false for any other value or if the parameter does not exist."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getBooleanParameteri",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameter"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The parameter name.",
+          "assertion": "assert args[0] != null;",
+          "name": "parameter",
+          "content": "The parameter name."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "1 if the parameter value means \"true\", 0 if it has any other value, or -1 if it does not exist.",
+          "assertion": "assert (methodResultID == 1) == (receiverObjectID.getBooleanParameter(args[0]) == true);",
+          "name": null,
+          "content": "1 if the parameter value means \"true\", 0 if it has any other value, or -1 if it does not exist."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNumberParameter",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameter"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The parameter name.",
+          "assertion": "assert args[0] != null;",
+          "name": "parameter",
+          "content": "The parameter name."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "The numeric value of the parameter. 0 if the parameter does not exist or is not a number.",
+          "assertion": "assert (receiverObjectID.hasParameter(args[0]) && !Double.isNaN(receiverObjectID.getParameter(args[0]))) ? methodResultID == Double.parseDouble(receiverObjectID.getParameter(args[0])) : methodResultID == 0;",
+          "name": null,
+          "content": "The numeric value of the parameter. 0 if the parameter does not exist or is not a number."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getParameterCount",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "The number of parameters found in the configuration file.",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "The number of parameters found in the configuration file."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getParametersKeySet",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "A set of all the names identifying parameters in this environment.",
+          "assertion": "assert methodResultID != null && !methodResultID.isEmpty();",
+          "name": null,
+          "content": "set of all the names identifying parameters in this environment."
+        }
+      ]
+    }
+  },
+  {
+    "method": "clone",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "An Environment object identical to this one",
+          "assertion": "assert methodResultID.equals(receiverObjectID);",
+          "name": null,
+          "content": "An Environment object identical to this one"
+        }
+      ]
+    }
+  },
+  {
+    "method": "setParameter",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "parameter"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The parameter name.",
+          "assertion": "assert args[0] != null;",
+          "name": "parameter",
+          "content": "The parameter name."
+        },
+        {
+          "description": "The new parameter value.",
+          "assertion": "assert args[1] != null;",
+          "name": "value",
+          "content": "The new parameter value."
+        }
+      ]
+    }
+  },
+  {
+    "method": "lockEnvironment",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "on"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "If true the environment is locked.",
+          "assertion": "assert args[0] == true;",
+          "name": "on",
+          "content": "If true the environment is locked."
+        }
+      ]
+    }
+  },
+  {
+    "method": "initializeFieldsOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The object to initialize.",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "object",
+          "content": "The object to initialize."
+        }
+      ]
+    }
+  },
+  {
+    "method": "initializeFieldsOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fieldList"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The object to initialize.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "object",
+          "content": "The object to initialize."
+        },
+        {
+          "description": "The name of the fields to initialize in the object.",
+          "assertion": "assert (args[1] != null) && !args[1].isEmpty();",
+          "name": "fieldList",
+          "content": "The name of the fields to initialize in the object."
+        }
+      ]
+    }
+  },
+  {
+    "method": "initializeFieldsOf",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fieldList"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The object to initialize.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "object",
+          "content": "The object to initialize."
+        },
+        {
+          "description": "The name of the fields to initialize in the object.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "fieldList",
+          "content": "The name of the fields to initialize in the object."
+        }
+      ]
+    }
+  },
+  {
+    "method": "invokeSetMethod",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Method",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "method"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "types"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "name"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "printParameters",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "PrintStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "out"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The output stream to use.",
+          "assertion": "assert (args[0]==null) == false;",
+          "name": "out",
+          "content": "The output stream to use."
+        }
+      ]
+    }
+  },
+  {
+    "method": "printParameters",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "readCommandLine",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "args"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "The command line.",
+          "assertion": "assert args[0] != null;",
+          "name": "args",
+          "content": "The command line."
+        }
+      ]
+    }
+  },
+  {
+    "method": "readCommandLine",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "args"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "trashcan"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "args is not null",
+          "assertion": "assert args != null;",
+          "name": "args",
+          "content": "The command line."
+        },
+        {
+          "description": "trashcan can be null",
+          "assertion": "assert trashcan == null || trashcan instanceof Collection;",
+          "name": "trashcan",
+          "content": "Will be filled by the set of unparsed strings (can be null if these strings can be ignored)."
+        }
+      ]
+    }
+  },
+  {
+    "method": "readConfigFile",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "filename"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "trashcan"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "writeParameterFile",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fileName"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Name of the file to save the config in.",
+          "assertion": "assert args[0] != null;",
+          "name": "fileName",
+          "content": "Name of the file to save the config in."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "For any output error on the given file name.",
+          "assertion": "assert !new java.io.FileWriter(args[0]).equals(null);",
+          "name": "IOException",
+          "content": "For any output error on the given file name."
+        }
+      ]
+    }
+  },
+  {
+    "method": "readConfigurationFile",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "readParameterFile",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fileName"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "Name of the parameter file to read.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "fileName",
+          "content": "Name of the parameter file to read."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "For any error with the given parameter file name.",
+          "assertion": "assert !new java.io.File(args[0]).exists() || !new java.io.File(args[0]).canRead();",
+          "name": "IOException",
+          "content": "For any error with the given parameter file name."
+        }
+      ]
+    }
+  }
+]

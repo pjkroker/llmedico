@@ -1,0 +1,164 @@
+[
+  {
+    "method": "SimpsonIntegrator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "relativeAccuracy"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "absoluteAccuracy"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minimalIterationCount"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maximalIterationCount"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "relative accuracy of the result",
+          "assertion": "assert args[0] >= 0;",
+          "name": "relativeAccuracy",
+          "content": "relative accuracy of the result"
+        },
+        {
+          "description": "absolute accuracy of the result",
+          "assertion": "assert args[1] >= 0;",
+          "name": "absoluteAccuracy",
+          "content": "absolute accuracy of the result"
+        },
+        {
+          "description": "minimum number of iterations",
+          "assertion": "assert args[2] > 0;",
+          "name": "minimalIterationCount",
+          "content": "minimum number of iterations"
+        },
+        {
+          "description": "maximum number of iterations\n(must be less than or equal to {@link #SIMPSON_MAX_ITERATIONS_COUNT})",
+          "assertion": "assert args[3] <= SIMPSON_MAX_ITERATIONS_COUNT && args[3] >= args[2];",
+          "name": "maximalIterationCount",
+          "content": "maximum number of iterations\n(must be less than or equal to {@link #SIMPSON_MAX_ITERATIONS_COUNT})"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if minimal number of iterations\nis not strictly positive",
+          "assertion": "assert args[2] <= 0;",
+          "name": "NotStrictlyPositiveException",
+          "content": "if minimal number of iterations\nis not strictly positive"
+        },
+        {
+          "description": "if maximal number of iterations\nis lesser than or equal to the minimal number of iterations",
+          "assertion": "assert args[3] <= args[2];",
+          "name": "NumberIsTooSmallException",
+          "content": "if maximal number of iterations\nis lesser than or equal to the minimal number of iterations"
+        },
+        {
+          "description": "if maximal number of iterations\nis greater than {@link #SIMPSON_MAX_ITERATIONS_COUNT}",
+          "assertion": "assert args[3] > receiverObjectID.SIMPSON_MAX_ITERATIONS_COUNT;",
+          "name": "NumberIsTooLargeException",
+          "content": "if maximal number of iterations\nis greater than {@link #SIMPSON_MAX_ITERATIONS_COUNT}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "SimpsonIntegrator",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "minimalIterationCount"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "maximalIterationCount"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "minimum number of iterations",
+          "assertion": "assert args[0] > 0;",
+          "name": "minimalIterationCount",
+          "content": "minimum number of iterations"
+        },
+        {
+          "description": "maximum number of iterations\n(must be less than or equal to {@link #SIMPSON_MAX_ITERATIONS_COUNT})",
+          "assertion": "assert args[1] <= SIMPSON_MAX_ITERATIONS_COUNT && args[1] > args[0];",
+          "name": "maximalIterationCount",
+          "content": "maximum number of iterations\n(must be less than or equal to {@link #SIMPSON_MAX_ITERATIONS_COUNT})"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if minimal number of iterations\nis not strictly positive",
+          "assertion": "assert args[0] <= 0;",
+          "name": "NotStrictlyPositiveException",
+          "content": "if minimal number of iterations\nis not strictly positive"
+        },
+        {
+          "description": "if maximal number of iterations\nis lesser than or equal to the minimal number of iterations",
+          "assertion": "assert args[1] <= args[0];",
+          "name": "NumberIsTooSmallException",
+          "content": "if maximal number of iterations\nis lesser than or equal to the minimal number of iterations"
+        },
+        {
+          "description": "if maximal number of iterations\nis greater than {@link #SIMPSON_MAX_ITERATIONS_COUNT}",
+          "assertion": "assert args[1] > receiverObjectID.SIMPSON_MAX_ITERATIONS_COUNT;",
+          "name": "NumberIsTooLargeException",
+          "content": "if maximal number of iterations\nis greater than {@link #SIMPSON_MAX_ITERATIONS_COUNT}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "SimpsonIntegrator",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "doIntegrate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  }
+]
