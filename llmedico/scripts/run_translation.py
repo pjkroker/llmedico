@@ -8,8 +8,9 @@ from pyjdoctor.pyjdoctor import PyJDoctor
 
 input_ = Path(__file__).parent.parent.parent / "pyjdoctor" / "data" / "input"
 
-LLMEDICO = True
-JDOCTOR = False
+LLMEDICO = False
+JDOCTOR = True
+JDOCTOR_LLMEDICO = True
 
 projects = {"commons-collections4-4.1":
                 {"data_dir": input_ / "commons-collections4-4.1-src" / "src" / "main" / "java",
@@ -54,10 +55,17 @@ projects = {"commons-collections4-4.1":
                 "jdoc_data_dir_a": input_ / "plume-lib-1.1.0" / "java" / "src",
                 "jdoc_source_dir_r": "/input/",
                 "jdoc_class_dir_r": "/input/"
+            },
+            "commons-lang-rel-commons-lang-3.20.0":{
+                "data_dir": input_ / "commons-lang-rel-commons-lang-3.20.0" / "src" / "main" / "java",
+                "jar_dir": input_ / "commons-lang-rel-commons-lang-3.20.0" / "target" / "commons-lang3-3.20.0.jar",
+                "jdoc_data_dir_a": input_ / "commons-lang-rel-commons-lang-3.20.0",
+                "jdoc_source_dir_r": "/input/src/main/java",
+                "jdoc_class_dir_r": "/input/target/classes",
             }
             }
 
-done = ["commons-collections4-4.1", "commons-math3-3.6.1", "freecol-0.11.6", "gs-core-1.3", "guava-19.0", "jgrapht-core-0.9.2",]
+done = ["commons-collections4-4.1", "commons-math3-3.6.1", "freecol-0.11.6", "gs-core-1.3", "guava-19.0", "jgrapht-core-0.9.2","plume-lib-1.1.0"]
 done_method = {"commons-math3-3.6.1": [], "freecol-0.11.6": []}
 date = datetime.date.today()
 
@@ -70,7 +78,7 @@ for project in projects:
         if not projects[project]["jar_dir"].exists():
             print(f"{projects[project]['jar_dir']} not found, skipping")
             raise FileNotFoundError
-        path_classes = Path(__file__).parent.parent / "storage" / "projects_txt" / (project + ".txt")
+        path_classes = Path(__file__).parent.parent / "storage" / "projects_txt" / (project + ".txt") if not JDOCTOR_LLMEDICO else Path(__file__).parent.parent / "storage" / "projects_txt" / "llmedico" / (project + ".txt")
         if not path_classes.exists():
             print(f"{path_classes} not found, skipping")
             raise FileNotFoundError
