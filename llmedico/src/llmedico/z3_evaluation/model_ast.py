@@ -103,6 +103,13 @@ class Compare(Expr):
     op: str   # ">", ">=", "<", "<=", "==", "!="
     right: Expr
 
+#Bit operations
+@dataclass(frozen=True)
+class BitWiseShift(Expr):
+    left: Expr
+    op: str # ">>", "<<", ">>>"
+    right: Expr
+
 @dataclass(frozen=True)
 class InstanceOf(Expr):
     expr: Expr
@@ -128,7 +135,10 @@ INT_RETURN_METHODS = {
         "iteration",
         "norm",
         "int",
-        "long"
+        "long",
+        "<<",
+        ">>",
+        ">>>"
     }
 
 BOOL_RETURN_METHODS = {

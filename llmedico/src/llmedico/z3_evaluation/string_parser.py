@@ -102,16 +102,26 @@ class StringParser:
 
     # Comparison
     def _parse_cmp(self) -> Expr:
-        left = self._parse_add()
+        left = self._parse_bit_wise_shift()
         if self.peek() == "instanceof":
             self.consume("instanceof")
             type_name = self._parse_type_name()
             return InstanceOf(left, type_name)
         while self.peek() in {"==", "!=", "<", "<=", ">", ">="}:
             op = self.consume()
-            right = self._parse_add()
+            right = self._parse_bit_wise_shift()
             left = Compare(left, op, right)
         return left
+
+    def _parse_bit_wise_shift(self) -> Expr: #TODO
+        expr = self._parse_add()
+
+        while self.peek() in {"<<", ">>", ">>>"}:
+            op = self.consume()
+            right = self._parse_add()
+            expr = BitWiseShift(expr, op, right)
+
+        return expr
 
     # Addition and Subtraction
     def _parse_add(self) -> Expr:

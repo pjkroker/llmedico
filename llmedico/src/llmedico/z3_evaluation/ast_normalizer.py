@@ -10,6 +10,17 @@ class UnsupportedAssertion(Exception):
 
 class AstNormalizer:
 
+    BOOL_EXPR = (BoolConst,
+            BoolVar,
+            Compare,
+            And,
+            Or,
+            Not,
+            InstanceOf)
+
+    def _is_boolean_expr(self, expr: Expr) -> bool:
+        return isinstance(expr, self.BOOL_EXPR)
+
     def normalize_expr(self, expr: Expr) -> Optional[Expr]:
 
         # ---- Method calls ----
@@ -63,25 +74,25 @@ class AstNormalizer:
             otherwise = self.normalize_expr(expr.otherwise)
             return Conditional(cond, then, otherwise)
 
+        if isinstance(expr, Compare) and expr.op == "==":
+            left = self.normalize_expr(expr.left)
+            right = self.normalize_expr(expr.right)
 
-        if isinstance(expr, Compare):
-            if expr.op == "==":
-                left = self.normalize_expr(expr.left)
-                right = self.normalize_expr(expr.right)
-                if isinstance(left, BoolConst) and (isinstance(right, BoolVar) or isinstance(right, Var) or isinstance(right, InstanceOf)):
-                    if left.value == True:
-                        return right
-                    if left.value == False:
-                        logger.warning(f"Normalized boolean comparison: Not(expr={right})")
-                        return Not(right)
-                if isinstance(right, BoolConst) and (isinstance(left, BoolVar) or isinstance(left, Var) or isinstance(left, InstanceOf)):
-                    if right.value == True:
-                        return left
-                    if right.value == False:
-                        logger.warning(f"Normalized boolean comparison: Not(expr={left})")
-                        return Not(left)
+            # true == X   or   X == true
+            if isinstance(left, BoolConst) and left.value is True and self._is_boolean_expr(right):
+                return right
+            if isinstance(right, BoolConst) and right.value is True and self._is_boolean_expr(left):
+                return left
 
-            return expr
+            # false == X   or   X == false
+            if isinstance(left, BoolConst) and left.value is False and self._is_boolean_expr(right):
+                logger.warning(f"Normalized boolean comparison: Not(expr={right})")
+                return Not(right)
+            if isinstance(right, BoolConst) and right.value is False and self._is_boolean_expr(left):
+                logger.warning(f"Normalized boolean comparison: Not(expr={left})")
+                return Not(left)
+
+            return Compare(left, "==", right)
 
         if isinstance(expr, And):
             return And(left=self.normalize_expr(expr.left), right=self.normalize_expr(expr.right))

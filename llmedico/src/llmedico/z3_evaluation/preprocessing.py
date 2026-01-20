@@ -16,7 +16,8 @@ def normalize_expression(expr: str) -> str:
 FLOAT_ZERO_RE = re.compile(r'(?<!\w)(\d+)\.0(?!\d)')
 
 TOKEN_REGEX = re.compile(
-    r"\s*(->|>=|<=|==|!=|\|\||&&|"
+    r"\s*(>>>|>>|<<|"
+    r"->|>=|<=|==|!=|\|\||&&|"
     r"[a-zA-Z_]\w*\[\d+\]|"
     r"[-+*/(),%.?:]|"
     r"[<>!]|"
