@@ -8,3 +8,7 @@ def test_config():
     config = Config(Path(__file__).parent / "config.toml")
     translation_config = config.section("translation")
     assert translation_config.get("iteration_repairloop") == 5
+
+    evaluation_config = config.section("evaluation")
+    print(evaluation_config)
+    assert evaluation_config["normalise_incomplete_java"] == True

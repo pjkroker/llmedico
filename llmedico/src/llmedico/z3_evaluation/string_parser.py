@@ -21,9 +21,10 @@ class StringParser:
     """
     ARRAY_VAR_RE = re.compile(r"[a-zA-Z_]\w*\[\d+\]")
 
-    def __init__(self, tokens: list[str]):
+    def __init__(self, tokens: list[str], normalise_incomplete_java=True):
         self.tokens = tokens
         self.pos = 0
+        self.normalise_incomplete_java = normalise_incomplete_java
 
     def peek(self):
         return self.tokens[self.pos] if self.pos < len(self.tokens) else None
@@ -77,8 +78,11 @@ class StringParser:
                 self.consume(":")
                 otherwise = self.parse_expr()
             else:
-                logger.critical(f"Incomplete ternary '?:' operator. Found no else branch")
-                otherwise = None  # incomplete ternary
+                if self.normalise_incomplete_java:
+                    logger.critical(f"Incomplete ternary '?:' operator. Fix missing else branch with normalisation.")
+                    otherwise = None  # incomplete ternary
+                else:
+                    raise ParseError("Incomplete ternary '?:' operator. Found no else branch.")
 
             return Conditional(expr, then, otherwise)
 

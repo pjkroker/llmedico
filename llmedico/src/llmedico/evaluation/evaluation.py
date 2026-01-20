@@ -7,6 +7,7 @@ from typing import List
 
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.builder.class_model_builder_jdoctor import ClassModelBuilderJdoctor
+from llmedico.config.config import Config
 from llmedico.evaluation.evaluation_csv_writer import EvaluationCSVWriter
 from llmedico.evaluation.evaluation_row import EvaluationRow
 from llmedico.evaluation.evaluator import evaluate_class
@@ -33,6 +34,13 @@ def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generat
     if Path(path_output) is not None and not Path(path_output).exists():
         os.makedirs(path_output)
 
+    config_path = Path(
+        os.getenv("LLMEDICO_CONFIG", Path.cwd() / "config.toml")  # TODO test environment variable
+    ).expanduser().resolve()
+
+    cnfg = Config(config_path)
+    evaluation_config = cnfg.section("evaluation")
+
     llmed_builder = ClassModelBuilder()
     jdoc_builder = ClassModelBuilderJdoctor()
 
@@ -57,7 +65,7 @@ def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generat
     if expected_clsm.qualified_name != generated_clsm.qualified_name:
         raise ValueError("Cannot compare conditions of different classes!")
 
-    result = evaluate_class(expected_clsm, generated_clsm)
+    result = evaluate_class(expected_clsm, generated_clsm,evaluation_config["normalise_incomplete_java"])
 
     path_outputfile = path_result if path_result is not None else Path(path_output) / f"llmedico-evaluation-{expected_clsm.qualified_name}.csv"
     with EvaluationCSVWriter(path_outputfile) as writer:

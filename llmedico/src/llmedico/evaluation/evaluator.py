@@ -20,7 +20,7 @@ from llmedico.z3_evaluation.z3_evaluator import AssertionEvaluatorZ
 def _normalize(s: str) -> str:
     return "".join(s.split())
 
-def _evaluate_assertions(expected: str, generated:str, return_type: model_ast.Type=None) -> EvaluationResult:
+def _evaluate_assertions(expected: str, generated:str, return_type: model_ast.Type=None, normalise_incomplete_java=True) -> EvaluationResult:
     relation: AssertionRelation
     # 1. Empty/Unexpected/Missing
     if expected.strip() == generated.strip() == "":
@@ -41,12 +41,12 @@ def _evaluate_assertions(expected: str, generated:str, return_type: model_ast.Ty
         #expected
         norm = AstNormalizer()
         expected_tokens = tokenize(rewrite_method_references(normalize_expression(expected)))
-        parser = StringParser(expected_tokens)
+        parser = StringParser(tokens=expected_tokens,normalise_incomplete_java=normalise_incomplete_java)
         expected_ast = parser.parse()
         expected_ast = norm.normalize_expr(expected_ast)
         #generated
         generated_tokens = tokenize(rewrite_method_references(normalize_expression(generated)))
-        parser = StringParser(generated_tokens)
+        parser = StringParser(tokens=generated_tokens, normalise_incomplete_java=normalise_incomplete_java)
         generated_ast = parser.parse()
         generated_ast = norm.normalize_expr(generated_ast)
     except Exception as e:
@@ -58,7 +58,7 @@ def _evaluate_assertions(expected: str, generated:str, return_type: model_ast.Ty
     evaluator = AssertionEvaluatorZ()
     return evaluator.evaluate(expected_ast, generated_ast, return_type)
 
-def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[EvaluationRow]:
+def evaluate_class(expected: ClassModel, generated: ClassModel, normalise_incomplete_java=True) -> List[EvaluationRow]:
     evaluation_rows = []
     class_name = expected.name
     if class_name != generated.name:
@@ -91,7 +91,7 @@ def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[Evaluati
                 for gen in generated.methods[i].conditions:
                     if gen.name == condition_exp.name:
                         logger.critical(f"matching condition {condition_exp} and {gen}")
-                        result = _evaluate_assertions(condition_exp.expression, gen.expression, return_type)
+                        result = _evaluate_assertions(condition_exp.expression, gen.expression, return_type, normalise_incomplete_java)
                         evaluation_rows.append(EvaluationRow(class_name, method_signature,
                                                 kind_exp=condition_exp.kind,
                                                 name_exp=condition_exp.name,
@@ -107,7 +107,7 @@ def evaluate_class(expected: ClassModel, generated: ClassModel) -> List[Evaluati
                 expected_condition = condition_exp.expression
                 generated_condition = generated.methods[i].conditions[j].expression
 
-                result = _evaluate_assertions(expected_condition, generated_condition, return_type)
+                result = _evaluate_assertions(expected_condition, generated_condition, return_type, normalise_incomplete_java)
 
                 evaluation_rows.append(EvaluationRow(class_name, method_signature,
                                                      kind_exp=condition_exp.kind,
