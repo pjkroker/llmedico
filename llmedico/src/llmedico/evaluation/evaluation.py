@@ -84,6 +84,7 @@ if __name__ == '__main__':
     PATH_RESULT = None #Path(__file__).parent.parent.parent.parent / "data" / "output" / "llmedico-evaluation-org.project.MyClass.csv"
     DEBUG = True
     SILENT = False
+    os.environ["LLMEDICO_CONFIG"] = (Path(__file__).parent.parent.parent.parent / "config.toml").as_posix()
     evaluate(path_expected=PATH_EXPECTED,
              type_expected=TYPE_EXPECTED,
              path_generated=PATH_GENERATED,
