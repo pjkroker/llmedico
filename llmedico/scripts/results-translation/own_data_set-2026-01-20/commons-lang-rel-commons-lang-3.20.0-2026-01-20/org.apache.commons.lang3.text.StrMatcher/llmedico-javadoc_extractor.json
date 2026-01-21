@@ -1,0 +1,1002 @@
+[
+  {
+    "name": "StrMatcher",
+    "package": "org.apache.commons.lang3.text",
+    "qualified_name": "org.apache.commons.lang3.text.StrMatcher",
+    "javadoc": "/**\n * A matcher class that can be queried to determine if a character array\n * portion matches.\n * <p>\n * This class comes complete with various factory methods.\n * If these do not suffice, you can subclass and implement your own matcher.\n * </p>\n *\n * @since 2.2\n * @deprecated As of <a href=\"https://commons.apache.org/proper/commons-lang/changes-report.html#a3.6\">3.6</a>, use Apache Commons Text\n * <a href=\"https://commons.apache.org/proper/commons-text/javadocs/api-release/org/apache/commons/text/matcher/StringMatcherFactory.html\">\n * StringMatcherFactory</a>.\n */\n",
+    "code": "/**\n * A matcher class that can be queried to determine if a character array\n * portion matches.\n * <p>\n * This class comes complete with various factory methods.\n * If these do not suffice, you can subclass and implement your own matcher.\n * </p>\n *\n * @since 2.2\n * @deprecated As of <a href=\"https://commons.apache.org/proper/commons-lang/changes-report.html#a3.6\">3.6</a>, use Apache Commons Text\n * <a href=\"https://commons.apache.org/proper/commons-text/javadocs/api-release/org/apache/commons/text/matcher/StringMatcherFactory.html\">\n * StringMatcherFactory</a>.\n */\n@Deprecated\npublic abstract class StrMatcher {\n\n    /**\n     * Class used to define a character for matching purposes.\n     */\n    static final class CharMatcher extends StrMatcher {\n\n        /**\n         * The character to match.\n         */\n        private final char ch;\n\n        /**\n         * Constructor that creates a matcher that matches a single character.\n         *\n         * @param ch  the character to match.\n         */\n        CharMatcher(final char ch) {\n            this.ch = ch;\n        }\n\n        /**\n         * Tests whether or not the given character matches.\n         *\n         * @param buffer  the text content to match against, do not change.\n         * @param pos  the starting position for the match, valid for buffer.\n         * @param bufferStart  the first active index in the buffer, valid for buffer.\n         * @param bufferEnd  the end index of the active buffer, valid for buffer.\n         * @return the number of matching characters, zero for no match.\n         */\n        @Override\n        public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n            return ch == buffer[pos] ? 1 : 0;\n        }\n    }\n\n    /**\n     * Class used to define a set of characters for matching purposes.\n     */\n    static final class CharSetMatcher extends StrMatcher {\n\n        /**\n         * The set of characters to match.\n         */\n        private final char[] chars;\n\n        /**\n         * Constructor that creates a matcher from a character array.\n         *\n         * @param chars  the characters to match, must not be null.\n         */\n        CharSetMatcher(final char[] chars) {\n            this.chars = ArraySorter.sort(chars.clone());\n        }\n\n        /**\n         * Returns whether or not the given character matches.\n         *\n         * @param buffer  the text content to match against, do not change.\n         * @param pos  the starting position for the match, valid for buffer.\n         * @param bufferStart  the first active index in the buffer, valid for buffer.\n         * @param bufferEnd  the end index of the active buffer, valid for buffer.\n         * @return the number of matching characters, zero for no match.\n         */\n        @Override\n        public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n            return Arrays.binarySearch(chars, buffer[pos]) >= 0 ? 1 : 0;\n        }\n    }\n\n    /**\n     * Class used to match no characters.\n     */\n    static final class NoMatcher extends StrMatcher {\n\n        /**\n         * Constructs a new instance of {@link NoMatcher}.\n         */\n        NoMatcher() {\n        }\n\n        /**\n         * Always returns {@code false}.\n         *\n         * @param buffer  the text content to match against, do not change.\n         * @param pos  the starting position for the match, valid for buffer.\n         * @param bufferStart  the first active index in the buffer, valid for buffer.\n         * @param bufferEnd  the end index of the active buffer, valid for buffer.\n         * @return the number of matching characters, zero for no match.\n         */\n        @Override\n        public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n            return 0;\n        }\n    }\n\n    /**\n     * Class used to define a set of characters for matching purposes.\n     */\n    static final class StringMatcher extends StrMatcher {\n\n        /**\n         * The string to match, as a character array.\n         */\n        private final char[] chars;\n\n        /**\n         * Constructor that creates a matcher from a String.\n         *\n         * @param str  the string to match, must not be null\n         */\n        StringMatcher(final String str) {\n            chars = str.toCharArray();\n        }\n\n        /**\n         * Tests whether or not the given text matches the stored string.\n         *\n         * @param buffer  the text content to match against, do not change.\n         * @param pos  the starting position for the match, valid for buffer.\n         * @param bufferStart  the first active index in the buffer, valid for buffer.\n         * @param bufferEnd  the end index of the active buffer, valid for buffer.\n         * @return the number of matching characters, zero for no match.\n         */\n        @Override\n        public int isMatch(final char[] buffer, int pos, final int bufferStart, final int bufferEnd) {\n            final int len = chars.length;\n            if (pos + len > bufferEnd) {\n                return 0;\n            }\n            for (int i = 0; i < chars.length; i++, pos++) {\n                if (chars[i] != buffer[pos]) {\n                    return 0;\n                }\n            }\n            return len;\n        }\n\n        @Override\n        public String toString() {\n            return super.toString() + ' ' + Arrays.toString(chars);\n        }\n    }\n\n    /**\n     * Class used to match whitespace as per trim().\n     */\n    static final class TrimMatcher extends StrMatcher {\n\n        /**\n         * Constructs a new instance of {@link TrimMatcher}.\n         */\n        TrimMatcher() {\n        }\n\n        /**\n         * Tests whether or not the given character matches.\n         *\n         * @param buffer  the text content to match against, do not change.\n         * @param pos  the starting position for the match, valid for buffer.\n         * @param bufferStart  the first active index in the buffer, valid for buffer.\n         * @param bufferEnd  the end index of the active buffer, valid for buffer.\n         * @return the number of matching characters, zero for no match.\n         */\n        @Override\n        public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n            return buffer[pos] <= 32 ? 1 : 0;\n        }\n    }\n\n    /**\n     * Matches the comma character.\n     */\n    private static final StrMatcher COMMA_MATCHER = new CharMatcher(',');\n\n    /**\n     * Matches the tab character.\n     */\n    private static final StrMatcher TAB_MATCHER = new CharMatcher('\\t');\n\n    /**\n     * Matches the space character.\n     */\n    private static final StrMatcher SPACE_MATCHER = new CharMatcher(' ');\n\n    /**\n     * Matches the same characters as StringTokenizer,\n     * namely space, tab, newline, formfeed.\n     */\n    private static final StrMatcher SPLIT_MATCHER = new CharSetMatcher(\" \\t\\n\\r\\f\".toCharArray());\n\n    /**\n     * Matches the String trim() whitespace characters.\n     */\n    private static final StrMatcher TRIM_MATCHER = new TrimMatcher();\n\n    /**\n     * Matches the double quote character.\n     */\n    private static final StrMatcher SINGLE_QUOTE_MATCHER = new CharMatcher('\\'');\n\n    /**\n     * Matches the double quote character.\n     */\n    private static final StrMatcher DOUBLE_QUOTE_MATCHER = new CharMatcher('\"');\n\n    /**\n     * Matches the single or double quote character.\n     */\n    private static final StrMatcher QUOTE_MATCHER = new CharSetMatcher(\"'\\\"\".toCharArray());\n\n    /**\n     * Matches no characters.\n     */\n    private static final StrMatcher NONE_MATCHER = new NoMatcher();\n\n    /**\n     * Creates a matcher from a character.\n     *\n     * @param ch  the character to match, must not be null.\n     * @return a new Matcher for the given char.\n     */\n    public static StrMatcher charMatcher(final char ch) {\n        return new CharMatcher(ch);\n    }\n\n    /**\n     * Creates a matcher from a set of characters.\n     *\n     * @param chars  the characters to match, null or empty matches nothing.\n     * @return a new matcher for the given char[].\n     */\n    public static StrMatcher charSetMatcher(final char... chars) {\n        if (ArrayUtils.isEmpty(chars)) {\n            return NONE_MATCHER;\n        }\n        if (chars.length == 1) {\n            return new CharMatcher(chars[0]);\n        }\n        return new CharSetMatcher(chars);\n    }\n\n    /**\n     * Creates a matcher from a string representing a set of characters.\n     *\n     * @param chars  the characters to match, null or empty matches nothing.\n     * @return a new Matcher for the given characters.\n     */\n    public static StrMatcher charSetMatcher(final String chars) {\n        if (StringUtils.isEmpty(chars)) {\n            return NONE_MATCHER;\n        }\n        if (chars.length() == 1) {\n            return new CharMatcher(chars.charAt(0));\n        }\n        return new CharSetMatcher(chars.toCharArray());\n    }\n\n    /**\n     * Gets the matcher for the comma character.\n     *\n     * @return the matcher for a comma.\n     */\n    public static StrMatcher commaMatcher() {\n        return COMMA_MATCHER;\n    }\n\n    /**\n     * Gets the matcher for the double quote character.\n     *\n     * @return the matcher for a double quote.\n     */\n    public static StrMatcher doubleQuoteMatcher() {\n        return DOUBLE_QUOTE_MATCHER;\n    }\n\n    /**\n     * Gets the matcher for no characters.\n     *\n     * @return the matcher that matches nothing.\n     */\n    public static StrMatcher noneMatcher() {\n        return NONE_MATCHER;\n    }\n\n    /**\n     * Gets the matcher for the single or double quote character.\n     *\n     * @return the matcher for a single or double quote.\n     */\n    public static StrMatcher quoteMatcher() {\n        return QUOTE_MATCHER;\n    }\n\n    /**\n     * Gets the matcher for the single quote character.\n     *\n     * @return the matcher for a single quote.\n     */\n    public static StrMatcher singleQuoteMatcher() {\n        return SINGLE_QUOTE_MATCHER;\n    }\n\n    /**\n     * Gets the matcher for the space character.\n     *\n     * @return the matcher for a space.\n     */\n    public static StrMatcher spaceMatcher() {\n        return SPACE_MATCHER;\n    }\n\n    /**\n     * Gets the matcher for the same characters as StringTokenizer,\n     * namely space, tab, newline and form-feed.\n     *\n     * @return the split matcher.\n     */\n    public static StrMatcher splitMatcher() {\n        return SPLIT_MATCHER;\n    }\n\n    /**\n     * Creates a matcher for a string.\n     *\n     * @param str  the string to match, null or empty matches nothing.\n     * @return a new Matcher for the given String.\n     */\n    public static StrMatcher stringMatcher(final String str) {\n        if (StringUtils.isEmpty(str)) {\n            return NONE_MATCHER;\n        }\n        return new StringMatcher(str);\n    }\n\n    /**\n     * Gets the matcher for the tab character.\n     *\n     * @return the matcher for a tab.\n     */\n    public static StrMatcher tabMatcher() {\n        return TAB_MATCHER;\n    }\n\n    /**\n     * Gets the matcher to String trim() whitespace characters.\n     *\n     * @return the trim matcher.\n     */\n    public static StrMatcher trimMatcher() {\n        return TRIM_MATCHER;\n    }\n\n    /**\n     * Constructs a new instance.\n     */\n    protected StrMatcher() {\n    }\n\n    /**\n     * Tests whether the number of matching characters, zero for no match.\n     * <p>\n     * This method is called to check for a match.\n     * The parameter {@code pos} represents the current position to be\n     * checked in the string {@code buffer} (a character array which must\n     * not be changed).\n     * The API guarantees that {@code pos} is a valid index for {@code buffer}.\n     * </p>\n     * <p>\n     * The matching code may check one character or many.\n     * It may check characters preceding {@code pos} as well as those after.\n     * </p>\n     * <p>\n     * It must return zero for no match, or a positive number if a match was found.\n     * The number indicates the number of characters that matched.\n     * </p>\n     *\n     * @param buffer  the text content to match against, do not change.\n     * @param pos  the starting position for the match, valid for buffer.\n     * @return the number of matching characters, zero for no match.\n     * @since 2.4\n     */\n    public int isMatch(final char[] buffer, final int pos) {\n        return isMatch(buffer, pos, 0, buffer.length);\n    }\n\n    /**\n     * Tests whether the number of matching characters, zero for no match.\n     * <p>\n     * This method is called to check for a match.\n     * The parameter {@code pos} represents the current position to be\n     * checked in the string {@code buffer} (a character array which must\n     * not be changed).\n     * The API guarantees that {@code pos} is a valid index for {@code buffer}.\n     * </p>\n     * <p>\n     * The character array may be larger than the active area to be matched.\n     * Only values in the buffer between the specified indices may be accessed.\n     * </p>\n     * <p>\n     * The matching code may check one character or many.\n     * It may check characters preceding {@code pos} as well as those\n     * after, so long as no checks exceed the bounds specified.\n     * </p>\n     * <p>\n     * It must return zero for no match, or a positive number if a match was found.\n     * The number indicates the number of characters that matched.\n     * </p>\n     *\n     * @param buffer  the text content to match against, do not change.\n     * @param pos  the starting position for the match, valid for buffer.\n     * @param bufferStart  the first active index in the buffer, valid for buffer.\n     * @param bufferEnd  the end index (exclusive) of the active buffer, valid for buffer.\n     * @return the number of matching characters, zero for no match.\n     */\n    public abstract int isMatch(char[] buffer, int pos, int bufferStart, int bufferEnd);\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "StrMatcher",
+        "parameters": [],
+        "javadoc": "/**\n * Constructs a new instance.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructs a new instance.\n */\nprotected StrMatcher() {\n}"
+      },
+      {
+        "type": "method",
+        "name": "charMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ch"
+          }
+        ],
+        "javadoc": "/**\n * Creates a matcher from a character.\n *\n * @param ch  the character to match, must not be null.\n * @return a new Matcher for the given char.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "ch",
+            "content": "the character to match, must not be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new Matcher for the given char."
+          }
+        ],
+        "code": "/**\n * Creates a matcher from a character.\n *\n * @param ch  the character to match, must not be null.\n * @return a new Matcher for the given char.\n */\npublic static StrMatcher charMatcher(final char ch) {\n    return new CharMatcher(ch);\n}"
+      },
+      {
+        "type": "method",
+        "name": "charSetMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "chars"
+          }
+        ],
+        "javadoc": "/**\n * Creates a matcher from a set of characters.\n *\n * @param chars  the characters to match, null or empty matches nothing.\n * @return a new matcher for the given char[].\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "chars",
+            "content": "the characters to match, null or empty matches nothing."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new matcher for the given char[]."
+          }
+        ],
+        "code": "/**\n * Creates a matcher from a set of characters.\n *\n * @param chars  the characters to match, null or empty matches nothing.\n * @return a new matcher for the given char[].\n */\npublic static StrMatcher charSetMatcher(final char... chars) {\n    if (ArrayUtils.isEmpty(chars)) {\n        return NONE_MATCHER;\n    }\n    if (chars.length == 1) {\n        return new CharMatcher(chars[0]);\n    }\n    return new CharSetMatcher(chars);\n}"
+      },
+      {
+        "type": "method",
+        "name": "charSetMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "chars"
+          }
+        ],
+        "javadoc": "/**\n * Creates a matcher from a string representing a set of characters.\n *\n * @param chars  the characters to match, null or empty matches nothing.\n * @return a new Matcher for the given characters.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "chars",
+            "content": "the characters to match, null or empty matches nothing."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new Matcher for the given characters."
+          }
+        ],
+        "code": "/**\n * Creates a matcher from a string representing a set of characters.\n *\n * @param chars  the characters to match, null or empty matches nothing.\n * @return a new Matcher for the given characters.\n */\npublic static StrMatcher charSetMatcher(final String chars) {\n    if (StringUtils.isEmpty(chars)) {\n        return NONE_MATCHER;\n    }\n    if (chars.length() == 1) {\n        return new CharMatcher(chars.charAt(0));\n    }\n    return new CharSetMatcher(chars.toCharArray());\n}"
+      },
+      {
+        "type": "method",
+        "name": "commaMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for the comma character.\n *\n * @return the matcher for a comma.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "matcher for a comma."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for the comma character.\n *\n * @return the matcher for a comma.\n */\npublic static StrMatcher commaMatcher() {\n    return COMMA_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "doubleQuoteMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for the double quote character.\n *\n * @return the matcher for a double quote.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "matcher for a double quote."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for the double quote character.\n *\n * @return the matcher for a double quote.\n */\npublic static StrMatcher doubleQuoteMatcher() {\n    return DOUBLE_QUOTE_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "noneMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for no characters.\n *\n * @return the matcher that matches nothing.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "matcher that matches nothing."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for no characters.\n *\n * @return the matcher that matches nothing.\n */\npublic static StrMatcher noneMatcher() {\n    return NONE_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "quoteMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for the single or double quote character.\n *\n * @return the matcher for a single or double quote.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "matcher for a single or double quote."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for the single or double quote character.\n *\n * @return the matcher for a single or double quote.\n */\npublic static StrMatcher quoteMatcher() {\n    return QUOTE_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "singleQuoteMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for the single quote character.\n *\n * @return the matcher for a single quote.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "matcher for a single quote."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for the single quote character.\n *\n * @return the matcher for a single quote.\n */\npublic static StrMatcher singleQuoteMatcher() {\n    return SINGLE_QUOTE_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "spaceMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for the space character.\n *\n * @return the matcher for a space.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "matcher for a space."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for the space character.\n *\n * @return the matcher for a space.\n */\npublic static StrMatcher spaceMatcher() {\n    return SPACE_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "splitMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for the same characters as StringTokenizer,\n * namely space, tab, newline and form-feed.\n *\n * @return the split matcher.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "split matcher."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for the same characters as StringTokenizer,\n * namely space, tab, newline and form-feed.\n *\n * @return the split matcher.\n */\npublic static StrMatcher splitMatcher() {\n    return SPLIT_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "stringMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          }
+        ],
+        "javadoc": "/**\n * Creates a matcher for a string.\n *\n * @param str  the string to match, null or empty matches nothing.\n * @return a new Matcher for the given String.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the string to match, null or empty matches nothing."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new Matcher for the given String."
+          }
+        ],
+        "code": "/**\n * Creates a matcher for a string.\n *\n * @param str  the string to match, null or empty matches nothing.\n * @return a new Matcher for the given String.\n */\npublic static StrMatcher stringMatcher(final String str) {\n    if (StringUtils.isEmpty(str)) {\n        return NONE_MATCHER;\n    }\n    return new StringMatcher(str);\n}"
+      },
+      {
+        "type": "method",
+        "name": "tabMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher for the tab character.\n *\n * @return the matcher for a tab.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "matcher for a tab."
+          }
+        ],
+        "code": "/**\n * Gets the matcher for the tab character.\n *\n * @return the matcher for a tab.\n */\npublic static StrMatcher tabMatcher() {\n    return TAB_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "trimMatcher",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "StrMatcher",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": "/**\n * Gets the matcher to String trim() whitespace characters.\n *\n * @return the trim matcher.\n */\n",
+        "tags": [
+          {
+            "tag": "return",
+            "name": null,
+            "content": "trim matcher."
+          }
+        ],
+        "code": "/**\n * Gets the matcher to String trim() whitespace characters.\n *\n * @return the trim matcher.\n */\npublic static StrMatcher trimMatcher() {\n    return TRIM_MATCHER;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isMatch",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "buffer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pos"
+          }
+        ],
+        "javadoc": "/**\n * Tests whether the number of matching characters, zero for no match.\n * <p>\n * This method is called to check for a match.\n * The parameter {@code pos} represents the current position to be\n * checked in the string {@code buffer} (a character array which must\n * not be changed).\n * The API guarantees that {@code pos} is a valid index for {@code buffer}.\n * </p>\n * <p>\n * The matching code may check one character or many.\n * It may check characters preceding {@code pos} as well as those after.\n * </p>\n * <p>\n * It must return zero for no match, or a positive number if a match was found.\n * The number indicates the number of characters that matched.\n * </p>\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @return the number of matching characters, zero for no match.\n * @since 2.4\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "buffer",
+            "content": "the text content to match against, do not change."
+          },
+          {
+            "tag": "param",
+            "name": "pos",
+            "content": "the starting position for the match, valid for buffer."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of matching characters, zero for no match."
+          },
+          {
+            "tag": "since",
+            "name": "2.4",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Tests whether the number of matching characters, zero for no match.\n * <p>\n * This method is called to check for a match.\n * The parameter {@code pos} represents the current position to be\n * checked in the string {@code buffer} (a character array which must\n * not be changed).\n * The API guarantees that {@code pos} is a valid index for {@code buffer}.\n * </p>\n * <p>\n * The matching code may check one character or many.\n * It may check characters preceding {@code pos} as well as those after.\n * </p>\n * <p>\n * It must return zero for no match, or a positive number if a match was found.\n * The number indicates the number of characters that matched.\n * </p>\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @return the number of matching characters, zero for no match.\n * @since 2.4\n */\npublic int isMatch(final char[] buffer, final int pos) {\n    return isMatch(buffer, pos, 0, buffer.length);\n}"
+      },
+      {
+        "type": "method",
+        "name": "isMatch",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "buffer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pos"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferStart"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferEnd"
+          }
+        ],
+        "javadoc": "/**\n * Tests whether the number of matching characters, zero for no match.\n * <p>\n * This method is called to check for a match.\n * The parameter {@code pos} represents the current position to be\n * checked in the string {@code buffer} (a character array which must\n * not be changed).\n * The API guarantees that {@code pos} is a valid index for {@code buffer}.\n * </p>\n * <p>\n * The character array may be larger than the active area to be matched.\n * Only values in the buffer between the specified indices may be accessed.\n * </p>\n * <p>\n * The matching code may check one character or many.\n * It may check characters preceding {@code pos} as well as those\n * after, so long as no checks exceed the bounds specified.\n * </p>\n * <p>\n * It must return zero for no match, or a positive number if a match was found.\n * The number indicates the number of characters that matched.\n * </p>\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index (exclusive) of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "buffer",
+            "content": "the text content to match against, do not change."
+          },
+          {
+            "tag": "param",
+            "name": "pos",
+            "content": "the starting position for the match, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferStart",
+            "content": "the first active index in the buffer, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferEnd",
+            "content": "the end index (exclusive) of the active buffer, valid for buffer."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of matching characters, zero for no match."
+          }
+        ],
+        "code": "/**\n * Tests whether the number of matching characters, zero for no match.\n * <p>\n * This method is called to check for a match.\n * The parameter {@code pos} represents the current position to be\n * checked in the string {@code buffer} (a character array which must\n * not be changed).\n * The API guarantees that {@code pos} is a valid index for {@code buffer}.\n * </p>\n * <p>\n * The character array may be larger than the active area to be matched.\n * Only values in the buffer between the specified indices may be accessed.\n * </p>\n * <p>\n * The matching code may check one character or many.\n * It may check characters preceding {@code pos} as well as those\n * after, so long as no checks exceed the bounds specified.\n * </p>\n * <p>\n * It must return zero for no match, or a positive number if a match was found.\n * The number indicates the number of characters that matched.\n * </p>\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index (exclusive) of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\npublic abstract int isMatch(char[] buffer, int pos, int bufferStart, int bufferEnd);"
+      }
+    ]
+  },
+  {
+    "name": "CharMatcher",
+    "package": "org.apache.commons.lang3.text",
+    "qualified_name": "org.apache.commons.lang3.text.CharMatcher",
+    "javadoc": "/**\n * Class used to define a character for matching purposes.\n */\n",
+    "code": "/**\n * Class used to define a character for matching purposes.\n */\nstatic final class CharMatcher extends StrMatcher {\n\n    /**\n     * The character to match.\n     */\n    private final char ch;\n\n    /**\n     * Constructor that creates a matcher that matches a single character.\n     *\n     * @param ch  the character to match.\n     */\n    CharMatcher(final char ch) {\n        this.ch = ch;\n    }\n\n    /**\n     * Tests whether or not the given character matches.\n     *\n     * @param buffer  the text content to match against, do not change.\n     * @param pos  the starting position for the match, valid for buffer.\n     * @param bufferStart  the first active index in the buffer, valid for buffer.\n     * @param bufferEnd  the end index of the active buffer, valid for buffer.\n     * @return the number of matching characters, zero for no match.\n     */\n    @Override\n    public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n        return ch == buffer[pos] ? 1 : 0;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "CharMatcher",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "ch"
+          }
+        ],
+        "javadoc": "/**\n * Constructor that creates a matcher that matches a single character.\n *\n * @param ch  the character to match.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "ch",
+            "content": "the character to match."
+          }
+        ],
+        "code": "/**\n * Constructor that creates a matcher that matches a single character.\n *\n * @param ch  the character to match.\n */\nCharMatcher(final char ch) {\n    this.ch = ch;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isMatch",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "buffer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pos"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferStart"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferEnd"
+          }
+        ],
+        "javadoc": "/**\n * Tests whether or not the given character matches.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "buffer",
+            "content": "the text content to match against, do not change."
+          },
+          {
+            "tag": "param",
+            "name": "pos",
+            "content": "the starting position for the match, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferStart",
+            "content": "the first active index in the buffer, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferEnd",
+            "content": "the end index of the active buffer, valid for buffer."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of matching characters, zero for no match."
+          }
+        ],
+        "code": "/**\n * Tests whether or not the given character matches.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n@Override\npublic int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n    return ch == buffer[pos] ? 1 : 0;\n}"
+      }
+    ]
+  },
+  {
+    "name": "CharSetMatcher",
+    "package": "org.apache.commons.lang3.text",
+    "qualified_name": "org.apache.commons.lang3.text.CharSetMatcher",
+    "javadoc": "/**\n * Class used to define a set of characters for matching purposes.\n */\n",
+    "code": "/**\n * Class used to define a set of characters for matching purposes.\n */\nstatic final class CharSetMatcher extends StrMatcher {\n\n    /**\n     * The set of characters to match.\n     */\n    private final char[] chars;\n\n    /**\n     * Constructor that creates a matcher from a character array.\n     *\n     * @param chars  the characters to match, must not be null.\n     */\n    CharSetMatcher(final char[] chars) {\n        this.chars = ArraySorter.sort(chars.clone());\n    }\n\n    /**\n     * Returns whether or not the given character matches.\n     *\n     * @param buffer  the text content to match against, do not change.\n     * @param pos  the starting position for the match, valid for buffer.\n     * @param bufferStart  the first active index in the buffer, valid for buffer.\n     * @param bufferEnd  the end index of the active buffer, valid for buffer.\n     * @return the number of matching characters, zero for no match.\n     */\n    @Override\n    public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n        return Arrays.binarySearch(chars, buffer[pos]) >= 0 ? 1 : 0;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "CharSetMatcher",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "chars"
+          }
+        ],
+        "javadoc": "/**\n * Constructor that creates a matcher from a character array.\n *\n * @param chars  the characters to match, must not be null.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "chars",
+            "content": "the characters to match, must not be null."
+          }
+        ],
+        "code": "/**\n * Constructor that creates a matcher from a character array.\n *\n * @param chars  the characters to match, must not be null.\n */\nCharSetMatcher(final char[] chars) {\n    this.chars = ArraySorter.sort(chars.clone());\n}"
+      },
+      {
+        "type": "method",
+        "name": "isMatch",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "buffer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pos"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferStart"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferEnd"
+          }
+        ],
+        "javadoc": "/**\n * Returns whether or not the given character matches.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "buffer",
+            "content": "the text content to match against, do not change."
+          },
+          {
+            "tag": "param",
+            "name": "pos",
+            "content": "the starting position for the match, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferStart",
+            "content": "the first active index in the buffer, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferEnd",
+            "content": "the end index of the active buffer, valid for buffer."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of matching characters, zero for no match."
+          }
+        ],
+        "code": "/**\n * Returns whether or not the given character matches.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n@Override\npublic int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n    return Arrays.binarySearch(chars, buffer[pos]) >= 0 ? 1 : 0;\n}"
+      }
+    ]
+  },
+  {
+    "name": "NoMatcher",
+    "package": "org.apache.commons.lang3.text",
+    "qualified_name": "org.apache.commons.lang3.text.NoMatcher",
+    "javadoc": "/**\n * Class used to match no characters.\n */\n",
+    "code": "/**\n * Class used to match no characters.\n */\nstatic final class NoMatcher extends StrMatcher {\n\n    /**\n     * Constructs a new instance of {@link NoMatcher}.\n     */\n    NoMatcher() {\n    }\n\n    /**\n     * Always returns {@code false}.\n     *\n     * @param buffer  the text content to match against, do not change.\n     * @param pos  the starting position for the match, valid for buffer.\n     * @param bufferStart  the first active index in the buffer, valid for buffer.\n     * @param bufferEnd  the end index of the active buffer, valid for buffer.\n     * @return the number of matching characters, zero for no match.\n     */\n    @Override\n    public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n        return 0;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "NoMatcher",
+        "parameters": [],
+        "javadoc": "/**\n * Constructs a new instance of {@link NoMatcher}.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructs a new instance of {@link NoMatcher}.\n */\nNoMatcher() {\n}"
+      },
+      {
+        "type": "method",
+        "name": "isMatch",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "buffer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pos"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferStart"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferEnd"
+          }
+        ],
+        "javadoc": "/**\n * Always returns {@code false}.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "buffer",
+            "content": "the text content to match against, do not change."
+          },
+          {
+            "tag": "param",
+            "name": "pos",
+            "content": "the starting position for the match, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferStart",
+            "content": "the first active index in the buffer, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferEnd",
+            "content": "the end index of the active buffer, valid for buffer."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of matching characters, zero for no match."
+          }
+        ],
+        "code": "/**\n * Always returns {@code false}.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n@Override\npublic int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n    return 0;\n}"
+      }
+    ]
+  },
+  {
+    "name": "StringMatcher",
+    "package": "org.apache.commons.lang3.text",
+    "qualified_name": "org.apache.commons.lang3.text.StringMatcher",
+    "javadoc": "/**\n * Class used to define a set of characters for matching purposes.\n */\n",
+    "code": "/**\n * Class used to define a set of characters for matching purposes.\n */\nstatic final class StringMatcher extends StrMatcher {\n\n    /**\n     * The string to match, as a character array.\n     */\n    private final char[] chars;\n\n    /**\n     * Constructor that creates a matcher from a String.\n     *\n     * @param str  the string to match, must not be null\n     */\n    StringMatcher(final String str) {\n        chars = str.toCharArray();\n    }\n\n    /**\n     * Tests whether or not the given text matches the stored string.\n     *\n     * @param buffer  the text content to match against, do not change.\n     * @param pos  the starting position for the match, valid for buffer.\n     * @param bufferStart  the first active index in the buffer, valid for buffer.\n     * @param bufferEnd  the end index of the active buffer, valid for buffer.\n     * @return the number of matching characters, zero for no match.\n     */\n    @Override\n    public int isMatch(final char[] buffer, int pos, final int bufferStart, final int bufferEnd) {\n        final int len = chars.length;\n        if (pos + len > bufferEnd) {\n            return 0;\n        }\n        for (int i = 0; i < chars.length; i++, pos++) {\n            if (chars[i] != buffer[pos]) {\n                return 0;\n            }\n        }\n        return len;\n    }\n\n    @Override\n    public String toString() {\n        return super.toString() + ' ' + Arrays.toString(chars);\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "StringMatcher",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          }
+        ],
+        "javadoc": "/**\n * Constructor that creates a matcher from a String.\n *\n * @param str  the string to match, must not be null\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the string to match, must not be null"
+          }
+        ],
+        "code": "/**\n * Constructor that creates a matcher from a String.\n *\n * @param str  the string to match, must not be null\n */\nStringMatcher(final String str) {\n    chars = str.toCharArray();\n}"
+      },
+      {
+        "type": "method",
+        "name": "isMatch",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "buffer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pos"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferStart"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferEnd"
+          }
+        ],
+        "javadoc": "/**\n * Tests whether or not the given text matches the stored string.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "buffer",
+            "content": "the text content to match against, do not change."
+          },
+          {
+            "tag": "param",
+            "name": "pos",
+            "content": "the starting position for the match, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferStart",
+            "content": "the first active index in the buffer, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferEnd",
+            "content": "the end index of the active buffer, valid for buffer."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of matching characters, zero for no match."
+          }
+        ],
+        "code": "/**\n * Tests whether or not the given text matches the stored string.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n@Override\npublic int isMatch(final char[] buffer, int pos, final int bufferStart, final int bufferEnd) {\n    final int len = chars.length;\n    if (pos + len > bufferEnd) {\n        return 0;\n    }\n    for (int i = 0; i < chars.length; i++, pos++) {\n        if (chars[i] != buffer[pos]) {\n            return 0;\n        }\n    }\n    return len;\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [],
+        "javadoc": null,
+        "tags": [],
+        "code": "@Override\npublic String toString() {\n    return super.toString() + ' ' + Arrays.toString(chars);\n}"
+      }
+    ]
+  },
+  {
+    "name": "TrimMatcher",
+    "package": "org.apache.commons.lang3.text",
+    "qualified_name": "org.apache.commons.lang3.text.TrimMatcher",
+    "javadoc": "/**\n * Class used to match whitespace as per trim().\n */\n",
+    "code": "/**\n * Class used to match whitespace as per trim().\n */\nstatic final class TrimMatcher extends StrMatcher {\n\n    /**\n     * Constructs a new instance of {@link TrimMatcher}.\n     */\n    TrimMatcher() {\n    }\n\n    /**\n     * Tests whether or not the given character matches.\n     *\n     * @param buffer  the text content to match against, do not change.\n     * @param pos  the starting position for the match, valid for buffer.\n     * @param bufferStart  the first active index in the buffer, valid for buffer.\n     * @param bufferEnd  the end index of the active buffer, valid for buffer.\n     * @return the number of matching characters, zero for no match.\n     */\n    @Override\n    public int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n        return buffer[pos] <= 32 ? 1 : 0;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "TrimMatcher",
+        "parameters": [],
+        "javadoc": "/**\n * Constructs a new instance of {@link TrimMatcher}.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructs a new instance of {@link TrimMatcher}.\n */\nTrimMatcher() {\n}"
+      },
+      {
+        "type": "method",
+        "name": "isMatch",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "buffer"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "pos"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferStart"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "bufferEnd"
+          }
+        ],
+        "javadoc": "/**\n * Tests whether or not the given character matches.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "buffer",
+            "content": "the text content to match against, do not change."
+          },
+          {
+            "tag": "param",
+            "name": "pos",
+            "content": "the starting position for the match, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferStart",
+            "content": "the first active index in the buffer, valid for buffer."
+          },
+          {
+            "tag": "param",
+            "name": "bufferEnd",
+            "content": "the end index of the active buffer, valid for buffer."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "number of matching characters, zero for no match."
+          }
+        ],
+        "code": "/**\n * Tests whether or not the given character matches.\n *\n * @param buffer  the text content to match against, do not change.\n * @param pos  the starting position for the match, valid for buffer.\n * @param bufferStart  the first active index in the buffer, valid for buffer.\n * @param bufferEnd  the end index of the active buffer, valid for buffer.\n * @return the number of matching characters, zero for no match.\n */\n@Override\npublic int isMatch(final char[] buffer, final int pos, final int bufferStart, final int bufferEnd) {\n    return buffer[pos] <= 32 ? 1 : 0;\n}"
+      }
+    ]
+  }
+]

@@ -1,0 +1,2346 @@
+2026-01-20 17:04:44,522 - DEBUG - llmedico.main - ---Starting LLMedico---
+2026-01-20 17:04:44,523 - DEBUG - llmedico.config.config - Loaded config from /vol/fob-vol3/mi20/krokerpa/ba/llmedico/llmedico/config.toml
+2026-01-20 17:04:44,523 - DEBUG - llmedico.main - ---Starting JavaParser - Extracting JavaDoc---
+2026-01-20 17:04:45,609 - DEBUG - llmedico.main - ---Starting Translator - Translating JavaDoc to Conditions---
+2026-01-20 17:04:45,609 - DEBUG - llmedico.main - translating every method of the class
+2026-01-20 17:04:45,610 - DEBUG - llmedico.main - current method name: AnnotationUtils
+2026-01-20 17:04:45,610 - DEBUG - llmedico.main - has the following javadoc: /**
+ * {@link AnnotationUtils} instances should NOT be constructed in
+ * standard programming. Instead, the class should be used statically.
+ *
+ * <p>This constructor is public to permit tools that require a JavaBean
+ * instance to operate.</p>
+ * @deprecated TODO Make private in 4.0.
+ */
+
+2026-01-20 17:04:45,610 - DEBUG - llmedico.main - unsupported tag: {'tag': 'deprecated', 'name': None, 'content': 'TODO Make private in 4.0.'}
+2026-01-20 17:04:45,610 - WARNING - llmedico.main - AnnotationUtils contains not tags?
+2026-01-20 17:04:45,610 - DEBUG - llmedico.main - found modes and their frequencies: {}
+2026-01-20 17:04:45,610 - DEBUG - llmedico.main - the following java assertion have been generated for {} for AnnotationUtils:
+ {}
+2026-01-20 17:04:45,610 - DEBUG - llmedico.main - current method name: equals
+2026-01-20 17:04:45,610 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Checks if two annotations are equal using the criteria for equality
+ * presented in the {@link Annotation#equals(Object)} API docs.
+ *
+ * @param a1 the first Annotation to compare, {@code null} returns
+ * {@code false} unless both are {@code null}
+ * @param a2 the second Annotation to compare, {@code null} returns
+ * {@code false} unless both are {@code null}
+ * @return {@code true} if the two annotations are {@code equal} or both
+ * {@code null}
+ */
+
+2026-01-20 17:04:45,611 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 2, 'RETURN': 1}
+2026-01-20 17:04:45,611 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'a1', 'content': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}, {'tag': 'param', 'name': 'a2', 'content': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}, {'tag': 'return', 'name': None, 'content': 'true} if the two annotations are {@code equal} or both {@code null}'}]
+2026-01-20 17:04:45,611 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:04:45,611 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
+    These never produce assertions.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Parameter Semantic Classification Rule
+    Before generating an assertion, classify the @param description as one of:
+    Value-validating: describes nullability, range, size, or intrinsic validity of the parameter
+    Receiver-defining: describes how the parameter configures, toggles, or controls receiver state
+    Rules:
+    For value-validating parameters, assertions MUST be written only in terms of args[i]
+    For receiver-defining parameters, assertions MUST be written in terms of receiverObjectID and MUST NOT restate the condition directly on args[i]
+    Assertions must be written either purely in terms of args[i] or purely in terms of receiverObjectID.
+    Do not mix parameter checks with receiver semantics in the same assertion.
+    @param collection not null
+    Correct (value-validating):
+    assert (args[0] == null) == false;
+
+    Incorrect (receiver misuse):
+    assert !receiverObjectID.isEmpty();
+    
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
+    In that case, express the assertion using receiverObjectID.
+    Example:
+    Input Javadoc:
+    /**
+    * Create a new Closure that calls one of the closures depending
+    * on the predicates.
+    * <p>
+    * The closure at array location 0 is called if the predicate at array
+    * location 0 returned true. Each predicate is evaluated
+    * until one returns true.
+    *
+    * @see org.apache.commons.collections4.functors.SwitchClosure
+    *
+    * @param <E>  the type that the closure acts on
+    * @param predicates  an array of predicates to check, not null
+    * @param closures  an array of closures to call, not null
+    * @return the <code>switch</code> closure
+    * @throws NullPointerException if the either array is null
+    * @throws NullPointerException if any element in the arrays is null
+    * @throws IllegalArgumentException if the arrays have different sizes
+    */
+    Input Method Name:
+    switchClosure
+     Input Parameters:
+    [{'type': {'qualified_name': null, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}, 'name': 'predicates'}, {'type': {'qualified_name': null, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}, 'name': 'closures'}]
+    Input Return Type:
+    {'qualified_name': null, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}
+    And the following available instance methods:
+    void exceptionClosure()
+    void nopClosure()
+    void asClosure(void transformer)
+    void forClosure(int count,void closure)
+    void whileClosure(void predicate,void closure)
+    void doWhileClosure(void closure,void predicate)
+    void invokerClosure(void methodName)
+    void invokerClosure(void methodName,void paramTypes,void args)
+    void chainedClosure(void closures)
+    void chainedClosure(void closures)
+    void ifClosure(void predicate,void trueClosure)
+    void ifClosure(void predicate,void trueClosure,void falseClosure)
+    void switchClosure(void predicates,void closures)
+    void switchClosure(void predicates,void closures,void defaultClosure)
+    void switchClosure(void predicatesAndClosures)
+    void switchMapClosure(void objectsAndClosures)
+    Output Java assertions:
+    ```json
+    [{"description": "an array of predicates to check, not null",
+    "assertion": "assert (args[0]==null) == false;",
+    "name": "predicates",
+    "content": "an array of predicates to check, not null"},
+    {"description": "an array of closures to call, not null",
+    "assertion": "assert (args[1]==null) == false;",
+    "name": "closures ",
+    "content": "an array of closures to call, not null"}]
+    ```
+    Input Javadoc:
+    /**
+    * Disallow the addition of new parameters. The already declared parameters
+    * are still modifiable, but no new parameter can be added.
+    * @param on If true the environment is locked.
+    */
+    Input Method Name:
+    "lockEnvironment"
+     Input Parameters:
+    [{'type': {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}, 'name': 'on'}]
+    Input Return Type:
+    void
+    Instance Methods:
+    boolean isLocked()
+    boolean hasParameter(void parameter)
+    boolean getBooleanParameter(void parameter)
+    int getBooleanParameteri(void parameter)
+    double getNumberParameter(void parameter)
+    int getParameterCount()
+    void lockEnvironment(boolean on)
+    
+    Output Java assertions:
+    ```json
+    [
+        {
+        "description": "true if locked",
+        "assertion": "assert receiverObjectID.isLocked();",
+        "name": "on",
+        "content": "If true the environment is locked."
+        }
+    ]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Checks if two annotations are equal using the criteria for equality
+ * presented in the {@link Annotation#equals(Object)} API docs.
+ *
+ * @param a1 the first Annotation to compare, {@code null} returns
+ * {@code false} unless both are {@code null}
+ * @param a2 the second Annotation to compare, {@code null} returns
+ * {@code false} unless both are {@code null}
+ * @return {@code true} if the two annotations are {@code equal} or both
+ * {@code null}
+ */
+"
+    For the method:
+    "equals"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a1'}, {'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a2'}]"
+    And the following Return Type:
+    "{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': 'a1', 'content': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}}, {{'description': '', 'assertion': '', 'name': 'a2', 'content': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:05:20,635 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[
+    {
+        "description": "the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}",
+        "assertion": "assert (args[0] != null) || (args[1] == null);",
+        "name": "a1",
+        "content": "the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}"
+    },
+    {
+        "description": "the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}",
+        "assertion": "assert (args[1] != null) || (args[0] == null);",
+        "name": "a2",
+        "content": "the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}"
+    }
+]
+```
+2026-01-20 17:05:20,643 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}', 'assertion': 'assert (args[0] != null) || (args[1] == null);', 'name': 'a1', 'content': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}, {'description': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}', 'assertion': 'assert (args[1] != null) || (args[0] == null);', 'name': 'a2', 'content': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}]
+2026-01-20 17:05:20,643 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'a1', 'content': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}, {'tag': 'param', 'name': 'a2', 'content': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}, {'tag': 'return', 'name': None, 'content': 'true} if the two annotations are {@code equal} or both {@code null}'}]
+2026-01-20 17:05:20,644 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:05:20,644 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    boolean isPrime(int n)
+    int nextPrime(int n)
+    void primeFactors(int n)
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Checks if two annotations are equal using the criteria for equality
+ * presented in the {@link Annotation#equals(Object)} API docs.
+ *
+ * @param a1 the first Annotation to compare, {@code null} returns
+ * {@code false} unless both are {@code null}
+ * @param a2 the second Annotation to compare, {@code null} returns
+ * {@code false} unless both are {@code null}
+ * @return {@code true} if the two annotations are {@code equal} or both
+ * {@code null}
+ */
+"
+    For the method:
+    "equals"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a1'}, {'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a2'}]"
+    And the following Return Type:
+    "{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': null, 'content': 'true} if the two annotations are {@code equal} or both {@code null}'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:05:34,501 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "true if the two annotations are equal or both null", 
+"assertion": "assert methodResultID == (args[0] == null && args[1] == null) || (args[0] != null && args[0].equals(args[1]));", 
+"name": null, 
+"content": "true if the two annotations are {@code equal} or both {@code null}"}]
+```
+2026-01-20 17:05:34,502 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'true if the two annotations are equal or both null', 'assertion': 'assert methodResultID == (args[0] == null && args[1] == null) || (args[0] != null && args[0].equals(args[1]));', 'name': None, 'content': 'true if the two annotations are {@code equal} or both {@code null}'}]
+2026-01-20 17:05:34,502 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 2, 'RETURN': 1} for equals:
+ {'PARAM': [{'description': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}', 'assertion': 'assert (args[0] != null) || (args[1] == null);', 'name': 'a1', 'content': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}, {'description': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}', 'assertion': 'assert (args[1] != null) || (args[0] == null);', 'name': 'a2', 'content': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}], 'RETURN': [{'description': 'true if the two annotations are equal or both null', 'assertion': 'assert methodResultID == (args[0] == null && args[1] == null) || (args[0] != null && args[0].equals(args[1]));', 'name': None, 'content': 'true if the two annotations are {@code equal} or both {@code null}'}]}
+2026-01-20 17:05:34,503 - DEBUG - llmedico.main - current method name: hashCode
+2026-01-20 17:05:34,503 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Generate a hash code for the given annotation using the algorithm
+ * presented in the {@link Annotation#hashCode()} API docs.
+ *
+ * @param a the Annotation for a hash code calculation is desired, not
+ * {@code null}
+ * @return the calculated hash code
+ * @throws RuntimeException if an {@link Exception} is encountered during
+ * annotation member access
+ * @throws IllegalStateException if an annotation method invocation returns
+ * {@code null}
+ */
+
+2026-01-20 17:05:34,503 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'RETURN': 1, 'THROWS': 2}
+2026-01-20 17:05:34,503 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'a', 'content': 'the Annotation for a hash code calculation is desired, not {@code null}'}, {'tag': 'return', 'name': None, 'content': 'calculated hash code'}, {'tag': 'throws', 'name': 'RuntimeException', 'content': 'if an {@link Exception} is encountered during annotation member access'}, {'tag': 'throws', 'name': 'IllegalStateException', 'content': 'if an annotation method invocation returns {@code null}'}]
+2026-01-20 17:05:34,503 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:05:34,503 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
+    These never produce assertions.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Parameter Semantic Classification Rule
+    Before generating an assertion, classify the @param description as one of:
+    Value-validating: describes nullability, range, size, or intrinsic validity of the parameter
+    Receiver-defining: describes how the parameter configures, toggles, or controls receiver state
+    Rules:
+    For value-validating parameters, assertions MUST be written only in terms of args[i]
+    For receiver-defining parameters, assertions MUST be written in terms of receiverObjectID and MUST NOT restate the condition directly on args[i]
+    Assertions must be written either purely in terms of args[i] or purely in terms of receiverObjectID.
+    Do not mix parameter checks with receiver semantics in the same assertion.
+    @param collection not null
+    Correct (value-validating):
+    assert (args[0] == null) == false;
+
+    Incorrect (receiver misuse):
+    assert !receiverObjectID.isEmpty();
+    
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
+    In that case, express the assertion using receiverObjectID.
+    Example:
+    Input Javadoc:
+    /**
+    * Create a new Closure that calls one of the closures depending
+    * on the predicates.
+    * <p>
+    * The closure at array location 0 is called if the predicate at array
+    * location 0 returned true. Each predicate is evaluated
+    * until one returns true.
+    *
+    * @see org.apache.commons.collections4.functors.SwitchClosure
+    *
+    * @param <E>  the type that the closure acts on
+    * @param predicates  an array of predicates to check, not null
+    * @param closures  an array of closures to call, not null
+    * @return the <code>switch</code> closure
+    * @throws NullPointerException if the either array is null
+    * @throws NullPointerException if any element in the arrays is null
+    * @throws IllegalArgumentException if the arrays have different sizes
+    */
+    Input Method Name:
+    switchClosure
+     Input Parameters:
+    [{'type': {'qualified_name': null, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}, 'name': 'predicates'}, {'type': {'qualified_name': null, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}, 'name': 'closures'}]
+    Input Return Type:
+    {'qualified_name': null, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}
+    And the following available instance methods:
+    void exceptionClosure()
+    void nopClosure()
+    void asClosure(void transformer)
+    void forClosure(int count,void closure)
+    void whileClosure(void predicate,void closure)
+    void doWhileClosure(void closure,void predicate)
+    void invokerClosure(void methodName)
+    void invokerClosure(void methodName,void paramTypes,void args)
+    void chainedClosure(void closures)
+    void chainedClosure(void closures)
+    void ifClosure(void predicate,void trueClosure)
+    void ifClosure(void predicate,void trueClosure,void falseClosure)
+    void switchClosure(void predicates,void closures)
+    void switchClosure(void predicates,void closures,void defaultClosure)
+    void switchClosure(void predicatesAndClosures)
+    void switchMapClosure(void objectsAndClosures)
+    Output Java assertions:
+    ```json
+    [{"description": "an array of predicates to check, not null",
+    "assertion": "assert (args[0]==null) == false;",
+    "name": "predicates",
+    "content": "an array of predicates to check, not null"},
+    {"description": "an array of closures to call, not null",
+    "assertion": "assert (args[1]==null) == false;",
+    "name": "closures ",
+    "content": "an array of closures to call, not null"}]
+    ```
+    Input Javadoc:
+    /**
+    * Disallow the addition of new parameters. The already declared parameters
+    * are still modifiable, but no new parameter can be added.
+    * @param on If true the environment is locked.
+    */
+    Input Method Name:
+    "lockEnvironment"
+     Input Parameters:
+    [{'type': {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}, 'name': 'on'}]
+    Input Return Type:
+    void
+    Instance Methods:
+    boolean isLocked()
+    boolean hasParameter(void parameter)
+    boolean getBooleanParameter(void parameter)
+    int getBooleanParameteri(void parameter)
+    double getNumberParameter(void parameter)
+    int getParameterCount()
+    void lockEnvironment(boolean on)
+    
+    Output Java assertions:
+    ```json
+    [
+        {
+        "description": "true if locked",
+        "assertion": "assert receiverObjectID.isLocked();",
+        "name": "on",
+        "content": "If true the environment is locked."
+        }
+    ]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Generate a hash code for the given annotation using the algorithm
+ * presented in the {@link Annotation#hashCode()} API docs.
+ *
+ * @param a the Annotation for a hash code calculation is desired, not
+ * {@code null}
+ * @return the calculated hash code
+ * @throws RuntimeException if an {@link Exception} is encountered during
+ * annotation member access
+ * @throws IllegalStateException if an annotation method invocation returns
+ * {@code null}
+ */
+"
+    For the method:
+    "hashCode"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a'}]"
+    And the following Return Type:
+    "{'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': 'a', 'content': 'the Annotation for a hash code calculation is desired, not {@code null}'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:05:46,926 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "the Annotation for a hash code calculation is desired, not null", 
+"assertion": "assert (args[0] == null) == false;", 
+"name": "a", 
+"content": "the Annotation for a hash code calculation is desired, not null"}]
+```
+2026-01-20 17:05:46,928 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the Annotation for a hash code calculation is desired, not null', 'assertion': 'assert (args[0] == null) == false;', 'name': 'a', 'content': 'the Annotation for a hash code calculation is desired, not null'}]
+2026-01-20 17:05:46,928 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'a', 'content': 'the Annotation for a hash code calculation is desired, not {@code null}'}, {'tag': 'return', 'name': None, 'content': 'calculated hash code'}, {'tag': 'throws', 'name': 'RuntimeException', 'content': 'if an {@link Exception} is encountered during annotation member access'}, {'tag': 'throws', 'name': 'IllegalStateException', 'content': 'if an annotation method invocation returns {@code null}'}]
+2026-01-20 17:05:46,928 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:05:46,928 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    boolean isPrime(int n)
+    int nextPrime(int n)
+    void primeFactors(int n)
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Generate a hash code for the given annotation using the algorithm
+ * presented in the {@link Annotation#hashCode()} API docs.
+ *
+ * @param a the Annotation for a hash code calculation is desired, not
+ * {@code null}
+ * @return the calculated hash code
+ * @throws RuntimeException if an {@link Exception} is encountered during
+ * annotation member access
+ * @throws IllegalStateException if an annotation method invocation returns
+ * {@code null}
+ */
+"
+    For the method:
+    "hashCode"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a'}]"
+    And the following Return Type:
+    "{'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': null, 'content': 'calculated hash code'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:05:58,488 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "the calculated hash code", 
+"assertion": "assert methodResultID == receiverObjectID.hashCode(args[0]);", 
+"name": null, 
+"content": "the calculated hash code"}]
+```
+2026-01-20 17:05:58,490 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the calculated hash code', 'assertion': 'assert methodResultID == receiverObjectID.hashCode(args[0]);', 'name': None, 'content': 'the calculated hash code'}]
+2026-01-20 17:05:58,490 - DEBUG - llmedico.translator.translator - translating for current mode: THROWS with the following tags: 
+[{'tag': 'param', 'name': 'a', 'content': 'the Annotation for a hash code calculation is desired, not {@code null}'}, {'tag': 'return', 'name': None, 'content': 'calculated hash code'}, {'tag': 'throws', 'name': 'RuntimeException', 'content': 'if an {@link Exception} is encountered during annotation member access'}, {'tag': 'throws', 'name': 'IllegalStateException', 'content': 'if an annotation method invocation returns {@code null}'}]
+2026-01-20 17:05:58,490 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:05:58,490 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java assertion statements that represent the exception conditions described by the @throws tags.
+    Requirements:
+    1. Interpret each @throws tag as a condition under which the specified exception is thrown.
+    2. Translate each @throws condition into exactly one Java assert statement that matches the exception condition itself (i.e., the assertion should evaluate to true when the exception condition holds).
+    3. If a @throws description mentions multiple sub-conditions, combine them into a single logical assertion using && and || as appropriate.
+    4. Ignore @param and @return tags entirely.
+    5. Ignore general descriptive text unless it is explicitly referenced by a @throws tag.
+    6. Output one Java assert statement per @throws tag, each inside its own JSON element..
+    7. Include the exception's name related to the assertion as shown in the example.
+    8. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    9. When generating THROWS assertions, derive conditions from the documented operations and object state (e.g., contains, size, ordering).
+        Do not replace such conditions with generic null checks unless null is explicitly mentioned.
+    10. Always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative receiver names.
+    11. Do not express the non-throw precondition (i.e., do not negate the exception condition). The assertion must describe when the exception is thrown, not when normal execution is allowed.
+    12. For IllegalArgumentException, conditions must be expressed exclusively in terms of method parameters, unless the @throws description explicitly refers to receiver state (e.g., membership in a graph, size, ordering).
+    Examples:
+    Input Javadoc:
+    /**
+    * Adds two integers.
+    *
+    * @throws IllegalArgumentException if x or y is negative
+    */
+    Input Method Name:
+    add
+    Input Parameters:
+    [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "x"},
+    {"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false
+    },
+    "name": "y"}]
+    Input Return Type:
+    {"qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false}
+    Output Java assertions:
+    ```json
+    [{"description": "x or y is negative",
+    "assertion": "assert args[0] < 0 || args[1] < 0;",
+    "name": "IllegalArgumentException",
+    "content": "if x or y is negative"}]
+    ```
+    
+    Input Javadoc:
+    /**
+    * Returns a set of all edges touching the specified vertex. If no edges are
+    * touching the specified vertex returns an empty set.
+    *
+    * @param vertex the vertex for which a set of touching edges is to be
+    * returned.
+    *
+    * @return a set of all edges touching the specified vertex.
+    *
+    * @throws IllegalArgumentException if vertex is not found in the graph.
+    * @throws NullPointerException if vertex is <code>null</code>.
+    */
+    Input Method Name:
+    edgesOf
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'vertex'}]
+    Input Return Type:
+    {'qualified_name': 'java.util.Set', 'simple_name': 'Set', 'is_array': False}
+    Input available Instance Methods:
+    java.lang.Object addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean addEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex,java.lang.Object e)
+    boolean addVertex(java.lang.Object v)
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    Output Java assertions:
+    ```json
+    [{"description": "if vertex is not found in the graph.",
+    "assertion": "assert !receiverObjectID.containsVertex(args[0]);",
+    "name": "IllegalArgumentException",
+    "content": "if vertex is not found in the graph."},
+    {"description": "if vertex is null.",
+    "assertion": "assert args[0]==null;",
+    "name": "NullPointerException",
+    "content": "if vertex is <code>null</code>."}]
+    ```
+    Now generate Java assertion statements from the following Javadoc:
+    "/**
+ * Generate a hash code for the given annotation using the algorithm
+ * presented in the {@link Annotation#hashCode()} API docs.
+ *
+ * @param a the Annotation for a hash code calculation is desired, not
+ * {@code null}
+ * @return the calculated hash code
+ * @throws RuntimeException if an {@link Exception} is encountered during
+ * annotation member access
+ * @throws IllegalStateException if an annotation method invocation returns
+ * {@code null}
+ */
+"
+    For the Method:
+    "hashCode"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a'}]"
+    And the following Return Type:
+    "{'qualified_name': 'int', 'simple_name': 'int', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': 'RuntimeException', 'content': 'if an {@link Exception} is encountered during annotation member access'}}, {{'description': '', 'assertion': '', 'name': 'IllegalStateException', 'content': 'if an annotation method invocation returns {@code null}'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:06:15,040 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "if an Exception is encountered during annotation member access", 
+"assertion": "assert args[0] == null || !(receiverObjectID.isValidAnnotationMemberType(args[0].getClass()));", 
+"name": "RuntimeException", 
+"content": "if an {@link Exception} is encountered during annotation member access"}, 
+{"description": "if an annotation method invocation returns null", 
+"assertion": "assert args[0] == null;", 
+"name": "IllegalStateException", 
+"content": "if an annotation method invocation returns {@code null}"}]
+```
+2026-01-20 17:06:15,041 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'if an Exception is encountered during annotation member access', 'assertion': 'assert args[0] == null || !(receiverObjectID.isValidAnnotationMemberType(args[0].getClass()));', 'name': 'RuntimeException', 'content': 'if an {@link Exception} is encountered during annotation member access'}, {'description': 'if an annotation method invocation returns null', 'assertion': 'assert args[0] == null;', 'name': 'IllegalStateException', 'content': 'if an annotation method invocation returns {@code null}'}]
+2026-01-20 17:06:15,042 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'RETURN': 1, 'THROWS': 2} for hashCode:
+ {'PARAM': [{'description': 'the Annotation for a hash code calculation is desired, not null', 'assertion': 'assert (args[0] == null) == false;', 'name': 'a', 'content': 'the Annotation for a hash code calculation is desired, not null'}], 'RETURN': [{'description': 'the calculated hash code', 'assertion': 'assert methodResultID == receiverObjectID.hashCode(args[0]);', 'name': None, 'content': 'the calculated hash code'}], 'THROWS': [{'description': 'if an Exception is encountered during annotation member access', 'assertion': 'assert args[0] == null || !(receiverObjectID.isValidAnnotationMemberType(args[0].getClass()));', 'name': 'RuntimeException', 'content': 'if an {@link Exception} is encountered during annotation member access'}, {'description': 'if an annotation method invocation returns null', 'assertion': 'assert args[0] == null;', 'name': 'IllegalStateException', 'content': 'if an annotation method invocation returns {@code null}'}]}
+2026-01-20 17:06:15,042 - DEBUG - llmedico.main - current method name: isValidAnnotationMemberType
+2026-01-20 17:06:15,042 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Checks if the specified type is permitted as an annotation member.
+ *
+ * <p>The Java language specification only permits certain types to be used
+ * in annotations. These include {@link String}, {@link Class}, primitive
+ * types, {@link Annotation}, {@link Enum}, and single-dimensional arrays of
+ * these types.</p>
+ *
+ * @param type the type to check, {@code null}
+ * @return {@code true} if the type is a valid type to use in an annotation
+ */
+
+2026-01-20 17:06:15,042 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'RETURN': 1}
+2026-01-20 17:06:15,042 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'type', 'content': 'the type to check, {@code null}'}, {'tag': 'return', 'name': None, 'content': 'true} if the type is a valid type to use in an annotation'}]
+2026-01-20 17:06:15,042 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:06:15,042 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
+    These never produce assertions.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Parameter Semantic Classification Rule
+    Before generating an assertion, classify the @param description as one of:
+    Value-validating: describes nullability, range, size, or intrinsic validity of the parameter
+    Receiver-defining: describes how the parameter configures, toggles, or controls receiver state
+    Rules:
+    For value-validating parameters, assertions MUST be written only in terms of args[i]
+    For receiver-defining parameters, assertions MUST be written in terms of receiverObjectID and MUST NOT restate the condition directly on args[i]
+    Assertions must be written either purely in terms of args[i] or purely in terms of receiverObjectID.
+    Do not mix parameter checks with receiver semantics in the same assertion.
+    @param collection not null
+    Correct (value-validating):
+    assert (args[0] == null) == false;
+
+    Incorrect (receiver misuse):
+    assert !receiverObjectID.isEmpty();
+    
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
+    In that case, express the assertion using receiverObjectID.
+    Example:
+    Input Javadoc:
+    /**
+    * Create a new Closure that calls one of the closures depending
+    * on the predicates.
+    * <p>
+    * The closure at array location 0 is called if the predicate at array
+    * location 0 returned true. Each predicate is evaluated
+    * until one returns true.
+    *
+    * @see org.apache.commons.collections4.functors.SwitchClosure
+    *
+    * @param <E>  the type that the closure acts on
+    * @param predicates  an array of predicates to check, not null
+    * @param closures  an array of closures to call, not null
+    * @return the <code>switch</code> closure
+    * @throws NullPointerException if the either array is null
+    * @throws NullPointerException if any element in the arrays is null
+    * @throws IllegalArgumentException if the arrays have different sizes
+    */
+    Input Method Name:
+    switchClosure
+     Input Parameters:
+    [{'type': {'qualified_name': null, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}, 'name': 'predicates'}, {'type': {'qualified_name': null, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}, 'name': 'closures'}]
+    Input Return Type:
+    {'qualified_name': null, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}
+    And the following available instance methods:
+    void exceptionClosure()
+    void nopClosure()
+    void asClosure(void transformer)
+    void forClosure(int count,void closure)
+    void whileClosure(void predicate,void closure)
+    void doWhileClosure(void closure,void predicate)
+    void invokerClosure(void methodName)
+    void invokerClosure(void methodName,void paramTypes,void args)
+    void chainedClosure(void closures)
+    void chainedClosure(void closures)
+    void ifClosure(void predicate,void trueClosure)
+    void ifClosure(void predicate,void trueClosure,void falseClosure)
+    void switchClosure(void predicates,void closures)
+    void switchClosure(void predicates,void closures,void defaultClosure)
+    void switchClosure(void predicatesAndClosures)
+    void switchMapClosure(void objectsAndClosures)
+    Output Java assertions:
+    ```json
+    [{"description": "an array of predicates to check, not null",
+    "assertion": "assert (args[0]==null) == false;",
+    "name": "predicates",
+    "content": "an array of predicates to check, not null"},
+    {"description": "an array of closures to call, not null",
+    "assertion": "assert (args[1]==null) == false;",
+    "name": "closures ",
+    "content": "an array of closures to call, not null"}]
+    ```
+    Input Javadoc:
+    /**
+    * Disallow the addition of new parameters. The already declared parameters
+    * are still modifiable, but no new parameter can be added.
+    * @param on If true the environment is locked.
+    */
+    Input Method Name:
+    "lockEnvironment"
+     Input Parameters:
+    [{'type': {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}, 'name': 'on'}]
+    Input Return Type:
+    void
+    Instance Methods:
+    boolean isLocked()
+    boolean hasParameter(void parameter)
+    boolean getBooleanParameter(void parameter)
+    int getBooleanParameteri(void parameter)
+    double getNumberParameter(void parameter)
+    int getParameterCount()
+    void lockEnvironment(boolean on)
+    
+    Output Java assertions:
+    ```json
+    [
+        {
+        "description": "true if locked",
+        "assertion": "assert receiverObjectID.isLocked();",
+        "name": "on",
+        "content": "If true the environment is locked."
+        }
+    ]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Checks if the specified type is permitted as an annotation member.
+ *
+ * <p>The Java language specification only permits certain types to be used
+ * in annotations. These include {@link String}, {@link Class}, primitive
+ * types, {@link Annotation}, {@link Enum}, and single-dimensional arrays of
+ * these types.</p>
+ *
+ * @param type the type to check, {@code null}
+ * @return {@code true} if the type is a valid type to use in an annotation
+ */
+"
+    For the method:
+    "isValidAnnotationMemberType"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Class', 'is_array': False, 'array_dimensions': 0}, 'name': 'type'}]"
+    And the following Return Type:
+    "{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': 'type', 'content': 'the type to check, {@code null}'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:06:26,483 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "the type to check, {@code null}", "assertion": "assert (args[0] != null);", "name": "type", "content": "the type to check, {@code null}"}]
+```
+2026-01-20 17:06:26,484 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the type to check, {@code null}', 'assertion': 'assert (args[0] != null);', 'name': 'type', 'content': 'the type to check, {@code null}'}]
+2026-01-20 17:06:26,484 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'type', 'content': 'the type to check, {@code null}'}, {'tag': 'return', 'name': None, 'content': 'true} if the type is a valid type to use in an annotation'}]
+2026-01-20 17:06:26,484 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:06:26,484 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    boolean isPrime(int n)
+    int nextPrime(int n)
+    void primeFactors(int n)
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Checks if the specified type is permitted as an annotation member.
+ *
+ * <p>The Java language specification only permits certain types to be used
+ * in annotations. These include {@link String}, {@link Class}, primitive
+ * types, {@link Annotation}, {@link Enum}, and single-dimensional arrays of
+ * these types.</p>
+ *
+ * @param type the type to check, {@code null}
+ * @return {@code true} if the type is a valid type to use in an annotation
+ */
+"
+    For the method:
+    "isValidAnnotationMemberType"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Class', 'is_array': False, 'array_dimensions': 0}, 'name': 'type'}]"
+    And the following Return Type:
+    "{'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': null, 'content': 'true} if the type is a valid type to use in an annotation'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:06:41,565 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "true if the type is a valid type to use in an annotation", 
+"assertion": "assert methodResultID == (args[0] instanceof String || args[0] instanceof Class || args[0] instanceof Annotation || args[0] instanceof Enum);", 
+"name": null, 
+"content": "true if the type is a valid type to use in an annotation"}]
+```
+2026-01-20 17:06:41,566 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'true if the type is a valid type to use in an annotation', 'assertion': 'assert methodResultID == (args[0] instanceof String || args[0] instanceof Class || args[0] instanceof Annotation || args[0] instanceof Enum);', 'name': None, 'content': 'true if the type is a valid type to use in an annotation'}]
+2026-01-20 17:06:41,566 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'RETURN': 1} for isValidAnnotationMemberType:
+ {'PARAM': [{'description': 'the type to check, {@code null}', 'assertion': 'assert (args[0] != null);', 'name': 'type', 'content': 'the type to check, {@code null}'}], 'RETURN': [{'description': 'true if the type is a valid type to use in an annotation', 'assertion': 'assert methodResultID == (args[0] instanceof String || args[0] instanceof Class || args[0] instanceof Annotation || args[0] instanceof Enum);', 'name': None, 'content': 'true if the type is a valid type to use in an annotation'}]}
+2026-01-20 17:06:41,567 - DEBUG - llmedico.main - current method name: toString
+2026-01-20 17:06:41,567 - DEBUG - llmedico.main - has the following javadoc: /**
+ * Generate a string representation of an Annotation, as suggested by
+ * {@link Annotation#toString()}.
+ *
+ * @param a the annotation of which a string representation is desired
+ * @return the standard string representation of an annotation, not
+ * {@code null}
+ */
+
+2026-01-20 17:06:41,567 - DEBUG - llmedico.main - found modes and their frequencies: {'PARAM': 1, 'RETURN': 1}
+2026-01-20 17:06:41,567 - DEBUG - llmedico.translator.translator - translating for current mode: PARAM with the following tags: 
+[{'tag': 'param', 'name': 'a', 'content': 'the annotation of which a string representation is desired'}, {'tag': 'return', 'name': None, 'content': 'standard string representation of an annotation, not {@code null}'}]
+2026-01-20 17:06:41,567 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:06:41,567 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate valid, compilable Java pre-condition assertion statements that represent the requirements described in the @param tag.
+    Ignore @param tags whose name is enclosed in < > (generic type parameters). DO NOT generate an assertion for tags like @param <S>.
+    These never produce assertions.
+    Requirements:
+    1. Interpret each @param tag as a pre-condition, and generate a Java assert statement checking that parameter’s validity.
+    2. Ignore @return and @throws tags — output only pre-condition checks.
+    3. Output one Java assert statement per pre-condition, each inside its own JSON element.
+    4. Include the parameter's name related to the assertion as shown in the example.
+    5. Include the parameter's content related to the assertion as shown in the example. Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    6. Only output JSON elements for the parameters described in the @param tag. If the signature includes parameters that are not described in a @param tag, do not generate an element for them.
+    7. Assertions must be type-correct with respect to the parameter’s declared type.
+    8. Parameter Semantic Classification Rule
+    Before generating an assertion, classify the @param description as one of:
+    Value-validating: describes nullability, range, size, or intrinsic validity of the parameter
+    Receiver-defining: describes how the parameter configures, toggles, or controls receiver state
+    Rules:
+    For value-validating parameters, assertions MUST be written only in terms of args[i]
+    For receiver-defining parameters, assertions MUST be written in terms of receiverObjectID and MUST NOT restate the condition directly on args[i]
+    Assertions must be written either purely in terms of args[i] or purely in terms of receiverObjectID.
+    Do not mix parameter checks with receiver semantics in the same assertion.
+    @param collection not null
+    Correct (value-validating):
+    assert (args[0] == null) == false;
+
+    Incorrect (receiver misuse):
+    assert !receiverObjectID.isEmpty();
+    
+    9. Do not introduce null checks unless nullability is explicitly stated in the @param documentation.
+    10. Express the condition directly on args[i] unless the @param documentation describes an effect on receiver state rather than intrinsic parameter validity.
+    In that case, express the assertion using receiverObjectID.
+    Example:
+    Input Javadoc:
+    /**
+    * Create a new Closure that calls one of the closures depending
+    * on the predicates.
+    * <p>
+    * The closure at array location 0 is called if the predicate at array
+    * location 0 returned true. Each predicate is evaluated
+    * until one returns true.
+    *
+    * @see org.apache.commons.collections4.functors.SwitchClosure
+    *
+    * @param <E>  the type that the closure acts on
+    * @param predicates  an array of predicates to check, not null
+    * @param closures  an array of closures to call, not null
+    * @return the <code>switch</code> closure
+    * @throws NullPointerException if the either array is null
+    * @throws NullPointerException if any element in the arrays is null
+    * @throws IllegalArgumentException if the arrays have different sizes
+    */
+    Input Method Name:
+    switchClosure
+     Input Parameters:
+    [{'type': {'qualified_name': null, 'simple_name': 'Predicate', 'is_array': True, 'array_dimensions': 1}, 'name': 'predicates'}, {'type': {'qualified_name': null, 'simple_name': 'Closure', 'is_array': True, 'array_dimensions': 1}, 'name': 'closures'}]
+    Input Return Type:
+    {'qualified_name': null, 'simple_name': 'Closure', 'is_array': False, 'array_dimensions': 0}
+    And the following available instance methods:
+    void exceptionClosure()
+    void nopClosure()
+    void asClosure(void transformer)
+    void forClosure(int count,void closure)
+    void whileClosure(void predicate,void closure)
+    void doWhileClosure(void closure,void predicate)
+    void invokerClosure(void methodName)
+    void invokerClosure(void methodName,void paramTypes,void args)
+    void chainedClosure(void closures)
+    void chainedClosure(void closures)
+    void ifClosure(void predicate,void trueClosure)
+    void ifClosure(void predicate,void trueClosure,void falseClosure)
+    void switchClosure(void predicates,void closures)
+    void switchClosure(void predicates,void closures,void defaultClosure)
+    void switchClosure(void predicatesAndClosures)
+    void switchMapClosure(void objectsAndClosures)
+    Output Java assertions:
+    ```json
+    [{"description": "an array of predicates to check, not null",
+    "assertion": "assert (args[0]==null) == false;",
+    "name": "predicates",
+    "content": "an array of predicates to check, not null"},
+    {"description": "an array of closures to call, not null",
+    "assertion": "assert (args[1]==null) == false;",
+    "name": "closures ",
+    "content": "an array of closures to call, not null"}]
+    ```
+    Input Javadoc:
+    /**
+    * Disallow the addition of new parameters. The already declared parameters
+    * are still modifiable, but no new parameter can be added.
+    * @param on If true the environment is locked.
+    */
+    Input Method Name:
+    "lockEnvironment"
+     Input Parameters:
+    [{'type': {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False, 'array_dimensions': 0}, 'name': 'on'}]
+    Input Return Type:
+    void
+    Instance Methods:
+    boolean isLocked()
+    boolean hasParameter(void parameter)
+    boolean getBooleanParameter(void parameter)
+    int getBooleanParameteri(void parameter)
+    double getNumberParameter(void parameter)
+    int getParameterCount()
+    void lockEnvironment(boolean on)
+    
+    Output Java assertions:
+    ```json
+    [
+        {
+        "description": "true if locked",
+        "assertion": "assert receiverObjectID.isLocked();",
+        "name": "on",
+        "content": "If true the environment is locked."
+        }
+    ]
+    ```
+
+    Now generate Java pre-condition assertions in the provided output format for the following Javadoc:
+    "/**
+ * Generate a string representation of an Annotation, as suggested by
+ * {@link Annotation#toString()}.
+ *
+ * @param a the annotation of which a string representation is desired
+ * @return the standard string representation of an annotation, not
+ * {@code null}
+ */
+"
+    For the method:
+    "toString"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a'}]"
+    And the following Return Type:
+    "{'qualified_name': null, 'simple_name': 'String', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': 'a', 'content': 'the annotation of which a string representation is desired'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:06:53,113 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "the annotation of which a string representation is desired", "assertion": "assert (args[0] == null) == false;", "name": "a", "content": "the annotation of which a string representation is desired"}]
+```
+2026-01-20 17:06:53,114 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the annotation of which a string representation is desired', 'assertion': 'assert (args[0] == null) == false;', 'name': 'a', 'content': 'the annotation of which a string representation is desired'}]
+2026-01-20 17:06:53,115 - DEBUG - llmedico.translator.translator - translating for current mode: RETURN with the following tags: 
+[{'tag': 'param', 'name': 'a', 'content': 'the annotation of which a string representation is desired'}, {'tag': 'return', 'name': None, 'content': 'standard string representation of an annotation, not {@code null}'}]
+2026-01-20 17:06:53,115 - DEBUG - llm_caller.models.ollama - Ollama: system prompt is: You are a Java expert.
+    I will provide a full Javadoc comment describing a method and the parameters of the method's signature.
+    The Javadoc may contain a general description, as well as tags such as @param, @return, and @throws.
+    Additionally, I will provide the parameters, the return type and the method name.
+    I may also provide a list of available instance methods of the receiver’s class.
+    This list represents the allowed operations that may be used to express the assertion’s semantics.
+
+    When such a list is provided:
+    - Prefer using only the methods from this list when referring to the receiver’s state.
+    - Do not invent or assume the existence of other receiver methods.
+    - If multiple listed methods could express the same semantic idea, choose the one that best matches the documented behavior.
+    - If none of the listed methods are suitable to express the documented semantics, choose a reasonable semantic placeholder name (e.g., containsX, hasY) rather than inventing unrelated logic.
+    
+    - Prefer built-in arithmetic and boolean operators over function calls.
+    - Do NOT introduce function calls (e.g., Math.abs, Objects.equals) if the same logic can be expressed using operators.
+    - Only use functions when the condition cannot be expressed using operators alone.
+    - Do NOT replace operator-based expressions with function calls if operators are sufficient.
+    
+    General Requirements:
+    A. If the Javadoc describes general conditions in the description (outside of tags), use them as additional information for your assertion.
+    B. For the Assertion use standard Java syntax (e.g., assert x > 0;) only. Do not provide any additional information.
+    Remember, that NOT "!" only works for boolean values!
+    INCORRECT Example: assert !args[0].length == 0 && !args[1].length == 0;
+    CORRECT Example: assert args[0].length != 0 && args[1].length != 0;
+    C. Ternary Operator Usage
+    When using the ternary operator (condition ? expr1 : expr2), strictly follow these rules:
+    Boolean Condition.
+    The condition part MUST be a boolean expression.
+    Context-Consistent Result:
+    The ternary expression MUST evaluate to a value that fits the surrounding context.
+        -If the ternary appears inside an assert, the overall expression MUST evaluate to boolean.
+        -If the ternary produces a non-boolean value (e.g., int), it MUST be compared to something to form a boolean expression.
+    INCORRECT Example (ternary returns an int, but assert expects a boolean): assert (methodResultID <= args[0] ? args[0] : args[1]);
+    CORRECT Example (ternary result is compared, making the assertion boolean): assert methodResultID == (methodResultID <= args[0] ? args[0] : args[1]);
+    D. Only output JSON, no additional explanations or commentary.
+    E. When the assertion requires referring to the receiver object, always refer to the receiver object using the variable name receiverObjectID. Do not use 'this' or invent alternative names (e.g., graph, obj).
+    F. Provide a short description for the generated assertion as shown in the example.
+    G. Always reference method parameters exclusively using the canonical form args[index], where index corresponds to the parameter’s position in the method signature.
+    Do not introduce, invent, or reuse parameter names from the method signature (e.g., x, y, n, xval, yval, etc.).
+    INCORRECT Example: assert xval.length != yval.length; assert n <= 0;
+    CORRECT Example: assert args[0].length != args[1].length; assert args[1] <= 0;
+    H. Assertions must relate the return value to method inputs. Only involve receiver state if the Javadoc explicitly refers to receiver state and the condition cannot be expressed using parameters alone.
+    I. Do not introduce generic null checks unless nullability is explicitly stated in the documentation.
+    J. Do NOT replace simple checks (null, boolean, numeric) with:
+        -collection emptiness checks
+        -iterator usage
+        -size-based conditions
+        -Preserve the original abstraction level of the condition.
+    K. If no listed instance method can express the documented receiver semantics, you may use a clearly semantic placeholder name (e.g., containsX) only as a last resort. Do not invent unrelated logic or placeholder methods when parameters alone suffice.
+    L. If the method return type is boolean, use methodResultID directly as a boolean expression. Do not compare it to true or false.
+    M. Use methodResultID according to the declared return type. If the return type is an object, relate it via equality to other objects. If it is a boolean, use it only as a boolean expression.
+    N. If a condition can be expressed using method parameters, always prefer method parameters and do not rewrite the condition using receiver fields unless the Javadoc explicitly refers to receiver state.
+    O. methodResultID represents the already-computed return value. Do not compare it to method calls or expressions with side effects. Compare it only to boolean literals, null, parameters, or pure expressions.
+    P. Never call the method being specified inside any generated assertion (THROWS or RETURN). Assertions must describe behavior, not re-invoke the method.
+    Q: Prefer the simplest syntactically valid boolean expression.If multiple assertions are logically related, choose the one with:
+        -Fewer method calls
+        -Fewer operators
+        -No receiver references
+
+2026-01-20 17:06:53,115 - INFO - llm_caller.models.ollama - Ollama: user prompt: 
+    Your task is to generate a valid, compilable Java assertion statement that represents the conditions described by the @return tag.
+    Requirements:
+    1. Interpret the @return tag as a return-condition, and generate a Java assert statement checking the return's value validity.
+    2. Ignore @param and @throws tags — output only a return-condition check. But you may assume that the preconditions for normal return are satisfied when writing RETURN assertions.
+    3. Output one Java assert statement, as an JSON element.
+    4. Refer to the return value as methodResultID, as shown in the example.
+    5. The value for "name" should be null as shown in the example, as the assertion can only refer to one return value.
+    6. Include the parameter's content related to the assertion as shown in the example.Copy it exactly, including potential HTML elements, and HTML Character Entities like "&lt;". Include \n character accordingly.
+    7. Always refer to the receiver object using the variable name `receiverObjectID`. Do not use `this` or invent alternative receiver names.
+    8. Use `methodResultID` according to the declared return type:
+        - If the return type is boolean, use `methodResultID` directly as a boolean expression. Do not compare it to `true` or `false`.
+        - If the return type is an object, relate it via equality to other objects.
+        - If the return type is numeric, use arithmetic expressions as appropriate.
+    9. Derive return conditions from the documented semantic behavior of the method, its parameters, and the receiver state.
+    10. Do not replace semantic conditions with generic null checks unless explicitly stated in the documentation.
+    11. When writing a RETURN assertion, never call the method being specified, and never call mutating methods on the receiver. Assertions must be side-effect free.
+    12. Do not explain how the method achieves the result. Specify only the condition under which the return value is true or false.
+    Example:
+    Input Javadoc:
+    /**
+     * Primality test: tells if the argument is a (provable) prime or not.
+     * <p>
+     * It uses the Miller-Rabin probabilistic test in such a way that a result is guaranteed:
+     * it uses the firsts prime numbers as successive base (see Handbook of applied cryptography
+     * by Menezes, table 4.1).
+     *
+     * @param n number to test.
+     * @return true if n is prime. (All numbers &lt; 2 return false).
+     */
+     Input Method Name:
+     isPrime
+     Input Parameters:
+     [{"type": {
+        "qualified_name": "int",
+        "name": "int",
+        "is_array": false},
+    "name": "n"}]
+    Input Return Type:
+    {"qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false}
+    Input available Instance Methods:
+    boolean isPrime(int n)
+    int nextPrime(int n)
+    void primeFactors(int n)
+    Output Java assertions:
+     ```json
+    [{"description": "true if n is prime. (All numbers < 2 return false).",
+    "assertion": "assert methodResultID == (args[0] >= 2);",
+    "name": null,
+    "content": "true if n is prime. (All numbers &lt; 2 return false)."}]
+    ```
+    Input Javadoc:
+    /**
+    * Adds the specified edge to this graph, going from the source vertex to
+    * the target vertex. More formally, adds the specified edge, <code>
+    * e</code>, to this graph if this graph contains no edge <code>e2</code>
+    * such that <code>e2.equals(e)</code>. If this graph already contains such
+    * an edge, the call leaves this graph unchanged and returns <tt>false</tt>.
+    * Some graphs do not allow edge-multiplicity. In such cases, if the graph
+    * already contains an edge from the specified source to the specified
+    * target, than this method does not change the graph and returns <code>
+    * false</code>. If the edge was added to the graph, returns <code>
+    * true</code>.
+    *
+    * <p>The source and target vertices must already be contained in this
+    * graph. If they are not found in graph IllegalArgumentException is
+    * thrown.</p>
+    *
+    * @param sourceVertex source vertex of the edge.
+    * @param targetVertex target vertex of the edge.
+    * @param e edge to be added to this graph.
+    *
+    * @return <tt>true</tt> if this graph did not already contain the specified
+    * edge.
+    *
+    * @throws IllegalArgumentException if source or target vertices are not
+    * found in the graph.
+    * @throws ClassCastException if the specified edge is not assignment
+    * compatible with the class of edges produced by the edge factory of this
+    * graph.
+    * @throws NullPointerException if any of the specified vertices is <code>
+    * null</code>.
+    *
+    * @see #addEdge(Object, Object)
+    * @see #getEdgeFactory()
+    */
+    Input Method Name:
+    addEdge
+    Input Parameters:
+    [{'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'sourceVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'targetVertex'}, {'type': {'qualified_name': 'java.lang.Object', 'simple_name': 'Object', 'is_array': False}, 'name': 'e'}]
+    Input Return Type:
+    {'qualified_name': 'boolean', 'simple_name': 'boolean', 'is_array': False}
+    Input available Instance Methods:
+    boolean containsEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean containsEdge(java.lang.Object e)
+    boolean containsVertex(java.lang.Object v)
+    java.util.Set edgesOf(java.lang.Object vertex)
+    boolean removeAllEdges(java.util.Collection edges)
+    java.util.Set removeAllEdges(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeAllVertices(java.util.Collection vertices)
+    java.lang.Object removeEdge(java.lang.Object sourceVertex,java.lang.Object targetVertex)
+    boolean removeEdge(java.lang.Object e)
+    boolean removeVertex(java.lang.Object v)
+    java.lang.Object getEdgeSource(java.lang.Object e)
+    java.lang.Object getEdgeTarget(java.lang.Object e)
+    double getEdgeWeight(java.lang.Object e)
+    Output Java assertion:
+    ```json
+    [{
+        "description": "true if this graph did not already contain the specified edge.",
+        "assertion": "assert methodResultID == !receiverObjectID.containsEdge(args[0], args[1]);",
+        "name": null,
+        "content": "true if this graph did not already contain the specified edge."
+    }]
+    ```
+    Now generate Java return-condition assertion for the following Javadoc:
+    "/**
+ * Generate a string representation of an Annotation, as suggested by
+ * {@link Annotation#toString()}.
+ *
+ * @param a the annotation of which a string representation is desired
+ * @return the standard string representation of an annotation, not
+ * {@code null}
+ */
+"
+    For the method:
+    "toString"
+    With the following Parameters:
+    "[{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a'}]"
+    And the following Return Type:
+    "{'qualified_name': null, 'simple_name': 'String', 'is_array': False, 'array_dimensions': 0}"
+    And the following available instance methods:
+    "boolean equals(None a1,None a2)
+int hashCode(None a)
+boolean isValidAnnotationMemberType(None type)
+"
+    
+    Use this template:
+    ```json
+    "[{{'description': '', 'assertion': '', 'name': null, 'content': 'standard string representation of an annotation, not {@code null}'}}]"
+    ```
+    
+Before outputting the result, verify all of the following:
+
+I. Parameter Referencing:
+   Every parameter MUST be referenced exclusively using the canonical form args[i].
+   Do NOT use actual parameter names, inferred variable names, or aliases
+   (e.g., x, y, n, xval, yval).
+
+II. Receiver Usage:
+   If a condition can be expressed using args[i] alone, do NOT use receiverObjectID.
+
+III. Output Format:
+   ONLY return the list of JSON elements exactly as shown in the example.
+   Do NOT return Java code, Python code, explanations, or any additional text.
+
+2026-01-20 17:07:05,306 - DEBUG - llm_caller.models.ollama - raw response from llama3.3:70b: ```json
+[{"description": "the standard string representation of an annotation, not null", 
+"assertion": "assert methodResultID != null;", 
+"name": null, 
+"content": "the standard string representation of an annotation, not {@code null}"}]
+```
+2026-01-20 17:07:05,307 - DEBUG - llmedico.translator.translator - extracted the following assertions: [{'description': 'the standard string representation of an annotation, not null', 'assertion': 'assert methodResultID != null;', 'name': None, 'content': 'the standard string representation of an annotation, not {@code null}'}]
+2026-01-20 17:07:05,307 - DEBUG - llmedico.main - the following java assertion have been generated for {'PARAM': 1, 'RETURN': 1} for toString:
+ {'PARAM': [{'description': 'the annotation of which a string representation is desired', 'assertion': 'assert (args[0] == null) == false;', 'name': 'a', 'content': 'the annotation of which a string representation is desired'}], 'RETURN': [{'description': 'the standard string representation of an annotation, not null', 'assertion': 'assert methodResultID != null;', 'name': None, 'content': 'the standard string representation of an annotation, not {@code null}'}]}
+2026-01-20 17:07:05,308 - DEBUG - llmedico.main - the following java assertions have been generated for org.apache.commons.lang3.AnnotationUtils: 
+ [{'method': 'AnnotationUtils', 'type': 'constructor', 'parameters': [], 'conditions': {}}, {'method': 'equals', 'type': 'method', 'parameters': [{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a1'}, {'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a2'}], 'conditions': {'PARAM': [{'description': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}', 'assertion': 'assert (args[0] != null) || (args[1] == null);', 'name': 'a1', 'content': 'the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}, {'description': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}', 'assertion': 'assert (args[1] != null) || (args[0] == null);', 'name': 'a2', 'content': 'the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}'}], 'RETURN': [{'description': 'true if the two annotations are equal or both null', 'assertion': 'assert methodResultID == (args[0] == null && args[1] == null) || (args[0] != null && args[0].equals(args[1]));', 'name': None, 'content': 'true if the two annotations are {@code equal} or both {@code null}'}]}}, {'method': 'hashCode', 'type': 'method', 'parameters': [{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a'}], 'conditions': {'PARAM': [{'description': 'the Annotation for a hash code calculation is desired, not null', 'assertion': 'assert (args[0] == null) == false;', 'name': 'a', 'content': 'the Annotation for a hash code calculation is desired, not null'}], 'RETURN': [{'description': 'the calculated hash code', 'assertion': 'assert methodResultID == receiverObjectID.hashCode(args[0]);', 'name': None, 'content': 'the calculated hash code'}], 'THROWS': [{'description': 'if an Exception is encountered during annotation member access', 'assertion': 'assert args[0] == null || !(receiverObjectID.isValidAnnotationMemberType(args[0].getClass()));', 'name': 'RuntimeException', 'content': 'if an {@link Exception} is encountered during annotation member access'}, {'description': 'if an annotation method invocation returns null', 'assertion': 'assert args[0] == null;', 'name': 'IllegalStateException', 'content': 'if an annotation method invocation returns {@code null}'}]}}, {'method': 'isValidAnnotationMemberType', 'type': 'method', 'parameters': [{'type': {'qualified_name': None, 'simple_name': 'Class', 'is_array': False, 'array_dimensions': 0}, 'name': 'type'}], 'conditions': {'PARAM': [{'description': 'the type to check, {@code null}', 'assertion': 'assert (args[0] != null);', 'name': 'type', 'content': 'the type to check, {@code null}'}], 'RETURN': [{'description': 'true if the type is a valid type to use in an annotation', 'assertion': 'assert methodResultID == (args[0] instanceof String || args[0] instanceof Class || args[0] instanceof Annotation || args[0] instanceof Enum);', 'name': None, 'content': 'true if the type is a valid type to use in an annotation'}]}}, {'method': 'toString', 'type': 'method', 'parameters': [{'type': {'qualified_name': None, 'simple_name': 'Annotation', 'is_array': False, 'array_dimensions': 0}, 'name': 'a'}], 'conditions': {'PARAM': [{'description': 'the annotation of which a string representation is desired', 'assertion': 'assert (args[0] == null) == false;', 'name': 'a', 'content': 'the annotation of which a string representation is desired'}], 'RETURN': [{'description': 'the standard string representation of an annotation, not null', 'assertion': 'assert methodResultID != null;', 'name': None, 'content': 'the standard string representation of an annotation, not {@code null}'}]}}]
+2026-01-20 17:07:05,309 - DEBUG - llmedico.main - ---Inserting Generated Conditions into LLMedico File---
+2026-01-20 17:07:05,309 - INFO - llmedico.main - Data before dumping:
+[
+  {
+    "name": "AnnotationUtils",
+    "package": "org.apache.commons.lang3",
+    "qualified_name": "org.apache.commons.lang3.AnnotationUtils",
+    "javadoc": "/**\n * Helper methods for working with {@link Annotation} instances.\n *\n * <p>This class contains various utility methods that make working with\n * annotations simpler.</p>\n *\n * <p>{@link Annotation} instances are always proxy objects; unfortunately\n * dynamic proxies cannot be depended upon to know how to implement certain\n * methods in the same manner as would be done by \"natural\" {@link Annotation}s.\n * The methods presented in this class can be used to avoid that possibility. It\n * is of course also possible for dynamic proxies to actually delegate their\n * e.g. {@link Annotation#equals(Object)}/{@link Annotation#hashCode()}/\n * {@link Annotation#toString()} implementations to {@link AnnotationUtils}.</p>\n *\n * <p>#ThreadSafe#</p>\n *\n * @since 3.0\n */\n",
+    "code": "/**\n * Helper methods for working with {@link Annotation} instances.\n *\n * <p>This class contains various utility methods that make working with\n * annotations simpler.</p>\n *\n * <p>{@link Annotation} instances are always proxy objects; unfortunately\n * dynamic proxies cannot be depended upon to know how to implement certain\n * methods in the same manner as would be done by \"natural\" {@link Annotation}s.\n * The methods presented in this class can be used to avoid that possibility. It\n * is of course also possible for dynamic proxies to actually delegate their\n * e.g. {@link Annotation#equals(Object)}/{@link Annotation#hashCode()}/\n * {@link Annotation#toString()} implementations to {@link AnnotationUtils}.</p>\n *\n * <p>#ThreadSafe#</p>\n *\n * @since 3.0\n */\npublic class AnnotationUtils {\n\n    /**\n     * A style that prints annotations as recommended.\n     */\n    private static final ToStringStyle TO_STRING_STYLE = new ToStringStyle() {\n\n        /**\n         * Serialization version\n         */\n        private static final long serialVersionUID = 1L;\n\n        {\n            setDefaultFullDetail(true);\n            setArrayContentDetail(true);\n            setUseClassName(true);\n            setUseShortClassName(true);\n            setUseIdentityHashCode(false);\n            setContentStart(\"(\");\n            setContentEnd(\")\");\n            setFieldSeparator(\", \");\n            setArrayStart(\"[\");\n            setArrayEnd(\"]\");\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        @Override\n        protected void appendDetail(final StringBuffer buffer, final String fieldName, Object value) {\n            if (value instanceof Annotation) {\n                value = AnnotationUtils.toString((Annotation) value);\n            }\n            super.appendDetail(buffer, fieldName, value);\n        }\n\n        /**\n         * {@inheritDoc}\n         */\n        @Override\n        protected String getShortClassName(final Class<?> cls) {\n            // formatter:off\n            return ClassUtils.getAllInterfaces(cls).stream().filter(Annotation.class::isAssignableFrom).findFirst().map(iface -> \"@\" + iface.getName()).orElse(StringUtils.EMPTY);\n            // formatter:on\n        }\n    };\n\n    /**\n     * Helper method for comparing two arrays of annotations.\n     *\n     * @param a1 the first array\n     * @param a2 the second array\n     * @return a flag whether these arrays are equal\n     */\n    private static boolean annotationArrayMemberEquals(final Annotation[] a1, final Annotation[] a2) {\n        if (a1.length != a2.length) {\n            return false;\n        }\n        for (int i = 0; i < a1.length; i++) {\n            if (!equals(a1[i], a2[i])) {\n                return false;\n            }\n        }\n        return true;\n    }\n\n    /**\n     * Helper method for comparing two objects of an array type.\n     *\n     * @param componentType the component type of the array\n     * @param o1 the first object\n     * @param o2 the second object\n     * @return a flag whether these objects are equal\n     */\n    private static boolean arrayMemberEquals(final Class<?> componentType, final Object o1, final Object o2) {\n        if (componentType.isAnnotation()) {\n            return annotationArrayMemberEquals((Annotation[]) o1, (Annotation[]) o2);\n        }\n        if (componentType.equals(Byte.TYPE)) {\n            return Arrays.equals((byte[]) o1, (byte[]) o2);\n        }\n        if (componentType.equals(Short.TYPE)) {\n            return Arrays.equals((short[]) o1, (short[]) o2);\n        }\n        if (componentType.equals(Integer.TYPE)) {\n            return Arrays.equals((int[]) o1, (int[]) o2);\n        }\n        if (componentType.equals(Character.TYPE)) {\n            return Arrays.equals((char[]) o1, (char[]) o2);\n        }\n        if (componentType.equals(Long.TYPE)) {\n            return Arrays.equals((long[]) o1, (long[]) o2);\n        }\n        if (componentType.equals(Float.TYPE)) {\n            return Arrays.equals((float[]) o1, (float[]) o2);\n        }\n        if (componentType.equals(Double.TYPE)) {\n            return Arrays.equals((double[]) o1, (double[]) o2);\n        }\n        if (componentType.equals(Boolean.TYPE)) {\n            return Arrays.equals((boolean[]) o1, (boolean[]) o2);\n        }\n        return Arrays.equals((Object[]) o1, (Object[]) o2);\n    }\n\n    /**\n     * Helper method for generating a hash code for an array.\n     *\n     * @param componentType the component type of the array\n     * @param o the array\n     * @return a hash code for the specified array\n     */\n    private static int arrayMemberHash(final Class<?> componentType, final Object o) {\n        if (componentType.equals(Byte.TYPE)) {\n            return Arrays.hashCode((byte[]) o);\n        }\n        if (componentType.equals(Short.TYPE)) {\n            return Arrays.hashCode((short[]) o);\n        }\n        if (componentType.equals(Integer.TYPE)) {\n            return Arrays.hashCode((int[]) o);\n        }\n        if (componentType.equals(Character.TYPE)) {\n            return Arrays.hashCode((char[]) o);\n        }\n        if (componentType.equals(Long.TYPE)) {\n            return Arrays.hashCode((long[]) o);\n        }\n        if (componentType.equals(Float.TYPE)) {\n            return Arrays.hashCode((float[]) o);\n        }\n        if (componentType.equals(Double.TYPE)) {\n            return Arrays.hashCode((double[]) o);\n        }\n        if (componentType.equals(Boolean.TYPE)) {\n            return Arrays.hashCode((boolean[]) o);\n        }\n        return Arrays.hashCode((Object[]) o);\n    }\n\n    /**\n     * Checks if two annotations are equal using the criteria for equality\n     * presented in the {@link Annotation#equals(Object)} API docs.\n     *\n     * @param a1 the first Annotation to compare, {@code null} returns\n     * {@code false} unless both are {@code null}\n     * @param a2 the second Annotation to compare, {@code null} returns\n     * {@code false} unless both are {@code null}\n     * @return {@code true} if the two annotations are {@code equal} or both\n     * {@code null}\n     */\n    public static boolean equals(final Annotation a1, final Annotation a2) {\n        if (a1 == a2) {\n            return true;\n        }\n        if (a1 == null || a2 == null) {\n            return false;\n        }\n        final Class<? extends Annotation> type1 = a1.annotationType();\n        final Class<? extends Annotation> type2 = a2.annotationType();\n        Validate.notNull(type1, \"Annotation %s with null annotationType()\", a1);\n        Validate.notNull(type2, \"Annotation %s with null annotationType()\", a2);\n        if (!type1.equals(type2)) {\n            return false;\n        }\n        try {\n            for (final Method m : type1.getDeclaredMethods()) {\n                if (m.getParameterTypes().length == 0 && isValidAnnotationMemberType(m.getReturnType())) {\n                    final Object v1 = m.invoke(a1);\n                    final Object v2 = m.invoke(a2);\n                    if (!memberEquals(m.getReturnType(), v1, v2)) {\n                        return false;\n                    }\n                }\n            }\n        } catch (final ReflectiveOperationException ex) {\n            return false;\n        }\n        return true;\n    }\n\n    /**\n     * Generate a hash code for the given annotation using the algorithm\n     * presented in the {@link Annotation#hashCode()} API docs.\n     *\n     * @param a the Annotation for a hash code calculation is desired, not\n     * {@code null}\n     * @return the calculated hash code\n     * @throws RuntimeException if an {@link Exception} is encountered during\n     * annotation member access\n     * @throws IllegalStateException if an annotation method invocation returns\n     * {@code null}\n     */\n    public static int hashCode(final Annotation a) {\n        int result = 0;\n        final Class<? extends Annotation> type = a.annotationType();\n        for (final Method m : type.getDeclaredMethods()) {\n            try {\n                final Object value = m.invoke(a);\n                if (value == null) {\n                    throw new IllegalStateException(String.format(\"Annotation method %s returned null\", m));\n                }\n                result += hashMember(m.getName(), value);\n            } catch (final ReflectiveOperationException ex) {\n                throw new UncheckedException(ex);\n            }\n        }\n        return result;\n    }\n\n    //besides modularity, this has the advantage of autoboxing primitives:\n    /**\n     * Helper method for generating a hash code for a member of an annotation.\n     *\n     * @param name the name of the member\n     * @param value the value of the member\n     * @return a hash code for this member\n     */\n    private static int hashMember(final String name, final Object value) {\n        final int part1 = name.hashCode() * 127;\n        if (ObjectUtils.isArray(value)) {\n            return part1 ^ arrayMemberHash(value.getClass().getComponentType(), value);\n        }\n        if (value instanceof Annotation) {\n            return part1 ^ hashCode((Annotation) value);\n        }\n        return part1 ^ value.hashCode();\n    }\n\n    /**\n     * Checks if the specified type is permitted as an annotation member.\n     *\n     * <p>The Java language specification only permits certain types to be used\n     * in annotations. These include {@link String}, {@link Class}, primitive\n     * types, {@link Annotation}, {@link Enum}, and single-dimensional arrays of\n     * these types.</p>\n     *\n     * @param type the type to check, {@code null}\n     * @return {@code true} if the type is a valid type to use in an annotation\n     */\n    public static boolean isValidAnnotationMemberType(Class<?> type) {\n        if (type == null) {\n            return false;\n        }\n        if (type.isArray()) {\n            type = type.getComponentType();\n        }\n        return type.isPrimitive() || type.isEnum() || type.isAnnotation() || String.class.equals(type) || Class.class.equals(type);\n    }\n\n    /**\n     * Helper method for checking whether two objects of the given type are\n     * equal. This method is used to compare the parameters of two annotation\n     * instances.\n     *\n     * @param type the type of the objects to be compared\n     * @param o1 the first object\n     * @param o2 the second object\n     * @return a flag whether these objects are equal\n     */\n    private static boolean memberEquals(final Class<?> type, final Object o1, final Object o2) {\n        if (o1 == o2) {\n            return true;\n        }\n        if (o1 == null || o2 == null) {\n            return false;\n        }\n        if (type.isArray()) {\n            return arrayMemberEquals(type.getComponentType(), o1, o2);\n        }\n        if (type.isAnnotation()) {\n            return equals((Annotation) o1, (Annotation) o2);\n        }\n        return o1.equals(o2);\n    }\n\n    /**\n     * Generate a string representation of an Annotation, as suggested by\n     * {@link Annotation#toString()}.\n     *\n     * @param a the annotation of which a string representation is desired\n     * @return the standard string representation of an annotation, not\n     * {@code null}\n     */\n    public static String toString(final Annotation a) {\n        final ToStringBuilder builder = new ToStringBuilder(a, TO_STRING_STYLE);\n        for (final Method m : a.annotationType().getDeclaredMethods()) {\n            if (m.getParameterTypes().length > 0) {\n                // what?\n                continue;\n            }\n            try {\n                builder.append(m.getName(), m.invoke(a));\n            } catch (final ReflectiveOperationException ex) {\n                throw new UncheckedException(ex);\n            }\n        }\n        return builder.build();\n    }\n\n    /**\n     * {@link AnnotationUtils} instances should NOT be constructed in\n     * standard programming. Instead, the class should be used statically.\n     *\n     * <p>This constructor is public to permit tools that require a JavaBean\n     * instance to operate.</p>\n     * @deprecated TODO Make private in 4.0.\n     */\n    @Deprecated\n    public AnnotationUtils() {\n        // empty\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "AnnotationUtils",
+        "parameters": [],
+        "javadoc": "/**\n * {@link AnnotationUtils} instances should NOT be constructed in\n * standard programming. Instead, the class should be used statically.\n *\n * <p>This constructor is public to permit tools that require a JavaBean\n * instance to operate.</p>\n * @deprecated TODO Make private in 4.0.\n */\n",
+        "tags": [
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "TODO Make private in 4.0."
+          }
+        ],
+        "code": "/**\n * {@link AnnotationUtils} instances should NOT be constructed in\n * standard programming. Instead, the class should be used statically.\n *\n * <p>This constructor is public to permit tools that require a JavaBean\n * instance to operate.</p>\n * @deprecated TODO Make private in 4.0.\n */\n@Deprecated\npublic AnnotationUtils() {\n    // empty\n}"
+      },
+      {
+        "type": "method",
+        "name": "equals",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Annotation",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a1"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Annotation",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a2"
+          }
+        ],
+        "javadoc": "/**\n * Checks if two annotations are equal using the criteria for equality\n * presented in the {@link Annotation#equals(Object)} API docs.\n *\n * @param a1 the first Annotation to compare, {@code null} returns\n * {@code false} unless both are {@code null}\n * @param a2 the second Annotation to compare, {@code null} returns\n * {@code false} unless both are {@code null}\n * @return {@code true} if the two annotations are {@code equal} or both\n * {@code null}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a1",
+            "content": "the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}",
+            "assertion": "assert (args[0] != null) || (args[1] == null);",
+            "description": "the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}"
+          },
+          {
+            "tag": "param",
+            "name": "a2",
+            "content": "the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}",
+            "assertion": "assert (args[1] != null) || (args[0] == null);",
+            "description": "the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if the two annotations are {@code equal} or both {@code null}",
+            "assertion": "assert methodResultID == (args[0] == null && args[1] == null) || (args[0] != null && args[0].equals(args[1]));",
+            "description": "true if the two annotations are equal or both null"
+          }
+        ],
+        "code": "/**\n * Checks if two annotations are equal using the criteria for equality\n * presented in the {@link Annotation#equals(Object)} API docs.\n *\n * @param a1 the first Annotation to compare, {@code null} returns\n * {@code false} unless both are {@code null}\n * @param a2 the second Annotation to compare, {@code null} returns\n * {@code false} unless both are {@code null}\n * @return {@code true} if the two annotations are {@code equal} or both\n * {@code null}\n */\npublic static boolean equals(final Annotation a1, final Annotation a2) {\n    if (a1 == a2) {\n        return true;\n    }\n    if (a1 == null || a2 == null) {\n        return false;\n    }\n    final Class<? extends Annotation> type1 = a1.annotationType();\n    final Class<? extends Annotation> type2 = a2.annotationType();\n    Validate.notNull(type1, \"Annotation %s with null annotationType()\", a1);\n    Validate.notNull(type2, \"Annotation %s with null annotationType()\", a2);\n    if (!type1.equals(type2)) {\n        return false;\n    }\n    try {\n        for (final Method m : type1.getDeclaredMethods()) {\n            if (m.getParameterTypes().length == 0 && isValidAnnotationMemberType(m.getReturnType())) {\n                final Object v1 = m.invoke(a1);\n                final Object v2 = m.invoke(a2);\n                if (!memberEquals(m.getReturnType(), v1, v2)) {\n                    return false;\n                }\n            }\n        }\n    } catch (final ReflectiveOperationException ex) {\n        return false;\n    }\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "hashCode",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Annotation",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * Generate a hash code for the given annotation using the algorithm\n * presented in the {@link Annotation#hashCode()} API docs.\n *\n * @param a the Annotation for a hash code calculation is desired, not\n * {@code null}\n * @return the calculated hash code\n * @throws RuntimeException if an {@link Exception} is encountered during\n * annotation member access\n * @throws IllegalStateException if an annotation method invocation returns\n * {@code null}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a",
+            "content": "the Annotation for a hash code calculation is desired, not {@code null}",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the Annotation for a hash code calculation is desired, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "calculated hash code",
+            "assertion": "assert methodResultID == receiverObjectID.hashCode(args[0]);",
+            "description": "the calculated hash code"
+          },
+          {
+            "tag": "throws",
+            "name": "RuntimeException",
+            "content": "if an {@link Exception} is encountered during annotation member access",
+            "assertion": "assert args[0] == null || !(receiverObjectID.isValidAnnotationMemberType(args[0].getClass()));",
+            "description": "if an Exception is encountered during annotation member access"
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalStateException",
+            "content": "if an annotation method invocation returns {@code null}",
+            "assertion": "assert args[0] == null;",
+            "description": "if an annotation method invocation returns null"
+          }
+        ],
+        "code": "/**\n * Generate a hash code for the given annotation using the algorithm\n * presented in the {@link Annotation#hashCode()} API docs.\n *\n * @param a the Annotation for a hash code calculation is desired, not\n * {@code null}\n * @return the calculated hash code\n * @throws RuntimeException if an {@link Exception} is encountered during\n * annotation member access\n * @throws IllegalStateException if an annotation method invocation returns\n * {@code null}\n */\npublic static int hashCode(final Annotation a) {\n    int result = 0;\n    final Class<? extends Annotation> type = a.annotationType();\n    for (final Method m : type.getDeclaredMethods()) {\n        try {\n            final Object value = m.invoke(a);\n            if (value == null) {\n                throw new IllegalStateException(String.format(\"Annotation method %s returned null\", m));\n            }\n            result += hashMember(m.getName(), value);\n        } catch (final ReflectiveOperationException ex) {\n            throw new UncheckedException(ex);\n        }\n    }\n    return result;\n}"
+      },
+      {
+        "type": "method",
+        "name": "isValidAnnotationMemberType",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Class",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "type"
+          }
+        ],
+        "javadoc": "/**\n * Checks if the specified type is permitted as an annotation member.\n *\n * <p>The Java language specification only permits certain types to be used\n * in annotations. These include {@link String}, {@link Class}, primitive\n * types, {@link Annotation}, {@link Enum}, and single-dimensional arrays of\n * these types.</p>\n *\n * @param type the type to check, {@code null}\n * @return {@code true} if the type is a valid type to use in an annotation\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "type",
+            "content": "the type to check, {@code null}",
+            "assertion": "assert (args[0] != null);",
+            "description": "the type to check, {@code null}"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if the type is a valid type to use in an annotation",
+            "assertion": "assert methodResultID == (args[0] instanceof String || args[0] instanceof Class || args[0] instanceof Annotation || args[0] instanceof Enum);",
+            "description": "true if the type is a valid type to use in an annotation"
+          }
+        ],
+        "code": "/**\n * Checks if the specified type is permitted as an annotation member.\n *\n * <p>The Java language specification only permits certain types to be used\n * in annotations. These include {@link String}, {@link Class}, primitive\n * types, {@link Annotation}, {@link Enum}, and single-dimensional arrays of\n * these types.</p>\n *\n * @param type the type to check, {@code null}\n * @return {@code true} if the type is a valid type to use in an annotation\n */\npublic static boolean isValidAnnotationMemberType(Class<?> type) {\n    if (type == null) {\n        return false;\n    }\n    if (type.isArray()) {\n        type = type.getComponentType();\n    }\n    return type.isPrimitive() || type.isEnum() || type.isAnnotation() || String.class.equals(type) || Class.class.equals(type);\n}"
+      },
+      {
+        "type": "method",
+        "name": "toString",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Annotation",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "a"
+          }
+        ],
+        "javadoc": "/**\n * Generate a string representation of an Annotation, as suggested by\n * {@link Annotation#toString()}.\n *\n * @param a the annotation of which a string representation is desired\n * @return the standard string representation of an annotation, not\n * {@code null}\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "a",
+            "content": "the annotation of which a string representation is desired",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the annotation of which a string representation is desired"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "standard string representation of an annotation, not {@code null}",
+            "assertion": "assert methodResultID != null;",
+            "description": "the standard string representation of an annotation, not null"
+          }
+        ],
+        "code": "/**\n * Generate a string representation of an Annotation, as suggested by\n * {@link Annotation#toString()}.\n *\n * @param a the annotation of which a string representation is desired\n * @return the standard string representation of an annotation, not\n * {@code null}\n */\npublic static String toString(final Annotation a) {\n    final ToStringBuilder builder = new ToStringBuilder(a, TO_STRING_STYLE);\n    for (final Method m : a.annotationType().getDeclaredMethods()) {\n        if (m.getParameterTypes().length > 0) {\n            // what?\n            continue;\n        }\n        try {\n            builder.append(m.getName(), m.invoke(a));\n        } catch (final ReflectiveOperationException ex) {\n            throw new UncheckedException(ex);\n        }\n    }\n    return builder.build();\n}"
+      }
+    ]
+  }
+]
+2026-01-20 17:07:05,310 - DEBUG - llmedico.main - ---Loading Data from LLMedico File into internal Canonical State---
+2026-01-20 17:07:05,310 - DEBUG - llmedico.main - ---Converting Data from Canonical State into JDoctor Format---
+2026-01-20 17:07:05,312 - DEBUG - llmedico.main - ---Ending LLMedico---
