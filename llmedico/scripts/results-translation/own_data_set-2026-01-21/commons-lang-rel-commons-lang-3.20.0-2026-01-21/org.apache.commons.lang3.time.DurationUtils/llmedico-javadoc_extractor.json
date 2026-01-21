@@ -1,0 +1,674 @@
+[
+  {
+    "name": "DurationUtils",
+    "package": "org.apache.commons.lang3.time",
+    "qualified_name": "org.apache.commons.lang3.time.DurationUtils",
+    "javadoc": "/**\n * Utilities for {@link Duration}.\n *\n * @since 3.12.0\n */\n",
+    "code": "/**\n * Utilities for {@link Duration}.\n *\n * @since 3.12.0\n */\npublic class DurationUtils {\n\n    /**\n     * An Integer Range that accepts Longs.\n     */\n    static final LongRange LONG_TO_INT_RANGE = LongRange.of(NumberUtils.LONG_INT_MIN_VALUE, NumberUtils.LONG_INT_MAX_VALUE);\n\n    /**\n     * Accepts the function with the duration as a long milliseconds and int nanoseconds.\n     *\n     * @param <T> The function exception.\n     * @param consumer Accepting function.\n     * @param duration The duration to pick apart.\n     * @throws T See the function signature.\n     * @see StopWatch\n     */\n    // boxing unavoidable\n    @SuppressWarnings(\"boxing\")\n    public static <T extends Throwable> void accept(final FailableBiConsumer<Long, Integer, T> consumer, final Duration duration) throws T {\n        if (consumer != null && duration != null) {\n            consumer.accept(duration.toMillis(), getNanosOfMilli(duration));\n        }\n    }\n\n    /**\n     * Gets a Duration of unit stored in the system property at the given key.\n     *\n     * @param key  The property name.\n     * @param unit The unit that the duration is measured in, not null.\n     * @param def  The default value in the given unit.\n     * @return a Duration of seconds.\n     * @since 3.19.0\n     */\n    public static Duration get(final String key, final TemporalUnit unit, final long def) {\n        return Duration.of(getLong(key, def), unit);\n    }\n\n    private static long getLong(final String key, final long def) {\n        return StringUtils.isEmpty(key) ? def : Long.getLong(key, def);\n    }\n\n    /**\n     * Gets a Duration of milliseconds stored in the system property at the given key.\n     *\n     * @param key The property name.\n     * @param def The default value in milliseconds.\n     * @return a Duration of milliseconds.\n     * @since 3.19.0\n     */\n    public static Duration getMillis(final String key, final long def) {\n        return Duration.ofMillis(getLong(key, def));\n    }\n\n    /**\n     * Gets the nanosecond part of a Duration converted to milliseconds.\n     * <p>\n     * Handy when calling an API that takes a long of milliseconds and an int of nanoseconds. For example,\n     * {@link Object#wait(long, int)} and {@link Thread#sleep(long, int)}.\n     * </p>\n     * <p>\n     * Note that is this different from {@link Duration#getNano()} because a duration are seconds and nanoseconds.\n     * </p>\n     *\n     * @param duration The duration to query.\n     * @return nanoseconds between 0 and 999,999.\n     * @deprecated Use {@link #getNanosOfMilli(Duration)}.\n     */\n    @Deprecated\n    public static int getNanosOfMiili(final Duration duration) {\n        return getNanosOfMilli(duration);\n    }\n\n    /**\n     * Gets the nanosecond part of a Duration converted to milliseconds.\n     * <p>\n     * Handy when calling an API that takes a long of milliseconds and an int of nanoseconds. For example,\n     * {@link Object#wait(long, int)} and {@link Thread#sleep(long, int)}.\n     * </p>\n     * <p>\n     * Note that is this different from {@link Duration#getNano()} because a duration are seconds and nanoseconds.\n     * </p>\n     *\n     * @param duration The duration to query.\n     * @return nanoseconds between 0 and 999,999.\n     * @since 3.13.0\n     */\n    public static int getNanosOfMilli(final Duration duration) {\n        return zeroIfNull(duration).getNano() % 1_000_000;\n    }\n\n    /**\n     * Gets a Duration of seconds stored in the system property at the given key.\n     *\n     * @param key The property name.\n     * @param def The default value in seconds.\n     * @return a Duration of seconds.\n     * @since 3.19.0\n     */\n    public static Duration getSeconds(final String key, final long def) {\n        return Duration.ofSeconds(getLong(key, def));\n    }\n\n    /**\n     * Tests whether the given Duration is positive (duration &gt; 0).\n     *\n     * @param duration the value to test\n     * @return whether the given Duration is positive (duration &gt; 0).\n     */\n    public static boolean isPositive(final Duration duration) {\n        return !duration.isNegative() && !duration.isZero();\n    }\n\n    private static <E extends Throwable> Instant now(final FailableConsumer<Instant, E> nowConsumer) throws E {\n        final Instant start = Instant.now();\n        nowConsumer.accept(start);\n        return start;\n    }\n\n    /**\n     * Runs the lambda and returns the duration of its execution.\n     *\n     * @param <E> The type of exception throw by the lambda.\n     * @param consumer What to execute.\n     * @return The Duration of execution.\n     * @throws E thrown by the lambda.\n     * @see StopWatch\n     * @since 3.13.0\n     */\n    public static <E extends Throwable> Duration of(final FailableConsumer<Instant, E> consumer) throws E {\n        return since(now(consumer::accept));\n    }\n\n    /**\n     * Runs the lambda and returns the duration of its execution.\n     *\n     * @param <E> The type of exception throw by the lambda.\n     * @param runnable What to execute.\n     * @return The Duration of execution.\n     * @throws E thrown by the lambda.\n     * @see StopWatch\n     * @since 3.13.0\n     */\n    public static <E extends Throwable> Duration of(final FailableRunnable<E> runnable) throws E {\n        return of(start -> runnable.run());\n    }\n\n    /**\n     * Computes the Duration between a start instant and now.\n     *\n     * @param startInclusive the start instant, inclusive, not null.\n     * @return a {@link Duration}, not null.\n     * @since 3.13.0\n     */\n    public static Duration since(final Temporal startInclusive) {\n        return Duration.between(startInclusive, Instant.now());\n    }\n\n    /**\n     * Converts a {@link TimeUnit} to a {@link ChronoUnit}.\n     *\n     * @param timeUnit A non-null TimeUnit.\n     * @return The corresponding ChronoUnit.\n     */\n    static ChronoUnit toChronoUnit(final TimeUnit timeUnit) {\n        // TODO when using Java >= 9: Use TimeUnit.toChronoUnit().\n        switch(Objects.requireNonNull(timeUnit)) {\n            case NANOSECONDS:\n                return ChronoUnit.NANOS;\n            case MICROSECONDS:\n                return ChronoUnit.MICROS;\n            case MILLISECONDS:\n                return ChronoUnit.MILLIS;\n            case SECONDS:\n                return ChronoUnit.SECONDS;\n            case MINUTES:\n                return ChronoUnit.MINUTES;\n            case HOURS:\n                return ChronoUnit.HOURS;\n            case DAYS:\n                return ChronoUnit.DAYS;\n            default:\n                throw new IllegalArgumentException(timeUnit.toString());\n        }\n    }\n\n    /**\n     * Converts an amount and TimeUnit into a Duration.\n     *\n     * @param amount   the amount of the duration, measured in terms of the unit, positive or negative\n     * @param timeUnit the unit that the duration is measured in, must have an exact duration, not null\n     * @return a Duration.\n     */\n    public static Duration toDuration(final long amount, final TimeUnit timeUnit) {\n        return Duration.of(amount, toChronoUnit(timeUnit));\n    }\n\n    /**\n     * Converts a Duration to milliseconds bound to an int (instead of a long).\n     * <p>\n     * Handy for low-level APIs that take millisecond timeouts in ints rather than longs.\n     * </p>\n     * <ul>\n     * <li>If the duration milliseconds are greater than {@link Integer#MAX_VALUE}, then return\n     * {@link Integer#MAX_VALUE}.</li>\n     * <li>If the duration milliseconds are lesser than {@link Integer#MIN_VALUE}, then return\n     * {@link Integer#MIN_VALUE}.</li>\n     * </ul>\n     *\n     * @param duration The duration to convert, not null.\n     * @return int milliseconds.\n     */\n    public static int toMillisInt(final Duration duration) {\n        Objects.requireNonNull(duration, \"duration\");\n        // intValue() does not do a narrowing conversion here\n        return LONG_TO_INT_RANGE.fit(Long.valueOf(duration.toMillis())).intValue();\n    }\n\n    /**\n     * Returns the given non-null value or {@link Duration#ZERO} if null.\n     *\n     * @param duration The duration to test.\n     * @return The given duration or {@link Duration#ZERO}.\n     */\n    public static Duration zeroIfNull(final Duration duration) {\n        return ObjectUtils.getIfNull(duration, Duration.ZERO);\n    }\n\n    /**\n     * Make private in 4.0.\n     *\n     * @deprecated TODO Make private in 4.0.\n     */\n    @Deprecated\n    public DurationUtils() {\n        // empty\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "DurationUtils",
+        "parameters": [],
+        "javadoc": "/**\n * Make private in 4.0.\n *\n * @deprecated TODO Make private in 4.0.\n */\n",
+        "tags": [
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "TODO Make private in 4.0."
+          }
+        ],
+        "code": "/**\n * Make private in 4.0.\n *\n * @deprecated TODO Make private in 4.0.\n */\n@Deprecated\npublic DurationUtils() {\n    // empty\n}"
+      },
+      {
+        "type": "method",
+        "name": "accept",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FailableBiConsumer",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "consumer"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Duration",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "duration"
+          }
+        ],
+        "javadoc": "/**\n * Accepts the function with the duration as a long milliseconds and int nanoseconds.\n *\n * @param <T> The function exception.\n * @param consumer Accepting function.\n * @param duration The duration to pick apart.\n * @throws T See the function signature.\n * @see StopWatch\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "The function exception."
+          },
+          {
+            "tag": "param",
+            "name": "consumer",
+            "content": "Accepting function."
+          },
+          {
+            "tag": "param",
+            "name": "duration",
+            "content": "The duration to pick apart."
+          },
+          {
+            "tag": "throws",
+            "name": "T",
+            "content": "See the function signature."
+          },
+          {
+            "tag": "see",
+            "name": "StopWatch",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Accepts the function with the duration as a long milliseconds and int nanoseconds.\n *\n * @param <T> The function exception.\n * @param consumer Accepting function.\n * @param duration The duration to pick apart.\n * @throws T See the function signature.\n * @see StopWatch\n */\n// boxing unavoidable\n@SuppressWarnings(\"boxing\")\npublic static <T extends Throwable> void accept(final FailableBiConsumer<Long, Integer, T> consumer, final Duration duration) throws T {\n    if (consumer != null && duration != null) {\n        consumer.accept(duration.toMillis(), getNanosOfMilli(duration));\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "get",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "TemporalUnit",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "unit"
+          },
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "def"
+          }
+        ],
+        "javadoc": "/**\n * Gets a Duration of unit stored in the system property at the given key.\n *\n * @param key  The property name.\n * @param unit The unit that the duration is measured in, not null.\n * @param def  The default value in the given unit.\n * @return a Duration of seconds.\n * @since 3.19.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "The property name."
+          },
+          {
+            "tag": "param",
+            "name": "unit",
+            "content": "The unit that the duration is measured in, not null."
+          },
+          {
+            "tag": "param",
+            "name": "def",
+            "content": "The default value in the given unit."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Duration of seconds."
+          },
+          {
+            "tag": "since",
+            "name": "3.19.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Gets a Duration of unit stored in the system property at the given key.\n *\n * @param key  The property name.\n * @param unit The unit that the duration is measured in, not null.\n * @param def  The default value in the given unit.\n * @return a Duration of seconds.\n * @since 3.19.0\n */\npublic static Duration get(final String key, final TemporalUnit unit, final long def) {\n    return Duration.of(getLong(key, def), unit);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getMillis",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "def"
+          }
+        ],
+        "javadoc": "/**\n * Gets a Duration of milliseconds stored in the system property at the given key.\n *\n * @param key The property name.\n * @param def The default value in milliseconds.\n * @return a Duration of milliseconds.\n * @since 3.19.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "The property name."
+          },
+          {
+            "tag": "param",
+            "name": "def",
+            "content": "The default value in milliseconds."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Duration of milliseconds."
+          },
+          {
+            "tag": "since",
+            "name": "3.19.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Gets a Duration of milliseconds stored in the system property at the given key.\n *\n * @param key The property name.\n * @param def The default value in milliseconds.\n * @return a Duration of milliseconds.\n * @since 3.19.0\n */\npublic static Duration getMillis(final String key, final long def) {\n    return Duration.ofMillis(getLong(key, def));\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNanosOfMiili",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Duration",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "duration"
+          }
+        ],
+        "javadoc": "/**\n * Gets the nanosecond part of a Duration converted to milliseconds.\n * <p>\n * Handy when calling an API that takes a long of milliseconds and an int of nanoseconds. For example,\n * {@link Object#wait(long, int)} and {@link Thread#sleep(long, int)}.\n * </p>\n * <p>\n * Note that is this different from {@link Duration#getNano()} because a duration are seconds and nanoseconds.\n * </p>\n *\n * @param duration The duration to query.\n * @return nanoseconds between 0 and 999,999.\n * @deprecated Use {@link #getNanosOfMilli(Duration)}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "duration",
+            "content": "The duration to query."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "between 0 and 999,999."
+          },
+          {
+            "tag": "deprecated",
+            "name": "Use",
+            "content": "{@link #getNanosOfMilli(Duration)}."
+          }
+        ],
+        "code": "/**\n * Gets the nanosecond part of a Duration converted to milliseconds.\n * <p>\n * Handy when calling an API that takes a long of milliseconds and an int of nanoseconds. For example,\n * {@link Object#wait(long, int)} and {@link Thread#sleep(long, int)}.\n * </p>\n * <p>\n * Note that is this different from {@link Duration#getNano()} because a duration are seconds and nanoseconds.\n * </p>\n *\n * @param duration The duration to query.\n * @return nanoseconds between 0 and 999,999.\n * @deprecated Use {@link #getNanosOfMilli(Duration)}.\n */\n@Deprecated\npublic static int getNanosOfMiili(final Duration duration) {\n    return getNanosOfMilli(duration);\n}"
+      },
+      {
+        "type": "method",
+        "name": "getNanosOfMilli",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Duration",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "duration"
+          }
+        ],
+        "javadoc": "/**\n * Gets the nanosecond part of a Duration converted to milliseconds.\n * <p>\n * Handy when calling an API that takes a long of milliseconds and an int of nanoseconds. For example,\n * {@link Object#wait(long, int)} and {@link Thread#sleep(long, int)}.\n * </p>\n * <p>\n * Note that is this different from {@link Duration#getNano()} because a duration are seconds and nanoseconds.\n * </p>\n *\n * @param duration The duration to query.\n * @return nanoseconds between 0 and 999,999.\n * @since 3.13.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "duration",
+            "content": "The duration to query."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "between 0 and 999,999."
+          },
+          {
+            "tag": "since",
+            "name": "3.13.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Gets the nanosecond part of a Duration converted to milliseconds.\n * <p>\n * Handy when calling an API that takes a long of milliseconds and an int of nanoseconds. For example,\n * {@link Object#wait(long, int)} and {@link Thread#sleep(long, int)}.\n * </p>\n * <p>\n * Note that is this different from {@link Duration#getNano()} because a duration are seconds and nanoseconds.\n * </p>\n *\n * @param duration The duration to query.\n * @return nanoseconds between 0 and 999,999.\n * @since 3.13.0\n */\npublic static int getNanosOfMilli(final Duration duration) {\n    return zeroIfNull(duration).getNano() % 1_000_000;\n}"
+      },
+      {
+        "type": "method",
+        "name": "getSeconds",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "key"
+          },
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "def"
+          }
+        ],
+        "javadoc": "/**\n * Gets a Duration of seconds stored in the system property at the given key.\n *\n * @param key The property name.\n * @param def The default value in seconds.\n * @return a Duration of seconds.\n * @since 3.19.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "key",
+            "content": "The property name."
+          },
+          {
+            "tag": "param",
+            "name": "def",
+            "content": "The default value in seconds."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Duration of seconds."
+          },
+          {
+            "tag": "since",
+            "name": "3.19.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Gets a Duration of seconds stored in the system property at the given key.\n *\n * @param key The property name.\n * @param def The default value in seconds.\n * @return a Duration of seconds.\n * @since 3.19.0\n */\npublic static Duration getSeconds(final String key, final long def) {\n    return Duration.ofSeconds(getLong(key, def));\n}"
+      },
+      {
+        "type": "method",
+        "name": "isPositive",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Duration",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "duration"
+          }
+        ],
+        "javadoc": "/**\n * Tests whether the given Duration is positive (duration &gt; 0).\n *\n * @param duration the value to test\n * @return whether the given Duration is positive (duration &gt; 0).\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "duration",
+            "content": "the value to test"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "the given Duration is positive (duration &gt; 0)."
+          }
+        ],
+        "code": "/**\n * Tests whether the given Duration is positive (duration &gt; 0).\n *\n * @param duration the value to test\n * @return whether the given Duration is positive (duration &gt; 0).\n */\npublic static boolean isPositive(final Duration duration) {\n    return !duration.isNegative() && !duration.isZero();\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FailableConsumer",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "consumer"
+          }
+        ],
+        "javadoc": "/**\n * Runs the lambda and returns the duration of its execution.\n *\n * @param <E> The type of exception throw by the lambda.\n * @param consumer What to execute.\n * @return The Duration of execution.\n * @throws E thrown by the lambda.\n * @see StopWatch\n * @since 3.13.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "The type of exception throw by the lambda."
+          },
+          {
+            "tag": "param",
+            "name": "consumer",
+            "content": "What to execute."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Duration of execution."
+          },
+          {
+            "tag": "throws",
+            "name": "E",
+            "content": "thrown by the lambda."
+          },
+          {
+            "tag": "see",
+            "name": "StopWatch",
+            "content": ""
+          },
+          {
+            "tag": "since",
+            "name": "3.13.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Runs the lambda and returns the duration of its execution.\n *\n * @param <E> The type of exception throw by the lambda.\n * @param consumer What to execute.\n * @return The Duration of execution.\n * @throws E thrown by the lambda.\n * @see StopWatch\n * @since 3.13.0\n */\npublic static <E extends Throwable> Duration of(final FailableConsumer<Instant, E> consumer) throws E {\n    return since(now(consumer::accept));\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "FailableRunnable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "runnable"
+          }
+        ],
+        "javadoc": "/**\n * Runs the lambda and returns the duration of its execution.\n *\n * @param <E> The type of exception throw by the lambda.\n * @param runnable What to execute.\n * @return The Duration of execution.\n * @throws E thrown by the lambda.\n * @see StopWatch\n * @since 3.13.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<E>",
+            "content": "The type of exception throw by the lambda."
+          },
+          {
+            "tag": "param",
+            "name": "runnable",
+            "content": "What to execute."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Duration of execution."
+          },
+          {
+            "tag": "throws",
+            "name": "E",
+            "content": "thrown by the lambda."
+          },
+          {
+            "tag": "see",
+            "name": "StopWatch",
+            "content": ""
+          },
+          {
+            "tag": "since",
+            "name": "3.13.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Runs the lambda and returns the duration of its execution.\n *\n * @param <E> The type of exception throw by the lambda.\n * @param runnable What to execute.\n * @return The Duration of execution.\n * @throws E thrown by the lambda.\n * @see StopWatch\n * @since 3.13.0\n */\npublic static <E extends Throwable> Duration of(final FailableRunnable<E> runnable) throws E {\n    return of(start -> runnable.run());\n}"
+      },
+      {
+        "type": "method",
+        "name": "since",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Temporal",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "startInclusive"
+          }
+        ],
+        "javadoc": "/**\n * Computes the Duration between a start instant and now.\n *\n * @param startInclusive the start instant, inclusive, not null.\n * @return a {@link Duration}, not null.\n * @since 3.13.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "startInclusive",
+            "content": "the start instant, inclusive, not null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@link Duration}, not null."
+          },
+          {
+            "tag": "since",
+            "name": "3.13.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Computes the Duration between a start instant and now.\n *\n * @param startInclusive the start instant, inclusive, not null.\n * @return a {@link Duration}, not null.\n * @since 3.13.0\n */\npublic static Duration since(final Temporal startInclusive) {\n    return Duration.between(startInclusive, Instant.now());\n}"
+      },
+      {
+        "type": "method",
+        "name": "toChronoUnit",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "ChronoUnit",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "TimeUnit",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "timeUnit"
+          }
+        ],
+        "javadoc": "/**\n * Converts a {@link TimeUnit} to a {@link ChronoUnit}.\n *\n * @param timeUnit A non-null TimeUnit.\n * @return The corresponding ChronoUnit.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "timeUnit",
+            "content": "A non-null TimeUnit."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "corresponding ChronoUnit."
+          }
+        ],
+        "code": "/**\n * Converts a {@link TimeUnit} to a {@link ChronoUnit}.\n *\n * @param timeUnit A non-null TimeUnit.\n * @return The corresponding ChronoUnit.\n */\nstatic ChronoUnit toChronoUnit(final TimeUnit timeUnit) {\n    // TODO when using Java >= 9: Use TimeUnit.toChronoUnit().\n    switch(Objects.requireNonNull(timeUnit)) {\n        case NANOSECONDS:\n            return ChronoUnit.NANOS;\n        case MICROSECONDS:\n            return ChronoUnit.MICROS;\n        case MILLISECONDS:\n            return ChronoUnit.MILLIS;\n        case SECONDS:\n            return ChronoUnit.SECONDS;\n        case MINUTES:\n            return ChronoUnit.MINUTES;\n        case HOURS:\n            return ChronoUnit.HOURS;\n        case DAYS:\n            return ChronoUnit.DAYS;\n        default:\n            throw new IllegalArgumentException(timeUnit.toString());\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "toDuration",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "long",
+              "simple_name": "long",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "amount"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "TimeUnit",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "timeUnit"
+          }
+        ],
+        "javadoc": "/**\n * Converts an amount and TimeUnit into a Duration.\n *\n * @param amount   the amount of the duration, measured in terms of the unit, positive or negative\n * @param timeUnit the unit that the duration is measured in, must have an exact duration, not null\n * @return a Duration.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "amount",
+            "content": "the amount of the duration, measured in terms of the unit, positive or negative"
+          },
+          {
+            "tag": "param",
+            "name": "timeUnit",
+            "content": "the unit that the duration is measured in, must have an exact duration, not null"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "Duration."
+          }
+        ],
+        "code": "/**\n * Converts an amount and TimeUnit into a Duration.\n *\n * @param amount   the amount of the duration, measured in terms of the unit, positive or negative\n * @param timeUnit the unit that the duration is measured in, must have an exact duration, not null\n * @return a Duration.\n */\npublic static Duration toDuration(final long amount, final TimeUnit timeUnit) {\n    return Duration.of(amount, toChronoUnit(timeUnit));\n}"
+      },
+      {
+        "type": "method",
+        "name": "toMillisInt",
+        "return_type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Duration",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "duration"
+          }
+        ],
+        "javadoc": "/**\n * Converts a Duration to milliseconds bound to an int (instead of a long).\n * <p>\n * Handy for low-level APIs that take millisecond timeouts in ints rather than longs.\n * </p>\n * <ul>\n * <li>If the duration milliseconds are greater than {@link Integer#MAX_VALUE}, then return\n * {@link Integer#MAX_VALUE}.</li>\n * <li>If the duration milliseconds are lesser than {@link Integer#MIN_VALUE}, then return\n * {@link Integer#MIN_VALUE}.</li>\n * </ul>\n *\n * @param duration The duration to convert, not null.\n * @return int milliseconds.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "duration",
+            "content": "The duration to convert, not null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "milliseconds."
+          }
+        ],
+        "code": "/**\n * Converts a Duration to milliseconds bound to an int (instead of a long).\n * <p>\n * Handy for low-level APIs that take millisecond timeouts in ints rather than longs.\n * </p>\n * <ul>\n * <li>If the duration milliseconds are greater than {@link Integer#MAX_VALUE}, then return\n * {@link Integer#MAX_VALUE}.</li>\n * <li>If the duration milliseconds are lesser than {@link Integer#MIN_VALUE}, then return\n * {@link Integer#MIN_VALUE}.</li>\n * </ul>\n *\n * @param duration The duration to convert, not null.\n * @return int milliseconds.\n */\npublic static int toMillisInt(final Duration duration) {\n    Objects.requireNonNull(duration, \"duration\");\n    // intValue() does not do a narrowing conversion here\n    return LONG_TO_INT_RANGE.fit(Long.valueOf(duration.toMillis())).intValue();\n}"
+      },
+      {
+        "type": "method",
+        "name": "zeroIfNull",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Duration",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Duration",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "duration"
+          }
+        ],
+        "javadoc": "/**\n * Returns the given non-null value or {@link Duration#ZERO} if null.\n *\n * @param duration The duration to test.\n * @return The given duration or {@link Duration#ZERO}.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "duration",
+            "content": "The duration to test."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "given duration or {@link Duration#ZERO}."
+          }
+        ],
+        "code": "/**\n * Returns the given non-null value or {@link Duration#ZERO} if null.\n *\n * @param duration The duration to test.\n * @return The given duration or {@link Duration#ZERO}.\n */\npublic static Duration zeroIfNull(final Duration duration) {\n    return ObjectUtils.getIfNull(duration, Duration.ZERO);\n}"
+      }
+    ]
+  }
+]

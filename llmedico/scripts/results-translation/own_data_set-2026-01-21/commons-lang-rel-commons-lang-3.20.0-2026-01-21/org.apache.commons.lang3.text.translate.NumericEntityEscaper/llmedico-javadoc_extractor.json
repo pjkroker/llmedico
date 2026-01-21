@@ -1,0 +1,220 @@
+[
+  {
+    "name": "NumericEntityEscaper",
+    "package": "org.apache.commons.lang3.text.translate",
+    "qualified_name": "org.apache.commons.lang3.text.translate.NumericEntityEscaper",
+    "javadoc": "/**\n * Translates code points to their XML numeric entity escaped value.\n *\n * @since 3.0\n * @deprecated As of <a href=\"https://commons.apache.org/proper/commons-lang/changes-report.html#a3.6\">3.6</a>, use Apache Commons Text\n * <a href=\"https://commons.apache.org/proper/commons-text/javadocs/api-release/org/apache/commons/text/translate/NumericEntityEscaper.html\">\n * NumericEntityEscaper</a>.\n */\n",
+    "code": "/**\n * Translates code points to their XML numeric entity escaped value.\n *\n * @since 3.0\n * @deprecated As of <a href=\"https://commons.apache.org/proper/commons-lang/changes-report.html#a3.6\">3.6</a>, use Apache Commons Text\n * <a href=\"https://commons.apache.org/proper/commons-text/javadocs/api-release/org/apache/commons/text/translate/NumericEntityEscaper.html\">\n * NumericEntityEscaper</a>.\n */\n@Deprecated\npublic class NumericEntityEscaper extends CodePointTranslator {\n\n    /**\n     * Constructs a {@link NumericEntityEscaper} above the specified value (exclusive).\n     *\n     * @param codePoint above which to escape.\n     * @return the newly created {@link NumericEntityEscaper} instance.\n     */\n    public static NumericEntityEscaper above(final int codePoint) {\n        return outsideOf(0, codePoint);\n    }\n\n    /**\n     * Constructs a {@link NumericEntityEscaper} below the specified value (exclusive).\n     *\n     * @param codePoint below which to escape.\n     * @return the newly created {@link NumericEntityEscaper} instance.\n     */\n    public static NumericEntityEscaper below(final int codePoint) {\n        return outsideOf(codePoint, Integer.MAX_VALUE);\n    }\n\n    /**\n     * Constructs a {@link NumericEntityEscaper} between the specified values (inclusive).\n     *\n     * @param codePointLow above which to escape.\n     * @param codePointHigh below which to escape.\n     * @return the newly created {@link NumericEntityEscaper} instance.\n     */\n    public static NumericEntityEscaper between(final int codePointLow, final int codePointHigh) {\n        return new NumericEntityEscaper(codePointLow, codePointHigh, true);\n    }\n\n    /**\n     * Constructs a {@link NumericEntityEscaper} outside of the specified values (exclusive).\n     *\n     * @param codePointLow below which to escape.\n     * @param codePointHigh above which to escape.\n     * @return the newly created {@link NumericEntityEscaper} instance.\n     */\n    public static NumericEntityEscaper outsideOf(final int codePointLow, final int codePointHigh) {\n        return new NumericEntityEscaper(codePointLow, codePointHigh, false);\n    }\n\n    private final int below;\n\n    private final int above;\n\n    private final boolean between;\n\n    /**\n     * Constructs a {@link NumericEntityEscaper} for all characters.\n     */\n    public NumericEntityEscaper() {\n        this(0, Integer.MAX_VALUE, true);\n    }\n\n    /**\n     * Constructs a {@link NumericEntityEscaper} for the specified range. This is\n     * the underlying method for the other constructors/builders. The {@code below}\n     * and {@code above} boundaries are inclusive when {@code between} is\n     * {@code true} and exclusive when it is {@code false}.\n     *\n     * @param below int value representing the lowest code point boundary.\n     * @param above int value representing the highest code point boundary.\n     * @param between whether to escape between the boundaries or outside them.\n     */\n    private NumericEntityEscaper(final int below, final int above, final boolean between) {\n        this.below = below;\n        this.above = above;\n        this.between = between;\n    }\n\n    /**\n     * {@inheritDoc}\n     */\n    @Override\n    public boolean translate(final int codePoint, final Writer out) throws IOException {\n        if (between) {\n            if (codePoint < below || codePoint > above) {\n                return false;\n            }\n        } else if (codePoint >= below && codePoint <= above) {\n            return false;\n        }\n        out.write(\"&#\");\n        out.write(Integer.toString(codePoint, 10));\n        out.write(';');\n        return true;\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "NumericEntityEscaper",
+        "parameters": [],
+        "javadoc": "/**\n * Constructs a {@link NumericEntityEscaper} for all characters.\n */\n",
+        "tags": [],
+        "code": "/**\n * Constructs a {@link NumericEntityEscaper} for all characters.\n */\npublic NumericEntityEscaper() {\n    this(0, Integer.MAX_VALUE, true);\n}"
+      },
+      {
+        "type": "method",
+        "name": "above",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "NumericEntityEscaper",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "codePoint"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a {@link NumericEntityEscaper} above the specified value (exclusive).\n *\n * @param codePoint above which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "codePoint",
+            "content": "above which to escape."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "newly created {@link NumericEntityEscaper} instance."
+          }
+        ],
+        "code": "/**\n * Constructs a {@link NumericEntityEscaper} above the specified value (exclusive).\n *\n * @param codePoint above which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\npublic static NumericEntityEscaper above(final int codePoint) {\n    return outsideOf(0, codePoint);\n}"
+      },
+      {
+        "type": "method",
+        "name": "below",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "NumericEntityEscaper",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "codePoint"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a {@link NumericEntityEscaper} below the specified value (exclusive).\n *\n * @param codePoint below which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "codePoint",
+            "content": "below which to escape."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "newly created {@link NumericEntityEscaper} instance."
+          }
+        ],
+        "code": "/**\n * Constructs a {@link NumericEntityEscaper} below the specified value (exclusive).\n *\n * @param codePoint below which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\npublic static NumericEntityEscaper below(final int codePoint) {\n    return outsideOf(codePoint, Integer.MAX_VALUE);\n}"
+      },
+      {
+        "type": "method",
+        "name": "between",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "NumericEntityEscaper",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "codePointLow"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "codePointHigh"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a {@link NumericEntityEscaper} between the specified values (inclusive).\n *\n * @param codePointLow above which to escape.\n * @param codePointHigh below which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "codePointLow",
+            "content": "above which to escape."
+          },
+          {
+            "tag": "param",
+            "name": "codePointHigh",
+            "content": "below which to escape."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "newly created {@link NumericEntityEscaper} instance."
+          }
+        ],
+        "code": "/**\n * Constructs a {@link NumericEntityEscaper} between the specified values (inclusive).\n *\n * @param codePointLow above which to escape.\n * @param codePointHigh below which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\npublic static NumericEntityEscaper between(final int codePointLow, final int codePointHigh) {\n    return new NumericEntityEscaper(codePointLow, codePointHigh, true);\n}"
+      },
+      {
+        "type": "method",
+        "name": "outsideOf",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "NumericEntityEscaper",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "codePointLow"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "codePointHigh"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a {@link NumericEntityEscaper} outside of the specified values (exclusive).\n *\n * @param codePointLow below which to escape.\n * @param codePointHigh above which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "codePointLow",
+            "content": "below which to escape."
+          },
+          {
+            "tag": "param",
+            "name": "codePointHigh",
+            "content": "above which to escape."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "newly created {@link NumericEntityEscaper} instance."
+          }
+        ],
+        "code": "/**\n * Constructs a {@link NumericEntityEscaper} outside of the specified values (exclusive).\n *\n * @param codePointLow below which to escape.\n * @param codePointHigh above which to escape.\n * @return the newly created {@link NumericEntityEscaper} instance.\n */\npublic static NumericEntityEscaper outsideOf(final int codePointLow, final int codePointHigh) {\n    return new NumericEntityEscaper(codePointLow, codePointHigh, false);\n}"
+      },
+      {
+        "type": "method",
+        "name": "translate",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "codePoint"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Writer",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "out"
+          }
+        ],
+        "javadoc": "/**\n * {@inheritDoc}\n */\n",
+        "tags": [],
+        "code": "/**\n * {@inheritDoc}\n */\n@Override\npublic boolean translate(final int codePoint, final Writer out) throws IOException {\n    if (between) {\n        if (codePoint < below || codePoint > above) {\n            return false;\n        }\n    } else if (codePoint >= below && codePoint <= above) {\n        return false;\n    }\n    out.write(\"&#\");\n    out.write(Integer.toString(codePoint, 10));\n    out.write(';');\n    return true;\n}"
+      }
+    ]
+  }
+]
