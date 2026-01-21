@@ -28,7 +28,7 @@ METRIC_DEFINITIONS = {
             AssertionRelation.WEAKER,
             AssertionRelation.INCOMPARABLE,
             AssertionRelation.UNSUPPORTED,
-        },
+        },#missing, unexpected, empty
     },
     MetricMode.LLMEDICO: {
         "correct": {
