@@ -1,0 +1,169 @@
+[
+  {
+    "method": "AnnotationUtils",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Annotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a1"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Annotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a2"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}",
+          "assertion": "assert (args[0] != null) || (args[1] == null);",
+          "name": "a1",
+          "content": "the first Annotation to compare, {@code null} returns {@code false} unless both are {@code null}"
+        },
+        {
+          "description": "the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}",
+          "assertion": "assert (args[1] != null) || (args[0] == null);",
+          "name": "a2",
+          "content": "the second Annotation to compare, {@code null} returns {@code false} unless both are {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the two annotations are equal or both null",
+          "assertion": "assert methodResultID == (args[0] == null && args[1] == null) || (args[0] != null && args[0].equals(args[1]));",
+          "name": null,
+          "content": "true if the two annotations are {@code equal} or both {@code null}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Annotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the Annotation for a hash code calculation is desired, not null",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "the Annotation for a hash code calculation is desired, not null"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the calculated hash code",
+          "assertion": "assert methodResultID == receiverObjectID.hashCode(args[0]);",
+          "name": null,
+          "content": "the calculated hash code"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if an Exception is encountered during annotation member access",
+          "assertion": "assert args[0] == null || !(receiverObjectID.isValidAnnotationMemberType(args[0].getClass()));",
+          "name": "RuntimeException",
+          "content": "if an {@link Exception} is encountered during annotation member access"
+        },
+        {
+          "description": "if an annotation method invocation returns null",
+          "assertion": "assert args[0] == null;",
+          "name": "IllegalStateException",
+          "content": "if an annotation method invocation returns {@code null}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "isValidAnnotationMemberType",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "type"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the type to check, {@code null}",
+          "assertion": "assert (args[0] != null);",
+          "name": "type",
+          "content": "the type to check, {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the type is a valid type to use in an annotation",
+          "assertion": "assert methodResultID == (args[0] instanceof String || args[0] instanceof Class || args[0] instanceof Annotation || args[0] instanceof Enum);",
+          "name": null,
+          "content": "true if the type is a valid type to use in an annotation"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Annotation",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "a"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the annotation of which a string representation is desired",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "a",
+          "content": "the annotation of which a string representation is desired"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the standard string representation of an annotation, not null",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the standard string representation of an annotation, not {@code null}"
+        }
+      ]
+    }
+  }
+]

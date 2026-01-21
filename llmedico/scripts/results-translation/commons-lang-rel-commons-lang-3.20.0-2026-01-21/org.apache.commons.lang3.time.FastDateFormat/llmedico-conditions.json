@@ -1,0 +1,1853 @@
+[
+  {
+    "method": "FastDateFormat",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pattern"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "{@link java.text.SimpleDateFormat} compatible pattern.",
+          "assertion": "assert args[0] != null;",
+          "name": "pattern",
+          "content": "{@link java.text.SimpleDateFormat} compatible pattern."
+        },
+        {
+          "description": "non-null time zone to use.",
+          "assertion": "assert args[1] != null;",
+          "name": "timeZone",
+          "content": "non-null time zone to use."
+        },
+        {
+          "description": "non-null locale to use.",
+          "assertion": "assert args[2] != null;",
+          "name": "locale",
+          "content": "non-null locale to use."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if pattern, timeZone, or locale is null.",
+          "assertion": "assert args[0]==null || args[1]==null || args[2]==null;",
+          "name": "NullPointerException",
+          "content": "if pattern, timeZone, or locale is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "FastDateFormat",
+    "type": "constructor",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pattern"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Date",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "centuryStart"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "pattern is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "pattern",
+          "content": "@link java.text.SimpleDateFormat compatible pattern."
+        },
+        {
+          "description": "timeZone is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "timeZone",
+          "content": "non-null time zone to use."
+        },
+        {
+          "description": "locale is not null",
+          "assertion": "assert args[2] != null;",
+          "name": "locale",
+          "content": "non-null locale to use."
+        },
+        {
+          "description": "centuryStart is either null or a valid date",
+          "assertion": "assert args[3] == null || args[3] instanceof Date;",
+          "name": "centuryStart",
+          "content": "The start of the 100-year period to use as the \"default century\" for 2 digit year parsing. If centuryStart is null, defaults to now -\\n                    80 years."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if pattern, timeZone, or locale is null.",
+          "assertion": "assert args[0] == null || args[1] == null || args[2] == null;",
+          "name": "NullPointerException",
+          "content": "if pattern, timeZone, or locale is null."
+        }
+      ]
+    }
+  },
+  {
+    "method": "clear",
+    "type": "method",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "getDateInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}.",
+          "assertion": "assert (args[0] == 0 || args[0] == 1 || args[0] == 2 || args[0] == 3);",
+          "name": "style",
+          "content": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a localized standard date formatter.",
+          "assertion": "assert methodResultID instanceof FastDateFormat;",
+          "name": null,
+          "content": "a localized standard date formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date pattern defined.",
+          "assertion": "assert !java.util.Locale.getDefault().getDisplayName().contains(\"date\");",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDateInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "date style: {@link #FULL}, LO{@link #FULL},{@link #MEDIUM}, or {@link #SHORT}.",
+          "assertion": "assert (args[0] == FULL || args[0] == MEDIUM || args[0] == SHORT);",
+          "name": "style",
+          "content": "date style: {@link #FULL}, LO{@link #FULL},{@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "optional locale, overrides system locale.",
+          "assertion": "assert args[1] != null;",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard date formatter.",
+          "assertion": "",
+          "description": "localized standard date formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date pattern defined.",
+          "assertion": "assert args[1] != null && !args[1].getDisplayName().contains(\"date\");",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDateInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "style is one of #FULL, #LONG, #MEDIUM, or #SHORT",
+          "assertion": "assert (args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT);",
+          "name": "style",
+          "content": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeZone is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted date."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard date formatter.",
+          "assertion": "",
+          "description": "localized standard date formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date pattern defined.",
+          "assertion": "assert !receiverObjectID.getPattern();",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDateInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "style is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT;",
+          "name": "style",
+          "content": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeZone is not null if provided",
+          "assertion": "assert args[1] == null || args[1] instanceof TimeZone;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted date."
+        },
+        {
+          "description": "locale is not null if provided",
+          "assertion": "assert args[2] == null || args[2] instanceof Locale;",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard date formatter.",
+          "assertion": "",
+          "description": "localized standard date formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date pattern defined.",
+          "assertion": "assert args[2] != null && !args[2].getDateFormatSymbols().getZoneStrings()[0][1].contains(\"yyyy\");",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDateTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "dateStyle"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeStyle"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "dateStyle is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT;",
+          "name": "dateStyle",
+          "content": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeStyle is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[1] == FULL || args[1] == LONG || args[1] == MEDIUM || args[1] == SHORT;",
+          "name": "timeStyle",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard date/time formatter.",
+          "assertion": "",
+          "description": "localized standard date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date/time pattern defined.",
+          "assertion": "assert !java.util.Locale.getDefault().getDisplayName().contains(\"date\") || !java.util.Locale.getDefault().getDisplayName().contains(\"time\");",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date/time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDateTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "dateStyle"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeStyle"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "dateStyle is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT;",
+          "name": "dateStyle",
+          "content": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeStyle is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[1] == FULL || args[1] == LONG || args[1] == MEDIUM || args[1] == SHORT;",
+          "name": "timeStyle",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "locale is not null",
+          "assertion": "assert args[2] != null;",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard date/time formatter.",
+          "assertion": "",
+          "description": "localized standard date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date/time pattern defined.",
+          "assertion": "assert args[2] != null && !((java.util.Locale)args[2]).getDisplayName().contains(\"date\") || !((java.util.Locale)args[2]).getDisplayName().contains(\"time\");",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date/time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDateTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "dateStyle"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeStyle"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "dateStyle is valid",
+          "assertion": "assert args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT;",
+          "name": "dateStyle",
+          "content": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeStyle is valid",
+          "assertion": "assert args[1] == FULL || args[1] == LONG || args[1] == MEDIUM || args[1] == SHORT;",
+          "name": "timeStyle",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeZone is not null",
+          "assertion": "assert args[2] != null;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted date."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard date/time formatter.",
+          "assertion": "",
+          "description": "localized standard date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date/time pattern defined.",
+          "assertion": "assert !receiverObjectID.getPattern();",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date/time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDateTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "dateStyle"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeStyle"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "dateStyle is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT;",
+          "name": "dateStyle",
+          "content": "date style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeStyle is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[1] == FULL || args[1] == LONG || args[1] == MEDIUM || args[1] == SHORT;",
+          "name": "timeStyle",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeZone is not null if provided",
+          "assertion": "assert args[2] == null || args[2] instanceof TimeZone;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted date."
+        },
+        {
+          "description": "locale is not null if provided",
+          "assertion": "assert args[3] == null || args[3] instanceof Locale;",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a localized standard date/time formatter.",
+          "assertion": "assert methodResultID instanceof FastDateFormat;",
+          "name": null,
+          "content": "a localized standard date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no date/time pattern defined.",
+          "assertion": "assert args[3] != null && !args[3].getDateTimePattern().contains(\"yyyy\") && !args[3].getDateTimePattern().contains(\"MM\") && !args[3].getDateTimePattern().contains(\"dd\") && !args[3].getDateTimePattern().contains(\"HH\") && !args[3].getDateTimePattern().contains(\"mm\") && !args[3].getDateTimePattern().contains(\"ss\");",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no date/time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInstance",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a date/time formatter.",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "a date/time formatter."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pattern"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "{@link java.text.SimpleDateFormat} compatible pattern.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "pattern",
+          "content": "{@link java.text.SimpleDateFormat} compatible pattern."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a pattern based date/time formatter.",
+          "assertion": "assert methodResultID instanceof FastDateFormat;",
+          "name": null,
+          "content": "a pattern based date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if pattern is invalid.",
+          "assertion": "assert !java.text.SimpleDateFormat.class.desiredAssertionStatus() || args[0] == null || args[0].isEmpty();",
+          "name": "IllegalArgumentException",
+          "content": "if pattern is invalid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pattern"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a {@link java.text.SimpleDateFormat} compatible pattern.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "pattern",
+          "content": "{@link java.text.SimpleDateFormat} compatible pattern."
+        },
+        {
+          "description": "optional locale, overrides system locale.",
+          "assertion": "assert (args[1] == null) || (args[1] instanceof Locale);",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a pattern based date/time formatter.",
+          "assertion": "assert methodResultID instanceof FastDateFormat;",
+          "name": null,
+          "content": "a pattern based date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if pattern is invalid.",
+          "assertion": "assert !java.text.SimpleDateFormat.compile(args[0]).isValid();",
+          "name": "IllegalArgumentException",
+          "content": "if pattern is invalid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pattern"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "a {@link java.text.SimpleDateFormat} compatible pattern.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "pattern",
+          "content": "{@link java.text.SimpleDateFormat} compatible pattern."
+        },
+        {
+          "description": "optional time zone, overrides time zone of formatted date.",
+          "assertion": "assert (args[1] == null) == true;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted date."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a pattern based date/time formatter.",
+          "assertion": "assert methodResultID instanceof FastDateFormat;",
+          "name": null,
+          "content": "a pattern based date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if pattern is invalid.",
+          "assertion": "assert !java.text.SimpleDateFormat(args[0]).toString().matches(\".*\");",
+          "name": "IllegalArgumentException",
+          "content": "if pattern is invalid."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pattern"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "pattern is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "pattern",
+          "content": "@link java.text.SimpleDateFormat compatible pattern."
+        },
+        {
+          "description": "timeZone is optional",
+          "assertion": "assert (args[1]==null) == false;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted date."
+        },
+        {
+          "description": "locale is optional",
+          "assertion": "assert (args[2]==null) == false;",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "pattern based date/time formatter.",
+          "assertion": "",
+          "description": "pattern based date/time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if pattern is invalid or null.",
+          "assertion": "assert args[0] == null || !java.text.SimpleDateFormat.class.desiredAssertionStatus() && !(new java.text.SimpleDateFormat((String)args[0])).toString().length() > 0;",
+          "name": "IllegalArgumentException",
+          "content": "if pattern is invalid or {@code null}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}.",
+          "assertion": "assert (args[0] == 0) || (args[0] == 1) || (args[0] == 2) || (args[0] == 3);",
+          "name": "style",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a localized standard time formatter.",
+          "assertion": "assert methodResultID instanceof FastDateFormat;",
+          "name": null,
+          "content": "a localized standard time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no time pattern defined.",
+          "assertion": "assert java.util.Locale.getDefault().getDisplayName() == \"\" || java.util.Locale.getDefault().getISO3Country() == \"\";",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}.",
+          "assertion": "assert (args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT);",
+          "name": "style",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "optional locale, overrides system locale.",
+          "assertion": "assert args[1] != null;",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a localized standard time formatter.",
+          "assertion": "assert methodResultID instanceof FastDateFormat;",
+          "name": null,
+          "content": "a localized standard time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no time pattern defined.",
+          "assertion": "assert args[1] != null && !args[1].getDisplayName().contains(\"time\");",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "style is one of #FULL, #LONG, #MEDIUM, or #SHORT",
+          "assertion": "assert (args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT);",
+          "name": "style",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeZone is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted time."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard time formatter.",
+          "assertion": "",
+          "description": "localized standard time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no time pattern defined.",
+          "assertion": "assert java.util.Locale.getDefault().getDisplayName() == \"\" || java.util.Locale.getDefault().getISO3Country() == \"\";",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTimeInstance",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "style"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "TimeZone",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "timeZone"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Locale",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "locale"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "style is one of FULL, LONG, MEDIUM, or SHORT",
+          "assertion": "assert args[0] == FULL || args[0] == LONG || args[0] == MEDIUM || args[0] == SHORT;",
+          "name": "style",
+          "content": "time style: {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, or {@link #SHORT}."
+        },
+        {
+          "description": "timeZone is not null if provided",
+          "assertion": "assert args[1] == null || args[1] instanceof TimeZone;",
+          "name": "timeZone",
+          "content": "optional time zone, overrides time zone of formatted time."
+        },
+        {
+          "description": "locale is not null if provided",
+          "assertion": "assert args[2] == null || args[2] instanceof Locale;",
+          "name": "locale",
+          "content": "optional locale, overrides system locale."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "localized standard time formatter.",
+          "assertion": "",
+          "description": "localized standard time formatter."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the Locale has no time pattern defined.",
+          "assertion": "assert args[2] != null && !args[2].getDateTimeFormat(int.class).hasTimePattern();",
+          "name": "IllegalArgumentException",
+          "content": "if the Locale has no time pattern defined."
+        }
+      ]
+    }
+  },
+  {
+    "method": "applyRules",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Calendar",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "calendar"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StringBuffer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buf"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the calendar to format.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "calendar",
+          "content": "the calendar to format."
+        },
+        {
+          "description": "the buffer to format into.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "buf",
+          "content": "the buffer to format into."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the specified string buffer",
+          "assertion": "assert methodResultID == args[1];",
+          "name": null,
+          "content": "the specified string buffer"
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to compare to.",
+          "assertion": "assert (args[0] != null);",
+          "name": "obj",
+          "content": "the object to compare to."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if the object is equal.",
+          "assertion": "assert methodResultID == receiverObjectID.equals(args[0]);",
+          "name": null,
+          "content": "true if the object is equal."
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Calendar",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "calendar"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the calendar to format.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "calendar",
+          "content": "the calendar to format."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "formatted string.",
+          "assertion": "",
+          "description": "formatted string."
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Calendar",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "calendar"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buf"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the calendar to format.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "calendar",
+          "content": "the calendar to format."
+        },
+        {
+          "description": "the buffer to format into.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "buf",
+          "content": "the buffer to format into."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the specified string buffer",
+          "assertion": "assert methodResultID == args[1];",
+          "name": null,
+          "content": "the specified string buffer"
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Calendar",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "calendar"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StringBuffer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buf"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the calendar to format.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "calendar",
+          "content": "the calendar to format."
+        },
+        {
+          "description": "the buffer to format into.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "buf",
+          "content": "the buffer to format into."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the specified string buffer",
+          "assertion": "assert methodResultID == args[1];",
+          "name": null,
+          "content": "the specified string buffer"
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Date",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "date"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the date to format.",
+          "assertion": "assert args[0] != null;",
+          "name": "date",
+          "content": "the date to format."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a string representation of the date",
+          "assertion": "assert methodResultID instanceof String;",
+          "name": null,
+          "content": "a string representation of the date"
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Date",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "date"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buf"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the date to format.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "date",
+          "content": "the date to format."
+        },
+        {
+          "description": "the buffer to format into.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "buf",
+          "content": "the buffer to format into."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the specified string buffer",
+          "assertion": "assert methodResultID == args[1];",
+          "name": null,
+          "content": "the specified string buffer"
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Date",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "date"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StringBuffer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buf"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the date to format.",
+          "assertion": "assert args[0] != null;",
+          "name": "date",
+          "content": "the date to format."
+        },
+        {
+          "description": "the buffer to format into.",
+          "assertion": "assert args[1] != null;",
+          "name": "buf",
+          "content": "the buffer to format into."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the specified string buffer",
+          "assertion": "assert methodResultID == args[1];",
+          "name": null,
+          "content": "the specified string buffer"
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "millis"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the millisecond value to format.",
+          "assertion": "assert true;",
+          "name": "millis",
+          "content": "the millisecond value to format."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the formatted string.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.format(args[0], null));",
+          "name": null,
+          "content": "the formatted string."
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "millis"
+      },
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buf"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the millisecond value to format.",
+          "assertion": "assert true;",
+          "name": "millis",
+          "content": "the millisecond value to format."
+        },
+        {
+          "description": "the buffer to format into.",
+          "assertion": "assert args[1] != null;",
+          "name": "buf",
+          "content": "the buffer to format into."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the specified string buffer",
+          "assertion": "assert methodResultID == args[1];",
+          "name": null,
+          "content": "the specified string buffer"
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "millis"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StringBuffer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "buf"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the millisecond value to format.",
+          "assertion": "assert true;",
+          "name": "millis",
+          "content": "the millisecond value to format."
+        },
+        {
+          "description": "the buffer to format into.",
+          "assertion": "assert args[1] != null;",
+          "name": "buf",
+          "content": "the buffer to format into."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "specified string buffer.",
+          "assertion": "",
+          "description": "specified string buffer."
+        }
+      ]
+    }
+  },
+  {
+    "method": "format",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "StringBuffer",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "toAppendTo"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "FieldPosition",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pos"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "obj is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "obj",
+          "content": "the object to format."
+        },
+        {
+          "description": "toAppendTo is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "toAppendTo",
+          "content": "the buffer to append to."
+        },
+        {
+          "description": "pos is not null",
+          "assertion": "assert args[2] != null;",
+          "name": "pos",
+          "content": "the position, ignored."
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "given buffer.",
+          "assertion": "",
+          "description": "given buffer."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getLocale",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the locale.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getLocale());",
+          "name": null,
+          "content": "the locale."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getMaxLengthEstimate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the maximum formatted length.",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "the maximum formatted length."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getPattern",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the pattern, {@link java.text.SimpleDateFormat} compatible.",
+          "assertion": "assert methodResultID instanceof String;",
+          "name": null,
+          "content": "the pattern, {@link java.text.SimpleDateFormat} compatible."
+        }
+      ]
+    }
+  },
+  {
+    "method": "getTimeZone",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the time zone.",
+          "assertion": "assert methodResultID instanceof java.util.TimeZone;",
+          "name": null,
+          "content": "the time zone."
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a hash code compatible with equals.",
+          "assertion": "assert methodResultID == receiverObjectID.hashCode();",
+          "name": null,
+          "content": "a hash code compatible with equals."
+        }
+      ]
+    }
+  },
+  {
+    "method": "parse",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "source"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "parse",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "source"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ParsePosition",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pos"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "parse",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "source"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ParsePosition",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pos"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Calendar",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "calendar"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "parseObject",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "source"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "ParsePosition",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "pos"
+      }
+    ],
+    "conditions": {}
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a debug string.",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "a debug string."
+        }
+      ]
+    }
+  }
+]

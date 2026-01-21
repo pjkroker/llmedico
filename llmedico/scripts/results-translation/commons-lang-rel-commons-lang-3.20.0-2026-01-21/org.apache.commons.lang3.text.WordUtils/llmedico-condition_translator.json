@@ -1,0 +1,804 @@
+[
+  {
+    "name": "WordUtils",
+    "package": "org.apache.commons.lang3.text",
+    "qualified_name": "org.apache.commons.lang3.text.WordUtils",
+    "javadoc": "/**\n * Operations on Strings that contain words.\n *\n * <p>This class tries to handle {@code null} input gracefully.\n * An exception will not be thrown for a {@code null} input.\n * Each method documents its behavior in more detail.</p>\n *\n * @since 2.0\n * @deprecated As of <a href=\"https://commons.apache.org/proper/commons-lang/changes-report.html#a3.6\">3.6</a>, use Apache Commons Text\n * <a href=\"https://commons.apache.org/proper/commons-text/javadocs/api-release/org/apache/commons/text/WordUtils.html\">\n * WordUtils</a>.\n */\n",
+    "code": "/**\n * Operations on Strings that contain words.\n *\n * <p>This class tries to handle {@code null} input gracefully.\n * An exception will not be thrown for a {@code null} input.\n * Each method documents its behavior in more detail.</p>\n *\n * @since 2.0\n * @deprecated As of <a href=\"https://commons.apache.org/proper/commons-lang/changes-report.html#a3.6\">3.6</a>, use Apache Commons Text\n * <a href=\"https://commons.apache.org/proper/commons-text/javadocs/api-release/org/apache/commons/text/WordUtils.html\">\n * WordUtils</a>.\n */\n@Deprecated\npublic class WordUtils {\n\n    /**\n     * Capitalizes all the whitespace separated words in a String.\n     * Only the first character of each word is changed. To convert the\n     * rest of each word to lowercase at the same time,\n     * use {@link #capitalizeFully(String)}.\n     *\n     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n     * A {@code null} input String returns {@code null}.\n     * Capitalization uses the Unicode title case, normally equivalent to\n     * upper case.</p>\n     *\n     * <pre>\n     * WordUtils.capitalize(null)        = null\n     * WordUtils.capitalize(\"\")          = \"\"\n     * WordUtils.capitalize(\"i am FINE\") = \"I Am FINE\"\n     * </pre>\n     *\n     * @param str  the String to capitalize, may be null.\n     * @return capitalized String, {@code null} if null String input.\n     * @see #uncapitalize(String)\n     * @see #capitalizeFully(String)\n     */\n    public static String capitalize(final String str) {\n        return capitalize(str, null);\n    }\n\n    /**\n     * Capitalizes all the delimiter separated words in a String.\n     * Only the first character of each word is changed. To convert the\n     * rest of each word to lowercase at the same time,\n     * use {@link #capitalizeFully(String, char[])}.\n     *\n     * <p>The delimiters represent a set of characters understood to separate words.\n     * The first string character and the first non-delimiter character after a\n     * delimiter will be capitalized.</p>\n     *\n     * <p>A {@code null} input String returns {@code null}.\n     * Capitalization uses the Unicode title case, normally equivalent to\n     * upper case.</p>\n     *\n     * <pre>\n     * WordUtils.capitalize(null, *)            = null\n     * WordUtils.capitalize(\"\", *)              = \"\"\n     * WordUtils.capitalize(*, new char[0])     = *\n     * WordUtils.capitalize(\"i am fine\", null)  = \"I Am Fine\"\n     * WordUtils.capitalize(\"i aM.fine\", {'.'}) = \"I aM.Fine\"\n     * </pre>\n     *\n     * @param str  the String to capitalize, may be null.\n     * @param delimiters  set of characters to determine capitalization, null means whitespace.\n     * @return capitalized String, {@code null} if null String input.\n     * @see #uncapitalize(String)\n     * @see #capitalizeFully(String)\n     * @since 2.1\n     */\n    public static String capitalize(final String str, final char... delimiters) {\n        final int delimLen = delimiters == null ? -1 : delimiters.length;\n        if (StringUtils.isEmpty(str) || delimLen == 0) {\n            return str;\n        }\n        final char[] buffer = str.toCharArray();\n        boolean capitalizeNext = true;\n        for (int i = 0; i < buffer.length; i++) {\n            final char ch = buffer[i];\n            if (isDelimiter(ch, delimiters)) {\n                capitalizeNext = true;\n            } else if (capitalizeNext) {\n                buffer[i] = Character.toTitleCase(ch);\n                capitalizeNext = false;\n            }\n        }\n        return new String(buffer);\n    }\n\n    /**\n     * Converts all the whitespace separated words in a String into capitalized words,\n     * that is each word is made up of a titlecase character and then a series of\n     * lowercase characters.\n     *\n     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n     * A {@code null} input String returns {@code null}.\n     * Capitalization uses the Unicode title case, normally equivalent to\n     * upper case.</p>\n     *\n     * <pre>\n     * WordUtils.capitalizeFully(null)        = null\n     * WordUtils.capitalizeFully(\"\")          = \"\"\n     * WordUtils.capitalizeFully(\"i am FINE\") = \"I Am Fine\"\n     * </pre>\n     *\n     * @param str  the String to capitalize, may be null.\n     * @return capitalized String, {@code null} if null String input.\n     */\n    public static String capitalizeFully(final String str) {\n        return capitalizeFully(str, null);\n    }\n\n    /**\n     * Converts all the delimiter separated words in a String into capitalized words,\n     * that is each word is made up of a titlecase character and then a series of\n     * lowercase characters.\n     *\n     * <p>The delimiters represent a set of characters understood to separate words.\n     * The first string character and the first non-delimiter character after a\n     * delimiter will be capitalized.</p>\n     *\n     * <p>A {@code null} input String returns {@code null}.\n     * Capitalization uses the Unicode title case, normally equivalent to\n     * upper case.</p>\n     *\n     * <pre>\n     * WordUtils.capitalizeFully(null, *)            = null\n     * WordUtils.capitalizeFully(\"\", *)              = \"\"\n     * WordUtils.capitalizeFully(*, null)            = *\n     * WordUtils.capitalizeFully(*, new char[0])     = *\n     * WordUtils.capitalizeFully(\"i aM.fine\", {'.'}) = \"I am.Fine\"\n     * </pre>\n     *\n     * @param str  the String to capitalize, may be null.\n     * @param delimiters  set of characters to determine capitalization, null means whitespace.\n     * @return capitalized String, {@code null} if null String input.\n     * @since 2.1\n     */\n    public static String capitalizeFully(final String str, final char... delimiters) {\n        final int delimLen = delimiters == null ? -1 : delimiters.length;\n        if (StringUtils.isEmpty(str) || delimLen == 0) {\n            return str;\n        }\n        return capitalize(str.toLowerCase(), delimiters);\n    }\n\n    /**\n     * Checks if the String contains all words in the given array.\n     *\n     * <p>\n     * A {@code null} String will return {@code false}. A {@code null}, zero\n     * length search array or if one element of array is null will return {@code false}.\n     * </p>\n     *\n     * <pre>\n     * WordUtils.containsAllWords(null, *)            = false\n     * WordUtils.containsAllWords(\"\", *)              = false\n     * WordUtils.containsAllWords(*, null)            = false\n     * WordUtils.containsAllWords(*, [])              = false\n     * WordUtils.containsAllWords(\"abcd\", \"ab\", \"cd\") = false\n     * WordUtils.containsAllWords(\"abc def\", \"def\", \"abc\") = true\n     * </pre>\n     *\n     * @param word The CharSequence to check, may be null.\n     * @param words The array of String words to search for, may be null.\n     * @return {@code true} if all search words are found, {@code false} otherwise.\n     * @since 3.5\n     */\n    public static boolean containsAllWords(final CharSequence word, final CharSequence... words) {\n        if (StringUtils.isEmpty(word) || ArrayUtils.isEmpty(words)) {\n            return false;\n        }\n        for (final CharSequence w : words) {\n            if (StringUtils.isBlank(w)) {\n                return false;\n            }\n            final Pattern p = Pattern.compile(\".*\\\\b\" + Pattern.quote(w.toString()) + \"\\\\b.*\");\n            if (!p.matcher(word).matches()) {\n                return false;\n            }\n        }\n        return true;\n    }\n\n    /**\n     * Extracts the initial characters from each word in the String.\n     *\n     * <p>All first characters after whitespace are returned as a new string.\n     * Their case is not changed.</p>\n     *\n     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n     * A {@code null} input String returns {@code null}.</p>\n     *\n     * <pre>\n     * WordUtils.initials(null)             = null\n     * WordUtils.initials(\"\")               = \"\"\n     * WordUtils.initials(\"Ben John Lee\")   = \"BJL\"\n     * WordUtils.initials(\"Ben J.Lee\")      = \"BJ\"\n     * </pre>\n     *\n     * @param str  the String to get initials from, may be null.\n     * @return String of initial letters, {@code null} if null String input.\n     * @see #initials(String,char[])\n     * @since 2.2\n     */\n    public static String initials(final String str) {\n        return initials(str, null);\n    }\n\n    /**\n     * Extracts the initial characters from each word in the String.\n     *\n     * <p>All first characters after the defined delimiters are returned as a new string.\n     * Their case is not changed.</p>\n     *\n     * <p>If the delimiters array is null, then Whitespace is used.\n     * Whitespace is defined by {@link Character#isWhitespace(char)}.\n     * A {@code null} input String returns {@code null}.\n     * An empty delimiter array returns an empty String.</p>\n     *\n     * <pre>\n     * WordUtils.initials(null, *)                = null\n     * WordUtils.initials(\"\", *)                  = \"\"\n     * WordUtils.initials(\"Ben John Lee\", null)   = \"BJL\"\n     * WordUtils.initials(\"Ben J.Lee\", null)      = \"BJ\"\n     * WordUtils.initials(\"Ben J.Lee\", [' ','.']) = \"BJL\"\n     * WordUtils.initials(*, new char[0])         = \"\"\n     * </pre>\n     *\n     * @param str  the String to get initials from, may be null.\n     * @param delimiters  set of characters to determine words, null means whitespace.\n     * @return String of initial characters, {@code null} if null String input.\n     * @see #initials(String)\n     * @since 2.2\n     */\n    public static String initials(final String str, final char... delimiters) {\n        if (StringUtils.isEmpty(str)) {\n            return str;\n        }\n        if (delimiters != null && delimiters.length == 0) {\n            return StringUtils.EMPTY;\n        }\n        final int strLen = str.length();\n        final char[] buf = new char[strLen / 2 + 1];\n        int count = 0;\n        boolean lastWasGap = true;\n        for (int i = 0; i < strLen; i++) {\n            final char ch = str.charAt(i);\n            if (isDelimiter(ch, delimiters)) {\n                lastWasGap = true;\n                // ignore ch\n                continue;\n            }\n            if (lastWasGap) {\n                buf[count++] = ch;\n                lastWasGap = false;\n            }\n        }\n        return new String(buf, 0, count);\n    }\n\n    /**\n     * Tests if the character is a delimiter.\n     *\n     * @param ch  the character to check.\n     * @param delimiters  the delimiters.\n     * @return true if it is a delimiter.\n     */\n    private static boolean isDelimiter(final char ch, final char[] delimiters) {\n        return delimiters == null ? Character.isWhitespace(ch) : ArrayUtils.contains(delimiters, ch);\n    }\n\n    /**\n     * Swaps the case of a String using a word based algorithm.\n     *\n     * <ul>\n     *  <li>Upper case character converts to Lower case</li>\n     *  <li>Title case character converts to Lower case</li>\n     *  <li>Lower case character after Whitespace or at start converts to Title case</li>\n     *  <li>Other Lower case character converts to Upper case</li>\n     * </ul>\n     *\n     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n     * A {@code null} input String returns {@code null}.</p>\n     *\n     * <pre>\n     * StringUtils.swapCase(null)                 = null\n     * StringUtils.swapCase(\"\")                   = \"\"\n     * StringUtils.swapCase(\"The dog has a BONE\") = \"tHE DOG HAS A bone\"\n     * </pre>\n     *\n     * @param str  the String to swap case, may be null.\n     * @return A new String, {@code null} if null String input.\n     */\n    public static String swapCase(final String str) {\n        if (StringUtils.isEmpty(str)) {\n            return str;\n        }\n        final char[] buffer = str.toCharArray();\n        boolean whitespace = true;\n        for (int i = 0; i < buffer.length; i++) {\n            final char ch = buffer[i];\n            if (Character.isUpperCase(ch) || Character.isTitleCase(ch)) {\n                buffer[i] = Character.toLowerCase(ch);\n                whitespace = false;\n            } else if (Character.isLowerCase(ch)) {\n                if (whitespace) {\n                    buffer[i] = Character.toTitleCase(ch);\n                    whitespace = false;\n                } else {\n                    buffer[i] = Character.toUpperCase(ch);\n                }\n            } else {\n                whitespace = Character.isWhitespace(ch);\n            }\n        }\n        return new String(buffer);\n    }\n\n    /**\n     * Uncapitalizes all the whitespace separated words in a String.\n     * Only the first character of each word is changed.\n     *\n     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n     * A {@code null} input String returns {@code null}.</p>\n     *\n     * <pre>\n     * WordUtils.uncapitalize(null)        = null\n     * WordUtils.uncapitalize(\"\")          = \"\"\n     * WordUtils.uncapitalize(\"I Am FINE\") = \"i am fINE\"\n     * </pre>\n     *\n     * @param str  the String to uncapitalize, may be null.\n     * @return uncapitalized String, {@code null} if null String input.\n     * @see #capitalize(String)\n     */\n    public static String uncapitalize(final String str) {\n        return uncapitalize(str, null);\n    }\n\n    /**\n     * Uncapitalizes all the whitespace separated words in a String.\n     * Only the first character of each word is changed.\n     *\n     * <p>The delimiters represent a set of characters understood to separate words.\n     * The first string character and the first non-delimiter character after a\n     * delimiter will be uncapitalized.</p>\n     *\n     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n     * A {@code null} input String returns {@code null}.</p>\n     *\n     * <pre>\n     * WordUtils.uncapitalize(null, *)            = null\n     * WordUtils.uncapitalize(\"\", *)              = \"\"\n     * WordUtils.uncapitalize(*, null)            = *\n     * WordUtils.uncapitalize(*, new char[0])     = *\n     * WordUtils.uncapitalize(\"I AM.FINE\", {'.'}) = \"i AM.fINE\"\n     * </pre>\n     *\n     * @param str  the String to uncapitalize, may be null.\n     * @param delimiters  set of characters to determine uncapitalization, null means whitespace.\n     * @return uncapitalized String, {@code null} if null String input.\n     * @see #capitalize(String)\n     * @since 2.1\n     */\n    public static String uncapitalize(final String str, final char... delimiters) {\n        final int delimLen = delimiters == null ? -1 : delimiters.length;\n        if (StringUtils.isEmpty(str) || delimLen == 0) {\n            return str;\n        }\n        final char[] buffer = str.toCharArray();\n        boolean uncapitalizeNext = true;\n        for (int i = 0; i < buffer.length; i++) {\n            final char ch = buffer[i];\n            if (isDelimiter(ch, delimiters)) {\n                uncapitalizeNext = true;\n            } else if (uncapitalizeNext) {\n                buffer[i] = Character.toLowerCase(ch);\n                uncapitalizeNext = false;\n            }\n        }\n        return new String(buffer);\n    }\n\n    /**\n     * Wraps a single line of text, identifying words by {@code ' '}.\n     *\n     * <p>New lines will be separated by the system property line separator.\n     * Very long words, such as URLs will <em>not</em> be wrapped.</p>\n     *\n     * <p>Leading spaces on a new line are stripped.\n     * Trailing spaces are not stripped.</p>\n     *\n     * <table border=\"1\">\n     *  <caption>Examples</caption>\n     *  <tr>\n     *   <th>input</th>\n     *   <th>wrapLength</th>\n     *   <th>result</th>\n     *  </tr>\n     *  <tr>\n     *   <td>null</td>\n     *   <td>*</td>\n     *   <td>null</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"\"</td>\n     *   <td>*</td>\n     *   <td>\"\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n     *   <td>20</td>\n     *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n     *   <td>20</td>\n     *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Click here, https://commons.apache.org, to jump to the commons website\"</td>\n     *   <td>20</td>\n     *   <td>\"Click here,\\nhttps://commons.apache.org,\\nto jump to the\\ncommons website\"</td>\n     *  </tr>\n     * </table>\n     *\n     * (assuming that '\\n' is the systems line separator)\n     *\n     * @param str  the String to be word wrapped, may be null.\n     * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n     * @return a line with newlines inserted, {@code null} if null input.\n     */\n    public static String wrap(final String str, final int wrapLength) {\n        return wrap(str, wrapLength, null, false);\n    }\n\n    /**\n     * Wraps a single line of text, identifying words by {@code ' '}.\n     *\n     * <p>Leading spaces on a new line are stripped.\n     * Trailing spaces are not stripped.</p>\n     *\n     * <table border=\"1\">\n     *  <caption>Examples</caption>\n     *  <tr>\n     *   <th>input</th>\n     *   <th>wrapLength</th>\n     *   <th>newLineString</th>\n     *   <th>wrapLongWords</th>\n     *   <th>result</th>\n     *  </tr>\n     *  <tr>\n     *   <td>null</td>\n     *   <td>*</td>\n     *   <td>*</td>\n     *   <td>true/false</td>\n     *   <td>null</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"\"</td>\n     *   <td>*</td>\n     *   <td>*</td>\n     *   <td>true/false</td>\n     *   <td>\"\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n     *   <td>20</td>\n     *   <td>\"\\n\"</td>\n     *   <td>true/false</td>\n     *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n     *   <td>20</td>\n     *   <td>\"&lt;br /&gt;\"</td>\n     *   <td>true/false</td>\n     *   <td>\"Here is one line of&lt;br /&gt;text that is going&lt;br /&gt;to be wrapped after&lt;br /&gt;20 columns.\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n     *   <td>20</td>\n     *   <td>null</td>\n     *   <td>true/false</td>\n     *   <td>\"Here is one line of\" + systemNewLine + \"text that is going\" + systemNewLine + \"to be wrapped after\" + systemNewLine + \"20 columns.\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n     *   <td>20</td>\n     *   <td>\"\\n\"</td>\n     *   <td>false</td>\n     *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n     *   <td>20</td>\n     *   <td>\"\\n\"</td>\n     *   <td>true</td>\n     *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apach\\ne.org\"</td>\n     *  </tr>\n     * </table>\n     *\n     * @param str  the String to be word wrapped, may be null.\n     * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n     * @param newLineStr  the string to insert for a new line,\n     *  {@code null} uses the system property line separator.\n     * @param wrapLongWords  true if long words (such as URLs) should be wrapped.\n     * @return a line with newlines inserted, {@code null} if null input.\n     */\n    public static String wrap(final String str, final int wrapLength, final String newLineStr, final boolean wrapLongWords) {\n        return wrap(str, wrapLength, newLineStr, wrapLongWords, \" \");\n    }\n\n    /**\n     * Wraps a single line of text, identifying words by {@code wrapOn}.\n     *\n     * <p>Leading spaces on a new line are stripped.\n     * Trailing spaces are not stripped.</p>\n     *\n     * <table border=\"1\">\n     *  <caption>Examples</caption>\n     *  <tr>\n     *   <th>input</th>\n     *   <th>wrapLength</th>\n     *   <th>newLineString</th>\n     *   <th>wrapLongWords</th>\n     *   <th>wrapOn</th>\n     *   <th>result</th>\n     *  </tr>\n     *  <tr>\n     *   <td>null</td>\n     *   <td>*</td>\n     *   <td>*</td>\n     *   <td>true/false</td>\n     *   <td>*</td>\n     *   <td>null</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"\"</td>\n     *   <td>*</td>\n     *   <td>*</td>\n     *   <td>true/false</td>\n     *   <td>*</td>\n     *   <td>\"\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n     *   <td>20</td>\n     *   <td>\"\\n\"</td>\n     *   <td>true/false</td>\n     *   <td>\" \"</td>\n     *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n     *   <td>20</td>\n     *   <td>\"&lt;br /&gt;\"</td>\n     *   <td>true/false</td>\n     *   <td>\" \"</td>\n     *   <td>\"Here is one line of&lt;br /&gt;text that is going&lt;br /&gt;to be wrapped after&lt;br /&gt;20 columns.\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n     *   <td>20</td>\n     *   <td>null</td>\n     *   <td>true/false</td>\n     *   <td>\" \"</td>\n     *   <td>\"Here is one line of\" + systemNewLine + \"text that is going\" + systemNewLine + \"to be wrapped after\" + systemNewLine + \"20 columns.\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n     *   <td>20</td>\n     *   <td>\"\\n\"</td>\n     *   <td>false</td>\n     *   <td>\" \"</td>\n     *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n     *   <td>20</td>\n     *   <td>\"\\n\"</td>\n     *   <td>true</td>\n     *   <td>\" \"</td>\n     *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apach\\ne.org\"</td>\n     *  </tr>\n     *  <tr>\n     *   <td>\"flammable/inflammable\"</td>\n     *   <td>20</td>\n     *   <td>\"\\n\"</td>\n     *   <td>true</td>\n     *   <td>\"/\"</td>\n     *   <td>\"flammable\\ninflammable\"</td>\n     *  </tr>\n     * </table>\n     * @param str  the String to be word wrapped, may be null.\n     * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n     * @param newLineStr  the string to insert for a new line,\n     *  {@code null} uses the system property line separator.\n     * @param wrapLongWords  true if long words (such as URLs) should be wrapped.\n     * @param wrapOn regex expression to be used as a breakable characters,\n     *               if blank string is provided a space character will be used.\n     * @return a line with newlines inserted, {@code null} if null input.\n     */\n    public static String wrap(final String str, int wrapLength, String newLineStr, final boolean wrapLongWords, String wrapOn) {\n        if (str == null) {\n            return null;\n        }\n        if (newLineStr == null) {\n            newLineStr = System.lineSeparator();\n        }\n        if (wrapLength < 1) {\n            wrapLength = 1;\n        }\n        if (StringUtils.isBlank(wrapOn)) {\n            wrapOn = \" \";\n        }\n        final Pattern patternToWrapOn = Pattern.compile(wrapOn);\n        final int inputLineLength = str.length();\n        int offset = 0;\n        final StringBuilder wrappedLine = new StringBuilder(inputLineLength + 32);\n        while (offset < inputLineLength) {\n            int spaceToWrapAt = -1;\n            Matcher matcher = patternToWrapOn.matcher(str.substring(offset, Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), inputLineLength)));\n            if (matcher.find()) {\n                if (matcher.start() == 0) {\n                    offset += matcher.end();\n                    continue;\n                }\n                spaceToWrapAt = matcher.start() + offset;\n            }\n            // only last line without leading spaces is left\n            if (inputLineLength - offset <= wrapLength) {\n                break;\n            }\n            while (matcher.find()) {\n                spaceToWrapAt = matcher.start() + offset;\n            }\n            if (spaceToWrapAt >= offset) {\n                // normal case\n                wrappedLine.append(str, offset, spaceToWrapAt);\n                wrappedLine.append(newLineStr);\n                offset = spaceToWrapAt + 1;\n            } else // really long word or URL\n            if (wrapLongWords) {\n                // wrap really long word one line at a time\n                wrappedLine.append(str, offset, wrapLength + offset);\n                wrappedLine.append(newLineStr);\n                offset += wrapLength;\n            } else {\n                // do not wrap really long word, just extend beyond limit\n                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));\n                if (matcher.find()) {\n                    spaceToWrapAt = matcher.start() + offset + wrapLength;\n                }\n                if (spaceToWrapAt >= 0) {\n                    wrappedLine.append(str, offset, spaceToWrapAt);\n                    wrappedLine.append(newLineStr);\n                    offset = spaceToWrapAt + 1;\n                } else {\n                    wrappedLine.append(str, offset, str.length());\n                    offset = inputLineLength;\n                }\n            }\n        }\n        // Whatever is left in line is short enough to just pass through\n        wrappedLine.append(str, offset, str.length());\n        return wrappedLine.toString();\n    }\n\n    /**\n     * {@link WordUtils} instances should NOT be constructed in\n     * standard programming. Instead, the class should be used as\n     * {@code WordUtils.wrap(\"foo bar\", 20);}.\n     *\n     * <p>This constructor is public to permit tools that require a JavaBean\n     * instance to operate.</p>\n     */\n    public WordUtils() {\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "WordUtils",
+        "parameters": [],
+        "javadoc": "/**\n * {@link WordUtils} instances should NOT be constructed in\n * standard programming. Instead, the class should be used as\n * {@code WordUtils.wrap(\"foo bar\", 20);}.\n *\n * <p>This constructor is public to permit tools that require a JavaBean\n * instance to operate.</p>\n */\n",
+        "tags": [],
+        "code": "/**\n * {@link WordUtils} instances should NOT be constructed in\n * standard programming. Instead, the class should be used as\n * {@code WordUtils.wrap(\"foo bar\", 20);}.\n *\n * <p>This constructor is public to permit tools that require a JavaBean\n * instance to operate.</p>\n */\npublic WordUtils() {\n}"
+      },
+      {
+        "type": "method",
+        "name": "capitalize",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          }
+        ],
+        "javadoc": "/**\n * Capitalizes all the whitespace separated words in a String.\n * Only the first character of each word is changed. To convert the\n * rest of each word to lowercase at the same time,\n * use {@link #capitalizeFully(String)}.\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalize(null)        = null\n * WordUtils.capitalize(\"\")          = \"\"\n * WordUtils.capitalize(\"i am FINE\") = \"I Am FINE\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @return capitalized String, {@code null} if null String input.\n * @see #uncapitalize(String)\n * @see #capitalizeFully(String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to capitalize, may be null.",
+            "assertion": "assert args[0] == null || args[0] instanceof String;",
+            "description": "the String to capitalize, may be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "String, {@code null} if null String input.",
+            "assertion": "assert (args[0] == null && methodResultID == null) || (args[0] != null && !methodResultID.equals(args[0]));",
+            "description": "capitalized String, {@code null} if null String input."
+          },
+          {
+            "tag": "see",
+            "name": "#uncapitalize(String)",
+            "content": ""
+          },
+          {
+            "tag": "see",
+            "name": "#capitalizeFully(String)",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Capitalizes all the whitespace separated words in a String.\n * Only the first character of each word is changed. To convert the\n * rest of each word to lowercase at the same time,\n * use {@link #capitalizeFully(String)}.\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalize(null)        = null\n * WordUtils.capitalize(\"\")          = \"\"\n * WordUtils.capitalize(\"i am FINE\") = \"I Am FINE\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @return capitalized String, {@code null} if null String input.\n * @see #uncapitalize(String)\n * @see #capitalizeFully(String)\n */\npublic static String capitalize(final String str) {\n    return capitalize(str, null);\n}"
+      },
+      {
+        "type": "method",
+        "name": "capitalize",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          },
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "delimiters"
+          }
+        ],
+        "javadoc": "/**\n * Capitalizes all the delimiter separated words in a String.\n * Only the first character of each word is changed. To convert the\n * rest of each word to lowercase at the same time,\n * use {@link #capitalizeFully(String, char[])}.\n *\n * <p>The delimiters represent a set of characters understood to separate words.\n * The first string character and the first non-delimiter character after a\n * delimiter will be capitalized.</p>\n *\n * <p>A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalize(null, *)            = null\n * WordUtils.capitalize(\"\", *)              = \"\"\n * WordUtils.capitalize(*, new char[0])     = *\n * WordUtils.capitalize(\"i am fine\", null)  = \"I Am Fine\"\n * WordUtils.capitalize(\"i aM.fine\", {'.'}) = \"I aM.Fine\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @param delimiters  set of characters to determine capitalization, null means whitespace.\n * @return capitalized String, {@code null} if null String input.\n * @see #uncapitalize(String)\n * @see #capitalizeFully(String)\n * @since 2.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to capitalize, may be null.",
+            "assertion": "assert args[0] == null || receiverObjectID != null;",
+            "description": "not null if str is not null"
+          },
+          {
+            "tag": "param",
+            "name": "delimiters",
+            "content": "set of characters to determine capitalization, null means whitespace.",
+            "assertion": "assert args[1] == null || args[1].length > 0;",
+            "description": "null or has at least one character"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "String, {@code null} if null String input.",
+            "assertion": "",
+            "description": "String, {@code null} if null String input."
+          },
+          {
+            "tag": "see",
+            "name": "#uncapitalize(String)",
+            "content": ""
+          },
+          {
+            "tag": "see",
+            "name": "#capitalizeFully(String)",
+            "content": ""
+          },
+          {
+            "tag": "since",
+            "name": "2.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Capitalizes all the delimiter separated words in a String.\n * Only the first character of each word is changed. To convert the\n * rest of each word to lowercase at the same time,\n * use {@link #capitalizeFully(String, char[])}.\n *\n * <p>The delimiters represent a set of characters understood to separate words.\n * The first string character and the first non-delimiter character after a\n * delimiter will be capitalized.</p>\n *\n * <p>A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalize(null, *)            = null\n * WordUtils.capitalize(\"\", *)              = \"\"\n * WordUtils.capitalize(*, new char[0])     = *\n * WordUtils.capitalize(\"i am fine\", null)  = \"I Am Fine\"\n * WordUtils.capitalize(\"i aM.fine\", {'.'}) = \"I aM.Fine\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @param delimiters  set of characters to determine capitalization, null means whitespace.\n * @return capitalized String, {@code null} if null String input.\n * @see #uncapitalize(String)\n * @see #capitalizeFully(String)\n * @since 2.1\n */\npublic static String capitalize(final String str, final char... delimiters) {\n    final int delimLen = delimiters == null ? -1 : delimiters.length;\n    if (StringUtils.isEmpty(str) || delimLen == 0) {\n        return str;\n    }\n    final char[] buffer = str.toCharArray();\n    boolean capitalizeNext = true;\n    for (int i = 0; i < buffer.length; i++) {\n        final char ch = buffer[i];\n        if (isDelimiter(ch, delimiters)) {\n            capitalizeNext = true;\n        } else if (capitalizeNext) {\n            buffer[i] = Character.toTitleCase(ch);\n            capitalizeNext = false;\n        }\n    }\n    return new String(buffer);\n}"
+      },
+      {
+        "type": "method",
+        "name": "capitalizeFully",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          }
+        ],
+        "javadoc": "/**\n * Converts all the whitespace separated words in a String into capitalized words,\n * that is each word is made up of a titlecase character and then a series of\n * lowercase characters.\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalizeFully(null)        = null\n * WordUtils.capitalizeFully(\"\")          = \"\"\n * WordUtils.capitalizeFully(\"i am FINE\") = \"I Am Fine\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @return capitalized String, {@code null} if null String input.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to capitalize, may be null.",
+            "assertion": "assert args[0] == null || args[0] instanceof String;",
+            "description": "the String to capitalize, may be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "String, {@code null} if null String input.",
+            "assertion": "assert (args[0] == null && methodResultID == null) || (args[0] != null && methodResultID != null);",
+            "description": "capitalized String, {@code null} if null String input."
+          }
+        ],
+        "code": "/**\n * Converts all the whitespace separated words in a String into capitalized words,\n * that is each word is made up of a titlecase character and then a series of\n * lowercase characters.\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalizeFully(null)        = null\n * WordUtils.capitalizeFully(\"\")          = \"\"\n * WordUtils.capitalizeFully(\"i am FINE\") = \"I Am Fine\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @return capitalized String, {@code null} if null String input.\n */\npublic static String capitalizeFully(final String str) {\n    return capitalizeFully(str, null);\n}"
+      },
+      {
+        "type": "method",
+        "name": "capitalizeFully",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          },
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "delimiters"
+          }
+        ],
+        "javadoc": "/**\n * Converts all the delimiter separated words in a String into capitalized words,\n * that is each word is made up of a titlecase character and then a series of\n * lowercase characters.\n *\n * <p>The delimiters represent a set of characters understood to separate words.\n * The first string character and the first non-delimiter character after a\n * delimiter will be capitalized.</p>\n *\n * <p>A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalizeFully(null, *)            = null\n * WordUtils.capitalizeFully(\"\", *)              = \"\"\n * WordUtils.capitalizeFully(*, null)            = *\n * WordUtils.capitalizeFully(*, new char[0])     = *\n * WordUtils.capitalizeFully(\"i aM.fine\", {'.'}) = \"I am.Fine\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @param delimiters  set of characters to determine capitalization, null means whitespace.\n * @return capitalized String, {@code null} if null String input.\n * @since 2.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to capitalize, may be null.",
+            "assertion": "assert (args[0]==null) || args[0] instanceof String;",
+            "description": "a string to capitalize, may be null"
+          },
+          {
+            "tag": "param",
+            "name": "delimiters",
+            "content": "set of characters to determine capitalization, null means whitespace.",
+            "assertion": "assert (args[1]==null) || (args[1] instanceof Character);",
+            "description": "delimiters as a character array, null means whitespace"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "String, {@code null} if null String input.",
+            "assertion": "",
+            "description": "String, {@code null} if null String input."
+          },
+          {
+            "tag": "since",
+            "name": "2.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Converts all the delimiter separated words in a String into capitalized words,\n * that is each word is made up of a titlecase character and then a series of\n * lowercase characters.\n *\n * <p>The delimiters represent a set of characters understood to separate words.\n * The first string character and the first non-delimiter character after a\n * delimiter will be capitalized.</p>\n *\n * <p>A {@code null} input String returns {@code null}.\n * Capitalization uses the Unicode title case, normally equivalent to\n * upper case.</p>\n *\n * <pre>\n * WordUtils.capitalizeFully(null, *)            = null\n * WordUtils.capitalizeFully(\"\", *)              = \"\"\n * WordUtils.capitalizeFully(*, null)            = *\n * WordUtils.capitalizeFully(*, new char[0])     = *\n * WordUtils.capitalizeFully(\"i aM.fine\", {'.'}) = \"I am.Fine\"\n * </pre>\n *\n * @param str  the String to capitalize, may be null.\n * @param delimiters  set of characters to determine capitalization, null means whitespace.\n * @return capitalized String, {@code null} if null String input.\n * @since 2.1\n */\npublic static String capitalizeFully(final String str, final char... delimiters) {\n    final int delimLen = delimiters == null ? -1 : delimiters.length;\n    if (StringUtils.isEmpty(str) || delimLen == 0) {\n        return str;\n    }\n    return capitalize(str.toLowerCase(), delimiters);\n}"
+      },
+      {
+        "type": "method",
+        "name": "containsAllWords",
+        "return_type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "word"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "CharSequence",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "words"
+          }
+        ],
+        "javadoc": "/**\n * Checks if the String contains all words in the given array.\n *\n * <p>\n * A {@code null} String will return {@code false}. A {@code null}, zero\n * length search array or if one element of array is null will return {@code false}.\n * </p>\n *\n * <pre>\n * WordUtils.containsAllWords(null, *)            = false\n * WordUtils.containsAllWords(\"\", *)              = false\n * WordUtils.containsAllWords(*, null)            = false\n * WordUtils.containsAllWords(*, [])              = false\n * WordUtils.containsAllWords(\"abcd\", \"ab\", \"cd\") = false\n * WordUtils.containsAllWords(\"abc def\", \"def\", \"abc\") = true\n * </pre>\n *\n * @param word The CharSequence to check, may be null.\n * @param words The array of String words to search for, may be null.\n * @return {@code true} if all search words are found, {@code false} otherwise.\n * @since 3.5\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "word",
+            "content": "The CharSequence to check, may be null.",
+            "assertion": "assert args[0] == null || args[0] instanceof CharSequence;",
+            "description": "The CharSequence to check, may be null."
+          },
+          {
+            "tag": "param",
+            "name": "words",
+            "content": "The array of String words to search for, may be null.",
+            "assertion": "assert args[1] == null || args[1] instanceof CharSequence;",
+            "description": "The array of String words to search for, may be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "true} if all search words are found, {@code false} otherwise.",
+            "assertion": "assert methodResultID == receiverObjectID.containsAllWords(args[0], args[1]);",
+            "description": "true if all search words are found, false otherwise."
+          },
+          {
+            "tag": "since",
+            "name": "3.5",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Checks if the String contains all words in the given array.\n *\n * <p>\n * A {@code null} String will return {@code false}. A {@code null}, zero\n * length search array or if one element of array is null will return {@code false}.\n * </p>\n *\n * <pre>\n * WordUtils.containsAllWords(null, *)            = false\n * WordUtils.containsAllWords(\"\", *)              = false\n * WordUtils.containsAllWords(*, null)            = false\n * WordUtils.containsAllWords(*, [])              = false\n * WordUtils.containsAllWords(\"abcd\", \"ab\", \"cd\") = false\n * WordUtils.containsAllWords(\"abc def\", \"def\", \"abc\") = true\n * </pre>\n *\n * @param word The CharSequence to check, may be null.\n * @param words The array of String words to search for, may be null.\n * @return {@code true} if all search words are found, {@code false} otherwise.\n * @since 3.5\n */\npublic static boolean containsAllWords(final CharSequence word, final CharSequence... words) {\n    if (StringUtils.isEmpty(word) || ArrayUtils.isEmpty(words)) {\n        return false;\n    }\n    for (final CharSequence w : words) {\n        if (StringUtils.isBlank(w)) {\n            return false;\n        }\n        final Pattern p = Pattern.compile(\".*\\\\b\" + Pattern.quote(w.toString()) + \"\\\\b.*\");\n        if (!p.matcher(word).matches()) {\n            return false;\n        }\n    }\n    return true;\n}"
+      },
+      {
+        "type": "method",
+        "name": "initials",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          }
+        ],
+        "javadoc": "/**\n * Extracts the initial characters from each word in the String.\n *\n * <p>All first characters after whitespace are returned as a new string.\n * Their case is not changed.</p>\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * WordUtils.initials(null)             = null\n * WordUtils.initials(\"\")               = \"\"\n * WordUtils.initials(\"Ben John Lee\")   = \"BJL\"\n * WordUtils.initials(\"Ben J.Lee\")      = \"BJ\"\n * </pre>\n *\n * @param str  the String to get initials from, may be null.\n * @return String of initial letters, {@code null} if null String input.\n * @see #initials(String,char[])\n * @since 2.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to get initials from, may be null.",
+            "assertion": "assert args[0] == null || args[0] instanceof String;",
+            "description": "the String to get initials from, may be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of initial letters, {@code null} if null String input.",
+            "assertion": "assert (args[0] == null && methodResultID == null) || (args[0] != null && methodResultID != null);",
+            "description": "null if input String is null, otherwise a string of initial letters"
+          },
+          {
+            "tag": "see",
+            "name": "#initials(String,char[])",
+            "content": ""
+          },
+          {
+            "tag": "since",
+            "name": "2.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Extracts the initial characters from each word in the String.\n *\n * <p>All first characters after whitespace are returned as a new string.\n * Their case is not changed.</p>\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * WordUtils.initials(null)             = null\n * WordUtils.initials(\"\")               = \"\"\n * WordUtils.initials(\"Ben John Lee\")   = \"BJL\"\n * WordUtils.initials(\"Ben J.Lee\")      = \"BJ\"\n * </pre>\n *\n * @param str  the String to get initials from, may be null.\n * @return String of initial letters, {@code null} if null String input.\n * @see #initials(String,char[])\n * @since 2.2\n */\npublic static String initials(final String str) {\n    return initials(str, null);\n}"
+      },
+      {
+        "type": "method",
+        "name": "initials",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          },
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "delimiters"
+          }
+        ],
+        "javadoc": "/**\n * Extracts the initial characters from each word in the String.\n *\n * <p>All first characters after the defined delimiters are returned as a new string.\n * Their case is not changed.</p>\n *\n * <p>If the delimiters array is null, then Whitespace is used.\n * Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.\n * An empty delimiter array returns an empty String.</p>\n *\n * <pre>\n * WordUtils.initials(null, *)                = null\n * WordUtils.initials(\"\", *)                  = \"\"\n * WordUtils.initials(\"Ben John Lee\", null)   = \"BJL\"\n * WordUtils.initials(\"Ben J.Lee\", null)      = \"BJ\"\n * WordUtils.initials(\"Ben J.Lee\", [' ','.']) = \"BJL\"\n * WordUtils.initials(*, new char[0])         = \"\"\n * </pre>\n *\n * @param str  the String to get initials from, may be null.\n * @param delimiters  set of characters to determine words, null means whitespace.\n * @return String of initial characters, {@code null} if null String input.\n * @see #initials(String)\n * @since 2.2\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to get initials from, may be null.",
+            "assertion": "assert (args[0]==null) || args[0] instanceof String;",
+            "description": "may be null"
+          },
+          {
+            "tag": "param",
+            "name": "delimiters",
+            "content": "set of characters to determine words, null means whitespace.",
+            "assertion": "assert (args[1]==null) || args[1] instanceof Character;",
+            "description": "set of characters to determine words, null means whitespace"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "of initial characters, {@code null} if null String input.",
+            "assertion": "",
+            "description": "of initial characters, {@code null} if null String input."
+          },
+          {
+            "tag": "see",
+            "name": "#initials(String)",
+            "content": ""
+          },
+          {
+            "tag": "since",
+            "name": "2.2",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Extracts the initial characters from each word in the String.\n *\n * <p>All first characters after the defined delimiters are returned as a new string.\n * Their case is not changed.</p>\n *\n * <p>If the delimiters array is null, then Whitespace is used.\n * Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.\n * An empty delimiter array returns an empty String.</p>\n *\n * <pre>\n * WordUtils.initials(null, *)                = null\n * WordUtils.initials(\"\", *)                  = \"\"\n * WordUtils.initials(\"Ben John Lee\", null)   = \"BJL\"\n * WordUtils.initials(\"Ben J.Lee\", null)      = \"BJ\"\n * WordUtils.initials(\"Ben J.Lee\", [' ','.']) = \"BJL\"\n * WordUtils.initials(*, new char[0])         = \"\"\n * </pre>\n *\n * @param str  the String to get initials from, may be null.\n * @param delimiters  set of characters to determine words, null means whitespace.\n * @return String of initial characters, {@code null} if null String input.\n * @see #initials(String)\n * @since 2.2\n */\npublic static String initials(final String str, final char... delimiters) {\n    if (StringUtils.isEmpty(str)) {\n        return str;\n    }\n    if (delimiters != null && delimiters.length == 0) {\n        return StringUtils.EMPTY;\n    }\n    final int strLen = str.length();\n    final char[] buf = new char[strLen / 2 + 1];\n    int count = 0;\n    boolean lastWasGap = true;\n    for (int i = 0; i < strLen; i++) {\n        final char ch = str.charAt(i);\n        if (isDelimiter(ch, delimiters)) {\n            lastWasGap = true;\n            // ignore ch\n            continue;\n        }\n        if (lastWasGap) {\n            buf[count++] = ch;\n            lastWasGap = false;\n        }\n    }\n    return new String(buf, 0, count);\n}"
+      },
+      {
+        "type": "method",
+        "name": "swapCase",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          }
+        ],
+        "javadoc": "/**\n * Swaps the case of a String using a word based algorithm.\n *\n * <ul>\n *  <li>Upper case character converts to Lower case</li>\n *  <li>Title case character converts to Lower case</li>\n *  <li>Lower case character after Whitespace or at start converts to Title case</li>\n *  <li>Other Lower case character converts to Upper case</li>\n * </ul>\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * StringUtils.swapCase(null)                 = null\n * StringUtils.swapCase(\"\")                   = \"\"\n * StringUtils.swapCase(\"The dog has a BONE\") = \"tHE DOG HAS A bone\"\n * </pre>\n *\n * @param str  the String to swap case, may be null.\n * @return A new String, {@code null} if null String input.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to swap case, may be null.",
+            "assertion": "assert args[0] == null || args[0] instanceof String;",
+            "description": "the String to swap case, may be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "new String, {@code null} if null String input.",
+            "assertion": "assert (args[0] == null && methodResultID == null) || (args[0] != null && methodResultID != null);",
+            "description": "A new String, null if null String input."
+          }
+        ],
+        "code": "/**\n * Swaps the case of a String using a word based algorithm.\n *\n * <ul>\n *  <li>Upper case character converts to Lower case</li>\n *  <li>Title case character converts to Lower case</li>\n *  <li>Lower case character after Whitespace or at start converts to Title case</li>\n *  <li>Other Lower case character converts to Upper case</li>\n * </ul>\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * StringUtils.swapCase(null)                 = null\n * StringUtils.swapCase(\"\")                   = \"\"\n * StringUtils.swapCase(\"The dog has a BONE\") = \"tHE DOG HAS A bone\"\n * </pre>\n *\n * @param str  the String to swap case, may be null.\n * @return A new String, {@code null} if null String input.\n */\npublic static String swapCase(final String str) {\n    if (StringUtils.isEmpty(str)) {\n        return str;\n    }\n    final char[] buffer = str.toCharArray();\n    boolean whitespace = true;\n    for (int i = 0; i < buffer.length; i++) {\n        final char ch = buffer[i];\n        if (Character.isUpperCase(ch) || Character.isTitleCase(ch)) {\n            buffer[i] = Character.toLowerCase(ch);\n            whitespace = false;\n        } else if (Character.isLowerCase(ch)) {\n            if (whitespace) {\n                buffer[i] = Character.toTitleCase(ch);\n                whitespace = false;\n            } else {\n                buffer[i] = Character.toUpperCase(ch);\n            }\n        } else {\n            whitespace = Character.isWhitespace(ch);\n        }\n    }\n    return new String(buffer);\n}"
+      },
+      {
+        "type": "method",
+        "name": "uncapitalize",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          }
+        ],
+        "javadoc": "/**\n * Uncapitalizes all the whitespace separated words in a String.\n * Only the first character of each word is changed.\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * WordUtils.uncapitalize(null)        = null\n * WordUtils.uncapitalize(\"\")          = \"\"\n * WordUtils.uncapitalize(\"I Am FINE\") = \"i am fINE\"\n * </pre>\n *\n * @param str  the String to uncapitalize, may be null.\n * @return uncapitalized String, {@code null} if null String input.\n * @see #capitalize(String)\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to uncapitalize, may be null.",
+            "assertion": "assert args[0] == null || args[0] instanceof String;",
+            "description": "the String to uncapitalize, may be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "String, {@code null} if null String input.",
+            "assertion": "assert (args[0] == null && methodResultID == null) || (args[0] != null && !methodResultID.equals(args[0]) && methodResultID.toLowerCase().equals(args[0].toLowerCase()));",
+            "description": "null if input is null, otherwise uncapitalized string"
+          },
+          {
+            "tag": "see",
+            "name": "#capitalize(String)",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Uncapitalizes all the whitespace separated words in a String.\n * Only the first character of each word is changed.\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * WordUtils.uncapitalize(null)        = null\n * WordUtils.uncapitalize(\"\")          = \"\"\n * WordUtils.uncapitalize(\"I Am FINE\") = \"i am fINE\"\n * </pre>\n *\n * @param str  the String to uncapitalize, may be null.\n * @return uncapitalized String, {@code null} if null String input.\n * @see #capitalize(String)\n */\npublic static String uncapitalize(final String str) {\n    return uncapitalize(str, null);\n}"
+      },
+      {
+        "type": "method",
+        "name": "uncapitalize",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          },
+          {
+            "type": {
+              "qualified_name": "char",
+              "simple_name": "char",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "delimiters"
+          }
+        ],
+        "javadoc": "/**\n * Uncapitalizes all the whitespace separated words in a String.\n * Only the first character of each word is changed.\n *\n * <p>The delimiters represent a set of characters understood to separate words.\n * The first string character and the first non-delimiter character after a\n * delimiter will be uncapitalized.</p>\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * WordUtils.uncapitalize(null, *)            = null\n * WordUtils.uncapitalize(\"\", *)              = \"\"\n * WordUtils.uncapitalize(*, null)            = *\n * WordUtils.uncapitalize(*, new char[0])     = *\n * WordUtils.uncapitalize(\"I AM.FINE\", {'.'}) = \"i AM.fINE\"\n * </pre>\n *\n * @param str  the String to uncapitalize, may be null.\n * @param delimiters  set of characters to determine uncapitalization, null means whitespace.\n * @return uncapitalized String, {@code null} if null String input.\n * @see #capitalize(String)\n * @since 2.1\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to uncapitalize, may be null.",
+            "assertion": "assert (args[0]==null) || args[0] instanceof String;",
+            "description": "may be null"
+          },
+          {
+            "tag": "param",
+            "name": "delimiters",
+            "content": "set of characters to determine uncapitalization, null means whitespace.",
+            "assertion": "assert (args[1]==null) || args[1] instanceof Character;",
+            "description": "set of characters to determine uncapitalization, null means whitespace"
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "String, {@code null} if null String input.",
+            "assertion": "",
+            "description": "String, {@code null} if null String input."
+          },
+          {
+            "tag": "see",
+            "name": "#capitalize(String)",
+            "content": ""
+          },
+          {
+            "tag": "since",
+            "name": "2.1",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Uncapitalizes all the whitespace separated words in a String.\n * Only the first character of each word is changed.\n *\n * <p>The delimiters represent a set of characters understood to separate words.\n * The first string character and the first non-delimiter character after a\n * delimiter will be uncapitalized.</p>\n *\n * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.\n * A {@code null} input String returns {@code null}.</p>\n *\n * <pre>\n * WordUtils.uncapitalize(null, *)            = null\n * WordUtils.uncapitalize(\"\", *)              = \"\"\n * WordUtils.uncapitalize(*, null)            = *\n * WordUtils.uncapitalize(*, new char[0])     = *\n * WordUtils.uncapitalize(\"I AM.FINE\", {'.'}) = \"i AM.fINE\"\n * </pre>\n *\n * @param str  the String to uncapitalize, may be null.\n * @param delimiters  set of characters to determine uncapitalization, null means whitespace.\n * @return uncapitalized String, {@code null} if null String input.\n * @see #capitalize(String)\n * @since 2.1\n */\npublic static String uncapitalize(final String str, final char... delimiters) {\n    final int delimLen = delimiters == null ? -1 : delimiters.length;\n    if (StringUtils.isEmpty(str) || delimLen == 0) {\n        return str;\n    }\n    final char[] buffer = str.toCharArray();\n    boolean uncapitalizeNext = true;\n    for (int i = 0; i < buffer.length; i++) {\n        final char ch = buffer[i];\n        if (isDelimiter(ch, delimiters)) {\n            uncapitalizeNext = true;\n        } else if (uncapitalizeNext) {\n            buffer[i] = Character.toLowerCase(ch);\n            uncapitalizeNext = false;\n        }\n    }\n    return new String(buffer);\n}"
+      },
+      {
+        "type": "method",
+        "name": "wrap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "wrapLength"
+          }
+        ],
+        "javadoc": "/**\n * Wraps a single line of text, identifying words by {@code ' '}.\n *\n * <p>New lines will be separated by the system property line separator.\n * Very long words, such as URLs will <em>not</em> be wrapped.</p>\n *\n * <p>Leading spaces on a new line are stripped.\n * Trailing spaces are not stripped.</p>\n *\n * <table border=\"1\">\n *  <caption>Examples</caption>\n *  <tr>\n *   <th>input</th>\n *   <th>wrapLength</th>\n *   <th>result</th>\n *  </tr>\n *  <tr>\n *   <td>null</td>\n *   <td>*</td>\n *   <td>null</td>\n *  </tr>\n *  <tr>\n *   <td>\"\"</td>\n *   <td>*</td>\n *   <td>\"\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here, https://commons.apache.org, to jump to the commons website\"</td>\n *   <td>20</td>\n *   <td>\"Click here,\\nhttps://commons.apache.org,\\nto jump to the\\ncommons website\"</td>\n *  </tr>\n * </table>\n *\n * (assuming that '\\n' is the systems line separator)\n *\n * @param str  the String to be word wrapped, may be null.\n * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n * @return a line with newlines inserted, {@code null} if null input.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to be word wrapped, may be null.",
+            "assertion": "assert args[0] == null || args[0].getClass().getSimpleName().equals(\"String\");",
+            "description": ""
+          },
+          {
+            "tag": "param",
+            "name": "wrapLength",
+            "content": "the column to wrap the words at, less than 1 is treated as 1.",
+            "assertion": "assert args[1].getClass().getSimpleName().equals(\"Integer\") && (int)args[1] >= 1;",
+            "description": ""
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "line with newlines inserted, {@code null} if null input.",
+            "assertion": "assert (args[0] == null) == (methodResultID == null);",
+            "description": "null if null input"
+          }
+        ],
+        "code": "/**\n * Wraps a single line of text, identifying words by {@code ' '}.\n *\n * <p>New lines will be separated by the system property line separator.\n * Very long words, such as URLs will <em>not</em> be wrapped.</p>\n *\n * <p>Leading spaces on a new line are stripped.\n * Trailing spaces are not stripped.</p>\n *\n * <table border=\"1\">\n *  <caption>Examples</caption>\n *  <tr>\n *   <th>input</th>\n *   <th>wrapLength</th>\n *   <th>result</th>\n *  </tr>\n *  <tr>\n *   <td>null</td>\n *   <td>*</td>\n *   <td>null</td>\n *  </tr>\n *  <tr>\n *   <td>\"\"</td>\n *   <td>*</td>\n *   <td>\"\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here, https://commons.apache.org, to jump to the commons website\"</td>\n *   <td>20</td>\n *   <td>\"Click here,\\nhttps://commons.apache.org,\\nto jump to the\\ncommons website\"</td>\n *  </tr>\n * </table>\n *\n * (assuming that '\\n' is the systems line separator)\n *\n * @param str  the String to be word wrapped, may be null.\n * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n * @return a line with newlines inserted, {@code null} if null input.\n */\npublic static String wrap(final String str, final int wrapLength) {\n    return wrap(str, wrapLength, null, false);\n}"
+      },
+      {
+        "type": "method",
+        "name": "wrap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "wrapLength"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newLineStr"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "wrapLongWords"
+          }
+        ],
+        "javadoc": "/**\n * Wraps a single line of text, identifying words by {@code ' '}.\n *\n * <p>Leading spaces on a new line are stripped.\n * Trailing spaces are not stripped.</p>\n *\n * <table border=\"1\">\n *  <caption>Examples</caption>\n *  <tr>\n *   <th>input</th>\n *   <th>wrapLength</th>\n *   <th>newLineString</th>\n *   <th>wrapLongWords</th>\n *   <th>result</th>\n *  </tr>\n *  <tr>\n *   <td>null</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>null</td>\n *  </tr>\n *  <tr>\n *   <td>\"\"</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>\"\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true/false</td>\n *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"&lt;br /&gt;\"</td>\n *   <td>true/false</td>\n *   <td>\"Here is one line of&lt;br /&gt;text that is going&lt;br /&gt;to be wrapped after&lt;br /&gt;20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>null</td>\n *   <td>true/false</td>\n *   <td>\"Here is one line of\" + systemNewLine + \"text that is going\" + systemNewLine + \"to be wrapped after\" + systemNewLine + \"20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>false</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apach\\ne.org\"</td>\n *  </tr>\n * </table>\n *\n * @param str  the String to be word wrapped, may be null.\n * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n * @param newLineStr  the string to insert for a new line,\n *  {@code null} uses the system property line separator.\n * @param wrapLongWords  true if long words (such as URLs) should be wrapped.\n * @return a line with newlines inserted, {@code null} if null input.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to be word wrapped, may be null.",
+            "assertion": "assert args[0] != null || args[0].isEmpty() : \"str is empty\";",
+            "description": "the String to be word wrapped, may be null."
+          },
+          {
+            "tag": "param",
+            "name": "wrapLength",
+            "content": "the column to wrap the words at, less than 1 is treated as 1.",
+            "assertion": "assert args[1] >= 1 : \"wrapLength must be greater than or equal to 1\";",
+            "description": "the column to wrap the words at, less than 1 is treated as 1."
+          },
+          {
+            "tag": "param",
+            "name": "newLineStr",
+            "content": "the string to insert for a new line, {@code null} uses the system property line separator.",
+            "assertion": "assert args[2] != null || args[2].isEmpty() : \"newLineStr is empty\";",
+            "description": "the string to insert for a new line, {@code null} uses the system property line separator."
+          },
+          {
+            "tag": "param",
+            "name": "wrapLongWords",
+            "content": "true if long words (such as URLs) should be wrapped.",
+            "assertion": "assert args[3] == true || args[3] == false : \"wrapLongWords must be a boolean\";",
+            "description": "true if long words (such as URLs) should be wrapped."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "line with newlines inserted, {@code null} if null input.",
+            "assertion": "",
+            "description": "line with newlines inserted, {@code null} if null input."
+          }
+        ],
+        "code": "/**\n * Wraps a single line of text, identifying words by {@code ' '}.\n *\n * <p>Leading spaces on a new line are stripped.\n * Trailing spaces are not stripped.</p>\n *\n * <table border=\"1\">\n *  <caption>Examples</caption>\n *  <tr>\n *   <th>input</th>\n *   <th>wrapLength</th>\n *   <th>newLineString</th>\n *   <th>wrapLongWords</th>\n *   <th>result</th>\n *  </tr>\n *  <tr>\n *   <td>null</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>null</td>\n *  </tr>\n *  <tr>\n *   <td>\"\"</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>\"\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true/false</td>\n *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"&lt;br /&gt;\"</td>\n *   <td>true/false</td>\n *   <td>\"Here is one line of&lt;br /&gt;text that is going&lt;br /&gt;to be wrapped after&lt;br /&gt;20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>null</td>\n *   <td>true/false</td>\n *   <td>\"Here is one line of\" + systemNewLine + \"text that is going\" + systemNewLine + \"to be wrapped after\" + systemNewLine + \"20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>false</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apach\\ne.org\"</td>\n *  </tr>\n * </table>\n *\n * @param str  the String to be word wrapped, may be null.\n * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n * @param newLineStr  the string to insert for a new line,\n *  {@code null} uses the system property line separator.\n * @param wrapLongWords  true if long words (such as URLs) should be wrapped.\n * @return a line with newlines inserted, {@code null} if null input.\n */\npublic static String wrap(final String str, final int wrapLength, final String newLineStr, final boolean wrapLongWords) {\n    return wrap(str, wrapLength, newLineStr, wrapLongWords, \" \");\n}"
+      },
+      {
+        "type": "method",
+        "name": "wrap",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "str"
+          },
+          {
+            "type": {
+              "qualified_name": "int",
+              "simple_name": "int",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "wrapLength"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "newLineStr"
+          },
+          {
+            "type": {
+              "qualified_name": "boolean",
+              "simple_name": "boolean",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "wrapLongWords"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "String",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "wrapOn"
+          }
+        ],
+        "javadoc": "/**\n * Wraps a single line of text, identifying words by {@code wrapOn}.\n *\n * <p>Leading spaces on a new line are stripped.\n * Trailing spaces are not stripped.</p>\n *\n * <table border=\"1\">\n *  <caption>Examples</caption>\n *  <tr>\n *   <th>input</th>\n *   <th>wrapLength</th>\n *   <th>newLineString</th>\n *   <th>wrapLongWords</th>\n *   <th>wrapOn</th>\n *   <th>result</th>\n *  </tr>\n *  <tr>\n *   <td>null</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>*</td>\n *   <td>null</td>\n *  </tr>\n *  <tr>\n *   <td>\"\"</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>*</td>\n *   <td>\"\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true/false</td>\n *   <td>\" \"</td>\n *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"&lt;br /&gt;\"</td>\n *   <td>true/false</td>\n *   <td>\" \"</td>\n *   <td>\"Here is one line of&lt;br /&gt;text that is going&lt;br /&gt;to be wrapped after&lt;br /&gt;20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>null</td>\n *   <td>true/false</td>\n *   <td>\" \"</td>\n *   <td>\"Here is one line of\" + systemNewLine + \"text that is going\" + systemNewLine + \"to be wrapped after\" + systemNewLine + \"20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>false</td>\n *   <td>\" \"</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true</td>\n *   <td>\" \"</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apach\\ne.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"flammable/inflammable\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true</td>\n *   <td>\"/\"</td>\n *   <td>\"flammable\\ninflammable\"</td>\n *  </tr>\n * </table>\n * @param str  the String to be word wrapped, may be null.\n * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n * @param newLineStr  the string to insert for a new line,\n *  {@code null} uses the system property line separator.\n * @param wrapLongWords  true if long words (such as URLs) should be wrapped.\n * @param wrapOn regex expression to be used as a breakable characters,\n *               if blank string is provided a space character will be used.\n * @return a line with newlines inserted, {@code null} if null input.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "str",
+            "content": "the String to be word wrapped, may be null.",
+            "assertion": "assert args[0] != null : \"str is null\";",
+            "description": "the String to be word wrapped, may be null."
+          },
+          {
+            "tag": "param",
+            "name": "wrapLength",
+            "content": "the column to wrap the words at, less than 1 is treated as 1.",
+            "assertion": "assert args[1] >= 1 : \"wrapLength must be greater than or equal to 1\";",
+            "description": "the column to wrap the words at, less than 1 is treated as 1."
+          },
+          {
+            "tag": "param",
+            "name": "newLineStr",
+            "content": "the string to insert for a new line, {@code null} uses the system property line separator.",
+            "assertion": "assert args[2] != null || System.getProperty(\"line.separator\") != null : \"newLineStr is null and system property line separator is null\";",
+            "description": "the string to insert for a new line, {@code null} uses the system property line separator."
+          },
+          {
+            "tag": "param",
+            "name": "wrapLongWords",
+            "content": "true if long words (such as URLs) should be wrapped.",
+            "assertion": "assert args[3] == true || args[3] == false : \"wrapLongWords must be a boolean value\";",
+            "description": "true if long words (such as URLs) should be wrapped."
+          },
+          {
+            "tag": "param",
+            "name": "wrapOn",
+            "content": "regex expression to be used as a breakable characters, if blank string is provided a space character will be used.",
+            "assertion": "assert args[4] != null && !args[4].isEmpty() : \"wrapOn must not be empty\";",
+            "description": "regex expression to be used as a breakable characters, if blank string is provided a space character will be used."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "line with newlines inserted, {@code null} if null input.",
+            "assertion": "",
+            "description": "line with newlines inserted, {@code null} if null input."
+          }
+        ],
+        "code": "/**\n * Wraps a single line of text, identifying words by {@code wrapOn}.\n *\n * <p>Leading spaces on a new line are stripped.\n * Trailing spaces are not stripped.</p>\n *\n * <table border=\"1\">\n *  <caption>Examples</caption>\n *  <tr>\n *   <th>input</th>\n *   <th>wrapLength</th>\n *   <th>newLineString</th>\n *   <th>wrapLongWords</th>\n *   <th>wrapOn</th>\n *   <th>result</th>\n *  </tr>\n *  <tr>\n *   <td>null</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>*</td>\n *   <td>null</td>\n *  </tr>\n *  <tr>\n *   <td>\"\"</td>\n *   <td>*</td>\n *   <td>*</td>\n *   <td>true/false</td>\n *   <td>*</td>\n *   <td>\"\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true/false</td>\n *   <td>\" \"</td>\n *   <td>\"Here is one line of\\ntext that is going\\nto be wrapped after\\n20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>\"&lt;br /&gt;\"</td>\n *   <td>true/false</td>\n *   <td>\" \"</td>\n *   <td>\"Here is one line of&lt;br /&gt;text that is going&lt;br /&gt;to be wrapped after&lt;br /&gt;20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Here is one line of text that is going to be wrapped after 20 columns.\"</td>\n *   <td>20</td>\n *   <td>null</td>\n *   <td>true/false</td>\n *   <td>\" \"</td>\n *   <td>\"Here is one line of\" + systemNewLine + \"text that is going\" + systemNewLine + \"to be wrapped after\" + systemNewLine + \"20 columns.\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>false</td>\n *   <td>\" \"</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apache.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"Click here to jump to the commons website - https://commons.apache.org\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true</td>\n *   <td>\" \"</td>\n *   <td>\"Click here to jump\\nto the commons\\nwebsite -\\nhttps://commons.apach\\ne.org\"</td>\n *  </tr>\n *  <tr>\n *   <td>\"flammable/inflammable\"</td>\n *   <td>20</td>\n *   <td>\"\\n\"</td>\n *   <td>true</td>\n *   <td>\"/\"</td>\n *   <td>\"flammable\\ninflammable\"</td>\n *  </tr>\n * </table>\n * @param str  the String to be word wrapped, may be null.\n * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1.\n * @param newLineStr  the string to insert for a new line,\n *  {@code null} uses the system property line separator.\n * @param wrapLongWords  true if long words (such as URLs) should be wrapped.\n * @param wrapOn regex expression to be used as a breakable characters,\n *               if blank string is provided a space character will be used.\n * @return a line with newlines inserted, {@code null} if null input.\n */\npublic static String wrap(final String str, int wrapLength, String newLineStr, final boolean wrapLongWords, String wrapOn) {\n    if (str == null) {\n        return null;\n    }\n    if (newLineStr == null) {\n        newLineStr = System.lineSeparator();\n    }\n    if (wrapLength < 1) {\n        wrapLength = 1;\n    }\n    if (StringUtils.isBlank(wrapOn)) {\n        wrapOn = \" \";\n    }\n    final Pattern patternToWrapOn = Pattern.compile(wrapOn);\n    final int inputLineLength = str.length();\n    int offset = 0;\n    final StringBuilder wrappedLine = new StringBuilder(inputLineLength + 32);\n    while (offset < inputLineLength) {\n        int spaceToWrapAt = -1;\n        Matcher matcher = patternToWrapOn.matcher(str.substring(offset, Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), inputLineLength)));\n        if (matcher.find()) {\n            if (matcher.start() == 0) {\n                offset += matcher.end();\n                continue;\n            }\n            spaceToWrapAt = matcher.start() + offset;\n        }\n        // only last line without leading spaces is left\n        if (inputLineLength - offset <= wrapLength) {\n            break;\n        }\n        while (matcher.find()) {\n            spaceToWrapAt = matcher.start() + offset;\n        }\n        if (spaceToWrapAt >= offset) {\n            // normal case\n            wrappedLine.append(str, offset, spaceToWrapAt);\n            wrappedLine.append(newLineStr);\n            offset = spaceToWrapAt + 1;\n        } else // really long word or URL\n        if (wrapLongWords) {\n            // wrap really long word one line at a time\n            wrappedLine.append(str, offset, wrapLength + offset);\n            wrappedLine.append(newLineStr);\n            offset += wrapLength;\n        } else {\n            // do not wrap really long word, just extend beyond limit\n            matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));\n            if (matcher.find()) {\n                spaceToWrapAt = matcher.start() + offset + wrapLength;\n            }\n            if (spaceToWrapAt >= 0) {\n                wrappedLine.append(str, offset, spaceToWrapAt);\n                wrappedLine.append(newLineStr);\n                offset = spaceToWrapAt + 1;\n            } else {\n                wrappedLine.append(str, offset, str.length());\n                offset = inputLineLength;\n            }\n        }\n    }\n    // Whatever is left in line is short enough to just pass through\n    wrappedLine.append(str, offset, str.length());\n    return wrappedLine.toString();\n}"
+      }
+    ]
+  }
+]

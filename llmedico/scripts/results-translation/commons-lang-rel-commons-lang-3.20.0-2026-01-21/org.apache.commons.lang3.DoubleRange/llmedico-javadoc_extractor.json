@@ -1,0 +1,154 @@
+[
+  {
+    "name": "DoubleRange",
+    "package": "org.apache.commons.lang3",
+    "qualified_name": "org.apache.commons.lang3.DoubleRange",
+    "javadoc": "/**\n * Specializes {@link NumberRange} for {@link Double}s.\n *\n * <p>\n * This class is not designed to interoperate with other NumberRanges\n * </p>\n *\n * @since 3.13.0\n */\n",
+    "code": "/**\n * Specializes {@link NumberRange} for {@link Double}s.\n *\n * <p>\n * This class is not designed to interoperate with other NumberRanges\n * </p>\n *\n * @since 3.13.0\n */\npublic final class DoubleRange extends NumberRange<Double> {\n\n    private static final long serialVersionUID = 1L;\n\n    /**\n     * Creates a range with the specified minimum and maximum values (both inclusive).\n     *\n     * <p>\n     * The range uses the natural ordering of the elements to determine where values lie in the range.\n     * </p>\n     *\n     * <p>\n     * The arguments may be passed in the order (min,max) or (max,min). The getMinimum and getMaximum methods will return the correct values.\n     * </p>\n     *\n     * @param fromInclusive the first value that defines the edge of the range, inclusive.\n     * @param toInclusive the second value that defines the edge of the range, inclusive.\n     * @return the range object, not null.\n     */\n    public static DoubleRange of(final double fromInclusive, final double toInclusive) {\n        return of(Double.valueOf(fromInclusive), Double.valueOf(toInclusive));\n    }\n\n    /**\n     * Creates a range with the specified minimum and maximum values (both inclusive).\n     *\n     * <p>\n     * The range uses the natural ordering of the elements to determine where values lie in the range.\n     * </p>\n     *\n     * <p>\n     * The arguments may be passed in the order (min,max) or (max,min). The getMinimum and getMaximum methods will return the correct values.\n     * </p>\n     *\n     * @param fromInclusive the first value that defines the edge of the range, inclusive.\n     * @param toInclusive the second value that defines the edge of the range, inclusive.\n     * @return the range object, not null.\n     * @throws IllegalArgumentException if either element is null.\n     */\n    public static DoubleRange of(final Double fromInclusive, final Double toInclusive) {\n        return new DoubleRange(fromInclusive, toInclusive);\n    }\n\n    /**\n     * Creates an instance.\n     *\n     * @param number1 the first element, not null\n     * @param number2 the second element, not null\n     * @throws NullPointerException when element1 is null.\n     * @throws NullPointerException when element2 is null.\n     */\n    private DoubleRange(final Double number1, final Double number2) {\n        super(number1, number2, null);\n    }\n\n    /**\n     * Fits the given value into this range by returning the given value or, if out of bounds, the range minimum if\n     * below, or the range maximum if above.\n     *\n     * <pre>{@code\n     * LongRange range = LongRange.of(16, 64);\n     * range.fit(-9) -->  16\n     * range.fit(0)  -->  16\n     * range.fit(15) -->  16\n     * range.fit(16) -->  16\n     * range.fit(17) -->  17\n     * ...\n     * range.fit(63) -->  63\n     * range.fit(64) -->  64\n     * range.fit(99) -->  64\n     * }</pre>\n     *\n     * @param element the element to test.\n     * @return the minimum, the element, or the maximum depending on the element's location relative to the range.\n     * @since 3.19.0\n     */\n    public double fit(final double element) {\n        return super.fit(element).doubleValue();\n    }\n}",
+    "members": [
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DoubleRange",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromInclusive"
+          },
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toInclusive"
+          }
+        ],
+        "javadoc": "/**\n * Creates a range with the specified minimum and maximum values (both inclusive).\n *\n * <p>\n * The range uses the natural ordering of the elements to determine where values lie in the range.\n * </p>\n *\n * <p>\n * The arguments may be passed in the order (min,max) or (max,min). The getMinimum and getMaximum methods will return the correct values.\n * </p>\n *\n * @param fromInclusive the first value that defines the edge of the range, inclusive.\n * @param toInclusive the second value that defines the edge of the range, inclusive.\n * @return the range object, not null.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "fromInclusive",
+            "content": "the first value that defines the edge of the range, inclusive."
+          },
+          {
+            "tag": "param",
+            "name": "toInclusive",
+            "content": "the second value that defines the edge of the range, inclusive."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "range object, not null."
+          }
+        ],
+        "code": "/**\n * Creates a range with the specified minimum and maximum values (both inclusive).\n *\n * <p>\n * The range uses the natural ordering of the elements to determine where values lie in the range.\n * </p>\n *\n * <p>\n * The arguments may be passed in the order (min,max) or (max,min). The getMinimum and getMaximum methods will return the correct values.\n * </p>\n *\n * @param fromInclusive the first value that defines the edge of the range, inclusive.\n * @param toInclusive the second value that defines the edge of the range, inclusive.\n * @return the range object, not null.\n */\npublic static DoubleRange of(final double fromInclusive, final double toInclusive) {\n    return of(Double.valueOf(fromInclusive), Double.valueOf(toInclusive));\n}"
+      },
+      {
+        "type": "method",
+        "name": "of",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "DoubleRange",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "fromInclusive"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "toInclusive"
+          }
+        ],
+        "javadoc": "/**\n * Creates a range with the specified minimum and maximum values (both inclusive).\n *\n * <p>\n * The range uses the natural ordering of the elements to determine where values lie in the range.\n * </p>\n *\n * <p>\n * The arguments may be passed in the order (min,max) or (max,min). The getMinimum and getMaximum methods will return the correct values.\n * </p>\n *\n * @param fromInclusive the first value that defines the edge of the range, inclusive.\n * @param toInclusive the second value that defines the edge of the range, inclusive.\n * @return the range object, not null.\n * @throws IllegalArgumentException if either element is null.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "fromInclusive",
+            "content": "the first value that defines the edge of the range, inclusive."
+          },
+          {
+            "tag": "param",
+            "name": "toInclusive",
+            "content": "the second value that defines the edge of the range, inclusive."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "range object, not null."
+          },
+          {
+            "tag": "throws",
+            "name": "IllegalArgumentException",
+            "content": "if either element is null."
+          }
+        ],
+        "code": "/**\n * Creates a range with the specified minimum and maximum values (both inclusive).\n *\n * <p>\n * The range uses the natural ordering of the elements to determine where values lie in the range.\n * </p>\n *\n * <p>\n * The arguments may be passed in the order (min,max) or (max,min). The getMinimum and getMaximum methods will return the correct values.\n * </p>\n *\n * @param fromInclusive the first value that defines the edge of the range, inclusive.\n * @param toInclusive the second value that defines the edge of the range, inclusive.\n * @return the range object, not null.\n * @throws IllegalArgumentException if either element is null.\n */\npublic static DoubleRange of(final Double fromInclusive, final Double toInclusive) {\n    return new DoubleRange(fromInclusive, toInclusive);\n}"
+      },
+      {
+        "type": "method",
+        "name": "fit",
+        "return_type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "double",
+              "simple_name": "double",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "element"
+          }
+        ],
+        "javadoc": "/**\n * Fits the given value into this range by returning the given value or, if out of bounds, the range minimum if\n * below, or the range maximum if above.\n *\n * <pre>{@code\n * LongRange range = LongRange.of(16, 64);\n * range.fit(-9) -->  16\n * range.fit(0)  -->  16\n * range.fit(15) -->  16\n * range.fit(16) -->  16\n * range.fit(17) -->  17\n * ...\n * range.fit(63) -->  63\n * range.fit(64) -->  64\n * range.fit(99) -->  64\n * }</pre>\n *\n * @param element the element to test.\n * @return the minimum, the element, or the maximum depending on the element's location relative to the range.\n * @since 3.19.0\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "element",
+            "content": "the element to test."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "minimum, the element, or the maximum depending on the element's location relative to the range."
+          },
+          {
+            "tag": "since",
+            "name": "3.19.0",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Fits the given value into this range by returning the given value or, if out of bounds, the range minimum if\n * below, or the range maximum if above.\n *\n * <pre>{@code\n * LongRange range = LongRange.of(16, 64);\n * range.fit(-9) -->  16\n * range.fit(0)  -->  16\n * range.fit(15) -->  16\n * range.fit(16) -->  16\n * range.fit(17) -->  17\n * ...\n * range.fit(63) -->  63\n * range.fit(64) -->  64\n * range.fit(99) -->  64\n * }</pre>\n *\n * @param element the element to test.\n * @return the minimum, the element, or the maximum depending on the element's location relative to the range.\n * @since 3.19.0\n */\npublic double fit(final double element) {\n    return super.fit(element).doubleValue();\n}"
+      }
+    ]
+  }
+]

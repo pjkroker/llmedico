@@ -1,0 +1,1506 @@
+[
+  {
+    "method": "CompareToBuilder",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "reflectionCompare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "lhs is not null or rhs is not null",
+          "assertion": "assert args[0] != null || args[1] != null;",
+          "name": "lhs",
+          "content": "left-hand side object"
+        },
+        {
+          "description": "rhs is assignment-compatible with lhs if both are not null",
+          "assertion": "assert args[0] == null || args[1] == null || args[1].getClass().isInstance(args[0]);",
+          "name": "rhs",
+          "content": "right-hand side object"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs",
+          "assertion": "assert methodResultID < 0 || methodResultID == 0 || methodResultID > 0;",
+          "name": null,
+          "content": "a negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if either (but not both) parameters are {@code null}",
+          "assertion": "",
+          "description": "if either (but not both) parameters are {@code null}"
+        },
+        {
+          "tag": "throws",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}",
+          "assertion": "",
+          "description": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reflectionCompare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "compareTransients"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null if lhs is not null and rhs is null",
+          "assertion": "assert args[0] != null || args[1] == null;",
+          "name": "lhs",
+          "content": "left-hand side object"
+        },
+        {
+          "description": "not null if rhs is not null and lhs is null",
+          "assertion": "assert args[1] != null || args[0] == null;",
+          "name": "rhs",
+          "content": "right-hand side object"
+        },
+        {
+          "description": "true or false",
+          "assertion": "assert args[2] == true || args[2] == false;",
+          "name": "compareTransients",
+          "content": "whether to compare transient fields"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs",
+          "assertion": "assert (methodResultID < 0 && args[0] < args[1]) || (methodResultID == 0 && args[0] == args[1]) || (methodResultID > 0 && args[0] > args[1]);",
+          "name": null,
+          "content": "negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either lhs or rhs (but not both) is null",
+          "assertion": "assert (args[0] == null && args[1] != null) || (args[0] != null && args[1] == null);",
+          "name": "NullPointerException",
+          "content": "if either {@code lhs} or {@code rhs} (but not both) is {@code null}"
+        },
+        {
+          "description": "if rhs is not assignment-compatible with lhs",
+          "assertion": "assert !(args[0].getClass().isInstance(args[1]));",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reflectionCompare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "compareTransients"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "reflectUpToClass"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "excludeFields"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "lhs",
+          "content": "left-hand side object",
+          "assertion": "",
+          "description": "left-hand side object"
+        },
+        {
+          "tag": "param",
+          "name": "rhs",
+          "content": "right-hand side object",
+          "assertion": "",
+          "description": "right-hand side object"
+        },
+        {
+          "tag": "param",
+          "name": "compareTransients",
+          "content": "whether to compare transient fields",
+          "assertion": "",
+          "description": "whether to compare transient fields"
+        },
+        {
+          "tag": "param",
+          "name": "reflectUpToClass",
+          "content": "last superclass for which fields are compared",
+          "assertion": "",
+          "description": "last superclass for which fields are compared"
+        },
+        {
+          "tag": "param",
+          "name": "excludeFields",
+          "content": "fields to exclude",
+          "assertion": "",
+          "description": "fields to exclude"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "negative integer, zero, or a positive integer as {@code lhs} is less than, equal to, or greater than {@code rhs}",
+          "assertion": "",
+          "description": "negative integer, zero, or a positive integer as {@code lhs} is less than, equal to, or greater than {@code rhs}"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "NullPointerException",
+          "content": "if either {@code lhs} or {@code rhs} (but not both) is {@code null}",
+          "assertion": "",
+          "description": "if either {@code lhs} or {@code rhs} (but not both) is {@code null}"
+        },
+        {
+          "tag": "throws",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}",
+          "assertion": "",
+          "description": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reflectionCompare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Collection",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "excludeFields"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null if lhs is not null and rhs is null",
+          "assertion": "assert args[0] != null || args[1] != null;",
+          "name": "lhs",
+          "content": "left-hand side object"
+        },
+        {
+          "description": "not null if rhs is not null and lhs is null",
+          "assertion": "assert args[1] != null || args[0] != null;",
+          "name": "rhs",
+          "content": "right-hand side object"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[2] != null;",
+          "name": "excludeFields",
+          "content": "Collection of String fields to exclude"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs",
+          "assertion": "assert (methodResultID < 0 && args[0] < args[1]) || (methodResultID == 0 && args[0] == args[1]) || (methodResultID > 0 && args[0] > args[1]);",
+          "name": null,
+          "content": "negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either lhs or rhs (but not both) is null",
+          "assertion": "assert (args[0] == null && args[1] != null) || (args[0] != null && args[1] == null);",
+          "name": "NullPointerException",
+          "content": "if either {@code lhs} or {@code rhs} (but not both) is {@code null}"
+        },
+        {
+          "description": "if rhs is not assignment-compatible with lhs",
+          "assertion": "assert !(args[0].getClass().isInstance(args[1]));",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reflectionCompare",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "excludeFields"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null if lhs is not null and rhs is null",
+          "assertion": "assert args[0] != null || args[1] != null;",
+          "name": "lhs",
+          "content": "left-hand side object"
+        },
+        {
+          "description": "not null if rhs is not null and lhs is null",
+          "assertion": "assert args[1] != null || args[0] != null;",
+          "name": "rhs",
+          "content": "right-hand side object"
+        },
+        {
+          "description": "null or array of fields to exclude",
+          "assertion": "assert args[2] == null || args[2] instanceof String;",
+          "name": "excludeFields",
+          "content": "array of fields to exclude"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs",
+          "assertion": "assert (methodResultID < 0 && args[0] < args[1]) || (methodResultID == 0 && args[0] == args[1]) || (methodResultID > 0 && args[0] > args[1]);",
+          "name": null,
+          "content": "negative integer, zero, or a positive integer as lhs is less than, equal to, or greater than rhs"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if either lhs or rhs (but not both) is null",
+          "assertion": "assert (args[0] == null && args[1] != null) || (args[0] != null && args[1] == null);",
+          "name": "NullPointerException",
+          "content": "if either {@code lhs} or {@code rhs} (but not both) is {@code null}"
+        },
+        {
+          "description": "if rhs is not assignment-compatible with lhs",
+          "assertion": "assert !(args[0].getClass().isInstance(args[1]));",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert args[0] == true || args[0] == false;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert args[1] == true || args[1] == false;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "boolean",
+          "simple_name": "boolean",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert true;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert true;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0]!=null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1]!=null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert true;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert true;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "char",
+          "simple_name": "char",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0]!=null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1]!=null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert true;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert true;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert true;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert true;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "float",
+          "simple_name": "float",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert true;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert true;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert true;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert true;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "long",
+          "simple_name": "long",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "lhs is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side object"
+        },
+        {
+          "description": "rhs is not null or lhs is null",
+          "assertion": "assert args[1] != null || args[0] == null;",
+          "name": "rhs",
+          "content": "right-hand side object"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}",
+          "assertion": "",
+          "description": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comparator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "lhs is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side object"
+        },
+        {
+          "description": "rhs is not null and assignment-compatible with lhs",
+          "assertion": "assert args[1] != null && (args[0].getClass().isInstance(args[1]) || args[1].getClass().isAssignableFrom(args[0].getClass()));",
+          "name": "rhs",
+          "content": "right-hand side object"
+        },
+        {
+          "description": "comparator is either null or an instance of Comparator",
+          "assertion": "assert args[2] == null || args[2] instanceof java.util.Comparator;",
+          "name": "comparator",
+          "content": "@link Comparator used to compare the objects, @code null means treat lhs as @link Comparable"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}",
+          "assertion": "",
+          "description": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "lhs is not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "rhs is not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "tag": "throws",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}",
+          "assertion": "",
+          "description": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Comparator",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "comparator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        },
+        {
+          "description": "assignment-compatible",
+          "assertion": "assert args[1].getClass().isAssignableFrom(args[0].getClass());",
+          "name": "rhs",
+          "content": "right-hand side array is assignment-compatible with left-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if rhs is not assignment-compatible with lhs",
+          "assertion": "assert args[0].getClass().isInstance(args[1]);",
+          "name": "ClassCastException",
+          "content": "if {@code rhs} is not assignment-compatible with {@code lhs}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "left-hand side value",
+          "assertion": "assert true;",
+          "name": "lhs",
+          "content": "left-hand side value"
+        },
+        {
+          "description": "right-hand side value",
+          "assertion": "assert true;",
+          "name": "rhs",
+          "content": "right-hand side value"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "append",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "lhs"
+      },
+      {
+        "type": {
+          "qualified_name": "short",
+          "simple_name": "short",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "rhs"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "not null",
+          "assertion": "assert args[0] != null;",
+          "name": "lhs",
+          "content": "left-hand side array"
+        },
+        {
+          "description": "not null",
+          "assertion": "assert args[1] != null;",
+          "name": "rhs",
+          "content": "right-hand side array"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "appendSuper",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "superCompareTo"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "result of calling {@code super.compareTo(Object)}",
+          "assertion": "assert true;",
+          "name": "superCompareTo",
+          "content": "result of calling {@code super.compareTo(Object)}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this instance",
+          "assertion": "assert methodResultID == receiverObjectID;",
+          "name": null,
+          "content": "this instance"
+        }
+      ]
+    }
+  },
+  {
+    "method": "build",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "final comparison result as an Integer",
+          "assertion": "assert (methodResultID < 0 && receiverObjectID.toComparison() < 0) || (methodResultID > 0 && receiverObjectID.toComparison() > 0) || (methodResultID == 0 && receiverObjectID.toComparison() == 0);",
+          "name": null,
+          "content": "final comparison result as an Integer"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toComparison",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "Returns a negative integer, a positive integer, or zero as the builder has judged the left-hand side as less than, greater than, or equal to the right-hand side.",
+          "assertion": "assert methodResultID < 0 || methodResultID > 0 || methodResultID == 0;",
+          "name": null,
+          "content": "final comparison result"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,451 @@
+[
+  {
+    "name": "SerializationUtils",
+    "package": "org.apache.commons.lang3",
+    "qualified_name": "org.apache.commons.lang3.SerializationUtils",
+    "javadoc": "/**\n * Assists with the serialization process and performs additional functionality based\n * on serialization.\n *\n * <ul>\n * <li>Deep clone using serialization\n * <li>Serialize managing finally and IOException\n * <li>Deserialize managing finally and IOException\n * </ul>\n *\n * <p>This class throws exceptions for invalid {@code null} inputs.\n * Each method documents its behavior in more detail.</p>\n *\n * <p>#ThreadSafe#</p>\n * @since 1.0\n */\n",
+    "code": "/**\n * Assists with the serialization process and performs additional functionality based\n * on serialization.\n *\n * <ul>\n * <li>Deep clone using serialization\n * <li>Serialize managing finally and IOException\n * <li>Deserialize managing finally and IOException\n * </ul>\n *\n * <p>This class throws exceptions for invalid {@code null} inputs.\n * Each method documents its behavior in more detail.</p>\n *\n * <p>#ThreadSafe#</p>\n * @since 1.0\n */\npublic class SerializationUtils {\n\n    /**\n     * Custom specialization of the standard JDK {@link ObjectInputStream}\n     * that uses a custom  {@link ClassLoader} to resolve a class.\n     * If the specified {@link ClassLoader} is not able to resolve the class,\n     * the context classloader of the current thread will be used.\n     * This way, the standard deserialization work also in web-application\n     * containers and application servers, no matter in which of the\n     * {@link ClassLoader} the particular class that encapsulates\n     * serialization/deserialization lives.\n     *\n     * <p>For more in-depth information about the problem for which this\n     * class here is a workaround, see the JIRA issue LANG-626.</p>\n     */\n    static final class ClassLoaderAwareObjectInputStream extends ObjectInputStream {\n\n        private final ClassLoader classLoader;\n\n        /**\n         * Constructs a new instance.\n         * @param in The {@link InputStream}.\n         * @param classLoader classloader to use\n         * @throws IOException if an I/O error occurs while reading stream header.\n         * @see java.io.ObjectInputStream\n         */\n        ClassLoaderAwareObjectInputStream(final InputStream in, final ClassLoader classLoader) throws IOException {\n            super(in);\n            this.classLoader = classLoader;\n        }\n\n        /**\n         * Overridden version that uses the parameterized {@link ClassLoader} or the {@link ClassLoader}\n         * of the current {@link Thread} to resolve the class.\n         * @param desc An instance of class {@link ObjectStreamClass}.\n         * @return A {@link Class} object corresponding to {@code desc}.\n         * @throws IOException Any of the usual Input/Output exceptions.\n         * @throws ClassNotFoundException If class of a serialized object cannot be found.\n         */\n        @Override\n        protected Class<?> resolveClass(final ObjectStreamClass desc) throws IOException, ClassNotFoundException {\n            final String name = desc.getName();\n            try {\n                return Class.forName(name, false, classLoader);\n            } catch (final ClassNotFoundException ex) {\n                try {\n                    return Class.forName(name, false, Thread.currentThread().getContextClassLoader());\n                } catch (final ClassNotFoundException cnfe) {\n                    final Class<?> cls = ClassUtils.getPrimitiveClass(name);\n                    if (cls != null) {\n                        return cls;\n                    }\n                    throw cnfe;\n                }\n            }\n        }\n    }\n\n    /**\n     * Deep clones an {@link Object} using serialization.\n     *\n     * <p>This is many times slower than writing clone methods by hand\n     * on all objects in your object graph. However, for complex object\n     * graphs, or for those that don't support deep cloning this can\n     * be a simple alternative implementation. Of course all the objects\n     * must be {@link Serializable}.</p>\n     *\n     * @param <T> the type of the object involved.\n     * @param object  the {@link Serializable} object to clone.\n     * @return the cloned object.\n     * @throws SerializationException (runtime) if the serialization fails.\n     */\n    public static <T extends Serializable> T clone(final T object) {\n        if (object == null) {\n            return null;\n        }\n        final ByteArrayInputStream bais = new ByteArrayInputStream(serialize(object));\n        final Class<T> cls = ObjectUtils.getClass(object);\n        try (ClassLoaderAwareObjectInputStream in = new ClassLoaderAwareObjectInputStream(bais, cls.getClassLoader())) {\n            // When we serialize and deserialize an object, it is reasonable to assume the deserialized object is of the\n            // same type as the original serialized object\n            return (T) in.readObject();\n        } catch (final ClassNotFoundException | IOException ex) {\n            throw new SerializationException(String.format(\"%s while reading cloned object data\", ex.getClass().getSimpleName()), ex);\n        }\n    }\n\n    /**\n     * Deserializes a single {@link Object} from an array of bytes.\n     *\n     * <p>\n     * If the call site incorrectly types the return value, a {@link ClassCastException} is thrown from the call site.\n     * Without Generics in this declaration, the call site must type cast and can cause the same ClassCastException.\n     * Note that in both cases, the ClassCastException is in the call site, not in this method.\n     * </p>\n     *\n     * @param <T>  the object type to be deserialized.\n     * @param objectData\n     *            the serialized object, must not be null.\n     * @return the deserialized object.\n     * @throws NullPointerException if {@code objectData} is {@code null}.\n     * @throws SerializationException (runtime) if the serialization fails.\n     */\n    public static <T> T deserialize(final byte[] objectData) {\n        Objects.requireNonNull(objectData, \"objectData\");\n        return deserialize(new ByteArrayInputStream(objectData));\n    }\n\n    /**\n     * Deserializes an {@link Object} from the specified stream.\n     *\n     * <p>\n     * The stream will be closed once the object is written. This avoids the need for a finally clause, and maybe also\n     * exception handling, in the application code.\n     * </p>\n     *\n     * <p>\n     * The stream passed in is not buffered internally within this method. This is the responsibility of your\n     * application if desired.\n     * </p>\n     *\n     * <p>\n     * If the call site incorrectly types the return value, a {@link ClassCastException} is thrown from the call site.\n     * Without Generics in this declaration, the call site must type cast and can cause the same ClassCastException.\n     * Note that in both cases, the ClassCastException is in the call site, not in this method.\n     * </p>\n     *\n     * @param <T>  the object type to be deserialized.\n     * @param inputStream\n     *            the serialized object input stream, must not be null.\n     * @return the deserialized object.\n     * @throws NullPointerException if {@code inputStream} is {@code null}.\n     * @throws SerializationException (runtime) if the serialization fails.\n     */\n    // inputStream is managed by the caller\n    @SuppressWarnings(\"resource\")\n    public static <T> T deserialize(final InputStream inputStream) {\n        Objects.requireNonNull(inputStream, \"inputStream\");\n        try (ObjectInputStream in = new ObjectInputStream(inputStream)) {\n            @SuppressWarnings(\"unchecked\")\n            final T obj = (T) in.readObject();\n            return obj;\n        } catch (final ClassNotFoundException | IOException | NegativeArraySizeException ex) {\n            throw new SerializationException(ex);\n        }\n    }\n\n    /**\n     * Performs a serialization roundtrip. Serializes and deserializes the given object, great for testing objects that\n     * implement {@link Serializable}.\n     *\n     * @param <T>\n     *           the type of the object involved.\n     * @param obj\n     *            the object to roundtrip.\n     * @return the serialized and deserialized object.\n     * @since 3.3\n     */\n    // OK, because we serialized a type `T`\n    @SuppressWarnings(\"unchecked\")\n    public static <T extends Serializable> T roundtrip(final T obj) {\n        return (T) deserialize(serialize(obj));\n    }\n\n    /**\n     * Serializes an {@link Object} to a byte array for\n     * storage/serialization.\n     *\n     * @param obj  the object to serialize to bytes.\n     * @return a byte[] with the converted Serializable.\n     * @throws SerializationException (runtime) if the serialization fails.\n     */\n    public static byte[] serialize(final Serializable obj) {\n        final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);\n        serialize(obj, baos);\n        return baos.toByteArray();\n    }\n\n    /**\n     * Serializes an {@link Object} to the specified stream.\n     *\n     * <p>The stream will be closed once the object is written.\n     * This avoids the need for a finally clause, and maybe also exception\n     * handling, in the application code.</p>\n     *\n     * <p>The stream passed in is not buffered internally within this method.\n     * This is the responsibility of your application if desired.</p>\n     *\n     * @param obj  the object to serialize to bytes, may be null.\n     * @param outputStream  the stream to write to, must not be null.\n     * @throws NullPointerException if {@code outputStream} is {@code null}.\n     * @throws SerializationException (runtime) if the serialization fails.\n     */\n    // outputStream is managed by the caller\n    @SuppressWarnings(\"resource\")\n    public static void serialize(final Serializable obj, final OutputStream outputStream) {\n        Objects.requireNonNull(outputStream, \"outputStream\");\n        try (ObjectOutputStream out = new ObjectOutputStream(outputStream)) {\n            out.writeObject(obj);\n        } catch (final IOException ex) {\n            throw new SerializationException(ex);\n        }\n    }\n\n    /**\n     * SerializationUtils instances should NOT be constructed in standard programming.\n     * Instead, the class should be used as {@code SerializationUtils.clone(object)}.\n     *\n     * <p>This constructor is public to permit tools that require a JavaBean instance\n     * to operate.</p>\n     * @since 2.0\n     * @deprecated TODO Make private in 4.0.\n     */\n    @Deprecated\n    public SerializationUtils() {\n        // empty\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "SerializationUtils",
+        "parameters": [],
+        "javadoc": "/**\n * SerializationUtils instances should NOT be constructed in standard programming.\n * Instead, the class should be used as {@code SerializationUtils.clone(object)}.\n *\n * <p>This constructor is public to permit tools that require a JavaBean instance\n * to operate.</p>\n * @since 2.0\n * @deprecated TODO Make private in 4.0.\n */\n",
+        "tags": [
+          {
+            "tag": "since",
+            "name": null,
+            "content": "2.0"
+          },
+          {
+            "tag": "deprecated",
+            "name": null,
+            "content": "TODO Make private in 4.0."
+          }
+        ],
+        "code": "/**\n * SerializationUtils instances should NOT be constructed in standard programming.\n * Instead, the class should be used as {@code SerializationUtils.clone(object)}.\n *\n * <p>This constructor is public to permit tools that require a JavaBean instance\n * to operate.</p>\n * @since 2.0\n * @deprecated TODO Make private in 4.0.\n */\n@Deprecated\npublic SerializationUtils() {\n    // empty\n}"
+      },
+      {
+        "type": "method",
+        "name": "clone",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "object"
+          }
+        ],
+        "javadoc": "/**\n * Deep clones an {@link Object} using serialization.\n *\n * <p>This is many times slower than writing clone methods by hand\n * on all objects in your object graph. However, for complex object\n * graphs, or for those that don't support deep cloning this can\n * be a simple alternative implementation. Of course all the objects\n * must be {@link Serializable}.</p>\n *\n * @param <T> the type of the object involved.\n * @param object  the {@link Serializable} object to clone.\n * @return the cloned object.\n * @throws SerializationException (runtime) if the serialization fails.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the type of the object involved."
+          },
+          {
+            "tag": "param",
+            "name": "object",
+            "content": "the {@link Serializable} object to clone.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the {@link Serializable} object to clone."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "cloned object.",
+            "assertion": "assert methodResultID.equals(receiverObjectID.roundtrip(args[0]));",
+            "description": "the cloned object."
+          },
+          {
+            "tag": "throws",
+            "name": "SerializationException",
+            "content": "(runtime) if the serialization fails.",
+            "assertion": "assert !(object instanceof java.io.Serializable);",
+            "description": "(runtime) if the serialization fails."
+          }
+        ],
+        "code": "/**\n * Deep clones an {@link Object} using serialization.\n *\n * <p>This is many times slower than writing clone methods by hand\n * on all objects in your object graph. However, for complex object\n * graphs, or for those that don't support deep cloning this can\n * be a simple alternative implementation. Of course all the objects\n * must be {@link Serializable}.</p>\n *\n * @param <T> the type of the object involved.\n * @param object  the {@link Serializable} object to clone.\n * @return the cloned object.\n * @throws SerializationException (runtime) if the serialization fails.\n */\npublic static <T extends Serializable> T clone(final T object) {\n    if (object == null) {\n        return null;\n    }\n    final ByteArrayInputStream bais = new ByteArrayInputStream(serialize(object));\n    final Class<T> cls = ObjectUtils.getClass(object);\n    try (ClassLoaderAwareObjectInputStream in = new ClassLoaderAwareObjectInputStream(bais, cls.getClassLoader())) {\n        // When we serialize and deserialize an object, it is reasonable to assume the deserialized object is of the\n        // same type as the original serialized object\n        return (T) in.readObject();\n    } catch (final ClassNotFoundException | IOException ex) {\n        throw new SerializationException(String.format(\"%s while reading cloned object data\", ex.getClass().getSimpleName()), ex);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "deserialize",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "byte",
+              "simple_name": "byte",
+              "is_array": true,
+              "array_dimensions": 1
+            },
+            "name": "objectData"
+          }
+        ],
+        "javadoc": "/**\n * Deserializes a single {@link Object} from an array of bytes.\n *\n * <p>\n * If the call site incorrectly types the return value, a {@link ClassCastException} is thrown from the call site.\n * Without Generics in this declaration, the call site must type cast and can cause the same ClassCastException.\n * Note that in both cases, the ClassCastException is in the call site, not in this method.\n * </p>\n *\n * @param <T>  the object type to be deserialized.\n * @param objectData\n *            the serialized object, must not be null.\n * @return the deserialized object.\n * @throws NullPointerException if {@code objectData} is {@code null}.\n * @throws SerializationException (runtime) if the serialization fails.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the object type to be deserialized."
+          },
+          {
+            "tag": "param",
+            "name": "objectData",
+            "content": " the serialized object, must not be null.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the serialized object, must not be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "deserialized object.",
+            "assertion": "assert methodResultID != null;",
+            "description": "the deserialized object."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if {@code objectData} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": "if objectData is null."
+          },
+          {
+            "tag": "throws",
+            "name": "SerializationException",
+            "content": "(runtime) if the serialization fails.",
+            "assertion": "assert !receiverObjectID.deserialize(args[0] instanceof byte[]) instanceof java.lang.Object;",
+            "description": "if the serialization fails."
+          }
+        ],
+        "code": "/**\n * Deserializes a single {@link Object} from an array of bytes.\n *\n * <p>\n * If the call site incorrectly types the return value, a {@link ClassCastException} is thrown from the call site.\n * Without Generics in this declaration, the call site must type cast and can cause the same ClassCastException.\n * Note that in both cases, the ClassCastException is in the call site, not in this method.\n * </p>\n *\n * @param <T>  the object type to be deserialized.\n * @param objectData\n *            the serialized object, must not be null.\n * @return the deserialized object.\n * @throws NullPointerException if {@code objectData} is {@code null}.\n * @throws SerializationException (runtime) if the serialization fails.\n */\npublic static <T> T deserialize(final byte[] objectData) {\n    Objects.requireNonNull(objectData, \"objectData\");\n    return deserialize(new ByteArrayInputStream(objectData));\n}"
+      },
+      {
+        "type": "method",
+        "name": "deserialize",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "InputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "inputStream"
+          }
+        ],
+        "javadoc": "/**\n * Deserializes an {@link Object} from the specified stream.\n *\n * <p>\n * The stream will be closed once the object is written. This avoids the need for a finally clause, and maybe also\n * exception handling, in the application code.\n * </p>\n *\n * <p>\n * The stream passed in is not buffered internally within this method. This is the responsibility of your\n * application if desired.\n * </p>\n *\n * <p>\n * If the call site incorrectly types the return value, a {@link ClassCastException} is thrown from the call site.\n * Without Generics in this declaration, the call site must type cast and can cause the same ClassCastException.\n * Note that in both cases, the ClassCastException is in the call site, not in this method.\n * </p>\n *\n * @param <T>  the object type to be deserialized.\n * @param inputStream\n *            the serialized object input stream, must not be null.\n * @return the deserialized object.\n * @throws NullPointerException if {@code inputStream} is {@code null}.\n * @throws SerializationException (runtime) if the serialization fails.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": "the object type to be deserialized."
+          },
+          {
+            "tag": "param",
+            "name": "inputStream",
+            "content": " the serialized object input stream, must not be null.",
+            "assertion": "assert (args[0] == null) == false;",
+            "description": "the serialized object input stream, must not be null."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "deserialized object.",
+            "assertion": "assert methodResultID instanceof java.lang.Object;",
+            "description": "the deserialized object"
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if {@code inputStream} is {@code null}.",
+            "assertion": "assert args[0] == null;",
+            "description": "if inputStream is null."
+          },
+          {
+            "tag": "throws",
+            "name": "SerializationException",
+            "content": "(runtime) if the serialization fails.",
+            "assertion": "assert !receiverObjectID.deserialize(args[0] instanceof java.io.InputStream ? args[0] : null) instanceof java.lang.Object;",
+            "description": "(runtime) if the serialization fails."
+          }
+        ],
+        "code": "/**\n * Deserializes an {@link Object} from the specified stream.\n *\n * <p>\n * The stream will be closed once the object is written. This avoids the need for a finally clause, and maybe also\n * exception handling, in the application code.\n * </p>\n *\n * <p>\n * The stream passed in is not buffered internally within this method. This is the responsibility of your\n * application if desired.\n * </p>\n *\n * <p>\n * If the call site incorrectly types the return value, a {@link ClassCastException} is thrown from the call site.\n * Without Generics in this declaration, the call site must type cast and can cause the same ClassCastException.\n * Note that in both cases, the ClassCastException is in the call site, not in this method.\n * </p>\n *\n * @param <T>  the object type to be deserialized.\n * @param inputStream\n *            the serialized object input stream, must not be null.\n * @return the deserialized object.\n * @throws NullPointerException if {@code inputStream} is {@code null}.\n * @throws SerializationException (runtime) if the serialization fails.\n */\n// inputStream is managed by the caller\n@SuppressWarnings(\"resource\")\npublic static <T> T deserialize(final InputStream inputStream) {\n    Objects.requireNonNull(inputStream, \"inputStream\");\n    try (ObjectInputStream in = new ObjectInputStream(inputStream)) {\n        @SuppressWarnings(\"unchecked\")\n        final T obj = (T) in.readObject();\n        return obj;\n    } catch (final ClassNotFoundException | IOException | NegativeArraySizeException ex) {\n        throw new SerializationException(ex);\n    }\n}"
+      },
+      {
+        "type": "method",
+        "name": "roundtrip",
+        "return_type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": "java.lang.Object",
+              "simple_name": "Object",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "obj"
+          }
+        ],
+        "javadoc": "/**\n * Performs a serialization roundtrip. Serializes and deserializes the given object, great for testing objects that\n * implement {@link Serializable}.\n *\n * @param <T>\n *           the type of the object involved.\n * @param obj\n *            the object to roundtrip.\n * @return the serialized and deserialized object.\n * @since 3.3\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "<T>",
+            "content": " the type of the object involved."
+          },
+          {
+            "tag": "param",
+            "name": "obj",
+            "content": " the object to roundtrip.",
+            "assertion": "assert args[0] != null;",
+            "description": "the object to roundtrip."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "serialized and deserialized object.",
+            "assertion": "assert methodResultID.equals(receiverObjectID.deserialize(receiverObjectID.serialize(args[0])));",
+            "description": "the serialized and deserialized object."
+          },
+          {
+            "tag": "since",
+            "name": "3.3",
+            "content": ""
+          }
+        ],
+        "code": "/**\n * Performs a serialization roundtrip. Serializes and deserializes the given object, great for testing objects that\n * implement {@link Serializable}.\n *\n * @param <T>\n *           the type of the object involved.\n * @param obj\n *            the object to roundtrip.\n * @return the serialized and deserialized object.\n * @since 3.3\n */\n// OK, because we serialized a type `T`\n@SuppressWarnings(\"unchecked\")\npublic static <T extends Serializable> T roundtrip(final T obj) {\n    return (T) deserialize(serialize(obj));\n}"
+      },
+      {
+        "type": "method",
+        "name": "serialize",
+        "return_type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Serializable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "obj"
+          }
+        ],
+        "javadoc": "/**\n * Serializes an {@link Object} to a byte array for\n * storage/serialization.\n *\n * @param obj  the object to serialize to bytes.\n * @return a byte[] with the converted Serializable.\n * @throws SerializationException (runtime) if the serialization fails.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "obj",
+            "content": "the object to serialize to bytes.",
+            "assertion": "assert args[0] != null;",
+            "description": "the object to serialize to bytes."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "byte[] with the converted Serializable.",
+            "assertion": "assert methodResultID != null && methodResultID.length > 0;",
+            "description": "a byte[] with the converted Serializable."
+          },
+          {
+            "tag": "throws",
+            "name": "SerializationException",
+            "content": "(runtime) if the serialization fails.",
+            "assertion": "assert !(args[0] instanceof java.io.Serializable);",
+            "description": "(runtime) if the serialization fails."
+          }
+        ],
+        "code": "/**\n * Serializes an {@link Object} to a byte array for\n * storage/serialization.\n *\n * @param obj  the object to serialize to bytes.\n * @return a byte[] with the converted Serializable.\n * @throws SerializationException (runtime) if the serialization fails.\n */\npublic static byte[] serialize(final Serializable obj) {\n    final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);\n    serialize(obj, baos);\n    return baos.toByteArray();\n}"
+      },
+      {
+        "type": "method",
+        "name": "serialize",
+        "return_type": null,
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "Serializable",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "obj"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "OutputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "outputStream"
+          }
+        ],
+        "javadoc": "/**\n * Serializes an {@link Object} to the specified stream.\n *\n * <p>The stream will be closed once the object is written.\n * This avoids the need for a finally clause, and maybe also exception\n * handling, in the application code.</p>\n *\n * <p>The stream passed in is not buffered internally within this method.\n * This is the responsibility of your application if desired.</p>\n *\n * @param obj  the object to serialize to bytes, may be null.\n * @param outputStream  the stream to write to, must not be null.\n * @throws NullPointerException if {@code outputStream} is {@code null}.\n * @throws SerializationException (runtime) if the serialization fails.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "obj",
+            "content": "the object to serialize to bytes, may be null.",
+            "assertion": "assert (args[0] == null) || (args[0] != null);",
+            "description": "the object to serialize to bytes, may be null."
+          },
+          {
+            "tag": "param",
+            "name": "outputStream",
+            "content": "the stream to write to, must not be null.",
+            "assertion": "assert (args[1] == null) == false;",
+            "description": "the stream to write to, must not be null."
+          },
+          {
+            "tag": "throws",
+            "name": "NullPointerException",
+            "content": "if {@code outputStream} is {@code null}.",
+            "assertion": "assert args[1] == null;",
+            "description": "if outputStream is null."
+          },
+          {
+            "tag": "throws",
+            "name": "SerializationException",
+            "content": "(runtime) if the serialization fails.",
+            "assertion": "assert false;",
+            "description": "if the serialization fails."
+          }
+        ],
+        "code": "/**\n * Serializes an {@link Object} to the specified stream.\n *\n * <p>The stream will be closed once the object is written.\n * This avoids the need for a finally clause, and maybe also exception\n * handling, in the application code.</p>\n *\n * <p>The stream passed in is not buffered internally within this method.\n * This is the responsibility of your application if desired.</p>\n *\n * @param obj  the object to serialize to bytes, may be null.\n * @param outputStream  the stream to write to, must not be null.\n * @throws NullPointerException if {@code outputStream} is {@code null}.\n * @throws SerializationException (runtime) if the serialization fails.\n */\n// outputStream is managed by the caller\n@SuppressWarnings(\"resource\")\npublic static void serialize(final Serializable obj, final OutputStream outputStream) {\n    Objects.requireNonNull(outputStream, \"outputStream\");\n    try (ObjectOutputStream out = new ObjectOutputStream(outputStream)) {\n        out.writeObject(obj);\n    } catch (final IOException ex) {\n        throw new SerializationException(ex);\n    }\n}"
+      }
+    ]
+  },
+  {
+    "name": "ClassLoaderAwareObjectInputStream",
+    "package": "org.apache.commons.lang3",
+    "qualified_name": "org.apache.commons.lang3.ClassLoaderAwareObjectInputStream",
+    "javadoc": "/**\n * Custom specialization of the standard JDK {@link ObjectInputStream}\n * that uses a custom  {@link ClassLoader} to resolve a class.\n * If the specified {@link ClassLoader} is not able to resolve the class,\n * the context classloader of the current thread will be used.\n * This way, the standard deserialization work also in web-application\n * containers and application servers, no matter in which of the\n * {@link ClassLoader} the particular class that encapsulates\n * serialization/deserialization lives.\n *\n * <p>For more in-depth information about the problem for which this\n * class here is a workaround, see the JIRA issue LANG-626.</p>\n */\n",
+    "code": "/**\n * Custom specialization of the standard JDK {@link ObjectInputStream}\n * that uses a custom  {@link ClassLoader} to resolve a class.\n * If the specified {@link ClassLoader} is not able to resolve the class,\n * the context classloader of the current thread will be used.\n * This way, the standard deserialization work also in web-application\n * containers and application servers, no matter in which of the\n * {@link ClassLoader} the particular class that encapsulates\n * serialization/deserialization lives.\n *\n * <p>For more in-depth information about the problem for which this\n * class here is a workaround, see the JIRA issue LANG-626.</p>\n */\nstatic final class ClassLoaderAwareObjectInputStream extends ObjectInputStream {\n\n    private final ClassLoader classLoader;\n\n    /**\n     * Constructs a new instance.\n     * @param in The {@link InputStream}.\n     * @param classLoader classloader to use\n     * @throws IOException if an I/O error occurs while reading stream header.\n     * @see java.io.ObjectInputStream\n     */\n    ClassLoaderAwareObjectInputStream(final InputStream in, final ClassLoader classLoader) throws IOException {\n        super(in);\n        this.classLoader = classLoader;\n    }\n\n    /**\n     * Overridden version that uses the parameterized {@link ClassLoader} or the {@link ClassLoader}\n     * of the current {@link Thread} to resolve the class.\n     * @param desc An instance of class {@link ObjectStreamClass}.\n     * @return A {@link Class} object corresponding to {@code desc}.\n     * @throws IOException Any of the usual Input/Output exceptions.\n     * @throws ClassNotFoundException If class of a serialized object cannot be found.\n     */\n    @Override\n    protected Class<?> resolveClass(final ObjectStreamClass desc) throws IOException, ClassNotFoundException {\n        final String name = desc.getName();\n        try {\n            return Class.forName(name, false, classLoader);\n        } catch (final ClassNotFoundException ex) {\n            try {\n                return Class.forName(name, false, Thread.currentThread().getContextClassLoader());\n            } catch (final ClassNotFoundException cnfe) {\n                final Class<?> cls = ClassUtils.getPrimitiveClass(name);\n                if (cls != null) {\n                    return cls;\n                }\n                throw cnfe;\n            }\n        }\n    }\n}",
+    "members": [
+      {
+        "type": "constructor",
+        "name": "ClassLoaderAwareObjectInputStream",
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "InputStream",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "in"
+          },
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ClassLoader",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "classLoader"
+          }
+        ],
+        "javadoc": "/**\n * Constructs a new instance.\n * @param in The {@link InputStream}.\n * @param classLoader classloader to use\n * @throws IOException if an I/O error occurs while reading stream header.\n * @see java.io.ObjectInputStream\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "in",
+            "content": "The {@link InputStream}."
+          },
+          {
+            "tag": "param",
+            "name": "classLoader",
+            "content": "classloader to use"
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "if an I/O error occurs while reading stream header."
+          },
+          {
+            "tag": "see",
+            "name": null,
+            "content": "java.io.ObjectInputStream"
+          }
+        ],
+        "code": "/**\n * Constructs a new instance.\n * @param in The {@link InputStream}.\n * @param classLoader classloader to use\n * @throws IOException if an I/O error occurs while reading stream header.\n * @see java.io.ObjectInputStream\n */\nClassLoaderAwareObjectInputStream(final InputStream in, final ClassLoader classLoader) throws IOException {\n    super(in);\n    this.classLoader = classLoader;\n}"
+      },
+      {
+        "type": "method",
+        "name": "resolveClass",
+        "return_type": {
+          "qualified_name": null,
+          "simple_name": "Class",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "parameters": [
+          {
+            "type": {
+              "qualified_name": null,
+              "simple_name": "ObjectStreamClass",
+              "is_array": false,
+              "array_dimensions": 0
+            },
+            "name": "desc"
+          }
+        ],
+        "javadoc": "/**\n * Overridden version that uses the parameterized {@link ClassLoader} or the {@link ClassLoader}\n * of the current {@link Thread} to resolve the class.\n * @param desc An instance of class {@link ObjectStreamClass}.\n * @return A {@link Class} object corresponding to {@code desc}.\n * @throws IOException Any of the usual Input/Output exceptions.\n * @throws ClassNotFoundException If class of a serialized object cannot be found.\n */\n",
+        "tags": [
+          {
+            "tag": "param",
+            "name": "desc",
+            "content": "An instance of class {@link ObjectStreamClass}."
+          },
+          {
+            "tag": "return",
+            "name": null,
+            "content": "{@link Class} object corresponding to {@code desc}."
+          },
+          {
+            "tag": "throws",
+            "name": "IOException",
+            "content": "Any of the usual Input/Output exceptions."
+          },
+          {
+            "tag": "throws",
+            "name": "ClassNotFoundException",
+            "content": "If class of a serialized object cannot be found."
+          }
+        ],
+        "code": "/**\n * Overridden version that uses the parameterized {@link ClassLoader} or the {@link ClassLoader}\n * of the current {@link Thread} to resolve the class.\n * @param desc An instance of class {@link ObjectStreamClass}.\n * @return A {@link Class} object corresponding to {@code desc}.\n * @throws IOException Any of the usual Input/Output exceptions.\n * @throws ClassNotFoundException If class of a serialized object cannot be found.\n */\n@Override\nprotected Class<?> resolveClass(final ObjectStreamClass desc) throws IOException, ClassNotFoundException {\n    final String name = desc.getName();\n    try {\n        return Class.forName(name, false, classLoader);\n    } catch (final ClassNotFoundException ex) {\n        try {\n            return Class.forName(name, false, Thread.currentThread().getContextClassLoader());\n        } catch (final ClassNotFoundException cnfe) {\n            final Class<?> cls = ClassUtils.getPrimitiveClass(name);\n            if (cls != null) {\n                return cls;\n            }\n            throw cnfe;\n        }\n    }\n}"
+      }
+    ]
+  }
+]

@@ -1,0 +1,853 @@
+[
+  {
+    "method": "getFraction",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "double",
+          "simple_name": "double",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "value"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "tag": "param",
+          "name": "value",
+          "content": "the double value to convert",
+          "assertion": "",
+          "description": "the double value to convert"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new fraction instance that is close to the value",
+          "assertion": "assert Math.abs(methodResultID.doubleValue() - args[0]) < 1e-10;",
+          "name": null,
+          "content": "a new fraction instance that is close to the value"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if |value| > Integer.MAX_VALUE or value = NaN",
+          "assertion": "assert Math.abs(args[0]) > Integer.MAX_VALUE || Double.isNaN(args[0]);",
+          "name": "ArithmeticException",
+          "content": "if {@code |value| &gt; Integer.MAX_VALUE} or {@code value = NaN}"
+        },
+        {
+          "description": "if the calculated denominator is zero",
+          "assertion": "assert receiverObjectID.getDenominator() == 0;",
+          "name": "ArithmeticException",
+          "content": "if the calculated denominator is {@code zero}"
+        },
+        {
+          "description": "if the algorithm does not converge",
+          "assertion": "assert !receiverObjectID.reduce().equals(receiverObjectID);",
+          "name": "ArithmeticException",
+          "content": "if the algorithm does not converge"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getFraction",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "numerator"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "denominator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the numerator, for example the three in 'three sevenths'",
+          "assertion": "assert args[0] != Integer.MIN_VALUE || args[1] > 0;",
+          "name": "numerator",
+          "content": "the numerator, for example the three in 'three sevenths'"
+        },
+        {
+          "description": "the denominator, for example the seven in 'three sevenths'",
+          "assertion": "assert args[1] != 0 && args[1] > 0;",
+          "name": "denominator",
+          "content": "the denominator, for example the seven in 'three sevenths'"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new fraction instance with the 2 parts of a fraction Y/Z.",
+          "assertion": "assert methodResultID.getNumerator() == (args[0] < 0 ? -args[0] : args[0]) && methodResultID.getDenominator() == (args[1] < 0 ? -args[1] : args[1]);",
+          "name": null,
+          "content": "a new fraction instance with the 2 parts of a fraction Y/Z."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the denominator is zero or the denominator is negative and the numerator is Integer#MIN_VALUE",
+          "assertion": "assert args[1] == 0 || (args[1] < 0 && args[0] == Integer.MIN_VALUE);",
+          "name": "ArithmeticException",
+          "content": "if the denominator is {@code zero} or the denominator is {@code negative} and the numerator is {@code Integer#MIN_VALUE}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getFraction",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "whole"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "numerator"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "denominator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "whole number is not negative",
+          "assertion": "assert args[0] >= 0;",
+          "name": "whole",
+          "content": "the whole number, for example the one in 'one and three sevenths'"
+        },
+        {
+          "description": "numerator is not negative",
+          "assertion": "assert args[1] >= 0;",
+          "name": "numerator",
+          "content": "the numerator, for example the three in 'one and three sevenths'"
+        },
+        {
+          "description": "denominator is positive",
+          "assertion": "assert args[2] > 0;",
+          "name": "denominator",
+          "content": "the denominator, for example the seven in 'one and three sevenths'"
+        }
+      ],
+      "RETURN": [
+        {
+          "tag": "return",
+          "name": null,
+          "content": "new fraction instance",
+          "assertion": "",
+          "description": "new fraction instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the denominator is zero",
+          "assertion": "assert args[2] == 0;",
+          "name": "ArithmeticException",
+          "content": "if the denominator is {@code zero}"
+        },
+        {
+          "description": "if the denominator is negative",
+          "assertion": "assert args[2] < 0;",
+          "name": "ArithmeticException",
+          "content": "if the denominator is negative"
+        },
+        {
+          "description": "if the numerator is negative",
+          "assertion": "assert args[1] < 0;",
+          "name": "ArithmeticException",
+          "content": "if the numerator is negative"
+        },
+        {
+          "description": "if the resulting numerator exceeds Integer.MAX_VALUE",
+          "assertion": "assert (args[0] * args[2]) + args[1] > Integer.MAX_VALUE;",
+          "name": "ArithmeticException",
+          "content": "if the resulting numerator exceeds {@code Integer.MAX_VALUE}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getFraction",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "String",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "str"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the string to parse, must not be {@code null}",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "str",
+          "content": "the string to parse, must not be {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new Fraction instance",
+          "assertion": "assert methodResultID instanceof Fraction;",
+          "name": null,
+          "content": "a new Fraction instance"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the string is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the string is {@code null}"
+        },
+        {
+          "description": "if the number format is invalid",
+          "assertion": "assert !args[0].matches(\"^-?\\\\d+(\\\\.\\\\d+| \\\\d+/\\\\d+)?$\");",
+          "name": "NumberFormatException",
+          "content": "if the number format is invalid"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getReducedFraction",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "numerator"
+      },
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "denominator"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the numerator, for example the three in 'three sevenths'",
+          "assertion": "assert true;",
+          "name": "numerator",
+          "content": "the numerator, for example the three in 'three sevenths'"
+        },
+        {
+          "description": "the denominator, for example the seven in 'three sevenths'",
+          "assertion": "assert args[1] != 0;",
+          "name": "denominator",
+          "content": "the denominator, for example the seven in 'three sevenths'"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a new fraction instance, with the numerator and denominator reduced",
+          "assertion": "assert methodResultID.getNumerator() == args[0] / gcd(args[0], args[1]) && methodResultID.getDenominator() == args[1] / gcd(args[0], args[1]);",
+          "name": null,
+          "content": "a new fraction instance, with the numerator and denominator reduced"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the denominator is zero",
+          "assertion": "assert args[1] == 0;",
+          "name": "ArithmeticException",
+          "content": "if the denominator is {@code zero}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "abs",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "this if it is positive, or a new positive fraction instance with the opposite signed numerator",
+          "assertion": "assert (methodResultID.equals(receiverObjectID) && receiverObjectID.getNumerator() >= 0) || (receiverObjectID.getNumerator() < 0 && methodResultID.getNumerator() == -receiverObjectID.getNumerator() && methodResultID.getDenominator() == receiverObjectID.getDenominator());",
+          "name": null,
+          "content": "this if it is positive, or a new positive fraction instance with the opposite signed numerator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "add",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Fraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the fraction to add, must not be {@code null}",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "fraction",
+          "content": "the fraction to add, must not be {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a {@link Fraction} instance with the resulting values",
+          "assertion": "assert methodResultID.equals(receiverObjectID.add(args[0]).reduce());",
+          "name": null,
+          "content": "a {@link Fraction} instance with the resulting values"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the fraction is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the fraction is {@code null}"
+        },
+        {
+          "description": "if the resulting numerator or denominator exceeds Integer.MAX_VALUE",
+          "assertion": "assert Math.abs(receiverObjectID.getNumerator() + args[0].getNumerator()) > Integer.MAX_VALUE || Math.abs(receiverObjectID.getDenominator() * args[0].getDenominator()) > Integer.MAX_VALUE;",
+          "name": "ArithmeticException",
+          "content": "if the resulting numerator or denominator exceeds {@code Integer.MAX_VALUE}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "compareTo",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Fraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "other"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to compare to",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "other",
+          "content": "the object to compare to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "-1 if this is less, 0 if equal, +1 if greater",
+          "assertion": "assert (methodResultID == -1 && args[0].compareTo(receiverObjectID) > 0) || (methodResultID == 0 && args[0].compareTo(receiverObjectID) == 0) || (methodResultID == 1 && args[0].compareTo(receiverObjectID) < 0);",
+          "name": null,
+          "content": "-1 if this is less, 0 if equal, +1 if greater"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the object is not a {@link Fraction}",
+          "assertion": "assert !(args[0] instanceof Fraction);",
+          "name": "ClassCastException",
+          "content": "if the object is not a {@link Fraction}"
+        },
+        {
+          "description": "if the object is {@code null}",
+          "assertion": "assert args[0]==null;",
+          "name": "NullPointerException",
+          "content": "if the object is {@code null}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "divideBy",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Fraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the fraction to divide by, must not be {@code null}",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "fraction",
+          "content": "the fraction to divide by, must not be {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a {@link Fraction} instance with the resulting values",
+          "assertion": "assert methodResultID.equals(receiverObjectID.divideBy(args[0]));",
+          "name": null,
+          "content": "a {@link Fraction} instance with the resulting values"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the fraction is null",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the fraction is {@code null}"
+        },
+        {
+          "description": "if the fraction to divide by is zero",
+          "assertion": "assert args[0].getDenominator() == 0 || args[0].getNumerator() == 0;",
+          "name": "ArithmeticException",
+          "content": "if the fraction to divide by is zero"
+        },
+        {
+          "description": "if the resulting numerator or denominator exceeds Integer.MAX_VALUE",
+          "assertion": "assert (receiverObjectID.getNumerator() / args[0].getDenominator()) > Integer.MAX_VALUE || (receiverObjectID.getDenominator() * args[0].getNumerator()) > Integer.MAX_VALUE;",
+          "name": "ArithmeticException",
+          "content": "if the resulting numerator or denominator exceeds {@code Integer.MAX_VALUE}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "doubleValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the fraction as a double",
+          "assertion": "assert methodResultID == (double)receiverObjectID.getNumerator() / receiverObjectID.getDenominator();",
+          "name": null,
+          "content": "the fraction as a {@code double}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "equals",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the reference object with which to compare",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "obj",
+          "content": "the reference object with which to compare"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "true if this object is equal",
+          "assertion": "assert methodResultID == (receiverObjectID.getNumerator() == ((Fraction)args[0]).getNumerator() && receiverObjectID.getDenominator() == ((Fraction)args[0]).getDenominator());",
+          "name": null,
+          "content": "true if this object is equal"
+        }
+      ]
+    }
+  },
+  {
+    "method": "floatValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the fraction as a {@code float}",
+          "assertion": "assert methodResultID == (double)receiverObjectID.getNumerator() / receiverObjectID.getDenominator();",
+          "name": null,
+          "content": "the fraction as a {@code float}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getDenominator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the denominator fraction part",
+          "assertion": "assert methodResultID > 0;",
+          "name": null,
+          "content": "the denominator fraction part"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getNumerator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the numerator fraction part",
+          "assertion": "assert methodResultID >= 0;",
+          "name": null,
+          "content": "the numerator fraction part"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getProperNumerator",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the numerator fraction part of a proper fraction, always positive",
+          "assertion": "assert methodResultID >= 0 && methodResultID == receiverObjectID.getNumerator() % receiverObjectID.getDenominator();",
+          "name": null,
+          "content": "the numerator fraction part of a proper fraction, always positive"
+        }
+      ]
+    }
+  },
+  {
+    "method": "getProperWhole",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the whole fraction part of a proper fraction, that includes the sign",
+          "assertion": "assert methodResultID == (receiverObjectID.getNumerator() / receiverObjectID.getDenominator()) >= 1 ? (int) Math.floor(receiverObjectID.doubleValue()) : (int) Math.ceil(receiverObjectID.doubleValue());",
+          "name": null,
+          "content": "the whole fraction part of a proper fraction, that includes the sign"
+        }
+      ]
+    }
+  },
+  {
+    "method": "hashCode",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a hash code value for this object",
+          "assertion": "assert methodResultID == receiverObjectID.hashCode();",
+          "name": null,
+          "content": "a hash code value for this object"
+        }
+      ]
+    }
+  },
+  {
+    "method": "intValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the whole number fraction part",
+          "assertion": "assert methodResultID == receiverObjectID.getProperWhole();",
+          "name": null,
+          "content": "the whole number fraction part"
+        }
+      ]
+    }
+  },
+  {
+    "method": "invert",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new fraction instance with the numerator and denominator inverted.",
+          "assertion": "assert methodResultID.getNumerator() == receiverObjectID.getDenominator() && methodResultID.getDenominator() == receiverObjectID.getNumerator();",
+          "name": null,
+          "content": "a new fraction instance with the numerator and denominator inverted."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the fraction represents zero.",
+          "assertion": "assert receiverObjectID.getNumerator() == 0;",
+          "name": "ArithmeticException",
+          "content": "if the fraction represents zero."
+        }
+      ]
+    }
+  },
+  {
+    "method": "longValue",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "the whole number fraction part",
+          "assertion": "assert methodResultID == receiverObjectID.getProperWhole();",
+          "name": null,
+          "content": "the whole number fraction part"
+        }
+      ]
+    }
+  },
+  {
+    "method": "multiplyBy",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Fraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the fraction to multiply by, must not be {@code null}",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "fraction",
+          "content": "the fraction to multiply by, must not be {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a {@link Fraction} instance with the resulting values",
+          "assertion": "assert methodResultID.equals(receiverObjectID.multiplyBy(args[0]).reduce());",
+          "name": null,
+          "content": "a {@link Fraction} instance with the resulting values"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the fraction is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the fraction is {@code null}"
+        },
+        {
+          "description": "if the resulting numerator or denominator exceeds Integer.MAX_VALUE",
+          "assertion": "assert (receiverObjectID.getNumerator() * args[0].getNumerator()) > Integer.MAX_VALUE || (receiverObjectID.getDenominator() * args[0].getDenominator()) > Integer.MAX_VALUE;",
+          "name": "ArithmeticException",
+          "content": "if the resulting numerator or denominator exceeds {@code Integer.MAX_VALUE}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "negate",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new fraction instance with the opposite signed numerator",
+          "assertion": "assert methodResultID.getNumerator() == -receiverObjectID.getNumerator() && methodResultID.getDenominator() == receiverObjectID.getDenominator();",
+          "name": null,
+          "content": "a new fraction instance with the opposite signed numerator"
+        }
+      ]
+    }
+  },
+  {
+    "method": "pow",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "int",
+          "simple_name": "int",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "power"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the power to raise the fraction to",
+          "assertion": "assert true;",
+          "name": "power",
+          "content": "the power to raise the fraction to"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "this if the power is one, {@link #ONE} if the power is zero (even if the fraction equals ZERO) or a new fraction instance raised to the appropriate power",
+          "assertion": "assert (args[0] == 1 && methodResult.equals(receiverObjectID)) || (args[0] == 0 && methodResult.equals(Fraction.ONE)) || (methodResult.getNumerator() == (int)Math.pow(receiverObjectID.getNumerator(), args[0]) && methodResult.getDenominator() == (int)Math.pow(receiverObjectID.getDenominator(), args[0]));",
+          "name": null,
+          "content": "this if the power is one, {@link #ONE} if the power is zero (even if the fraction equals ZERO) or a new fraction instance raised to the appropriate power"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the resulting numerator or denominator exceeds Integer.MAX_VALUE",
+          "assertion": "assert Math.abs(receiverObjectID.getNumerator() * (int)Math.pow(args[0], args[0])) > Integer.MAX_VALUE || Math.abs(receiverObjectID.getDenominator() * (int)Math.pow(args[0], args[0])) > Integer.MAX_VALUE;",
+          "name": "ArithmeticException",
+          "content": "if the resulting numerator or denominator exceeds {@code Integer.MAX_VALUE}"
+        }
+      ]
+    }
+  },
+  {
+    "method": "reduce",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a new reduced fraction instance, or this if no simplification possible",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getReducedFraction(receiverObjectID.getNumerator(), receiverObjectID.getDenominator()));",
+          "name": null,
+          "content": "a new reduced fraction instance, or this if no simplification possible"
+        }
+      ]
+    }
+  },
+  {
+    "method": "subtract",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Fraction",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "fraction"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the fraction to subtract, must not be {@code null}",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "fraction",
+          "content": "the fraction to subtract, must not be {@code null}"
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a {@link Fraction} instance with the resulting values",
+          "assertion": "assert methodResultID.equals(receiverObjectID.subtract(args[0]));",
+          "name": null,
+          "content": "a {@link Fraction} instance with the resulting values"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if the fraction is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if the fraction is {@code null}"
+        },
+        {
+          "description": "if the resulting numerator or denominator cannot be represented in an int.",
+          "assertion": "assert Math.abs(receiverObjectID.getNumerator() - args[0].getNumerator()) > Integer.MAX_VALUE || Math.abs(receiverObjectID.getDenominator() * args[0].getDenominator()) > Integer.MAX_VALUE;",
+          "name": "ArithmeticException",
+          "content": "if the resulting numerator or denominator cannot be represented in an {@code int}."
+        }
+      ]
+    }
+  },
+  {
+    "method": "toProperString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a {@link String} form of the fraction",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getProperWhole() == 0 && receiverObjectID.getProperNumerator() == 0 ? \"\" + receiverObjectID.getProperWhole() : (receiverObjectID.getProperWhole() == 0 ? \"\" : receiverObjectID.getProperWhole() + \" \") + receiverObjectID.getProperNumerator() + \"/\" + receiverObjectID.getDenominator());",
+          "name": null,
+          "content": "a {@link String} form of the fraction"
+        }
+      ]
+    }
+  },
+  {
+    "method": "toString",
+    "type": "method",
+    "parameters": [],
+    "conditions": {
+      "RETURN": [
+        {
+          "description": "a {@link String} form of the fraction",
+          "assertion": "assert methodResultID.equals(receiverObjectID.getNumerator() + \"/\" + receiverObjectID.getDenominator());",
+          "name": null,
+          "content": "a {@link String} form of the fraction"
+        }
+      ]
+    }
+  }
+]

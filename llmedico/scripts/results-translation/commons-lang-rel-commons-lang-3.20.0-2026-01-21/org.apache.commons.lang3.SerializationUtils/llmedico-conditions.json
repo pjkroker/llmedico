@@ -1,0 +1,271 @@
+[
+  {
+    "method": "SerializationUtils",
+    "type": "constructor",
+    "parameters": [],
+    "conditions": {}
+  },
+  {
+    "method": "clone",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "object"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the {@link Serializable} object to clone.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "object",
+          "content": "the {@link Serializable} object to clone."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the cloned object.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.roundtrip(args[0]));",
+          "name": null,
+          "content": "the cloned object."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "(runtime) if the serialization fails.",
+          "assertion": "assert !(object instanceof java.io.Serializable);",
+          "name": "SerializationException",
+          "content": "(runtime) if the serialization fails."
+        }
+      ]
+    }
+  },
+  {
+    "method": "deserialize",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "byte",
+          "simple_name": "byte",
+          "is_array": true,
+          "array_dimensions": 1
+        },
+        "name": "objectData"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the serialized object, must not be null.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "objectData",
+          "content": "the serialized object, must not be null."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the deserialized object.",
+          "assertion": "assert methodResultID != null;",
+          "name": null,
+          "content": "the deserialized object."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if objectData is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if {@code objectData} is {@code null}."
+        },
+        {
+          "description": "if the serialization fails.",
+          "assertion": "assert !receiverObjectID.deserialize(args[0] instanceof byte[]) instanceof java.lang.Object;",
+          "name": "SerializationException",
+          "content": "(runtime) if the serialization fails."
+        }
+      ]
+    }
+  },
+  {
+    "method": "deserialize",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "InputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "inputStream"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the serialized object input stream, must not be null.",
+          "assertion": "assert (args[0] == null) == false;",
+          "name": "inputStream",
+          "content": "the serialized object input stream, must not be null."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the deserialized object",
+          "assertion": "assert methodResultID instanceof java.lang.Object;",
+          "name": null,
+          "content": "the deserialized object"
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if inputStream is null.",
+          "assertion": "assert args[0] == null;",
+          "name": "NullPointerException",
+          "content": "if {@code inputStream} is {@code null}."
+        },
+        {
+          "description": "(runtime) if the serialization fails.",
+          "assertion": "assert !receiverObjectID.deserialize(args[0] instanceof java.io.InputStream ? args[0] : null) instanceof java.lang.Object;",
+          "name": "SerializationException",
+          "content": "(runtime) if the serialization fails."
+        }
+      ]
+    }
+  },
+  {
+    "method": "roundtrip",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": "java.lang.Object",
+          "simple_name": "Object",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to roundtrip.",
+          "assertion": "assert args[0] != null;",
+          "name": "obj",
+          "content": "the object to roundtrip."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "the serialized and deserialized object.",
+          "assertion": "assert methodResultID.equals(receiverObjectID.deserialize(receiverObjectID.serialize(args[0])));",
+          "name": null,
+          "content": "the serialized and deserialized object."
+        }
+      ]
+    }
+  },
+  {
+    "method": "serialize",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Serializable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to serialize to bytes.",
+          "assertion": "assert args[0] != null;",
+          "name": "obj",
+          "content": "the object to serialize to bytes."
+        }
+      ],
+      "RETURN": [
+        {
+          "description": "a byte[] with the converted Serializable.",
+          "assertion": "assert methodResultID != null && methodResultID.length > 0;",
+          "name": null,
+          "content": "a byte[] with the converted Serializable."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "(runtime) if the serialization fails.",
+          "assertion": "assert !(args[0] instanceof java.io.Serializable);",
+          "name": "SerializationException",
+          "content": "(runtime) if the serialization fails."
+        }
+      ]
+    }
+  },
+  {
+    "method": "serialize",
+    "type": "method",
+    "parameters": [
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "Serializable",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "obj"
+      },
+      {
+        "type": {
+          "qualified_name": null,
+          "simple_name": "OutputStream",
+          "is_array": false,
+          "array_dimensions": 0
+        },
+        "name": "outputStream"
+      }
+    ],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the object to serialize to bytes, may be null.",
+          "assertion": "assert (args[0] == null) || (args[0] != null);",
+          "name": "obj",
+          "content": "the object to serialize to bytes, may be null."
+        },
+        {
+          "description": "the stream to write to, must not be null.",
+          "assertion": "assert (args[1] == null) == false;",
+          "name": "outputStream",
+          "content": "the stream to write to, must not be null."
+        }
+      ],
+      "THROWS": [
+        {
+          "description": "if outputStream is null.",
+          "assertion": "assert args[1] == null;",
+          "name": "NullPointerException",
+          "content": "if {@code outputStream} is {@code null}."
+        },
+        {
+          "description": "if the serialization fails.",
+          "assertion": "assert false;",
+          "name": "SerializationException",
+          "content": "(runtime) if the serialization fails."
+        }
+      ]
+    }
+  }
+]
