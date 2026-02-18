@@ -61,6 +61,7 @@ def _evaluate_assertions(expected: str, generated:str, return_type: model_ast.Ty
 def evaluate_class(expected: ClassModel, generated: ClassModel, normalise_incomplete_java=True) -> List[EvaluationRow]:
     evaluation_rows = []
     class_name = expected.name
+    logger.info(f"Evaluating class{class_name}")
     if class_name != generated.name:
         raise ValueError(f"Class name mismatch: {class_name} != {generated.name}")
     if len(expected.methods) != len(generated.methods):
