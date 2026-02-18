@@ -83,27 +83,85 @@ def evaluate_class(expected: ClassModel, generated: ClassModel, normalise_incomp
 
             logger.critical(f"return_type:{return_type}")
             if len(method_exp.conditions) != len(generated.methods[i].conditions):
-                if len(generated.methods[i].conditions) == 0:
-                    logger.critical(f"Cannot compare {method_exp.signature.name} condition, generated methods has none!")
-                    break
-                logger.critical(f"Class: {class_name} with {method_signature}")
-                logger.critical(f"Conditions don't match expected {len(method_exp.conditions)} but got {len(generated.methods[i].conditions)}\n trying to match them to one of expected conditions, but could be wrong!")
 
+                # Case 1: Generated has NO conditions → all expected are MISSING
+                if len(generated.methods[i].conditions) == 0:
+                    logger.critical(
+                        f"Generated method {method_signature} has no conditions → counting all as MISSING"
+                    )
+
+                    evaluation_rows.append(
+                        EvaluationRow(
+                            class_name,
+                            method_signature,
+                            kind_exp=condition_exp.kind,
+                            name_exp=condition_exp.name,
+                            kind_gen=None,
+                            name_gen=None,
+                            expected=condition_exp.expression,
+                            generated="",
+                            relation=AssertionRelation.MISSING,
+                            reason="No generated conditions for this method",
+                        )
+                    )
+                    continue  # IMPORTANT: continue, NOT break
+
+                # Case 2: Length mismatch but generated has some conditions
+                logger.critical(
+                    f"Conditions don't match expected {len(method_exp.conditions)} "
+                    f"but got {len(generated.methods[i].conditions)}"
+                )
+
+                matched = False
                 for gen in generated.methods[i].conditions:
                     if gen.name == condition_exp.name:
-                        logger.critical(f"matching condition {condition_exp} and {gen}")
-                        result = _evaluate_assertions(condition_exp.expression, gen.expression, return_type, normalise_incomplete_java)
-                        evaluation_rows.append(EvaluationRow(class_name, method_signature,
-                                                kind_exp=condition_exp.kind,
-                                                name_exp=condition_exp.name,
-                                                kind_gen=gen.kind,
-                                                name_gen=gen.name,
-                                                expected=condition_exp.expression,
-                                                generated=gen.expression,
-                                                relation=result.relation,
-                                                reason=result.reason))
+                        result = _evaluate_assertions(
+                            condition_exp.expression,
+                            gen.expression,
+                            return_type,
+                            normalise_incomplete_java,
+                        )
+
+                        evaluation_rows.append(
+                            EvaluationRow(
+                                class_name,
+                                method_signature,
+                                kind_exp=condition_exp.kind,
+                                name_exp=condition_exp.name,
+                                kind_gen=gen.kind,
+                                name_gen=gen.name,
+                                expected=condition_exp.expression,
+                                generated=gen.expression,
+                                relation=result.relation,
+                                reason=result.reason,
+                            )
+                        )
+                        matched = True
                         break
-                logger.critical("could not match generated conditions!")
+
+                # If no matching condition found → count as MISSING
+                if not matched:
+                    logger.critical(
+                        f"No matching generated condition for {condition_exp.name} → MISSING"
+                    )
+
+                    evaluation_rows.append(
+                        EvaluationRow(
+                            class_name,
+                            method_signature,
+                            kind_exp=condition_exp.kind,
+                            name_exp=condition_exp.name,
+                            kind_gen=None,
+                            name_gen=None,
+                            expected=condition_exp.expression,
+                            generated="",
+                            relation=AssertionRelation.MISSING,
+                            reason="No matching generated condition",
+                        )
+                    )
+
+                continue
+
             else:
                 expected_condition = condition_exp.expression
                 generated_condition = generated.methods[i].conditions[j].expression
