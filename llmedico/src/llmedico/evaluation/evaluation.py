@@ -4,7 +4,8 @@ from collections import Counter
 from enum import Enum
 from pathlib import Path
 from typing import List
-
+import logging
+logger = logging.getLogger(__name__)
 from llmedico.builder.class_model_builder import ClassModelBuilder
 from llmedico.builder.class_model_builder_jdoctor import ClassModelBuilderJdoctor
 from llmedico.config.config import Config
@@ -33,6 +34,7 @@ def _write_evaluation_rows_by_type(rows: List[EvaluationRow], types: [AssertionR
 def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generated: str | Path, type_generated: InputFormat,path_output: str | Path | None, path_result: str | Path | None=None,debug: bool=True, silent: bool=False) -> List[EvaluationRow]:
     if Path(path_output) is not None and not Path(path_output).exists():
         os.makedirs(path_output)
+    logger.debug(f"Comparing the following two classes \n expected: {path_expected} \n generated: {path_generated}")
 
     config_path = Path(
         os.getenv("LLMEDICO_CONFIG", Path.cwd() / "config.toml")  # TODO test environment variable
@@ -66,7 +68,7 @@ def evaluate(path_expected: str | Path, type_expected: InputFormat, path_generat
         raise ValueError("Cannot compare conditions of different classes!")
 
     result = evaluate_class(expected_clsm, generated_clsm,evaluation_config["normalise_incomplete_java"])
-
+    logger.info(f"Evaluation result: \n{result}")
     path_outputfile = path_result if path_result is not None else Path(path_output) / f"llmedico-evaluation-{expected_clsm.qualified_name}.csv"
     with EvaluationCSVWriter(path_outputfile) as writer:
         for row in result:
