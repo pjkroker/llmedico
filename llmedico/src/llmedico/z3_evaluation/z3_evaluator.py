@@ -43,18 +43,18 @@ class AssertionEvaluatorZ:
                 return EvaluationResult(AssertionRelation.DUAL)
             solver.pop()
 
-            # 3. Generated is weaker: B => A
+            # 3. Generated is stronger: B => A
             solver.push()
             solver.add(z3.And(B, z3.Not(A)))
             if solver.check() == z3.unsat:
-                return EvaluationResult(AssertionRelation.WEAKER)
+                return EvaluationResult(AssertionRelation.STRONGER)
             solver.pop()
 
-            # 4. Generated is stronger: A => B
+            # 4. Generated is weaker: A => B
             solver.push()
             solver.add(z3.And(A, z3.Not(B)))
             if solver.check() == z3.unsat:
-                return EvaluationResult(AssertionRelation.STRONGER)
+                return EvaluationResult(AssertionRelation.WEAKER)
             solver.pop()
 
             # 5. No implication either way
