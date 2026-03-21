@@ -67,10 +67,10 @@ projects = {"commons-collections4-4.1":
             }
             }
 LLMEDICO = False
-JDOCTOR_LLMEDICO = True
+JDOCTOR_LLMEDICO = False
 os.environ["LLMEDICO_CONFIG"] = (Path(__file__).parent.parent / "config.toml").as_posix()
 
-date_eval = "own_data_set-2026-01-21"
+date_eval = "2026-01-19"
 path_ground_truth_base = Path(__file__).parent.parent / "storage" / "goal-output-groundtruth"
 path_llmedico_base = path_llmedico = Path(__file__).parent / "results-translation" / date_eval
 path_jdoctor_base = Path(__file__).parent / "results-translation-jdoctor" / date_eval
@@ -79,7 +79,7 @@ path_out_base = Path(__file__).parent / "results-evalutation" / date_eval
 
 #TODO fix these for comparison
 done_jdoocc = [ "commons-math3-3.6.1", "freecol-0.11.6", "guava-19.0","plume-lib-1.1.0"] #["commons-collections4-4.1", "commons-math3-3.6.1", "freecol-0.11.6", "gs-core-1.3", "jgrapht-core-0.9.2", "guava-19.0", "plume-lib-1.1.0"]
-done = ["commons-lang-rel-commons-lang-3.20.0"]#["commons-collections4-4.1", "commons-math3-3.6.1", "freecol-0.11.6", "gs-core-1.3", "jgrapht-core-0.9.2", "guava-19.0", "plume-lib-1.1.0"]
+done = ["commons-lang-rel-commons-lang-3.20.0"]#["commons-collections4-4.1", "commons-math3-3.6.1", "freecol-0.11.6", "gs-core-1.3", "jgrapht-core-0.9.2", "guava-19.0", "plume-lib-1.1.0"]#["commons-collections4-4.1", "commons-math3-3.6.1", "freecol-0.11.6", "gs-core-1.3", "jgrapht-core-0.9.2", "guava-19.0", "plume-lib-1.1.0"]
 date = datetime.date.today()
 evaluation_rows = []
 for project in projects:
@@ -93,9 +93,9 @@ for project in projects:
         print(classes_)
         for class_ in classes_:
             print(class_)
-            evaluation_rows_project.append(evaluate( path_ground_truth_base / project / (class_ + "_goal.json") if not JDOCTOR_LLMEDICO else Path(__file__).parent / "results-translation-jdoctor" / date_eval / (project+ "-2026-01-20") / class_ / "toradocu-condition_translator.json"  ,#path_jdoctor_base / (project + date_eval) / class_ / "toradocu-condition_translator.json",
+            evaluation_rows_project.append(evaluate( path_ground_truth_base / project / (class_ + "_goal.json") if not JDOCTOR_LLMEDICO else Path(__file__).parent / "results-translation-jdoctor" / date_eval / (project+ "-2026-01-21") / class_ / "toradocu-condition_translator.json"  ,#path_jdoctor_base / (project + date_eval) / class_ / "toradocu-condition_translator.json",
                                             InputFormat.JDOCTOR,
-                                            path_llmedico_base / (project + "-" + date_eval) / class_ / "llmedico-condition_translator.json" if LLMEDICO else path_jdoctor_base / (project + "-" + date_eval) / class_ / "toradocu-condition_translator.json", #path_jdoctor_base / (project + date_eval) / class_ / "toradocu-condition_translator.json"
+                                            path_llmedico_base / (project+ "-2026-01-21") / class_ / "llmedico-condition_translator.json" if LLMEDICO else path_jdoctor_base / (project + "-" + date_eval) / class_ / "toradocu-condition_translator.json", #path_jdoctor_base / (project + date_eval) / class_ / "toradocu-condition_translator.json"
                                             InputFormat.LLMEDICO if LLMEDICO else InputFormat.JDOCTOR,
                                             path_outputfile))
 
@@ -106,9 +106,12 @@ for project in projects:
         evaluation_rows.append([row for rows_class in evaluation_rows_project for row in rows_class])
 
 compute_metrics_project(evaluation_rows, "all_projects", path_out_base if LLMEDICO else path_out_base_jdoctor, MetricMode("llmedico"))
-types = [AssertionRelation("unsupported"),
+types = [#AssertionRelation("stronger"),
+         #AssertionRelation("weaker"),
+         AssertionRelation("equivalent"),
          AssertionRelation("incomparable"),
-         AssertionRelation("equivalent")]
+         AssertionRelation("unsupported"),
+         AssertionRelation("identical")]
 flat_rows = [row for sublist in evaluation_rows for row in sublist]
 _write_evaluation_rows_by_type(flat_rows, types,(path_out_base if LLMEDICO else path_out_base_jdoctor )/ "llmedico-evaluation-relevant_assertion_relations-all_projects.csv")
 from collections import Counter
