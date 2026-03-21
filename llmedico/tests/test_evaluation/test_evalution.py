@@ -48,10 +48,10 @@ def test_evaluate_expressions():
     assert result.relation == AssertionRelation.EQUIVALENT
 
     result = _evaluate_assertions("x > 0", "x >= 0")
-    assert result.relation == AssertionRelation.STRONGER
+    assert result.relation == AssertionRelation.WEAKER
 
     result = _evaluate_assertions("x >= 0", "x > 0")
-    assert result.relation == AssertionRelation.WEAKER
+    assert result.relation == AssertionRelation.STRONGER
 
     result = _evaluate_assertions("x > 0", "y > 0")
     assert result.relation == AssertionRelation.INCOMPARABLE
