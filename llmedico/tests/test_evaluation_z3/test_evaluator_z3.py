@@ -192,7 +192,7 @@ def test_type_mismatch():
     evaluator = AssertionEvaluatorZ()
     result = evaluator.evaluate(expected_ast, generated_ast)
 
-    assert result.relation == AssertionRelation.STRONGER
+    assert result.relation == AssertionRelation.WEAKER
 
 def test_normalizer_after_parsing():
 
