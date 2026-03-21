@@ -37,7 +37,7 @@ CONDITION_TYPES = ["llmedico", "jdoctor"]
 @click.option(
     "--out",
     "--out-dir",
-    type=click.Path(path_type=Path, exists=True, dir_okay=True),
+    type=click.Path(path_type=Path, dir_okay=True),
     required=True,
     help="Path to the generated conditions JSON file"
 )
