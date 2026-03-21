@@ -84,11 +84,29 @@ def evaluate_class(expected: ClassModel, generated: ClassModel, normalise_incomp
             logger.critical(f"return_type:{return_type}")
             if len(method_exp.conditions) != len(generated.methods[i].conditions):
 
-                # Case 1: Generated has NO conditions → all expected are MISSING
                 if len(generated.methods[i].conditions) == 0:
-                    logger.critical(
-                        f"Generated method {method_signature} has no conditions → counting all as MISSING"
-                    )
+
+                    expected_expr = condition_exp.expression.strip()
+
+                    # Case C Fix: expected condition exists structurally,
+                    # but contains no actual assertion
+                    if expected_expr == "":
+                        logger.critical(
+                            f"Generated method {method_signature} has no conditions "
+                            f"and expected condition '{condition_exp.name}' is empty → EMPTY"
+                        )
+
+                        relation = AssertionRelation.EMPTY
+                        reason = "Both expected and generated assertions are empty"
+
+                    else:
+                        logger.critical(
+                            f"Generated method {method_signature} has no conditions "
+                            f"and expected condition '{condition_exp.name}' is non-empty → MISSING"
+                        )
+
+                        relation = AssertionRelation.MISSING
+                        reason = "No generated conditions for this method"
 
                     evaluation_rows.append(
                         EvaluationRow(
@@ -100,11 +118,12 @@ def evaluate_class(expected: ClassModel, generated: ClassModel, normalise_incomp
                             name_gen=None,
                             expected=condition_exp.expression,
                             generated="",
-                            relation=AssertionRelation.MISSING,
-                            reason="No generated conditions for this method",
+                            relation=relation,
+                            reason=reason,
                         )
                     )
-                    continue  # IMPORTANT: continue, NOT break
+
+                    continue
 
                 # Case 2: Length mismatch but generated has some conditions
                 logger.critical(
