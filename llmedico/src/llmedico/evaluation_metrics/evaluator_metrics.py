@@ -9,7 +9,8 @@ from llmedico.evaluation_metrics.evaluation_metrics_row import EvaluationMetricR
 from enum import Enum
 
 from llmedico.evaluation_metrics.evaluation_metrics_writer import EvaluationMetricsCSVWriter
-
+import logging
+logger = logging.getLogger(__name__)
 
 class MetricMode(Enum):
     JDOCTOR = "jdoctor" # identical
@@ -86,7 +87,6 @@ def _rows_of_kind(rows, kind: ConditionKind):
     return [r for r in rows if r.kind_exp == kind]
 
 def _compute_metrics_class(evaluation_rows: list[EvaluationRow], mode: MetricMode = MetricMode.JDOCTOR) -> EvaluationMetricRow:
-
     fqn = evaluation_rows[0].class_name
 
     overall_precision, overall_recall = _compute_pr_from_rows(
