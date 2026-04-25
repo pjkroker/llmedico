@@ -101,9 +101,7 @@ Generate assertions from Javadoc.
 | `--target-class` | yes | Fully-qualified name of the target class, e.g. `org.project.MyClass` |
 | `--src-dir` | yes | Directory containing the project's Java source files |
 | `--jar-dir` | yes | The project compiled as a JAR |
-| `--out-dir` | no | Directory for all output files; prints to stdout if omitted |
-| `--debug` | no | Enable fine-grained logging |
-| `--silent` | no | Suppress all console output |
+| `--out-dir` | yes | Directory for all output files |
 | `--help` | no | Show available options |
 
 ### `llmedico evaluate`
