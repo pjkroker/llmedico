@@ -1,6 +1,6 @@
 .PHONY: test clean lint
 
-VENV := ../.venv_clean
+VENV := ../.venv
 PYTHON := $(VENV)/bin/python
 
 test:
