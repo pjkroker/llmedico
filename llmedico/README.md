@@ -1,18 +1,57 @@
-# LLMedico: automated generation of test oracles from Javadoc documentation
+# LLMedico: Automated Test Oracle Generation from Javadoc
 
-LLMedico generates assertions from the Javadoc documentation of a class.
+LLMedico generates **test oracles (assertions)** from Javadoc documentation of Java classes.
+
+It translates structured tags such as `@param`, `@return`, and `@throws` into executable conditions, enabling automated validation of program behavior.
+
+---
+
+## Features
+
+- Translate Javadoc → formal assertions
+- Supports assertion and exception oracles
+- Designed for **high-precision generation**
+- Compatible with Java projects (source + compiled JAR)
+
+---
+## Background
+
+Natural language documentation contains valuable information about intended program behavior and can be used to generate test oracles automatically :contentReference[oaicite:1]{index=1}.
+
+LLMedico builds on this idea by converting Javadoc into executable specifications.
+
+---
 
 ## Installation
+```
+python3.10 -m venv .venv
+source bin/activate
+cd llemdico/
 pip install .
+```
 
-### Use config
-export LLMEDICO_CONFIG=/vol/fob-vol3/mi20/krokerpa/ba/llmedico/llmedico/config.toml
+---
 
-## Overview
+## Configuration
+Set the path to your configuration file:
+```bash
+export LLMEDICO_CONFIG=/path/to/config.toml
+```
+If no configuration is provided, LLMedico will automatically use the default configuration located at:
+`llmedico/config.toml
+The configuration file defines model settings and pipeline parameters.
 
-## Learn more
-LLMedico is explained in the following final thesis:
+## Quick Start
 
+```bash
+llmedico translate \
+  --target-class org.project.MyClass \
+  --src-dir /path/to/src \
+  --jar-dir /path/to/project.jar \
+  --out-dir /path/to/output
+```
+---
+alt
 ## Using LLMedico:
 llmedico translate --target org.project.MyClass \
 --src /data/input/project/src \
@@ -27,13 +66,13 @@ llmedico translate --target org.project.MyClass \
 #TODO
 
 ### Translate
+Generate assertions from Javadoc.
 
-minimum:
 
-llmedico translate --target org.project.MyClass \
---src /data/input/project/src \
---jar /data/input/project/target/project.jar \
---out /data/output
+llmedico translate --target-class org.apache.commons.collections4.bag.AbstractBagDecorator \
+--src-dir /Users/paul/paul_data/projects_cs/ba_versuch1/.pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java \
+--jar-dir /Users/paul/paul_data/projects_cs/ba_versuch1/.pyjdoctor/data/input/commons-collections4-4.1-src/target/commons-collections4-4.1.jar \
+--out-dir .
 
 | Option                       | Description                                                                                                                                                            |
 |------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -53,10 +92,13 @@ llmedico translate --target org.project.MyClass \
 
 
 ### Evaluate
-minimum:
-llmedico evaluate --expected goal-conditions-org.project.MyClass.json \
---generated llmedico-conditions-org.project.MyClass.json \
---result result-org.project.MyClass.csv
+
+ llmedico evaluate --expected /Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/scripts/results-translation-jdoctor/2026-01-21/commons-collections4-4.1-2026-01-21/org.apache.commons.collections4.ArrayStack/toradocu-condition_translator.json \
+--expected-type jdoctor \
+--generated /Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/scripts/results-translation/2026-01-21/commons-collections4-4.1-2026-01-21/org.apache.commons.collections4.ArrayStack/llmedico-condition_translator.json \
+--generated-type llmedico \
+--out result.csv
+
 
 | Option              | Description                                                                                        |
 |---------------------|----------------------------------------------------------------------------------------------------|
@@ -65,28 +107,4 @@ llmedico evaluate --expected goal-conditions-org.project.MyClass.json \
 | `--generated`, *    | Path to the generated-conditions. _e.g. /data/output/llmedico-conditions-org.project.MyClass.json_ |
 | `--generated-type`, * | Specify the format. _{llmedico, jdoctor}_                                                          |
 | `--out`, *          | Path to save the results. _e.g. /data/output/_                                                     |
-| `--result`          | Path to save the results. _e.g. /data/output/llmedico-evaluation-org.project.MyClass.csv_          |
-| `--debug`           | Enable fine-grained logging.                                                                       |
-| `--silent`          | Disable all output to the command line.                                                            |
 | `--help`, `-h`      | Print the list of available options.                                                               |
-
-
-#TODO delete
-### Analyze
-
-llmedico analyze --target-class=org.apache.commons.lang3.StringUtils --target-method=isNotEmpty --data-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project --out-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output
-oder
-llmedico analyze --target-class=org.apache.commons.lang3.StringUtils --target-method=isNotEmpty --source-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project/src/main/java --class-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/input/project/target/classes --out-dir=/Users/paul/paul_data/projects_cs/ba_versuch1/llmedico/data/output
-
-#/data/input is mandatory --> change later
-
-| Option             | Description                                                                                                                                                                                                                                                                                        |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--target-class` * | Fully-qualified name of the class for which LLMedico has to generate test oracles. _e.g. org.apache.commons.lang3.StringUtils_                                                                                                                                                                     |
-| `--targer-method` * | Method of class for which LLMedico has to generate test oracles. _e.g. isNotEmpty_                                                                                                                                                                                                                 |
-| `--data-dir` *     | Directory containing all the project files of the system under test (the system that includes the target class). _e.g. /data/input/**project**_ <br/> Expects the following: /data/input/project/src/main/java and /data/input/project/target/classes; if not use --source-dir and --class-dir instead |
-| `--source-dir`     | Directory containing all the source files of the system under test (the system that includes the target class).  _e.g. /data/input/project/src/main/java_                                                                                                                                          |
-| `--class-dir`      | Directory containing binary files of the system under test (the system that includes the target class). _e.g /data/input/project/target/classes_                                                                                                                                                   |
-| `--out-dir` *      | Directory to save every output file.                                                                                                                                                                                                                                                               |
-| `--help`, `-h`     | Print the list of available options.                                                                                                                                                                                                                                                               |
-| `--debug`          | Enable fine-grained logging.                                                                                                                                                                                                                                                                       |
