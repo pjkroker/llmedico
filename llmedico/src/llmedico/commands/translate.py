@@ -25,7 +25,7 @@ from llmedico.main import main as run_pipeline
 )
 
 @click.option("--jar-dir", "path_jar_dir",
-              type=click.Path(),
+              type=click.Path(path_type=Path),
               help="The project compiled as a jar. _e.g. /data/input/project/target/project.jar")
 @click.option(
     "--out-dir",

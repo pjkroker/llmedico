@@ -42,7 +42,7 @@
             "name": "IllegalArgumentException",
             "content": "if the specified initial size\n is negative",
             "assertion": "assert args[0] < 0;",
-            "description": "if the specified initial size is negative"
+            "description": "if the specified initial size\n is negative"
           }
         ],
         "code": "/**\n * Constructs a new empty <code>ArrayStack</code> with an initial size.\n *\n * @param initialSize  the initial size to use\n * @throws IllegalArgumentException  if the specified initial size\n *  is negative\n */\npublic ArrayStack(final int initialSize) {\n    super(initialSize);\n}"
@@ -63,7 +63,7 @@
             "tag": "return",
             "name": null,
             "content": "if the stack is currently empty",
-            "assertion": "assert methodResultID == !receiverObjectID.empty();",
+            "assertion": "assert methodResultID == !receiverObjectID.isEmpty();",
             "description": "true if the stack is currently empty"
           }
         ],
@@ -85,14 +85,14 @@
             "tag": "return",
             "name": null,
             "content": "top item on the stack",
-            "assertion": "assert methodResultID != null;",
+            "assertion": "assert methodResultID != null && !receiverObjectID.empty();",
             "description": "the top item on the stack"
           },
           {
             "tag": "throws",
             "name": "EmptyStackException",
             "content": "if the stack is empty",
-            "assertion": "assert !receiverObjectID.empty();",
+            "assertion": "assert receiverObjectID.empty();",
             "description": "if the stack is empty"
           }
         ],
@@ -131,14 +131,14 @@
             "tag": "return",
             "name": null,
             "content": "n'th item on the stack, zero relative",
-            "assertion": "assert methodResultID == args[0];",
+            "assertion": "assert methodResultID == receiverObjectID.peek(args[0]);",
             "description": "the n'th item on the stack, zero relative"
           },
           {
             "tag": "throws",
             "name": "EmptyStackException",
             "content": "if there are not enough items on the stack to satisfy this request",
-            "assertion": "assert !receiverObjectID.empty();",
+            "assertion": "assert args[0] >= receiverObjectID.size() || receiverObjectID.empty();",
             "description": "if there are not enough items on the stack to satisfy this request"
           }
         ],
@@ -160,14 +160,14 @@
             "tag": "return",
             "name": null,
             "content": "top item on the stack",
-            "assertion": "assert methodResultID == !receiverObjectID.empty();",
+            "assertion": "assert methodResultID != null && !receiverObjectID.empty();",
             "description": "the top item on the stack"
           },
           {
             "tag": "throws",
             "name": "EmptyStackException",
             "content": "if the stack is empty",
-            "assertion": "assert !receiverObjectID.empty();",
+            "assertion": "assert receiverObjectID.empty();",
             "description": "if the stack is empty"
           }
         ],
@@ -245,8 +245,8 @@
             "tag": "return",
             "name": null,
             "content": "1-based depth into the stack of the object, or -1 if not found",
-            "assertion": "assert methodResultID == (args[0] >= 0 ? args[0] : -1);",
-            "description": "the 1-based depth into the stack of the object, or -1 if not found"
+            "assertion": "assert (methodResultID == -1) || (receiverObjectID.search(args[0]) == methodResultID);",
+            "description": "1-based depth into the stack of the object, or -1 if not found"
           }
         ],
         "code": "/**\n * Returns the one-based position of the distance from the top that the\n * specified object exists on this stack, where the top-most element is\n * considered to be at distance <code>1</code>.  If the object is not\n * present on the stack, return <code>-1</code> instead.  The\n * <code>equals()</code> method is used to compare to the items\n * in this stack.\n *\n * @param object  the object to be searched for\n * @return the 1-based depth into the stack of the object, or -1 if not found\n */\npublic int search(final Object object) {\n    // Current index\n    int i = size() - 1;\n    // Current distance\n    int n = 1;\n    while (i >= 0) {\n        final Object current = get(i);\n        if ((object == null && current == null) || (object != null && object.equals(current))) {\n            return n;\n        }\n        i--;\n        n++;\n    }\n    return -1;\n}"

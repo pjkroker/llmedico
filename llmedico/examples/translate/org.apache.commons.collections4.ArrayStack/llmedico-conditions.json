@@ -30,10 +30,10 @@
       ],
       "THROWS": [
         {
-          "description": "if the specified initial size is negative",
+          "description": "if the specified initial size\n is negative",
           "assertion": "assert args[0] < 0;",
           "name": "IllegalArgumentException",
-          "content": "if the specified initial size is negative"
+          "content": "if the specified initial size\n is negative"
         }
       ]
     }
@@ -46,9 +46,9 @@
       "RETURN": [
         {
           "description": "true if the stack is currently empty",
-          "assertion": "assert methodResultID == !receiverObjectID.empty();",
+          "assertion": "assert methodResultID == !receiverObjectID.isEmpty();",
           "name": null,
-          "content": "if the stack is currently empty"
+          "content": "true if the stack is currently empty"
         }
       ]
     }
@@ -61,7 +61,7 @@
       "RETURN": [
         {
           "description": "the top item on the stack",
-          "assertion": "assert methodResultID != null;",
+          "assertion": "assert methodResultID != null && !receiverObjectID.empty();",
           "name": null,
           "content": "the top item on the stack"
         }
@@ -69,9 +69,9 @@
       "THROWS": [
         {
           "description": "if the stack is empty",
-          "assertion": "assert !receiverObjectID.empty();",
+          "assertion": "assert receiverObjectID.empty();",
           "name": "EmptyStackException",
-          "content": " if the stack is empty"
+          "content": "if the stack is empty"
         }
       ]
     }
@@ -102,15 +102,15 @@
       "RETURN": [
         {
           "description": "the n'th item on the stack, zero relative",
-          "assertion": "assert methodResultID == args[0];",
+          "assertion": "assert methodResultID == receiverObjectID.peek(args[0]);",
           "name": null,
-          "content": "n'th item on the stack, zero relative"
+          "content": "the n'th item on the stack, zero relative"
         }
       ],
       "THROWS": [
         {
           "description": "if there are not enough items on the stack to satisfy this request",
-          "assertion": "assert !receiverObjectID.empty();",
+          "assertion": "assert args[0] >= receiverObjectID.size() || receiverObjectID.empty();",
           "name": "EmptyStackException",
           "content": "if there are not enough items on the stack to satisfy this request"
         }
@@ -125,7 +125,7 @@
       "RETURN": [
         {
           "description": "the top item on the stack",
-          "assertion": "assert methodResultID == !receiverObjectID.empty();",
+          "assertion": "assert methodResultID != null && !receiverObjectID.empty();",
           "name": null,
           "content": "the top item on the stack"
         }
@@ -133,9 +133,9 @@
       "THROWS": [
         {
           "description": "if the stack is empty",
-          "assertion": "assert !receiverObjectID.empty();",
+          "assertion": "assert receiverObjectID.empty();",
           "name": "EmptyStackException",
-          "content": " if the stack is empty"
+          "content": "if the stack is empty"
         }
       ]
     }
@@ -168,7 +168,7 @@
           "description": "the item just pushed",
           "assertion": "assert methodResultID == args[0];",
           "name": null,
-          "content": "item just pushed"
+          "content": "the item just pushed"
         }
       ]
     }
@@ -198,8 +198,8 @@
       ],
       "RETURN": [
         {
-          "description": "the 1-based depth into the stack of the object, or -1 if not found",
-          "assertion": "assert methodResultID == (args[0] >= 0 ? args[0] : -1);",
+          "description": "1-based depth into the stack of the object, or -1 if not found",
+          "assertion": "assert (methodResultID == -1) || (receiverObjectID.search(args[0]) == methodResultID);",
           "name": null,
           "content": "the 1-based depth into the stack of the object, or -1 if not found"
         }

@@ -82,7 +82,7 @@
     "returnTag": {
       "comment": "true if the stack is currently empty",
       "kind": "RETURN",
-      "condition": "methodResultID == !receiverObjectID.empty()"
+      "condition": "methodResultID == !receiverObjectID.isEmpty()"
     },
     "throwsTags": []
   },
@@ -106,7 +106,7 @@
     "returnTag": {
       "comment": "the top item on the stack",
       "kind": "RETURN",
-      "condition": "methodResultID != null"
+      "condition": "methodResultID != null && !receiverObjectID.empty()"
     },
     "throwsTags": [
       {
@@ -118,7 +118,7 @@
         "codeTags": [],
         "comment": "if the stack is empty",
         "kind": "THROWS",
-        "condition": "!receiverObjectID.empty()"
+        "condition": "receiverObjectID.empty()"
       }
     ]
   },
@@ -165,7 +165,7 @@
     "returnTag": {
       "comment": "the n'th item on the stack, zero relative",
       "kind": "RETURN",
-      "condition": "methodResultID == args[0]"
+      "condition": "methodResultID == receiverObjectID.peek(args[0])"
     },
     "throwsTags": [
       {
@@ -179,7 +179,7 @@
         ],
         "comment": "if there are not enough items on the stack to satisfy this request",
         "kind": "THROWS",
-        "condition": "!receiverObjectID.empty()"
+        "condition": "args[0] >= receiverObjectID.size() || receiverObjectID.empty()"
       }
     ]
   },
@@ -203,7 +203,7 @@
     "returnTag": {
       "comment": "the top item on the stack",
       "kind": "RETURN",
-      "condition": "methodResultID == !receiverObjectID.empty()"
+      "condition": "methodResultID != null && !receiverObjectID.empty()"
     },
     "throwsTags": [
       {
@@ -215,7 +215,7 @@
         "codeTags": [],
         "comment": "if the stack is empty",
         "kind": "THROWS",
-        "condition": "!receiverObjectID.empty()"
+        "condition": "receiverObjectID.empty()"
       }
     ]
   },
@@ -307,9 +307,9 @@
       }
     ],
     "returnTag": {
-      "comment": "the 1-based depth into the stack of the object, or -1 if not found",
+      "comment": "1-based depth into the stack of the object, or -1 if not found",
       "kind": "RETURN",
-      "condition": "methodResultID == (args[0] >= 0 ? args[0] : -1)"
+      "condition": "(methodResultID == -1) || (receiverObjectID.search(args[0]) == methodResultID)"
     },
     "throwsTags": []
   }

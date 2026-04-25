@@ -183,9 +183,9 @@ def main(fq_class_name: str, target_method: str | None, path_source_dir:Path, pa
 if __name__ == '__main__':
     FQ_CLASS_NAME = "org.apache.commons.collections4.ArrayStack"  # --target-class java class to be analyzed
     TARGET_METHOD = "dummy"  # --target-method#
-    PATH_SOURCE_DIR = Path("/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java")
+    PATH_SOURCE_DIR = Path("/.pyjdoctor/data/input/commons-collections4-4.1-src/src/main/java")
     PATH_JAR = Path(
-        "/Users/paul/paul_data/projects_cs/ba_versuch1/pyjdoctor/data/input/commons-collections4-4.1-src/target/commons-collections4-4.1.jar")
+        "/.pyjdoctor/data/input/commons-collections4-4.1-src/target/commons-collections4-4.1.jar")
     PATH_OUTPUT_DIR = Path(__file__).parent.parent.parent / "data" / "output" # --out-dir
 
     os.environ["LLMEDICO_CONFIG"] = (Path(__file__).parent.parent.parent / "config.toml").as_posix()
