@@ -1,0 +1,142 @@
+# LLMedico: Automated Test Oracle Generation from Javadoc
+
+LLMedico generates **test oracles (assertions)** from the Javadoc documentation of Java classes. It translates structured tags — `@param`, `@return`, and `@throws` — into executable conditions using a large language model, enabling automated validation of program behavior.
+
+---
+
+## How it works
+
+1. **Extract** — Javadoc tags are parsed from the Java source files
+2. **Translate** — An LLM converts each tag's natural-language description into a formal Java assertion
+3. **Repair** — A repair loop validates and iteratively fixes syntactically or semantically invalid assertions
+4. **Evaluate** — Generated conditions are compared against a reference set using Z3-based semantic equivalence checking
+
+---
+
+## Requirements
+
+- Python 3.10+
+- Java (required by JPype for bytecode inspection)
+- A running LLM endpoint (Ollama, OpenAI-compatible API, or Anthropic)
+
+---
+
+## Installation
+
+```bash
+python3.10 -m venv .venv
+source .venv/bin/activate
+cd llmedico/
+pip install .
+```
+
+---
+
+## Configuration
+
+LLMedico is configured via a TOML file. Point to it with:
+
+```bash
+export LLMEDICO_CONFIG=/path/to/config.toml
+```
+
+If `LLMEDICO_CONFIG` is not set, LLMedico falls back to `llmedico/config.toml`.
+
+**Example `config.toml`:**
+
+```toml
+[llm]
+# Use Ollama (default)
+model = "llama3:8b"
+temperature = 0
+
+# Or use an OpenAI-compatible endpoint via LiteLLM:
+# model = "openai/llama3.3:70b"
+# LITELLM_API_BASE = "http://localhost:11434/v1"
+
+[translation]
+iteration_repairloop = 3
+
+[evaluation]
+normalise_incomplete_java = true
+```
+
+---
+
+## Quick Start
+
+```bash
+llmedico translate \
+  --target-class org.project.MyClass \
+  --src-dir /path/to/project/src \
+  --jar-dir /path/to/project.jar \
+  --out-dir /path/to/output
+```
+
+See [`examples/`](examples/) for real output produced by LLMedico on Apache Commons Collections 4.1.
+
+---
+
+## CLI Reference
+
+### `llmedico translate`
+
+Generate assertions from Javadoc.
+
+| Option | Required | Description |
+|---|---|---|
+| `--target-class` | yes | Fully-qualified name of the target class, e.g. `org.project.MyClass` |
+| `--target-method` | no | Restrict translation to a single method, e.g. `isEmpty` |
+| `--src-dir` | yes | Directory containing the project's Java source files |
+| `--jar-dir` | yes | The project compiled as a JAR |
+| `--out-dir` | no | Directory for all output files; prints to stdout if omitted |
+| `--debug` | no | Enable fine-grained logging |
+| `--silent` | no | Suppress all console output |
+| `--help` | no | Show available options |
+
+### `llmedico evaluate`
+
+Compare generated conditions against a reference set.
+
+| Option | Required | Description |
+|---|---|---|
+| `--expected` | yes | Path to the reference conditions, e.g. `/data/goal-conditions.json` |
+| `--expected-type` | yes | Format of the reference file: `llmedico` or `jdoctor` |
+| `--generated` | yes | Path to the generated conditions |
+| `--generated-type` | yes | Format of the generated file: `llmedico` or `jdoctor` |
+| `--out` | yes | Path for the output CSV, e.g. `/data/results.csv` |
+| `--help` | no | Show available options |
+
+---
+
+## Output format
+
+`llmedico translate` produces a JSON file with one entry per method:
+
+```json
+[
+  {
+    "method": "push",
+    "type": "method",
+    "parameters": [{ "type": { "simple_name": "Object", ... }, "name": "item" }],
+    "conditions": {
+      "PARAM": [
+        {
+          "description": "the item must not be null",
+          "assertion": "assert args[0] != null;",
+          "name": "item",
+          "content": "the item to push onto the stack"
+        }
+      ]
+    }
+  }
+]
+```
+
+`llmedico evaluate` produces a CSV with one row per condition pair, including the semantic relation (`EQUIVALENT`, `STRONGER`, `WEAKER`, `INCOMPARABLE`).
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
