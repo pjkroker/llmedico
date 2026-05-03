@@ -90,6 +90,77 @@ See [`examples/`](examples/) for real output produced by LLMedico on Apache Comm
 
 ---
 
+## Example
+
+This traces `ArrayStack(int initialSize)` from Apache Commons Collections through both steps.
+
+**Javadoc input**
+
+```java
+/**
+ * Constructs a new empty ArrayStack with an initial size.
+ *
+ * @param initialSize  the initial size to use
+ * @throws IllegalArgumentException  if the specified initial size is negative
+ */
+public ArrayStack(final int initialSize)
+```
+
+**Step 1 — Translate**
+
+```bash
+llmedico translate \
+  --target-class org.apache.commons.collections4.ArrayStack \
+  --src-dir path/to/commons-collections/src \
+  --jar-dir path/to/commons-collections-4.1.jar \
+  --out-dir out/
+```
+
+LLMedico generates one assertion per tag (`@param` → precondition, `@throws` → exception condition):
+
+```json
+{
+  "method": "ArrayStack",
+  "type": "constructor",
+  "parameters": [{ "type": { "simple_name": "int" }, "name": "initialSize" }],
+  "conditions": {
+    "PARAM": [{
+      "name": "initialSize",
+      "description": "the initial size to use",
+      "assertion": "assert args[0] >= 0;"
+    }],
+    "THROWS": [{
+      "name": "IllegalArgumentException",
+      "description": "if the specified initial size is negative",
+      "assertion": "assert args[0] < 0;"
+    }]
+  }
+}
+```
+
+**Step 2 — Evaluate**
+
+```bash
+llmedico evaluate \
+  --expected examples/reference/org.apache.commons.collections4.ArrayStack-jdoctor.json \
+  --expected-type jdoctor \
+  --generated out/llmedico-condition_translator.json \
+  --generated-type llmedico \
+  --out results.csv
+```
+
+Each generated assertion is paired with the corresponding reference condition and classified:
+
+| method | kind | name | expected | generated | relation |
+|---|---|---|---|---|---|
+| ArrayStack(initialSize) | PARAM | initialSize | _(none)_ | `assert args[0] >= 0;` | `UNEXPECTED` |
+| ArrayStack(initialSize) | THROWS | IllegalArgumentException | `assert args[0] <= -1;` | `assert args[0] < 0;` | `EQUIVALENT` |
+
+- **EQUIVALENT** — the two `THROWS` assertions are syntactically different but logically equivalent: for integers, `x <= -1` and `x < 0` hold in exactly the same models. LLMedico detects this via Z3-based semantic equivalence checking.
+- **UNEXPECTED** — JDoctor produced no `@param` condition for `initialSize`, so the generated assertion has no counterpart. LLMedico has introduced a constraint absent from the reference.
+
+---
+
 ## CLI Reference
 
 ### `llmedico translate`
@@ -143,12 +214,27 @@ Compare generated conditions against a reference set.
 ]
 ```
 
-`llmedico evaluate` produces a CSV with one row per condition pair, including the semantic relation (`EQUIVALENT`, `STRONGER`, `WEAKER`, `INCOMPARABLE`, `IDENTICAL`, `UNEXPECTED`). For a formal definition of each relation see [`thesis_excerpt.pdf`](thesis_excerpt.pdf).
+`llmedico evaluate` produces a CSV with one row per condition pair. Each pair is assigned exactly one of 10 relation categories:
+
+| Category | When it applies |
+|---|---|
+| `IDENTICAL` | assertions are syntactically equal after normalisation |
+| `EQUIVALENT` | syntactically different but logically equivalent (same truth in all models) |
+| `STRONGER` | generated implies expected, but not vice versa |
+| `WEAKER` | expected implies generated, but not vice versa |
+| `DUAL` | generated is the logical negation of expected |
+| `INCOMPARABLE` | neither implies the other |
+| `EMPTY` | neither an expected nor a generated assertion exists |
+| `MISSING` | expected assertion exists but nothing was generated |
+| `UNEXPECTED` | generated assertion exists but no expected counterpart |
+| `UNSUPPORTED` | at least one assertion cannot be translated into FOL |
+
+For formal definitions see [`thesis_excerpt.pdf`](thesis_excerpt.pdf).
 
 | class | method | kind_exp | name_exp | kind_gen | name_gen | expected | generated | relation | reason |
 |---|---|---|---|---|---|---|---|---|---|
 | ArrayStack | ArrayStack(initialSize) | PARAM | initialSize | PARAM | initialSize | | `assert args[0] >= 0;` | UNEXPECTED | |
-| ArrayStack | ArrayStack(initialSize) | THROWS | IllegalArgumentException | THROWS | IllegalArgumentException | `assert args[0]<0;` | `assert args[0] < 0;` | IDENTICAL | |
+| ArrayStack | ArrayStack(initialSize) | THROWS | IllegalArgumentException | THROWS | IllegalArgumentException | `assert args[0] <= -1;` | `assert args[0] < 0;` | EQUIVALENT | |
 
 
 
